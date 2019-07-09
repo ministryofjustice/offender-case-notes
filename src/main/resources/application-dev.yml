@@ -1,0 +1,11 @@
+spring:
+  datasource:
+    url: 'jdbc:h2:mem:offender-case-notes-db;MODE=PostgreSQL'
+
+  h2:
+    console:
+      enabled: true
+
+graceful:
+  shutdown:
+    enabled: false
