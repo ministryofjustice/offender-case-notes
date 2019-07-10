@@ -84,7 +84,7 @@ public class OffenderCaseNoteRepositoryTest {
         OffenderCaseNoteAmendment offenderCaseNoteAmendment3 = retrievedEntity2.getAmendment(3).get();
         assertThat(offenderCaseNoteAmendment3.getNoteText()).isEqualTo("Another Note 2");
 
-        retrievedEntity2.addAmendment("Another Note 3", "LEI", "USER1");
+        retrievedEntity2.addAmendment("Another Note 3", "USER1");
 
         TestTransaction.flagForCommit();
         TestTransaction.end();
