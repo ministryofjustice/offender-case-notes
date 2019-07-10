@@ -1,15 +1,15 @@
 package uk.gov.justice.hmpps.casenotes.controllers;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
+import io.swagger.annotations.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+import uk.gov.justice.hmpps.casenotes.dto.CaseNote;
+import uk.gov.justice.hmpps.casenotes.dto.ErrorResponse;
+import uk.gov.justice.hmpps.casenotes.dto.NewCaseNote;
+import uk.gov.justice.hmpps.casenotes.services.CaseNoteService;
 
+import javax.validation.constraints.NotNull;
 import java.util.List;
 
 @Api(tags = {"case-notes"})
@@ -20,12 +20,51 @@ import java.util.List;
 @Slf4j
 public class CaseNoteController {
 
+    private final CaseNoteService caseNoteService;
+
+    public CaseNoteController(CaseNoteService caseNoteService) {
+        this.caseNoteService = caseNoteService;
+    }
+
     @GetMapping("/{offenderIdentifier}")
     @ApiOperation(  value = "Returns list of case note for this offender",
-                    response = String.class,
+                    response = CaseNote.class,
                     notes = "More Information Here")
-    public List<String> getCaseNotesByOffenderIdentifier(
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "Case Note list.", response = List.class),
+            @ApiResponse(code = 404, message = "No case notes where found for this offender", response = ErrorResponse.class)})
+    public List<CaseNote> getCaseNotesByOffenderIdentifier(
             @ApiParam(value = "Offender Identifier", required = true, example = "A1234AA") @PathVariable("offenderIdentifier") final String offenderIdentifier) {
-        return List.of(offenderIdentifier, "HELLO", "GOODBYE");
+        return caseNoteService.getCaseNotesByOffenderIdentifier(offenderIdentifier);
     }
+
+    @PostMapping(value = "/{offenderIdentifier}", consumes = "application/json")
+    @ApiOperation(  value = "Add Case Note for offender",
+            response = CaseNote.class,
+            notes = "More Information Here")
+    @ApiResponses(value = {
+            @ApiResponse(code = 201, message = "The Case Note has been recorded. The updated object is returned including the status.", response = CaseNote.class),
+            @ApiResponse(code = 409, message = "The case note has already been recorded under the booking. The current unmodified object (including status) is returned.", response = ErrorResponse.class)})
+
+    public CaseNote createCaseNote(
+            @ApiParam(value = "Offender Identifier", required = true, example = "A1234AA") @PathVariable("offenderIdentifier") final String offenderIdentifier,
+            @RequestBody @NotNull final NewCaseNote newCaseNote) {
+        return caseNoteService.createCaseNote(offenderIdentifier, newCaseNote);
+    }
+
+    @PutMapping(value = "/{offenderIdentifier}/{caseNoteIdentifier}", consumes = "application/json")
+    @ApiOperation(  value = "Amend Case Note for offender",
+            response = CaseNote.class,
+            notes = "More Information Here")
+    @ApiResponses(value = {
+            @ApiResponse(code = 201, message = "The Case Note has been recorded. The updated object is returned including the status.", response = CaseNote.class),
+            @ApiResponse(code = 404, message = "No case notes where found for this offender and case note id", response = ErrorResponse.class)})
+
+    public CaseNote amendCaseNote(
+            @ApiParam(value = "Offender Identifier", required = true, example = "A1234AA") @PathVariable("offenderIdentifier") final String offenderIdentifier,
+            @ApiParam(value = "Case Note Id", required = true, example = "A1234AA") @PathVariable("caseNoteIdentifier") final Long caseNoteIdentifier,
+            @RequestBody @NotNull final String amendedText) {
+        return caseNoteService.amendCaseNote(offenderIdentifier, caseNoteIdentifier, amendedText);
+    }
+
 }
