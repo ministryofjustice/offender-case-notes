@@ -1,0 +1,25 @@
+version: "3"
+services:
+  oauth:
+    image: mojdigitalstudio/nomis-oauth2-server:latest
+    container_name: oauth
+    ports:
+      - "9090:8080"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/auth/health"]
+    environment:
+      - SERVER_PORT=8080
+      - SPRING_PROFILES_ACTIVE=dev
+
+  elite2:
+    image: mojdigitalstudio/elite2-api:latest
+    container_name: elite2
+    depends_on:
+      - oauth
+    ports:
+      - "8080:8080"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+    environment:
+      - SERVER_PORT=8080
+      - SPRING_PROFILES_ACTIVE=nomis-hsqldb
