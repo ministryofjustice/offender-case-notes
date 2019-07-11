@@ -1,16 +1,44 @@
-[
-  {
-    "type": "KA",
-    "subType": "KS",
-    "staffUsername": "API_TEST_USER",
-    "text": "This is another case note",
-    "agencyId": "MDI",
-    "amendments": [
-      {
-        "sequence": 1,
-        "authorUserName": "API_TEST_USER",
-        "additionalNoteText": "Amended case note"
-      }
-    ]
-  }
-]
+{
+  "content": [
+    {
+      "offenderIdentifier": "A1234AB",
+      "type": "KA",
+      "subType": "KS",
+      "staffUsername": "API_TEST_USER",
+      "text": "This is another case note",
+      "locationId": "MDI",
+      "amendments": [
+        {
+          "sequence": 1,
+          "authorUserName": "API_TEST_USER",
+          "additionalNoteText": "Amended case note"
+        }
+      ]
+    }
+  ],
+  "pageable": {
+    "sort": {
+      "sorted": true,
+      "unsorted": false,
+      "empty": false
+    },
+    "offset": 0,
+    "pageSize": 10,
+    "pageNumber": 0,
+    "paged": true,
+    "unpaged": false
+  },
+  "totalElements": 1,
+  "totalPages": 1,
+  "last": true,
+  "size": 10,
+  "first": true,
+  "numberOfElements": 1,
+  "sort": {
+    "sorted": true,
+    "unsorted": false,
+    "empty": false
+  },
+  "number": 0,
+  "empty": false
+}

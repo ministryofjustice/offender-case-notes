@@ -25,6 +25,10 @@ public class CaseNote {
     @NotNull
     private Long caseNoteId;
 
+    @ApiModelProperty(required = true, value = "Offender Unique Identifier", example = "A1234AA")
+    @NotNull
+    private String offenderIdentifier;
+
     @ApiModelProperty(required = true, value = "Case Note Type", position = 2, example = "KA")
     @NotBlank
     private String type;
@@ -49,8 +53,8 @@ public class CaseNote {
     @NotBlank
     private String text;
 
-    @ApiModelProperty(value = "Agency Code where Case Note was made.", position = 13, example = "MDI")
-    private String agencyId;
+    @ApiModelProperty(value = "Location Code where Case Note was made.", position = 13, example = "MDI")
+    private String locationId;
 
     @ApiModelProperty(required = true, value = "Ordered list of amendments to the case note (oldest first)", position = 14)
     @NotNull

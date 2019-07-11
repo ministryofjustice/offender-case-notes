@@ -1,12 +1,17 @@
 package uk.gov.justice.hmpps.casenotes.services;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 import uk.gov.justice.hmpps.casenotes.config.SecurityUserContext;
 import uk.gov.justice.hmpps.casenotes.dto.CaseNote;
 import uk.gov.justice.hmpps.casenotes.dto.CaseNoteAmendment;
+import uk.gov.justice.hmpps.casenotes.dto.CaseNoteFilter;
 import uk.gov.justice.hmpps.casenotes.dto.NewCaseNote;
+import uk.gov.justice.hmpps.casenotes.filters.OffenderCaseNoteFilter;
 import uk.gov.justice.hmpps.casenotes.model.OffenderCaseNote;
 import uk.gov.justice.hmpps.casenotes.repository.OffenderCaseNoteRepository;
 
@@ -14,7 +19,6 @@ import javax.persistence.EntityNotFoundException;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
@@ -30,15 +34,42 @@ public class CaseNoteService {
         this.securityUserContext = securityUserContext;
     }
 
-    public List<CaseNote> getCaseNotesByOffenderIdentifier(@NotNull final String offenderIdentifier) {
-        return repository.findOffenderCaseNotesByOffenderIdentifier(offenderIdentifier).stream()
+    public Page<CaseNote> getCaseNotesByOffenderIdentifier(@NotNull final String offenderIdentifier, Pageable pageable) {
+        final var filter = OffenderCaseNoteFilter.builder()
+                .offenderIdentifier(offenderIdentifier)
+                .build();
+
+        return getCaseNotes(pageable, filter);
+    }
+
+    public Page<CaseNote> getCaseNotes(CaseNoteFilter caseNoteFilter, Pageable pageable) {
+        final var filter = OffenderCaseNoteFilter.builder()
+                .type(caseNoteFilter.getType())
+                .subType(caseNoteFilter.getSubType())
+                .locationId(caseNoteFilter.getLocationId())
+                .staffUsername(caseNoteFilter.getStaffUsername())
+                .startDate(caseNoteFilter.getStartDate())
+                .endDate(caseNoteFilter.getEndDate())
+                .build();
+
+        return getCaseNotes(pageable, filter);
+    }
+
+    private Page<CaseNote> getCaseNotes(Pageable pageable, OffenderCaseNoteFilter filter) {
+        final var pagedResults = repository.findAll(filter, pageable);
+
+        final var caseNotes = pagedResults.getContent()
+                .stream()
                 .map(this::mapper)
                 .collect(Collectors.toList());
+
+        return new PageImpl<>(caseNotes, pageable, pagedResults.getTotalElements());
     }
 
     private CaseNote mapper(OffenderCaseNote cn) {
         return CaseNote.builder()
                 .caseNoteId(cn.getId())
+                .offenderIdentifier(cn.getOffenderIdentifier())
                 .occurrenceDateTime(cn.getOccurrenceDateTime())
                 .staffUsername(cn.getStaffUsername())
                 .type(cn.getType())
@@ -54,7 +85,7 @@ public class CaseNoteService {
                                 .creationDateTime(a.getCreateDateTime())
                                 .build()
                 ).collect(Collectors.toList()))
-                .agencyId(cn.getLocationId())
+                .locationId(cn.getLocationId())
                 .build();
     }
 

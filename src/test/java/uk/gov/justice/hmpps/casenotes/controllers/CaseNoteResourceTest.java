@@ -14,7 +14,7 @@ import static org.springframework.core.ResolvableType.forType;
 
 public class CaseNoteResourceTest extends ResourceTest {
 
-    private static final String CREATE_CASE_NOTE  = "{\"locationId\": \"MDI\", \"type\": \"KA\", \"subType\": \"KS\", \"text\": \"%s\"}";
+    private static final String CREATE_CASE_NOTE  = "{\"locationId\": \"%s\", \"type\": \"KA\", \"subType\": \"KS\", \"text\": \"%s\"}";
 
     @Autowired
     private AuthTokenHelper authTokenHelper;
@@ -26,7 +26,7 @@ public class CaseNoteResourceTest extends ResourceTest {
         final var postResponse = testRestTemplate.exchange(
                 "/case-notes/{offenderIdentifier}",
                 HttpMethod.POST,
-                createHttpEntity(token, format(CREATE_CASE_NOTE, "This is a case note")),
+                createHttpEntity(token, format(CREATE_CASE_NOTE, "MDI", "This is a case note")),
                 new ParameterizedTypeReference<String>() {
                 },
                 "A1234AA");
@@ -55,7 +55,7 @@ public class CaseNoteResourceTest extends ResourceTest {
         final var postResponse = testRestTemplate.exchange(
                 "/case-notes/{offenderIdentifier}",
                 HttpMethod.POST,
-                createHttpEntity(token, format(CREATE_CASE_NOTE, "This is another case note")),
+                createHttpEntity(token, format(CREATE_CASE_NOTE, "MDI", "This is another case note")),
                 new ParameterizedTypeReference<CaseNote>() {
                 },
                 "A1234AB");
@@ -86,4 +86,48 @@ public class CaseNoteResourceTest extends ResourceTest {
         assertThat(new JsonContent<CaseNote>(getClass(), forType(CaseNote.class), response.getBody())).isEqualToJson("A1234AB-casenote.json");
 
     }
+
+    @Test
+    public void testCanFilterCaseNotes() {
+        final var token = authTokenHelper.getToken(AuthTokenHelper.AuthToken.NORMAL_USER);
+
+        testRestTemplate.exchange(
+                "/case-notes/{offenderIdentifier}",
+                HttpMethod.POST,
+                createHttpEntity(token, format(CREATE_CASE_NOTE, "LEI", "This is a case note 1")),
+                new ParameterizedTypeReference<String>() {
+                },
+                "A1234AC");
+
+        testRestTemplate.exchange(
+                "/case-notes/{offenderIdentifier}",
+                HttpMethod.POST,
+                createHttpEntity(token, format(CREATE_CASE_NOTE, "LEI", "This is a case note 2")),
+                new ParameterizedTypeReference<String>() {
+                },
+                "A1234AC");
+
+        testRestTemplate.exchange(
+                "/case-notes/{offenderIdentifier}",
+                HttpMethod.POST,
+                createHttpEntity(token, format(CREATE_CASE_NOTE, "LEI", "This is a case note 3")),
+                new ParameterizedTypeReference<String>() {
+                },
+                "A1234AC");
+
+
+        final var response = testRestTemplate.exchange(
+                "/case-notes?locationId={locationId}&type={type}&subType={subType}&size={size}&page={page}",
+                HttpMethod.GET,
+                createHttpEntity(token, null),
+                new ParameterizedTypeReference<String>() {
+                },
+                "LEI", "KA", "KS", "2", "1");
+
+        assertThat(response.getStatusCodeValue()).isEqualTo(200);
+
+        assertThat(new JsonContent<CaseNote>(getClass(), forType(CaseNote.class), response.getBody())).isEqualToJson("A1234AC-casenote.json");
+
+    }
+
 }
