@@ -112,9 +112,9 @@ public class ResourceServerConfiguration extends ResourceServerConfigurerAdapter
 
     private SecurityScheme securityScheme() {
         final var grantType = new AuthorizationCodeGrantBuilder()
-                .tokenEndpoint(new TokenEndpoint("https://nomis-oauth2-server.herokuapp.com/auth/oauth" + "/token", "oauthtoken"))
+                .tokenEndpoint(new TokenEndpoint("http://localhost:9090/auth/oauth" + "/token", "oauthtoken"))
                 .tokenRequestEndpoint(
-                        new TokenRequestEndpoint("https://nomis-oauth2-server.herokuapp.com/auth/oauth" + "/authorize", "swagger-client", "clientsecret"))
+                        new TokenRequestEndpoint("http://localhost:9090/auth/oauth" + "/authorize", "swagger-client", "clientsecret"))
                 .build();
 
         return new OAuthBuilder().name("spring_oauth")

@@ -8,9 +8,9 @@ import org.springframework.stereotype.Component;
 import java.util.Map;
 
 @Component
-public class UserContext {
+public class SecurityUserContext {
 
-	public Authentication getAuthentication() {
+	private Authentication getAuthentication() {
 		return SecurityContextHolder.getContext().getAuthentication();
 	}
 

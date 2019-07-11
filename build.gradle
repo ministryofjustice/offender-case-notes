@@ -109,11 +109,8 @@ dependencies {
 
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation 'org.springframework.security:spring-security-test'
-    testImplementation 'org.gebish:geb-core:3.0.1'
-    testImplementation 'org.gebish:geb-spock:3.0.1'
-    testImplementation 'org.seleniumhq.selenium:selenium-support:3.141.59'
-    testImplementation 'org.seleniumhq.selenium:selenium-chrome-driver:3.141.59'
-    testImplementation 'org.seleniumhq.selenium:selenium-firefox-driver:3.141.59'
+    testImplementation 'com.tngtech.java:junit-dataprovider:1.13.1'
+    testImplementation 'net.javacrumbs.json-unit:json-unit-assertj:2.7.0'
     testImplementation 'io.github.http-builder-ng:http-builder-ng-apache:1.0.3'
     testImplementation 'com.github.tomakehurst:wiremock-standalone:2.23.2'
 }

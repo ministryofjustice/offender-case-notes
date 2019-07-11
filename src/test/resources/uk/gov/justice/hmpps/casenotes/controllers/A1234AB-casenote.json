@@ -1,0 +1,16 @@
+[
+  {
+    "type": "KA",
+    "subType": "KS",
+    "staffUsername": "API_TEST_USER",
+    "text": "This is a another case note",
+    "agencyId": "MDI",
+    "amendments": [
+      {
+        "sequence": 1,
+        "authorUserName": "API_TEST_USER",
+        "additionalNoteText": "Amended case note"
+      }
+    ]
+  }
+]

@@ -2,6 +2,7 @@ package uk.gov.justice.hmpps.casenotes.controllers;
 
 import io.swagger.annotations.*;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 import uk.gov.justice.hmpps.casenotes.dto.CaseNote;
@@ -39,9 +40,10 @@ public class CaseNoteController {
     }
 
     @PostMapping(value = "/{offenderIdentifier}", consumes = "application/json")
+    @ResponseStatus(HttpStatus.CREATED)
     @ApiOperation(  value = "Add Case Note for offender",
             response = CaseNote.class,
-            notes = "More Information Here")
+            notes = "Creates a note for a specific type/subType")
     @ApiResponses(value = {
             @ApiResponse(code = 201, message = "The Case Note has been recorded. The updated object is returned including the status.", response = CaseNote.class),
             @ApiResponse(code = 409, message = "The case note has already been recorded under the booking. The current unmodified object (including status) is returned.", response = ErrorResponse.class)})
@@ -55,7 +57,7 @@ public class CaseNoteController {
     @PutMapping(value = "/{offenderIdentifier}/{caseNoteIdentifier}", consumes = "application/json")
     @ApiOperation(  value = "Amend Case Note for offender",
             response = CaseNote.class,
-            notes = "More Information Here")
+            notes = "Amend a case note information adds and additional entry to the note")
     @ApiResponses(value = {
             @ApiResponse(code = 201, message = "The Case Note has been recorded. The updated object is returned including the status.", response = CaseNote.class),
             @ApiResponse(code = 404, message = "No case notes where found for this offender and case note id", response = ErrorResponse.class)})

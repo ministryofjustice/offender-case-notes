@@ -1,6 +1,8 @@
 spring:
   datasource:
     url: 'jdbc:h2:mem:offender-case-notes-db;MODE=PostgreSQL'
+    username: sa
+    password:
 
   h2:
     console:

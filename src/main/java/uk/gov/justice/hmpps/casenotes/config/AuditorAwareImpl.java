@@ -5,20 +5,18 @@ import org.springframework.data.domain.AuditorAware;
 import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 import org.springframework.stereotype.Service;
 
-import javax.validation.constraints.NotNull;
 import java.util.Optional;
 
 @Configuration
 @EnableJpaAuditing(auditorAwareRef = "auditorAware")
 @Service(value = "auditorAware")
 public class AuditorAwareImpl implements AuditorAware<String> {
-    private UserContext authenticationFacade;
+    private SecurityUserContext authenticationFacade;
 
-    public AuditorAwareImpl(final UserContext authenticationFacade) {
+    public AuditorAwareImpl(final SecurityUserContext authenticationFacade) {
         this.authenticationFacade = authenticationFacade;
     }
 
-    @NotNull
     @Override
     public Optional<String> getCurrentAuditor() {
         return Optional.ofNullable(authenticationFacade.getCurrentUsername());

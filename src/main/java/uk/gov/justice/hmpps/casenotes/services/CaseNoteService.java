@@ -3,7 +3,7 @@ package uk.gov.justice.hmpps.casenotes.services;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
-import uk.gov.justice.hmpps.casenotes.config.UserContext;
+import uk.gov.justice.hmpps.casenotes.config.SecurityUserContext;
 import uk.gov.justice.hmpps.casenotes.dto.CaseNote;
 import uk.gov.justice.hmpps.casenotes.dto.CaseNoteAmendment;
 import uk.gov.justice.hmpps.casenotes.dto.NewCaseNote;
@@ -23,11 +23,11 @@ import java.util.stream.Collectors;
 public class CaseNoteService {
 
     private final OffenderCaseNoteRepository repository;
-    private final UserContext userContext;
+    private final SecurityUserContext securityUserContext;
 
-    public CaseNoteService(OffenderCaseNoteRepository repository, UserContext userContext) {
+    public CaseNoteService(OffenderCaseNoteRepository repository, SecurityUserContext securityUserContext) {
         this.repository = repository;
-        this.userContext = userContext;
+        this.securityUserContext = securityUserContext;
     }
 
     public List<CaseNote> getCaseNotesByOffenderIdentifier(@NotNull final String offenderIdentifier) {
@@ -62,7 +62,7 @@ public class CaseNoteService {
     public CaseNote createCaseNote(@NotNull final String offenderIdentifier, @NotNull @Valid final NewCaseNote newCaseNote) {
         final var caseNote = OffenderCaseNote.builder()
                 .noteText(newCaseNote.getText())
-                .staffUsername(userContext.getCurrentUsername())
+                .staffUsername(securityUserContext.getCurrentUsername())
                 .occurrenceDateTime(newCaseNote.getOccurrenceDateTime() == null ? LocalDateTime.now() : newCaseNote.getOccurrenceDateTime())
                 .type(newCaseNote.getType())
                 .subType(newCaseNote.getSubType())
@@ -81,7 +81,7 @@ public class CaseNoteService {
             throw new EntityNotFoundException("Case Note not found for ID "+ caseNoteId);
         }
 
-        offenderCaseNote.addAmendment(amendCaseNote, userContext.getCurrentUsername());
+        offenderCaseNote.addAmendment(amendCaseNote, securityUserContext.getCurrentUsername());
         repository.save(offenderCaseNote);
         return mapper(offenderCaseNote);
     }
