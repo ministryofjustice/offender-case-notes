@@ -107,6 +107,8 @@ dependencies {
     implementation 'com.pauldijou:jwt-core_2.11:0.15.0'
     implementation 'com.google.code.gson:gson:2.8.5'
 
+    testAnnotationProcessor 'org.projectlombok:lombok:1.18.8'
+    testCompileOnly 'org.projectlombok:lombok:1.18.8'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation 'org.springframework.security:spring-security-test'
     testImplementation 'com.tngtech.java:junit-dataprovider:1.13.1'

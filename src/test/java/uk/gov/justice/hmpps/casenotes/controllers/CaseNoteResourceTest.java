@@ -8,10 +8,13 @@ import org.springframework.http.HttpMethod;
 import uk.gov.justice.hmpps.casenotes.dto.CaseNote;
 import uk.gov.justice.hmpps.casenotes.utils.AuthTokenHelper;
 
+import static java.lang.String.format;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.core.ResolvableType.forType;
 
 public class CaseNoteResourceTest extends ResourceTest {
+
+    private static final String CREATE_CASE_NOTE  = "{\"locationId\": \"MDI\", \"type\": \"KA\", \"subType\": \"KS\", \"text\": \"%s\"}";
 
     @Autowired
     private AuthTokenHelper authTokenHelper;
@@ -23,7 +26,7 @@ public class CaseNoteResourceTest extends ResourceTest {
         final var postResponse = testRestTemplate.exchange(
                 "/case-notes/{offenderIdentifier}",
                 HttpMethod.POST,
-                createHttpEntity(token, "{\"locationId\": \"MDI\", \"type\": \"KA\", \"subType\": \"KS\", \"text\": \"This is a case note\"}"),
+                createHttpEntity(token, format(CREATE_CASE_NOTE, "This is a case note")),
                 new ParameterizedTypeReference<String>() {
                 },
                 "A1234AA");
@@ -52,7 +55,7 @@ public class CaseNoteResourceTest extends ResourceTest {
         final var postResponse = testRestTemplate.exchange(
                 "/case-notes/{offenderIdentifier}",
                 HttpMethod.POST,
-                createHttpEntity(token, "{\"locationId\": \"MDI\", \"type\": \"KA\", \"subType\": \"KS\", \"text\": \"This is a another case note\"}"),
+                createHttpEntity(token, format(CREATE_CASE_NOTE, "This is another case note")),
                 new ParameterizedTypeReference<CaseNote>() {
                 },
                 "A1234AB");

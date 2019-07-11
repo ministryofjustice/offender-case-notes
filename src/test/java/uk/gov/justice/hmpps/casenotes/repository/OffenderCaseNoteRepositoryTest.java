@@ -16,7 +16,7 @@ import java.time.LocalDateTime;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@ActiveProfiles("dev")
+@ActiveProfiles("test")
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK)
 @Transactional
@@ -104,7 +104,7 @@ public class OffenderCaseNoteRepositoryTest {
                 .occurrenceDateTime(LocalDateTime.now())
                 .locationId("MDI")
                 .staffUsername("USER2")
-                .offenderIdentifier("A1234AA")
+                .offenderIdentifier("A1234AC")
                 .type("XXXX")
                 .subType("XXXX1")
                 .noteText("HELLO")
