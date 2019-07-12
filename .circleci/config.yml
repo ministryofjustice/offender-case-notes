@@ -22,6 +22,8 @@ commands:
               --namespace="${KUBE_ENV_NAMESPACE}"
             # confirm setup is ok
             kubectl config use-context circleci
+            kubectl -n "${KUBE_ENV_NAMESPACE}" get pods
+
   deploy_to_env:
     parameters:
       env:
@@ -133,6 +135,18 @@ jobs:
       - deploy_to_env:
           env: "dev"
 
+  deploy_preprod:
+    executor: deployer
+    steps:
+      - deploy_to_env:
+          env: "preprod"
+
+  deploy_prod:
+    executor: deployer
+    steps:
+      - deploy_to_env:
+          env: "prod"
+
 workflows:
   version: 2
   build-test-and-deploy:
@@ -150,5 +164,20 @@ workflows:
       - deploy_dev:
           requires:
             - build_docker
-
+      - request-preprod-approval:
+          type: approval
+          requires:
+            - deploy_dev
+      - deploy_preprod:
+          context: offender-case-notes-preprod
+          requires:
+            - request-preprod-approval
+      - request-prod-approval:
+          type: approval
+          requires:
+            - deploy_preprod
+      - deploy_prod:
+          context: offender-case-notes-prod
+          requires:
+            - request-prod-approval
 

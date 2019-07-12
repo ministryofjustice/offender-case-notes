@@ -15,7 +15,7 @@ ingress:
     kubernetes.io/ingress.class: "nginx"
     nginx.ingress.kubernetes.io/whitelist-source-range: "217.33.148.210/32,81.134.202.29/32,52.56.175.16/32,35.177.252.195/32"
   hosts:
-    - host: offender-case-notes-dev.service.justice.gov.uk
+    - host: dev.offender-case-notes.service.justice.gov.uk
       cert_secret: offender-case-notes-cert
   path: /
 
