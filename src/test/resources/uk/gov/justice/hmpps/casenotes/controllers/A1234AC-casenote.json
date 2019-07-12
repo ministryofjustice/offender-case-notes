@@ -1,0 +1,37 @@
+{
+  "content": [
+    {
+      "offenderIdentifier": "A1234AC",
+      "type": "KA",
+      "subType": "KS",
+      "staffUsername": "API_TEST_USER",
+      "text": "This is a case note 3",
+      "locationId": "LEI"
+    }
+  ],
+  "pageable": {
+    "sort": {
+      "sorted": true,
+      "unsorted": false,
+      "empty": false
+    },
+    "offset": 2,
+    "pageSize": 2,
+    "pageNumber": 1,
+    "paged": true,
+    "unpaged": false
+  },
+  "totalElements": 3,
+  "totalPages": 2,
+  "last": true,
+  "size": 2,
+  "first": false,
+  "numberOfElements": 1,
+  "sort": {
+    "sorted": true,
+    "unsorted": false,
+    "empty": false
+  },
+  "number": 1,
+  "empty": false
+}

@@ -1,0 +1,47 @@
+version: "3"
+services:
+  offender-case-notes:
+    image: mojdigitalstudio/offender-case-notes:latest
+    networks:
+      - hmpps
+    container_name: offender-case-notes
+    depends_on:
+      - offender-case-notes-db
+    ports:
+      - "8080:8080"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+    environment:
+      - SERVER_PORT=8080
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://offender-case-notes-db/offender-case-notes
+      - DATABASE_USERNAME=offender-case-notes
+      - DATABASE_PASSWORD=offender-case-notes
+
+  oauth:
+    image: mojdigitalstudio/nomis-oauth2-server:latest
+    networks:
+      - hmpps
+    container_name: oauth
+    ports:
+      - "9090:8080"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/auth/health"]
+    environment:
+      - SERVER_PORT=8080
+      - SPRING_PROFILES_ACTIVE=dev
+
+  offender-case-notes-db:
+    image: postgres
+    networks:
+      - hmpps
+    container_name: offender-case-notes-db
+    restart: always
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_PASSWORD=offender-case-notes
+      - POSTGRES_USER=offender-case-notes
+      - POSTGRES_DB=offender-case-notes
+
+networks:
+  hmpps:

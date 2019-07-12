@@ -2,15 +2,12 @@ package uk.gov.justice.hmpps.casenotes.config;
 
 
 import org.apache.commons.codec.binary.Base64;
-import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.info.BuildProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
-import org.springframework.data.domain.AuditorAware;
-import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -22,7 +19,6 @@ import org.springframework.security.oauth2.provider.token.DefaultTokenServices;
 import org.springframework.security.oauth2.provider.token.TokenStore;
 import org.springframework.security.oauth2.provider.token.store.JwtAccessTokenConverter;
 import org.springframework.security.oauth2.provider.token.store.JwtTokenStore;
-import org.springframework.stereotype.Service;
 import org.springframework.web.context.annotation.RequestScope;
 import springfox.documentation.builders.AuthorizationCodeGrantBuilder;
 import springfox.documentation.builders.OAuthBuilder;
@@ -44,7 +40,6 @@ import java.util.Optional;
 @Configuration
 @EnableSwagger2
 @EnableGlobalMethodSecurity(prePostEnabled = true, proxyTargetClass = true)
-@EnableJpaAuditing(auditorAwareRef = "auditorAware")
 public class ResourceServerConfiguration extends ResourceServerConfigurerAdapter {
 
     @Value("${jwt.public.key}")
@@ -117,9 +112,9 @@ public class ResourceServerConfiguration extends ResourceServerConfigurerAdapter
 
     private SecurityScheme securityScheme() {
         final var grantType = new AuthorizationCodeGrantBuilder()
-                .tokenEndpoint(new TokenEndpoint("https://nomis-oauth2-server.herokuapp.com/auth/oauth" + "/token", "oauthtoken"))
+                .tokenEndpoint(new TokenEndpoint("http://localhost:9090/auth/oauth" + "/token", "oauthtoken"))
                 .tokenRequestEndpoint(
-                        new TokenRequestEndpoint("https://nomis-oauth2-server.herokuapp.com/auth/oauth" + "/authorize", "swagger-client", "clientsecret"))
+                        new TokenRequestEndpoint("http://localhost:9090/auth/oauth" + "/authorize", "swagger-client", "clientsecret"))
                 .build();
 
         return new OAuthBuilder().name("spring_oauth")
@@ -168,21 +163,6 @@ public class ResourceServerConfiguration extends ResourceServerConfigurerAdapter
                 "MIT", "https://opensource.org/licenses/MIT", vendorExtensions);
     }
 
-
-    @Service(value = "auditorAware")
-    public class AuditorAwareImpl implements AuditorAware<String> {
-        private UserContext authenticationFacade;
-
-        public AuditorAwareImpl(final UserContext authenticationFacade) {
-            this.authenticationFacade = authenticationFacade;
-        }
-
-        @NotNull
-        @Override
-        public Optional<String> getCurrentAuditor() {
-            return Optional.ofNullable(authenticationFacade.getCurrentUsername());
-        }
-    }
 
     @Bean
     @RequestScope
