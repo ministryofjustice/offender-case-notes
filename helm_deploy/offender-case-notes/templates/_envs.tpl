@@ -7,9 +7,6 @@ env:
   - name: SERVER_PORT
     value: "{{ .Values.image.port }}"
 
-  - name: SPRING_PROFILES_ACTIVE
-    value: "logstash"
-
   - name: JAVA_OPTS
     value: "{{ .Values.env.JAVA_OPTS }}"
 
