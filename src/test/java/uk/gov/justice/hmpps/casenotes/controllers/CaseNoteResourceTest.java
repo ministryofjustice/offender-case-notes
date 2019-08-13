@@ -61,7 +61,7 @@ public class CaseNoteResourceTest extends ResourceTest {
 
     @Test
     public void testCanCreateAndRetrieveCaseNotesForOffender() {
-        oauthMockServer.subGetUserDetails();
+        oauthMockServer.subGetUserDetails("API_TEST_USER");
         elite2MockServer.subGetOffender("A1234AA");
 
         final var token = authTokenHelper.getToken(AuthTokenHelper.AuthToken.NORMAL_USER);
@@ -93,7 +93,7 @@ public class CaseNoteResourceTest extends ResourceTest {
 
     @Test
     public void testCanCreateAmendments() {
-        oauthMockServer.subGetUserDetails();
+        oauthMockServer.subGetUserDetails("API_TEST_USER");
         elite2MockServer.subGetOffender("A1234AB");
 
         final var token = authTokenHelper.getToken(AuthTokenHelper.AuthToken.NORMAL_USER);
@@ -135,7 +135,7 @@ public class CaseNoteResourceTest extends ResourceTest {
 
     @Test
     public void testCanFilterCaseNotes() {
-        oauthMockServer.subGetUserDetails();
+        oauthMockServer.subGetUserDetails("API_TEST_USER");
         elite2MockServer.subGetOffender("A1234AC");
 
         final var token = authTokenHelper.getToken(AuthTokenHelper.AuthToken.NORMAL_USER);
