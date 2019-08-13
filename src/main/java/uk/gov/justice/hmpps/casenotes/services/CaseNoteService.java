@@ -30,14 +30,14 @@ public class CaseNoteService {
     private final CaseNoteTypeRepository caseNoteTypeRepository;
     private final ParentCaseNoteTypeRepository parentCaseNoteTypeRepository;
     private final SecurityUserContext securityUserContext;
-    private final NomisService nomisService;
+    private final ExternalApiService externalApiService;
 
-    public CaseNoteService(OffenderCaseNoteRepository repository, CaseNoteTypeRepository caseNoteTypeRepository, ParentCaseNoteTypeRepository parentCaseNoteTypeRepository, SecurityUserContext securityUserContext, NomisService nomisService) {
+    public CaseNoteService(OffenderCaseNoteRepository repository, CaseNoteTypeRepository caseNoteTypeRepository, ParentCaseNoteTypeRepository parentCaseNoteTypeRepository, SecurityUserContext securityUserContext, ExternalApiService externalApiService) {
         this.repository = repository;
         this.caseNoteTypeRepository = caseNoteTypeRepository;
         this.parentCaseNoteTypeRepository = parentCaseNoteTypeRepository;
         this.securityUserContext = securityUserContext;
-        this.nomisService = nomisService;
+        this.externalApiService = externalApiService;
     }
 
     public Page<CaseNote> getCaseNotesByOffenderIdentifier(@NotNull final String offenderIdentifier, Pageable pageable) {
@@ -89,6 +89,7 @@ public class CaseNoteService {
                 .amendments(cn.getAmendments().stream().map(
                         a -> CaseNoteAmendment.builder()
                                 .authorUserName(a.getStaffUsername())
+                                .authorName(a.getStaffName())
                                 .additionalNoteText(a.getNoteText())
                                 .caseNoteAmendmentId(a.getId())
                                 .sequence(a.getAmendSequence())
@@ -108,8 +109,10 @@ public class CaseNoteService {
             throw EntityNotFoundException.withId(newCaseNote.getSubType());
         }
 
-        String currentUsername = securityUserContext.getCurrentUsername();
-        String staffName = nomisService.getUserDetails(currentUsername);
+        final var currentUsername = securityUserContext.getCurrentUsername();
+        final var staffName = externalApiService.getUserFullName(currentUsername);
+
+        final var locationId = newCaseNote.getLocationId() == null ? externalApiService.getOffenderLocation(offenderIdentifier) : newCaseNote.getLocationId();
 
         final var caseNote = OffenderCaseNote.builder()
                 .noteText(newCaseNote.getText())
@@ -118,7 +121,7 @@ public class CaseNoteService {
                 .occurrenceDateTime(newCaseNote.getOccurrenceDateTime() == null ? LocalDateTime.now() : newCaseNote.getOccurrenceDateTime())
                 .sensitiveCaseNoteType(type)
                 .offenderIdentifier(offenderIdentifier)
-                .locationId(newCaseNote.getLocationId())
+                .locationId(locationId)
                 .build();
 
         return mapper(repository.save(caseNote));
@@ -132,13 +135,13 @@ public class CaseNoteService {
             throw EntityNotFoundException.withId(offenderIdentifier);
         }
 
-        offenderCaseNote.addAmendment(amendCaseNote, securityUserContext.getCurrentUsername(), nomisService.getUserDetails(securityUserContext.getCurrentUsername()));
+        offenderCaseNote.addAmendment(amendCaseNote, securityUserContext.getCurrentUsername(), externalApiService.getUserFullName(securityUserContext.getCurrentUsername()));
         repository.save(offenderCaseNote);
         return mapper(offenderCaseNote);
     }
 
     public List<CaseNoteType> getCaseNoteTypes() {
-        final var caseNoteTypes = nomisService.getCaseNoteTypes();
+        final var caseNoteTypes = externalApiService.getCaseNoteTypes();
 
         if (SecurityUserContext.hasRoles("VIEW_SENSITIVE_CASE_NOTES")) {
             caseNoteTypes.addAll(getSensitiveCaseNotes());
@@ -148,7 +151,7 @@ public class CaseNoteService {
     }
 
     public List<CaseNoteType> getUserCaseNoteTypes() {
-        final var userCaseNoteTypes = nomisService.getUserCaseNoteTypes();
+        final var userCaseNoteTypes = externalApiService.getUserCaseNoteTypes();
         if (SecurityUserContext.hasRoles("VIEW_SENSITIVE_CASE_NOTES")) {
             userCaseNoteTypes.addAll(getSensitiveCaseNotes());
         }

@@ -1,5 +1,6 @@
 package uk.gov.justice.hmpps.casenotes.controllers;
 
+import org.junit.Rule;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -9,6 +10,8 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
+import uk.gov.justice.hmpps.casenotes.integration.wiremock.Elite2MockServer;
+import uk.gov.justice.hmpps.casenotes.integration.wiremock.OauthMockServer;
 
 import java.util.Collections;
 import java.util.Map;
@@ -24,6 +27,11 @@ public abstract class ResourceTest {
     @Autowired
     protected TestRestTemplate testRestTemplate;
 
+    @Rule
+    public Elite2MockServer elite2MockServer = new Elite2MockServer();
+
+    @Rule
+    public OauthMockServer oauthMockServer = new OauthMockServer();
 
     HttpEntity<?> createHttpEntity(final String bearerToken, final Object body) {
         return createHttpEntity(bearerToken, body, Collections.emptyMap());

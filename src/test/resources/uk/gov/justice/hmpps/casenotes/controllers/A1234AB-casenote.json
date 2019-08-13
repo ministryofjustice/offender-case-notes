@@ -7,9 +7,9 @@
       "subType": "GEN",
       "subTypeDescription": "General POM Note",
       "staffUsername": "API_TEST_USER",
-      "staffName": "API_TEST_USER",
+      "staffName": "Mikey Mouse",
       "text": "This is another case note",
-      "locationId": "MDI",
+      "locationId": "LEI",
       "amendments": [
         {
           "sequence": 1,

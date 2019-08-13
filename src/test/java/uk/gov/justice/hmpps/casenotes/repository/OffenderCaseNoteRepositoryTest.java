@@ -25,8 +25,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 @WithAnonymousUser
 public class OffenderCaseNoteRepositoryTest {
 
-    static final String PARENT_TYPE = "POM";
-    static final String SUB_TYPE = "GEN";
+    private static final String PARENT_TYPE = "POM";
+    private static final String SUB_TYPE = "GEN";
 
     @Autowired
     private OffenderCaseNoteRepository repository;

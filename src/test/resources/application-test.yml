@@ -20,3 +20,7 @@ spring:
 graceful:
   shutdown:
     enabled: false
+
+app:
+  elite2-api-base-url: http://localhost:8999
+  oauth-api-rest-url: http://localhost:8998/auth/api

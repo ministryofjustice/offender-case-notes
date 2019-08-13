@@ -40,6 +40,12 @@ public class RestTemplateConfiguration {
         return getRestTemplate(restTemplateBuilder, properties.getElite2ApiRestUrl());
     }
 
+    @Bean(name = "oauthApiRestTemplate")
+    public RestTemplate oauthApiRestTemplate(final RestTemplateBuilder restTemplateBuilder) {
+        return getRestTemplate(restTemplateBuilder, properties.getOauthApiRestUrl());
+    }
+
+
     private RestTemplate getRestTemplate(final RestTemplateBuilder restTemplateBuilder, final String uri) {
         return restTemplateBuilder
                 .rootUri(uri)

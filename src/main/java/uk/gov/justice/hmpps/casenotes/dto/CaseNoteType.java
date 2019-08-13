@@ -26,7 +26,8 @@ public class CaseNoteType {
     private String description;
 
     @ApiModelProperty(required = true, value = "Active indicator flag.", example = "Y", allowableValues = "Y,N", position = 3)
-    private String activeFlag;
+    @Builder.Default
+    private String activeFlag = "Y";
 
     @ApiModelProperty(value = "List of case note sub types", position = 4, allowEmptyValue = true)
     private List<CaseNoteType> subCodes;

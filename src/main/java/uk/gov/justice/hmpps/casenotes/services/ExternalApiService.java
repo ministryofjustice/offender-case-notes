@@ -7,14 +7,18 @@ import org.springframework.web.client.RestTemplate;
 import uk.gov.justice.hmpps.casenotes.dto.CaseNoteType;
 
 import java.util.List;
+import java.util.Map;
 
 @Service
-public class NomisService {
+public class ExternalApiService {
 
     private final RestTemplate elite2ApiRestTemplate;
 
-    public NomisService(RestTemplate elite2ApiRestTemplate) {
+    private final RestTemplate oauthApiRestTemplate;
+
+    public ExternalApiService(RestTemplate elite2ApiRestTemplate, RestTemplate oauthApiRestTemplate) {
         this.elite2ApiRestTemplate = elite2ApiRestTemplate;
+        this.oauthApiRestTemplate = oauthApiRestTemplate;
     }
 
     public List<CaseNoteType> getCaseNoteTypes() {
@@ -39,8 +43,23 @@ public class NomisService {
         return body;
     }
 
-    public String getUserDetails(String currentUsername) {
+    public String getUserFullName(final String currentUsername) {
+        final var response = oauthApiRestTemplate.exchange("/user/{username}", HttpMethod.GET, null, Map.class, currentUsername);
+        if (response.getBody() != null) {
+            return (String)response.getBody().get("name");
+        }
         return currentUsername;
     }
+
+    public String getOffenderLocation(final String offenderIdentifier) {
+        final var response = elite2ApiRestTemplate.exchange("/bookings/offenderNo/{offenderNo}", HttpMethod.GET, null, Map.class, offenderIdentifier);
+        final var body = response.getBody();
+        if (body == null) {
+            throw EntityNotFoundException.withId(offenderIdentifier);
+        }
+
+        return (String)response.getBody().get("agencyId");
+    }
+
 }
 
