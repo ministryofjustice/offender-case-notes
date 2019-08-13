@@ -6,6 +6,7 @@ CREATE TABLE OFFENDER_CASE_NOTE_AMENDMENT
     OFFENDER_CASE_NOTE_ID           BIGINT      NOT NULL,
     AMEND_SEQUENCE                  NUMERIC(5)  NOT NULL,
     STAFF_USERNAME                  VARCHAR(32) NOT NULL,
+    STAFF_NAME                      VARCHAR(80) NOT NULL,
     NOTE_TEXT                       TEXT        NOT NULL,
     CREATE_DATE_TIME                TIMESTAMP   NOT NULL,
     CREATE_USER_ID                  VARCHAR(32) NOT NULL,

@@ -6,10 +6,7 @@ import lombok.EqualsAndHashCode;
 import org.springframework.data.jpa.domain.Specification;
 import uk.gov.justice.hmpps.casenotes.model.OffenderCaseNote;
 
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Predicate;
-import javax.persistence.criteria.Root;
+import javax.persistence.criteria.*;
 import java.time.LocalDateTime;
 
 @Builder
@@ -38,10 +35,13 @@ public class OffenderCaseNoteFilter implements Specification<OffenderCaseNote> {
             predicateBuilder.add(cb.equal(root.get("staffUsername"), staffUsername));
         }
         if (type != null) {
-            predicateBuilder.add(cb.equal(root.get("type"), type));
+            final var caseNoteType = root.join("sensitiveCaseNoteType", JoinType.INNER);
+            final var parentType = caseNoteType.join("parentType", JoinType.INNER);
+            predicateBuilder.add(cb.equal(parentType.get("type"), type));
         }
         if (subType != null) {
-            predicateBuilder.add(cb.equal(root.get("subType"), subType));
+            final var caseNoteType = root.join("sensitiveCaseNoteType", JoinType.INNER);
+            predicateBuilder.add(cb.equal(caseNoteType.get("type"), subType));
         }
         if (startDate != null) {
             predicateBuilder.add(cb.greaterThanOrEqualTo(root.get("occurrenceDateTime"), startDate));

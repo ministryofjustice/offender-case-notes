@@ -1,5 +1,6 @@
 package uk.gov.justice.hmpps.casenotes.repository;
 
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,6 +12,7 @@ import org.springframework.test.context.transaction.TestTransaction;
 import org.springframework.transaction.annotation.Transactional;
 import uk.gov.justice.hmpps.casenotes.model.OffenderCaseNote;
 import uk.gov.justice.hmpps.casenotes.model.OffenderCaseNoteAmendment;
+import uk.gov.justice.hmpps.casenotes.model.SensitiveCaseNoteType;
 
 import java.time.LocalDateTime;
 
@@ -20,13 +22,29 @@ import static org.assertj.core.api.Assertions.assertThat;
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK)
 @Transactional
+@WithAnonymousUser
 public class OffenderCaseNoteRepositoryTest {
+
+    static final String PARENT_TYPE = "POM";
+    static final String SUB_TYPE = "GEN";
 
     @Autowired
     private OffenderCaseNoteRepository repository;
 
+    @Autowired
+    private CaseNoteTypeRepository caseNoteTypeRepository;
+
+    @Autowired
+    private ParentCaseNoteTypeRepository parentCaseNoteTypeRepository;
+
+    private SensitiveCaseNoteType sampleType;
+
+    @Before
+    public void setUp() {
+        sampleType = caseNoteTypeRepository.findCaseNoteTypeByParentTypeAndType(parentCaseNoteTypeRepository.findById(PARENT_TYPE).orElseThrow(), SUB_TYPE);
+    }
+
     @Test
-    @WithAnonymousUser
     public void testPersistCaseNote() {
 
         var caseNote = transientEntity();
@@ -84,7 +102,7 @@ public class OffenderCaseNoteRepositoryTest {
         OffenderCaseNoteAmendment offenderCaseNoteAmendment3 = retrievedEntity2.getAmendment(3).get();
         assertThat(offenderCaseNoteAmendment3.getNoteText()).isEqualTo("Another Note 2");
 
-        retrievedEntity2.addAmendment("Another Note 3", "USER1");
+        retrievedEntity2.addAmendment("Another Note 3", "USER1", "Mickey Mouse");
 
         TestTransaction.flagForCommit();
         TestTransaction.end();
@@ -104,9 +122,9 @@ public class OffenderCaseNoteRepositoryTest {
                 .occurrenceDateTime(LocalDateTime.now())
                 .locationId("MDI")
                 .staffUsername("USER2")
+                .staffName("Mickey Mouse")
                 .offenderIdentifier("A1234AC")
-                .type("XXXX")
-                .subType("XXXX1")
+                .sensitiveCaseNoteType(sampleType)
                 .noteText("HELLO")
                 .build();
     }

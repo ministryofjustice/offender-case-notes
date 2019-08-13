@@ -9,8 +9,8 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestClientResponseException;
 import uk.gov.justice.hmpps.casenotes.dto.ErrorResponse;
+import uk.gov.justice.hmpps.casenotes.services.EntityNotFoundException;
 
-import javax.persistence.EntityNotFoundException;
 
 @RestControllerAdvice(
         basePackages = {"uk.gov.justice.hmpps.casenotes.controllers"}

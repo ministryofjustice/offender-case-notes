@@ -3,7 +3,7 @@ package uk.gov.justice.hmpps.casenotes.config;
 
 import org.apache.commons.codec.binary.Base64;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.info.BuildProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -13,6 +13,7 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.oauth2.client.DefaultOAuth2ClientContext;
 import org.springframework.security.oauth2.client.OAuth2ClientContext;
+import org.springframework.security.oauth2.client.token.grant.client.ClientCredentialsResourceDetails;
 import org.springframework.security.oauth2.config.annotation.web.configuration.ResourceServerConfigurerAdapter;
 import org.springframework.security.oauth2.config.annotation.web.configurers.ResourceServerSecurityConfigurer;
 import org.springframework.security.oauth2.provider.token.DefaultTokenServices;
@@ -42,11 +43,14 @@ import java.util.Optional;
 @EnableGlobalMethodSecurity(prePostEnabled = true, proxyTargetClass = true)
 public class ResourceServerConfiguration extends ResourceServerConfigurerAdapter {
 
-    @Value("${jwt.public.key}")
-    private String jwtPublicKey;
+    private final OffenderCaseNoteProperties properties;
 
     @Autowired(required = false)
     private BuildProperties buildProperties;
+
+    public ResourceServerConfiguration(OffenderCaseNoteProperties properties) {
+        this.properties = properties;
+    }
 
     @Override
     public void configure(final HttpSecurity http) throws Exception {
@@ -80,7 +84,7 @@ public class ResourceServerConfiguration extends ResourceServerConfigurerAdapter
     @Bean
     public JwtAccessTokenConverter accessTokenConverter() {
         final var converter = new JwtAccessTokenConverter();
-        converter.setVerifierKey(new String(Base64.decodeBase64(jwtPublicKey)));
+        converter.setVerifierKey(new String(Base64.decodeBase64(properties.getJwtPublicKey())));
         return converter;
     }
 
@@ -163,6 +167,11 @@ public class ResourceServerConfiguration extends ResourceServerConfigurerAdapter
                 "MIT", "https://opensource.org/licenses/MIT", vendorExtensions);
     }
 
+    @Bean
+    @ConfigurationProperties("elite2api.client")
+    public ClientCredentialsResourceDetails elite2apiClientCredentials() {
+        return new ClientCredentialsResourceDetails();
+    }
 
     @Bean
     @RequestScope

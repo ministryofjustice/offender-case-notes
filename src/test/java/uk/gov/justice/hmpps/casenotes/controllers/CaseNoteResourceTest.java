@@ -14,7 +14,7 @@ import static org.springframework.core.ResolvableType.forType;
 
 public class CaseNoteResourceTest extends ResourceTest {
 
-    private static final String CREATE_CASE_NOTE  = "{\"locationId\": \"%s\", \"type\": \"KA\", \"subType\": \"KS\", \"text\": \"%s\"}";
+    private static final String CREATE_CASE_NOTE  = "{\"locationId\": \"%s\", \"type\": \"POM\", \"subType\": \"GEN\", \"text\": \"%s\"}";
 
     @Autowired
     private AuthTokenHelper authTokenHelper;
@@ -122,7 +122,7 @@ public class CaseNoteResourceTest extends ResourceTest {
                 createHttpEntity(token, null),
                 new ParameterizedTypeReference<String>() {
                 },
-                "LEI", "KA", "KS", "2", "1");
+                "LEI", "POM", "GEN", "2", "1");
 
         assertThat(response.getStatusCodeValue()).isEqualTo(200);
 

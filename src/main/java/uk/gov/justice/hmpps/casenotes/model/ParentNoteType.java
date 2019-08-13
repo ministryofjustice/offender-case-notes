@@ -9,38 +9,29 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
-@Table(name = "OFFENDER_CASE_NOTE_AMENDMENT")
+@Table(name = "CASE_NOTE_PARENT_TYPE")
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
 @EntityListeners(AuditingEntityListener.class)
 @Builder(toBuilder = true)
-@EqualsAndHashCode
-@ToString(of = {"id", "amendSequence", "caseNote" })
-public class OffenderCaseNoteAmendment {
+@EqualsAndHashCode(of = {"type"})
+@ToString(of = {"type", "description", "active"})
+public class ParentNoteType {
 
-    @Id
-    @GeneratedValue(strategy= GenerationType.IDENTITY)
-    @Column(name = "OFFENDER_CASE_NOTE_AMENDMENT_ID", nullable = false)
-    private Long id;
+    @Id()
+    @Column(name = "NOTE_TYPE", nullable = false)
+    private String type;
 
-    @ManyToOne
-    @JoinColumn(name = "OFFENDER_CASE_NOTE_ID", nullable = false)
-    private OffenderCaseNote caseNote;
+    @Column(name = "DESCRIPTION", nullable = false)
+    private String description;
 
-    @Column(nullable = false)
-    private int amendSequence;
-
-    @Column(nullable = false)
-    private String staffUsername;
-
-    @Column(nullable = false)
-    private String staffName;
-
-    @Column(nullable = false)
-    private String noteText;
+    @Column(name = "ACTIVE", nullable = false)
+    @Builder.Default
+    private boolean active = true;
 
     @CreatedDate
     @Column(nullable = false)
@@ -56,4 +47,6 @@ public class OffenderCaseNoteAmendment {
     @LastModifiedBy
     private String modifyUserId;
 
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "type")
+    private List<SensitiveCaseNoteType> subTypes;
 }

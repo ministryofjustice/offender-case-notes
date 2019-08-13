@@ -9,10 +9,7 @@ import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
-import uk.gov.justice.hmpps.casenotes.dto.CaseNote;
-import uk.gov.justice.hmpps.casenotes.dto.CaseNoteFilter;
-import uk.gov.justice.hmpps.casenotes.dto.ErrorResponse;
-import uk.gov.justice.hmpps.casenotes.dto.NewCaseNote;
+import uk.gov.justice.hmpps.casenotes.dto.*;
 import uk.gov.justice.hmpps.casenotes.services.CaseNoteService;
 
 import javax.validation.constraints.NotNull;
@@ -101,5 +98,24 @@ public class CaseNoteController {
                                        @PageableDefault(sort = {"occurrenceDateTime", "locationId"}, direction = Sort.Direction.ASC) final Pageable pageable) {
 
        return caseNoteService.getCaseNotes(filter, pageable);
+    }
+
+    @GetMapping("/types")
+    @ApiOperation(value = "Retrieves a list of case note types", response = CaseNoteType.class)
+    @ApiResponses({
+            @ApiResponse(code = 404, message = "Case notes types not found"),
+            @ApiResponse(code = 200, message = "OK")})
+    public List<CaseNoteType> getCaseNoteTypes() {
+        return caseNoteService.getCaseNoteTypes();
+    }
+
+    @GetMapping("/types-for-user")
+    @ApiOperation(value = "Retrieves a list of case note types for this user", response = CaseNoteType.class)
+    @ApiResponses({
+            @ApiResponse(code = 404, message = "Case notes types not found"),
+            @ApiResponse(code = 200, message = "OK")})
+    public List<CaseNoteType> getUserCaseNoteTypes() {
+        return caseNoteService.getUserCaseNoteTypes();
+
     }
 }
