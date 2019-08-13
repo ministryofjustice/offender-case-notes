@@ -34,7 +34,7 @@ public class CaseNoteController {
                     response = CaseNote.class,
                     notes = "More Information Here")
     @ApiResponses(value = {
-            @ApiResponse(code = 200, message = "Case Note list.", response = List.class),
+            @ApiResponse(code = 200, message = "Case Note list.", response = CaseNote.class, responseContainer = "List"),
             @ApiResponse(code = 404, message = "No case notes where found for this offender", response = ErrorResponse.class)})
     @ApiImplicitParams({
             @ApiImplicitParam(name = "page", dataType = "int", paramType = "query",
@@ -85,7 +85,7 @@ public class CaseNoteController {
             nickname = "retrieve case notes")
     @ApiResponses({
             @ApiResponse(code = 404, message = "Case notes not found"),
-            @ApiResponse(code = 200, message = "OK")})
+            @ApiResponse(code = 200, message = "OK", response = CaseNote.class, responseContainer = "List")})
     @ApiImplicitParams({
             @ApiImplicitParam(name = "page", dataType = "int", paramType = "query",
                     value = "Results page you want to retrieve (0..N)", example = "0", defaultValue = "0"),
@@ -104,7 +104,7 @@ public class CaseNoteController {
     @ApiOperation(value = "Retrieves a list of case note types", response = CaseNoteType.class)
     @ApiResponses({
             @ApiResponse(code = 404, message = "Case notes types not found"),
-            @ApiResponse(code = 200, message = "OK")})
+            @ApiResponse(code = 200, message = "OK", response = CaseNoteType.class, responseContainer = "List")})
     public List<CaseNoteType> getCaseNoteTypes() {
         return caseNoteService.getCaseNoteTypes();
     }
@@ -113,7 +113,7 @@ public class CaseNoteController {
     @ApiOperation(value = "Retrieves a list of case note types for this user", response = CaseNoteType.class)
     @ApiResponses({
             @ApiResponse(code = 404, message = "Case notes types not found"),
-            @ApiResponse(code = 200, message = "OK")})
+            @ApiResponse(code = 200, message = "OK", response = CaseNoteType.class, responseContainer = "List")})
     public List<CaseNoteType> getUserCaseNoteTypes() {
         return caseNoteService.getUserCaseNoteTypes();
 
