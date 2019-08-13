@@ -14,56 +14,56 @@ import java.util.stream.Collectors;
 @Component
 public class SecurityUserContext {
 
-	private Authentication getAuthentication() {
-		return SecurityContextHolder.getContext().getAuthentication();
-	}
+    public static boolean hasRoles(final String... allowedRoles) {
+        final var roles = Arrays.stream(allowedRoles)
+                .map(r -> RegExUtils.replaceFirst(r, "ROLE_", ""))
+                .collect(Collectors.toList());
 
-	public String getCurrentUsername() {
-		String username;
+        return hasMatchingRole(roles, SecurityContextHolder.getContext().getAuthentication());
+    }
 
-		Object userPrincipal = getUserPrincipal();
+    private static boolean hasMatchingRole(final List<String> roles, final Authentication authentication) {
+        return authentication != null &&
+                authentication.getAuthorities().stream()
+                        .anyMatch(a -> roles.contains(RegExUtils.replaceFirst(a.getAuthority(), "ROLE_", "")));
+    }
 
-		if (userPrincipal instanceof String) {
-			username = (String) userPrincipal;
-		} else if (userPrincipal instanceof UserDetails) {
-			username = ((UserDetails)userPrincipal).getUsername();
-		} else if (userPrincipal instanceof Map) {
-			Map userPrincipalMap = (Map) userPrincipal;
-			username = (String) userPrincipalMap.get("username");
-		} else {
-			username = null;
-		}
+    private Authentication getAuthentication() {
+        return SecurityContextHolder.getContext().getAuthentication();
+    }
 
-		return username;
-	}
+    public String getCurrentUsername() {
+        String username;
 
-	private Object getUserPrincipal() {
-		Object userPrincipal = null;
+        Object userPrincipal = getUserPrincipal();
 
-		final Authentication auth = getAuthentication();
+        if (userPrincipal instanceof String) {
+            username = (String) userPrincipal;
+        } else if (userPrincipal instanceof UserDetails) {
+            username = ((UserDetails) userPrincipal).getUsername();
+        } else if (userPrincipal instanceof Map) {
+            Map userPrincipalMap = (Map) userPrincipal;
+            username = (String) userPrincipalMap.get("username");
+        } else {
+            username = null;
+        }
 
-		if (auth != null) {
-			userPrincipal = auth.getPrincipal();
-		}
-		return userPrincipal;
-	}
+        return username;
+    }
 
-	public static boolean hasRoles(final String... allowedRoles) {
-		final var roles = Arrays.stream(allowedRoles)
-				.map(r -> RegExUtils.replaceFirst(r, "ROLE_", ""))
-				.collect(Collectors.toList());
+    private Object getUserPrincipal() {
+        Object userPrincipal = null;
 
-		return hasMatchingRole(roles, SecurityContextHolder.getContext().getAuthentication());
-	}
+        final Authentication auth = getAuthentication();
 
-	public boolean isOverrideRole(final String... overrideRoles) {
-		final var roles = Arrays.asList(overrideRoles.length > 0 ? overrideRoles : new String[]{"SYSTEM_USER"});
-		return hasMatchingRole(roles, getAuthentication());
-	}
+        if (auth != null) {
+            userPrincipal = auth.getPrincipal();
+        }
+        return userPrincipal;
+    }
 
-	private static boolean hasMatchingRole(final List<String> roles, final Authentication authentication) {
-		return authentication != null &&
-				authentication.getAuthorities().stream()
-						.anyMatch(a -> roles.contains(RegExUtils.replaceFirst(a.getAuthority(), "ROLE_", "")));
-	}
+    public boolean isOverrideRole(final String... overrideRoles) {
+        final var roles = Arrays.asList(overrideRoles.length > 0 ? overrideRoles : new String[]{"SYSTEM_USER"});
+        return hasMatchingRole(roles, getAuthentication());
+    }
 }

@@ -40,7 +40,7 @@ public class CaseNoteService {
         this.externalApiService = externalApiService;
     }
 
-    public Page<CaseNote> getCaseNotesByOffenderIdentifier(@NotNull final String offenderIdentifier, Pageable pageable) {
+    public Page<CaseNote> getCaseNotesByOffenderIdentifier(@NotNull final String offenderIdentifier, final Pageable pageable) {
         final var filter = OffenderCaseNoteFilter.builder()
                 .offenderIdentifier(offenderIdentifier)
                 .build();
@@ -48,7 +48,7 @@ public class CaseNoteService {
         return getCaseNotes(pageable, filter);
     }
 
-    public Page<CaseNote> getCaseNotes(CaseNoteFilter caseNoteFilter, Pageable pageable) {
+    public Page<CaseNote> getCaseNotes(final CaseNoteFilter caseNoteFilter, final Pageable pageable) {
         final var filter = OffenderCaseNoteFilter.builder()
                 .type(caseNoteFilter.getType())
                 .subType(caseNoteFilter.getSubType())
@@ -61,7 +61,7 @@ public class CaseNoteService {
         return getCaseNotes(pageable, filter);
     }
 
-    private Page<CaseNote> getCaseNotes(Pageable pageable, OffenderCaseNoteFilter filter) {
+    private Page<CaseNote> getCaseNotes(final Pageable pageable, final OffenderCaseNoteFilter filter) {
         final var pagedResults = repository.findAll(filter, pageable);
 
         final var caseNotes = pagedResults.getContent()
@@ -72,7 +72,7 @@ public class CaseNoteService {
         return new PageImpl<>(caseNotes, pageable, pagedResults.getTotalElements());
     }
 
-    private CaseNote mapper(OffenderCaseNote cn) {
+    private CaseNote mapper(final OffenderCaseNote cn) {
         final var parentType = cn.getSensitiveCaseNoteType().getParentType();
         return CaseNote.builder()
                 .caseNoteId(cn.getId())

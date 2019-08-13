@@ -18,11 +18,11 @@ import java.time.LocalDateTime;
 @EntityListeners(AuditingEntityListener.class)
 @Builder(toBuilder = true)
 @EqualsAndHashCode
-@ToString(of = {"id", "amendSequence", "caseNote" })
+@ToString(of = {"id", "amendSequence", "caseNote"})
 public class OffenderCaseNoteAmendment {
 
     @Id
-    @GeneratedValue(strategy= GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "OFFENDER_CASE_NOTE_AMENDMENT_ID", nullable = false)
     private Long id;
 

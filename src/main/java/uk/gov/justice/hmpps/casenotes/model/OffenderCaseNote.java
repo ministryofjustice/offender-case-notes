@@ -24,11 +24,11 @@ import java.util.Optional;
 @EntityListeners(AuditingEntityListener.class)
 @Builder(toBuilder = true)
 @EqualsAndHashCode(of = {"offenderIdentifier", "occurrenceDateTime", "locationId", "staffUsername", "sensitiveCaseNoteType", "noteText"})
-@ToString(of = {"id", "offenderIdentifier", "occurrenceDateTime", "locationId", "staffUsername", "sensitiveCaseNoteType" })
+@ToString(of = {"id", "offenderIdentifier", "occurrenceDateTime", "locationId", "staffUsername", "sensitiveCaseNoteType"})
 public class OffenderCaseNote {
 
     @Id()
-    @GeneratedValue(strategy= GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "OFFENDER_CASE_NOTE_ID", nullable = false)
     private Long id;
 
@@ -72,7 +72,7 @@ public class OffenderCaseNote {
     @LastModifiedBy
     private String modifyUserId;
 
-    public OffenderCaseNoteAmendment addAmendment(String noteText) {
+    public OffenderCaseNoteAmendment addAmendment(final String noteText) {
         return addAmendment(noteText, staffUsername, staffName);
     }
 
@@ -94,15 +94,15 @@ public class OffenderCaseNote {
     @NotNull
     private Integer getLatestSequence() {
         return amendments.stream().max(Comparator.comparingInt(OffenderCaseNoteAmendment::getAmendSequence))
-                    .map(OffenderCaseNoteAmendment::getAmendSequence)
-                    .orElse(0);
+                .map(OffenderCaseNoteAmendment::getAmendSequence)
+                .orElse(0);
     }
 
     public Optional<OffenderCaseNoteAmendment> getAmendment(final int sequence) {
         return amendments.stream().filter(a -> a.getAmendSequence() == sequence).findFirst();
     }
 
-    public static class AmendmentComparator implements Comparator<OffenderCaseNoteAmendment> {
+    private static class AmendmentComparator implements Comparator<OffenderCaseNoteAmendment> {
         @Override
         public int compare(OffenderCaseNoteAmendment a1, OffenderCaseNoteAmendment a2) {
             return a1.getAmendSequence() - a2.getAmendSequence();

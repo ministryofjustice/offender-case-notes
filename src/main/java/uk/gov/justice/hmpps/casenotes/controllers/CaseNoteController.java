@@ -19,7 +19,7 @@ import java.util.List;
 @Api(tags = {"case-notes"})
 @RestController
 @RequestMapping(
-        value="case-notes",
+        value = "case-notes",
         produces = MediaType.APPLICATION_JSON_VALUE)
 @Slf4j
 public class CaseNoteController {
@@ -31,9 +31,9 @@ public class CaseNoteController {
     }
 
     @GetMapping("/{offenderIdentifier}")
-    @ApiOperation(  value = "Returns list of case note for this offender",
-                    response = CaseNote.class,
-                    notes = "More Information Here")
+    @ApiOperation(value = "Returns list of case note for this offender",
+            response = CaseNote.class,
+            notes = "More Information Here")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Case Note list.", response = CaseNote.class, responseContainer = "List"),
             @ApiResponse(code = 404, message = "No case notes where found for this offender", response = ErrorResponse.class)})
@@ -52,9 +52,9 @@ public class CaseNoteController {
 
     @PostMapping(value = "/{offenderIdentifier}", consumes = "application/json")
     @ResponseStatus(HttpStatus.CREATED)
-    @ApiOperation(  value = "Add Case Note for offender",
+    @ApiOperation(value = "Add Case Note for offender",
             response = CaseNote.class,
-            authorizations = { @Authorization("ROLE_ADD_SENSITIVE_CASE_NOTES")},
+            authorizations = {@Authorization("ROLE_ADD_SENSITIVE_CASE_NOTES")},
             notes = "Creates a note for a specific type/subType")
     @ApiResponses(value = {
             @ApiResponse(code = 201, message = "The Case Note has been recorded. The updated object is returned including the status.", response = CaseNote.class),
@@ -67,8 +67,8 @@ public class CaseNoteController {
     }
 
     @PutMapping(value = "/{offenderIdentifier}/{caseNoteIdentifier}", consumes = "application/json")
-    @ApiOperation(  value = "Amend Case Note for offender",
-            response = CaseNote.class, authorizations = { @Authorization("ROLE_ADD_SENSITIVE_CASE_NOTES")},
+    @ApiOperation(value = "Amend Case Note for offender",
+            response = CaseNote.class, authorizations = {@Authorization("ROLE_ADD_SENSITIVE_CASE_NOTES")},
             notes = "Amend a case note information adds and additional entry to the note")
     @ApiResponses(value = {
             @ApiResponse(code = 201, message = "The Case Note has been recorded. The updated object is returned including the status.", response = CaseNote.class),
@@ -96,10 +96,10 @@ public class CaseNoteController {
             @ApiImplicitParam(name = "sort", dataType = "string", paramType = "query",
                     value = "Sort column and direction, eg sort=occurrenceDateTime,asc. Multiple sort params allowed.")})
     public Page<CaseNote> getCaseNotes(@ApiParam(value = "Optionally specify a case note filter")
-                                        CaseNoteFilter filter,
+                                               CaseNoteFilter filter,
                                        @PageableDefault(sort = {"occurrenceDateTime", "locationId"}, direction = Sort.Direction.ASC) final Pageable pageable) {
 
-       return caseNoteService.getCaseNotes(filter, pageable);
+        return caseNoteService.getCaseNotes(filter, pageable);
     }
 
     @GetMapping("/types")

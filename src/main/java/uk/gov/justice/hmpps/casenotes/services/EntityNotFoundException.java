@@ -5,6 +5,10 @@ import java.util.function.Supplier;
 public class EntityNotFoundException extends RuntimeException implements Supplier<EntityNotFoundException> {
     private static final String DEFAULT_MESSAGE_FOR_ID_FORMAT = "Resource with id [%s] not found.";
 
+    public EntityNotFoundException(final String message) {
+        super(message);
+    }
+
     public static EntityNotFoundException withId(final long id) {
         return withId(String.valueOf(id));
     }
@@ -19,10 +23,6 @@ public class EntityNotFoundException extends RuntimeException implements Supplie
 
     public static EntityNotFoundException withMessage(final String message, final Object... args) {
         return new EntityNotFoundException(String.format(message, args));
-    }
-
-    public EntityNotFoundException(final String message) {
-        super(message);
     }
 
     @Override

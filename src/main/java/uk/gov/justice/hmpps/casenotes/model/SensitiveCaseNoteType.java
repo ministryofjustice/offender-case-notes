@@ -22,7 +22,7 @@ import java.time.LocalDateTime;
 public class SensitiveCaseNoteType {
 
     @Id()
-    @GeneratedValue(strategy= GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "CASE_NOTE_TYPE_ID", nullable = false)
     private Long id;
 

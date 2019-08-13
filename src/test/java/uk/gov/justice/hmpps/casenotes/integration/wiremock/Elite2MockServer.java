@@ -13,7 +13,7 @@ public class Elite2MockServer extends WireMockRule {
 
     private static final int WIREMOCK_PORT = 8999;
 
-    private static String API_PREFIX = "/api";
+    private static final String API_PREFIX = "/api";
 
     public Elite2MockServer() {
         super(WIREMOCK_PORT);

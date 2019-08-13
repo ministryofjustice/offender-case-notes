@@ -29,7 +29,7 @@ public class ExternalApiService {
         return getCaseNoteTypes("/users/me/caseNoteTypes");
     }
 
-    private List<CaseNoteType> getCaseNoteTypes(String url) {
+    private List<CaseNoteType> getCaseNoteTypes(final String url) {
         final var response = elite2ApiRestTemplate.exchange(url, HttpMethod.GET, null,
                 new ParameterizedTypeReference<List<CaseNoteType>>() {
                 });
@@ -46,7 +46,7 @@ public class ExternalApiService {
     public String getUserFullName(final String currentUsername) {
         final var response = oauthApiRestTemplate.exchange("/user/{username}", HttpMethod.GET, null, Map.class, currentUsername);
         if (response.getBody() != null) {
-            return (String)response.getBody().get("name");
+            return (String) response.getBody().get("name");
         }
         return currentUsername;
     }
@@ -58,7 +58,7 @@ public class ExternalApiService {
             throw EntityNotFoundException.withId(offenderIdentifier);
         }
 
-        return (String)response.getBody().get("agencyId");
+        return (String) response.getBody().get("agencyId");
     }
 
 }

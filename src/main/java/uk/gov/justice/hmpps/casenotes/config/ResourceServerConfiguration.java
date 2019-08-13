@@ -142,7 +142,7 @@ public class ResourceServerConfiguration extends ResourceServerConfigurerAdapter
                 .build();
     }
 
-    private String getVersion(){
+    private String getVersion() {
         return buildProperties == null ? "version not available" : buildProperties.getVersion();
     }
 

@@ -28,10 +28,10 @@ public abstract class ResourceTest {
     protected TestRestTemplate testRestTemplate;
 
     @Rule
-    public Elite2MockServer elite2MockServer = new Elite2MockServer();
+    public final Elite2MockServer elite2MockServer = new Elite2MockServer();
 
     @Rule
-    public OauthMockServer oauthMockServer = new OauthMockServer();
+    public final OauthMockServer oauthMockServer = new OauthMockServer();
 
     HttpEntity<?> createHttpEntity(final String bearerToken, final Object body) {
         return createHttpEntity(bearerToken, body, Collections.emptyMap());
