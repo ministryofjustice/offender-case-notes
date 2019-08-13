@@ -152,7 +152,7 @@ public class CaseNoteService {
 
     public List<CaseNoteType> getUserCaseNoteTypes() {
         final var userCaseNoteTypes = externalApiService.getUserCaseNoteTypes();
-        if (SecurityUserContext.hasRoles("VIEW_SENSITIVE_CASE_NOTES")) {
+        if (SecurityUserContext.hasRoles("ADD_SENSITIVE_CASE_NOTES")) {
             userCaseNoteTypes.addAll(getSensitiveCaseNotes());
         }
         return userCaseNoteTypes;

@@ -1,0 +1,44 @@
+[
+  {
+    "code": "KA",
+    "description": "Key worker",
+    "activeFlag": "Y",
+    "subCodes": [
+      {
+        "code": "KS",
+        "description": "Key worker Session",
+        "activeFlag": "Y"
+      }
+    ]
+  },
+  {
+    "code": "OBS",
+    "description": "Observation",
+    "activeFlag": "Y",
+    "subCodes": [
+      {
+        "code": "GEN",
+        "description": "General",
+        "activeFlag": "Y"
+      }
+    ]
+  },
+  {
+    "code": "POM",
+    "description": "POM Notes",
+    "activeFlag": "Y",
+    "subCodes": [
+      {
+        "code": "GEN",
+        "description": "General POM Note",
+        "activeFlag": "Y"
+      },
+      {
+        "code": "SPECIAL",
+        "description": "Special POM Note",
+        "activeFlag": "Y"
+      }
+    ]
+  }
+
+]

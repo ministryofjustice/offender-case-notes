@@ -4,6 +4,7 @@ import com.github.tomakehurst.wiremock.client.WireMock;
 import com.github.tomakehurst.wiremock.junit.WireMockRule;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import uk.gov.justice.hmpps.casenotes.utils.AuthTokenHelper.AuthToken;
 
 public class OauthMockServer extends WireMockRule {
     private final Gson gson = new GsonBuilder().create();
@@ -16,14 +17,14 @@ public class OauthMockServer extends WireMockRule {
         super(WIREMOCK_PORT);
     }
 
-    public void subGetUserDetails(String username) {
+    public void subGetUserDetails(AuthToken username) {
         stubFor(
-                WireMock.get(WireMock.urlPathMatching(API_PREFIX + "/user/"+username))
+                WireMock.get(WireMock.urlPathMatching(API_PREFIX + "/user/"+username.name()))
                         .willReturn(WireMock.aResponse()
                                 .withHeader("Content-Type", "application/json")
                                 .withBody("{\n" +
                                         "  \"staffId\": 1111,\n" +
-                                        "  \"username\": \""+username+"\",\n" +
+                                        "  \"username\": \""+username.name()+"\",\n" +
                                         "  \"active\": true,\n" +
                                         "  \"name\": \"Mikey Mouse\",\n" +
                                         "  \"authSource\": \"nomis\",\n" +

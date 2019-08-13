@@ -4,14 +4,14 @@
   "typeDescription": "POM Notes",
   "subType": "GEN",
   "subTypeDescription": "General POM Note",
-  "staffUsername": "API_TEST_USER",
+  "staffUsername": "SECURE_CASENOTE_USER",
   "staffName": "Mikey Mouse",
   "text": "This is another case note",
   "locationId": "LEI",
   "amendments": [
     {
       "sequence": 1,
-      "authorUserName": "API_TEST_USER",
+      "authorUserName": "SECURE_CASENOTE_USER",
       "additionalNoteText": "Amended case note"
     }
   ]

@@ -6,7 +6,7 @@
       "typeDescription": "POM Notes",
       "subType": "GEN",
       "subTypeDescription": "General POM Note",
-      "staffUsername": "API_TEST_USER",
+      "staffUsername": "SECURE_CASENOTE_USER",
       "staffName": "Mikey Mouse",
       "text": "This is a case note",
       "locationId": "LEI",

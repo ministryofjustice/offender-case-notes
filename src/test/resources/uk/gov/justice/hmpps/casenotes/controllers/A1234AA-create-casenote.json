@@ -1,8 +1,11 @@
 {
   "offenderIdentifier": "A1234AA",
   "type": "POM",
+  "typeDescription": "POM Notes",
   "subType": "GEN",
-  "staffUsername": "API_TEST_USER",
+  "subTypeDescription": "General POM Note",
+  "staffUsername": "SECURE_CASENOTE_USER",
+  "staffName": "Mikey Mouse",
   "text": "This is a case note",
   "amendments": []
 }

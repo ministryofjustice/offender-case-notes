@@ -8,6 +8,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import uk.gov.justice.hmpps.casenotes.dto.*;
 import uk.gov.justice.hmpps.casenotes.services.CaseNoteService;
@@ -53,11 +54,12 @@ public class CaseNoteController {
     @ResponseStatus(HttpStatus.CREATED)
     @ApiOperation(  value = "Add Case Note for offender",
             response = CaseNote.class,
+            authorizations = { @Authorization("ROLE_ADD_SENSITIVE_CASE_NOTES")},
             notes = "Creates a note for a specific type/subType")
     @ApiResponses(value = {
             @ApiResponse(code = 201, message = "The Case Note has been recorded. The updated object is returned including the status.", response = CaseNote.class),
             @ApiResponse(code = 409, message = "The case note has already been recorded under the booking. The current unmodified object (including status) is returned.", response = ErrorResponse.class)})
-
+    @PreAuthorize("hasRole('ROLE_ADD_SENSITIVE_CASE_NOTES')")
     public CaseNote createCaseNote(
             @ApiParam(value = "Offender Identifier", required = true, example = "A1234AA") @PathVariable("offenderIdentifier") final String offenderIdentifier,
             @RequestBody @NotNull final NewCaseNote newCaseNote) {
@@ -66,12 +68,12 @@ public class CaseNoteController {
 
     @PutMapping(value = "/{offenderIdentifier}/{caseNoteIdentifier}", consumes = "application/json")
     @ApiOperation(  value = "Amend Case Note for offender",
-            response = CaseNote.class,
+            response = CaseNote.class, authorizations = { @Authorization("ROLE_ADD_SENSITIVE_CASE_NOTES")},
             notes = "Amend a case note information adds and additional entry to the note")
     @ApiResponses(value = {
             @ApiResponse(code = 201, message = "The Case Note has been recorded. The updated object is returned including the status.", response = CaseNote.class),
             @ApiResponse(code = 404, message = "No case notes where found for this offender and case note id", response = ErrorResponse.class)})
-
+    @PreAuthorize("hasRole('ROLE_ADD_SENSITIVE_CASE_NOTES')")
     public CaseNote amendCaseNote(
             @ApiParam(value = "Offender Identifier", required = true, example = "A1234AA") @PathVariable("offenderIdentifier") final String offenderIdentifier,
             @ApiParam(value = "Case Note Id", required = true, example = "A1234AA") @PathVariable("caseNoteIdentifier") final Long caseNoteIdentifier,
