@@ -102,7 +102,7 @@ public class OffenderCaseNote {
         return amendments.stream().filter(a -> a.getAmendSequence() == sequence).findFirst();
     }
 
-    private static class AmendmentComparator implements Comparator<OffenderCaseNoteAmendment> {
+    public static class AmendmentComparator implements Comparator<OffenderCaseNoteAmendment> {
         @Override
         public int compare(OffenderCaseNoteAmendment a1, OffenderCaseNoteAmendment a2) {
             return a1.getAmendSequence() - a2.getAmendSequence();
