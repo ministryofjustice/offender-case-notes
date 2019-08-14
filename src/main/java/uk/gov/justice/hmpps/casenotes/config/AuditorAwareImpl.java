@@ -11,7 +11,7 @@ import java.util.Optional;
 @EnableJpaAuditing(auditorAwareRef = "auditorAware")
 @Service(value = "auditorAware")
 public class AuditorAwareImpl implements AuditorAware<String> {
-    private SecurityUserContext authenticationFacade;
+    private final SecurityUserContext authenticationFacade;
 
     public AuditorAwareImpl(final SecurityUserContext authenticationFacade) {
         this.authenticationFacade = authenticationFacade;

@@ -23,12 +23,12 @@ import java.util.Optional;
 @AllArgsConstructor
 @EntityListeners(AuditingEntityListener.class)
 @Builder(toBuilder = true)
-@EqualsAndHashCode(of = {"offenderIdentifier", "occurrenceDateTime", "locationId", "staffUsername", "type", "subType", "noteText"})
-@ToString(of = {"id", "offenderIdentifier", "occurrenceDateTime", "locationId", "staffUsername", "type", "subType" })
+@EqualsAndHashCode(of = {"offenderIdentifier", "occurrenceDateTime", "locationId", "staffUsername", "sensitiveCaseNoteType", "noteText"})
+@ToString(of = {"id", "offenderIdentifier", "occurrenceDateTime", "locationId", "staffUsername", "sensitiveCaseNoteType"})
 public class OffenderCaseNote {
 
     @Id()
-    @GeneratedValue(strategy= GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "OFFENDER_CASE_NOTE_ID", nullable = false)
     private Long id;
 
@@ -44,11 +44,12 @@ public class OffenderCaseNote {
     @Column(nullable = false)
     private String staffUsername;
 
-    @Column(name = "CASE_NOTE_TYPE", nullable = false)
-    private String type;
+    @Column(nullable = false)
+    private String staffName;
 
-    @Column(name = "CASE_NOTE_SUB_TYPE", nullable = false)
-    private String subType;
+    @ManyToOne
+    @JoinColumn(name = "CASE_NOTE_TYPE_ID", nullable = false)
+    private SensitiveCaseNoteType sensitiveCaseNoteType;
 
     private String noteText;
 
@@ -71,16 +72,17 @@ public class OffenderCaseNote {
     @LastModifiedBy
     private String modifyUserId;
 
-    public OffenderCaseNoteAmendment addAmendment(String noteText) {
-        return addAmendment(noteText, staffUsername);
+    public OffenderCaseNoteAmendment addAmendment(final String noteText) {
+        return addAmendment(noteText, staffUsername, staffName);
     }
 
-    public OffenderCaseNoteAmendment addAmendment(final String noteText, final String staffUsername) {
+    public OffenderCaseNoteAmendment addAmendment(final String noteText, final String staffUsername, final String staffName) {
 
         final var amendment = OffenderCaseNoteAmendment.builder()
                 .caseNote(this)
                 .noteText(noteText)
                 .staffUsername(staffUsername)
+                .staffName(staffName)
                 .amendSequence(getLatestSequence() + 1)
                 .build();
 
@@ -92,8 +94,8 @@ public class OffenderCaseNote {
     @NotNull
     private Integer getLatestSequence() {
         return amendments.stream().max(Comparator.comparingInt(OffenderCaseNoteAmendment::getAmendSequence))
-                    .map(OffenderCaseNoteAmendment::getAmendSequence)
-                    .orElse(0);
+                .map(OffenderCaseNoteAmendment::getAmendSequence)
+                .orElse(0);
     }
 
     public Optional<OffenderCaseNoteAmendment> getAmendment(final int sequence) {

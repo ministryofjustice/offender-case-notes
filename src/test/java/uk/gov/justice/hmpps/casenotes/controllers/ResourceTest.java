@@ -1,5 +1,6 @@
 package uk.gov.justice.hmpps.casenotes.controllers;
 
+import org.junit.Rule;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -9,12 +10,10 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
-import uk.gov.justice.hmpps.casenotes.utils.JwtAuthenticationHelper;
-import uk.gov.justice.hmpps.casenotes.utils.JwtParameters;
+import uk.gov.justice.hmpps.casenotes.integration.wiremock.Elite2MockServer;
+import uk.gov.justice.hmpps.casenotes.integration.wiremock.OauthMockServer;
 
-import java.time.Duration;
 import java.util.Collections;
-import java.util.List;
 import java.util.Map;
 
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
@@ -28,10 +27,13 @@ public abstract class ResourceTest {
     @Autowired
     protected TestRestTemplate testRestTemplate;
 
-    @Autowired
-    protected JwtAuthenticationHelper jwtAuthenticationHelper;
+    @Rule
+    public final Elite2MockServer elite2MockServer = new Elite2MockServer();
 
-    protected HttpEntity<?> createHttpEntity(final String bearerToken, final Object body) {
+    @Rule
+    public final OauthMockServer oauthMockServer = new OauthMockServer();
+
+    HttpEntity<?> createHttpEntity(final String bearerToken, final Object body) {
         return createHttpEntity(bearerToken, body, Collections.emptyMap());
     }
 
@@ -45,25 +47,6 @@ public abstract class ResourceTest {
         additionalHeaders.forEach(headers::add);
 
         return new HttpEntity<>(body, headers);
-    }
-
-    protected HttpEntity<?> createHttpEntityWithBearerAuthorisationAndBody(final String user, final List<String> roles, final Object body) {
-        final var jwt = createJwt(user, roles);
-        return createHttpEntity(jwt, body);
-    }
-
-    protected HttpEntity<?> createHttpEntityWithBearerAuthorisation(final String user, final List<String> roles, final Map<String, String> additionalHeaders) {
-        final var jwt = createJwt(user, roles);
-        return createHttpEntity(jwt, null, additionalHeaders == null ? Map.of() : additionalHeaders);
-    }
-
-    private String createJwt(final String user, final List<String> roles) {
-        return jwtAuthenticationHelper.createJwt(JwtParameters.builder()
-                .username(user)
-                .roles(roles)
-                .scope(List.of("read", "write"))
-                .expiryTime(Duration.ofDays(1))
-                .build());
     }
 }
 

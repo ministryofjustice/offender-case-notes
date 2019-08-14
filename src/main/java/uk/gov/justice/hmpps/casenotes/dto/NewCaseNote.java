@@ -18,9 +18,8 @@ import java.time.LocalDateTime;
 @Data
 public class NewCaseNote {
 
-    @ApiModelProperty(required = true, value = "Location where case note was made", example = "MDI", position = 1)
+    @ApiModelProperty(required = true, value = "Location where case note was made, if blank it will be looked up in Nomis", example = "MDI", position = 1)
     @Length(max = 6)
-    @NotBlank
     private String locationId;
 
     @ApiModelProperty(required = true, value = "Type of case note", example = "GEN", position = 2)
@@ -36,7 +35,7 @@ public class NewCaseNote {
     @ApiModelProperty(required = true, value = "Occurrence time of case note", example = "2019-01-17T10:25:00", position = 4)
     private LocalDateTime occurrenceDateTime;
 
-    @ApiModelProperty(required = true, value = "Text of casen ote", example = "This is a case note messgae", position = 5)
+    @ApiModelProperty(required = true, value = "Text of case note", example = "This is a case note message", position = 5)
     @Length(max = 4000)
     @NotBlank
     private String text;

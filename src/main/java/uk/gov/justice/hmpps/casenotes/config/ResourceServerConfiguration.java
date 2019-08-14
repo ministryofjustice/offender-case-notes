@@ -3,7 +3,6 @@ package uk.gov.justice.hmpps.casenotes.config;
 
 import org.apache.commons.codec.binary.Base64;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.info.BuildProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -42,11 +41,14 @@ import java.util.Optional;
 @EnableGlobalMethodSecurity(prePostEnabled = true, proxyTargetClass = true)
 public class ResourceServerConfiguration extends ResourceServerConfigurerAdapter {
 
-    @Value("${jwt.public.key}")
-    private String jwtPublicKey;
+    private final OffenderCaseNoteProperties properties;
 
     @Autowired(required = false)
     private BuildProperties buildProperties;
+
+    public ResourceServerConfiguration(OffenderCaseNoteProperties properties) {
+        this.properties = properties;
+    }
 
     @Override
     public void configure(final HttpSecurity http) throws Exception {
@@ -80,7 +82,7 @@ public class ResourceServerConfiguration extends ResourceServerConfigurerAdapter
     @Bean
     public JwtAccessTokenConverter accessTokenConverter() {
         final var converter = new JwtAccessTokenConverter();
-        converter.setVerifierKey(new String(Base64.decodeBase64(jwtPublicKey)));
+        converter.setVerifierKey(new String(Base64.decodeBase64(properties.getJwtPublicKey())));
         return converter;
     }
 
@@ -138,7 +140,7 @@ public class ResourceServerConfiguration extends ResourceServerConfigurerAdapter
                 .build();
     }
 
-    private String getVersion(){
+    private String getVersion() {
         return buildProperties == null ? "version not available" : buildProperties.getVersion();
     }
 
@@ -162,7 +164,6 @@ public class ResourceServerConfiguration extends ResourceServerConfigurerAdapter
                 contactInfo(),
                 "MIT", "https://opensource.org/licenses/MIT", vendorExtensions);
     }
-
 
     @Bean
     @RequestScope

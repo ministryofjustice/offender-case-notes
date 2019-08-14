@@ -19,7 +19,7 @@ public class ApplicationInsightsConfiguration {
         return new TelemetryClient();
     }
 
-    public static class AppInsightKeyAbsentCondition implements Condition {
+    private static class AppInsightKeyAbsentCondition implements Condition {
 
         @Override
         public boolean matches(final ConditionContext context, final AnnotatedTypeMetadata metadata) {

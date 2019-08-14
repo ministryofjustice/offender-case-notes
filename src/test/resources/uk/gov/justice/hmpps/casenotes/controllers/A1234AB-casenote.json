@@ -2,15 +2,18 @@
   "content": [
     {
       "offenderIdentifier": "A1234AB",
-      "type": "KA",
-      "subType": "KS",
-      "staffUsername": "API_TEST_USER",
+      "type": "POM",
+      "typeDescription": "POM Notes",
+      "subType": "GEN",
+      "subTypeDescription": "General POM Note",
+      "staffUsername": "SECURE_CASENOTE_USER",
+      "staffName": "Mikey Mouse",
       "text": "This is another case note",
-      "locationId": "MDI",
+      "locationId": "LEI",
       "amendments": [
         {
           "sequence": 1,
-          "authorUserName": "API_TEST_USER",
+          "authorUserName": "SECURE_CASENOTE_USER",
           "additionalNoteText": "Amended case note"
         }
       ]

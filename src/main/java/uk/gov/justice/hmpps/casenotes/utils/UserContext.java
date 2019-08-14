@@ -8,7 +8,9 @@ public class UserContext {
 
     private static final ThreadLocal<String> authToken = new ThreadLocal<>();
 
-    static String getAuthToken() { return authToken.get(); }
+    static String getAuthToken() {
+        return authToken.get();
+    }
 
     static void setAuthToken(final String aToken) {
         authToken.set(aToken);

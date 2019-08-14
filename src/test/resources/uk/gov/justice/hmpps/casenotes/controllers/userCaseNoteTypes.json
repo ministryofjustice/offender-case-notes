@@ -1,0 +1,26 @@
+[
+  {
+    "code": "KA",
+    "description": "Key worker",
+    "activeFlag": "Y",
+    "subCodes": [
+      {
+        "code": "KS",
+        "description": "Key worker Session",
+        "activeFlag": "Y"
+      }
+    ]
+  },
+  {
+    "code": "OBS",
+    "description": "Observation",
+    "activeFlag": "Y",
+    "subCodes": [
+      {
+        "code": "GEN",
+        "description": "General",
+        "activeFlag": "Y"
+      }
+    ]
+  }
+]

@@ -11,36 +11,34 @@ import javax.persistence.*;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "OFFENDER_CASE_NOTE_AMENDMENT")
+@Table(name = "CASE_NOTE_TYPE")
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
 @EntityListeners(AuditingEntityListener.class)
 @Builder(toBuilder = true)
-@EqualsAndHashCode
-@ToString(of = {"id", "amendSequence", "caseNote"})
-public class OffenderCaseNoteAmendment {
+@EqualsAndHashCode(of = {"parentType", "type"})
+@ToString(of = {"parentType", "type", "description", "active"})
+public class SensitiveCaseNoteType {
 
-    @Id
+    @Id()
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "OFFENDER_CASE_NOTE_AMENDMENT_ID", nullable = false)
+    @Column(name = "CASE_NOTE_TYPE_ID", nullable = false)
     private Long id;
 
     @ManyToOne
-    @JoinColumn(name = "OFFENDER_CASE_NOTE_ID", nullable = false)
-    private OffenderCaseNote caseNote;
+    @JoinColumn(name = "PARENT_TYPE", nullable = false)
+    private ParentNoteType parentType;
 
-    @Column(nullable = false)
-    private int amendSequence;
+    @Column(name = "SUB_TYPE", nullable = false)
+    private String type;
 
-    @Column(nullable = false)
-    private String staffUsername;
+    @Column(name = "DESCRIPTION", nullable = false)
+    private String description;
 
-    @Column(nullable = false)
-    private String staffName;
-
-    @Column(nullable = false)
-    private String noteText;
+    @Column(name = "ACTIVE", nullable = false)
+    @Builder.Default
+    private boolean active = true;
 
     @CreatedDate
     @Column(nullable = false)

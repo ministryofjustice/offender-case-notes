@@ -2,9 +2,12 @@
   "content": [
     {
       "offenderIdentifier": "A1234AC",
-      "type": "KA",
-      "subType": "KS",
-      "staffUsername": "API_TEST_USER",
+      "type": "POM",
+      "typeDescription": "POM Notes",
+      "subType": "GEN",
+      "subTypeDescription": "General POM Note",
+      "staffUsername": "SECURE_CASENOTE_USER",
+      "staffName": "Mikey Mouse",
       "text": "This is a case note 3",
       "locationId": "LEI"
     }

@@ -6,27 +6,110 @@ import org.springframework.boot.test.json.JsonContent;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpMethod;
 import uk.gov.justice.hmpps.casenotes.dto.CaseNote;
+import uk.gov.justice.hmpps.casenotes.dto.CaseNoteType;
 import uk.gov.justice.hmpps.casenotes.utils.AuthTokenHelper;
 
 import static java.lang.String.format;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.core.ResolvableType.forType;
+import static uk.gov.justice.hmpps.casenotes.utils.AuthTokenHelper.AuthToken.API_TEST_USER;
+import static uk.gov.justice.hmpps.casenotes.utils.AuthTokenHelper.AuthToken.SECURE_CASENOTE_USER;
 
 public class CaseNoteResourceTest extends ResourceTest {
 
-    private static final String CREATE_CASE_NOTE  = "{\"locationId\": \"%s\", \"type\": \"KA\", \"subType\": \"KS\", \"text\": \"%s\"}";
+    private static final String CREATE_CASE_NOTE  = "{\"locationId\": \"%s\", \"type\": \"POM\", \"subType\": \"GEN\", \"text\": \"%s\"}";
+    private static final String CREATE_CASE_NOTE_WITHOUT_LOC  = "{\"type\": \"POM\", \"subType\": \"GEN\", \"text\": \"%s\"}";
 
     @Autowired
     private AuthTokenHelper authTokenHelper;
 
     @Test
+    public void testGetCaseNoteTypesNormal() {
+        elite2MockServer.subGetCaseNoteTypes();
+
+        final var token = authTokenHelper.getToken(API_TEST_USER);
+
+        final var response = testRestTemplate.exchange(
+                "/case-notes/types",
+                HttpMethod.GET,
+                createHttpEntity(token, null),
+                new ParameterizedTypeReference<String>() {
+                });
+
+        assertThat(response.getStatusCodeValue()).isEqualTo(200);
+
+        assertThat(new JsonContent<CaseNoteType>(getClass(), forType(CaseNoteType.class), response.getBody())).isEqualToJson("caseNoteTypes.json");
+
+    }
+
+    @Test
+    public void testGetCaseNoteTypesSecure() {
+        elite2MockServer.subGetCaseNoteTypes();
+
+        final var token = authTokenHelper.getToken(SECURE_CASENOTE_USER);
+
+        final var response = testRestTemplate.exchange(
+                "/case-notes/types",
+                HttpMethod.GET,
+                createHttpEntity(token, null),
+                new ParameterizedTypeReference<String>() {
+                });
+
+        assertThat(response.getStatusCodeValue()).isEqualTo(200);
+
+        assertThat(new JsonContent<CaseNoteType>(getClass(), forType(CaseNoteType.class), response.getBody())).isEqualToJson("caseNoteTypesSecure.json");
+
+    }
+
+    @Test
+    public void testUserCaseNoteTypesNormal() {
+        elite2MockServer.subUserCaseNoteTypes();
+
+        final var token = authTokenHelper.getToken(API_TEST_USER);
+
+        final var response = testRestTemplate.exchange(
+                "/case-notes/types-for-user",
+                HttpMethod.GET,
+                createHttpEntity(token, null),
+                new ParameterizedTypeReference<String>() {
+                });
+
+        assertThat(response.getStatusCodeValue()).isEqualTo(200);
+
+        assertThat(new JsonContent<CaseNoteType>(getClass(), forType(CaseNoteType.class), response.getBody())).isEqualToJson("userCaseNoteTypes.json");
+
+    }
+
+    @Test
+    public void testUserCaseNoteTypesSecure() {
+        elite2MockServer.subUserCaseNoteTypes();
+
+        final var token = authTokenHelper.getToken(SECURE_CASENOTE_USER);
+
+        final var response = testRestTemplate.exchange(
+                "/case-notes/types-for-user",
+                HttpMethod.GET,
+                createHttpEntity(token, null),
+                new ParameterizedTypeReference<String>() {
+                });
+
+        assertThat(response.getStatusCodeValue()).isEqualTo(200);
+
+        assertThat(new JsonContent<CaseNoteType>(getClass(), forType(CaseNoteType.class), response.getBody())).isEqualToJson("userCaseNoteTypesSecure.json");
+
+    }
+
+    @Test
     public void testCanCreateAndRetrieveCaseNotesForOffender() {
-        final var token = authTokenHelper.getToken(AuthTokenHelper.AuthToken.NORMAL_USER);
+        oauthMockServer.subGetUserDetails(SECURE_CASENOTE_USER);
+        elite2MockServer.subGetOffender("A1234AA");
+
+        final var token = authTokenHelper.getToken(SECURE_CASENOTE_USER);
 
         final var postResponse = testRestTemplate.exchange(
                 "/case-notes/{offenderIdentifier}",
                 HttpMethod.POST,
-                createHttpEntity(token, format(CREATE_CASE_NOTE, "MDI", "This is a case note")),
+                createHttpEntity(token, format(CREATE_CASE_NOTE_WITHOUT_LOC, "This is a case note")),
                 new ParameterizedTypeReference<String>() {
                 },
                 "A1234AA");
@@ -50,12 +133,15 @@ public class CaseNoteResourceTest extends ResourceTest {
 
     @Test
     public void testCanCreateAmendments() {
-        final var token = authTokenHelper.getToken(AuthTokenHelper.AuthToken.NORMAL_USER);
+        oauthMockServer.subGetUserDetails(SECURE_CASENOTE_USER);
+        elite2MockServer.subGetOffender("A1234AB");
+
+        final var token = authTokenHelper.getToken(SECURE_CASENOTE_USER);
 
         final var postResponse = testRestTemplate.exchange(
                 "/case-notes/{offenderIdentifier}",
                 HttpMethod.POST,
-                createHttpEntity(token, format(CREATE_CASE_NOTE, "MDI", "This is another case note")),
+                createHttpEntity(token, format(CREATE_CASE_NOTE_WITHOUT_LOC, "This is another case note")),
                 new ParameterizedTypeReference<CaseNote>() {
                 },
                 "A1234AB");
@@ -89,12 +175,15 @@ public class CaseNoteResourceTest extends ResourceTest {
 
     @Test
     public void testCanFilterCaseNotes() {
-        final var token = authTokenHelper.getToken(AuthTokenHelper.AuthToken.NORMAL_USER);
+        oauthMockServer.subGetUserDetails(SECURE_CASENOTE_USER);
+        elite2MockServer.subGetOffender("A1234AC");
+
+        final var token = authTokenHelper.getToken(SECURE_CASENOTE_USER);
 
         testRestTemplate.exchange(
                 "/case-notes/{offenderIdentifier}",
                 HttpMethod.POST,
-                createHttpEntity(token, format(CREATE_CASE_NOTE, "LEI", "This is a case note 1")),
+                createHttpEntity(token, format(CREATE_CASE_NOTE, "MDI", "This is a case note 1")),
                 new ParameterizedTypeReference<String>() {
                 },
                 "A1234AC");
@@ -102,7 +191,7 @@ public class CaseNoteResourceTest extends ResourceTest {
         testRestTemplate.exchange(
                 "/case-notes/{offenderIdentifier}",
                 HttpMethod.POST,
-                createHttpEntity(token, format(CREATE_CASE_NOTE, "LEI", "This is a case note 2")),
+                createHttpEntity(token, format(CREATE_CASE_NOTE_WITHOUT_LOC, "This is a case note 2")),
                 new ParameterizedTypeReference<String>() {
                 },
                 "A1234AC");
@@ -115,14 +204,13 @@ public class CaseNoteResourceTest extends ResourceTest {
                 },
                 "A1234AC");
 
-
         final var response = testRestTemplate.exchange(
                 "/case-notes?locationId={locationId}&type={type}&subType={subType}&size={size}&page={page}",
                 HttpMethod.GET,
                 createHttpEntity(token, null),
                 new ParameterizedTypeReference<String>() {
                 },
-                "LEI", "KA", "KS", "2", "1");
+                "LEI", "POM", "GEN", "2", "1");
 
         assertThat(response.getStatusCodeValue()).isEqualTo(200);
 
