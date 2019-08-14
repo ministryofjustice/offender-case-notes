@@ -76,9 +76,9 @@ azure:
 
 app:
   jwt-public-key: ${JWT_PUBLIC_KEY}
-  elite2-api-base-url: http://localhost:8080
+  elite2-api-base-url: ${ELITE2_API_BASE_URL}
   elite2-api-rest-url: ${app.elite2-api-base-url}/api
-  oauth-api-rest-url: http://localhost:9090/auth/api
+  oauth-api-rest-url: ${OAUTH_API_REST_URL}
 
 
 
