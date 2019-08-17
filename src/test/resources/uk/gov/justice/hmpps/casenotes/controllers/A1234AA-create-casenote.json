@@ -4,8 +4,8 @@
   "typeDescription": "POM Notes",
   "subType": "GEN",
   "subTypeDescription": "General POM Note",
-  "staffUsername": "SECURE_CASENOTE_USER",
-  "staffName": "Mikey Mouse",
+  "authorUsername": "SECURE_CASENOTE_USER",
+  "authorName": "Mikey Mouse",
   "text": "This is a case note",
   "amendments": []
 }

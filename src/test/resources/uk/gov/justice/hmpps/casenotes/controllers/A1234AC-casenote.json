@@ -6,10 +6,26 @@
       "typeDescription": "POM Notes",
       "subType": "GEN",
       "subTypeDescription": "General POM Note",
-      "staffUsername": "SECURE_CASENOTE_USER",
-      "staffName": "Mikey Mouse",
-      "text": "This is a case note 3",
-      "locationId": "LEI"
+      "source": "OCNS",
+      "authorUsername": "SECURE_CASENOTE_USER",
+      "authorName": "Mikey Mouse",
+      "text": "This is a case note 1",
+      "locationId": "MDI",
+      "amendments": []
+    },
+    {
+      "caseNoteId": 131232,
+      "offenderIdentifier": "A1234AC",
+      "type": "OBS",
+      "typeDescription": "Observation",
+      "subType": "GEN",
+      "subTypeDescription": "General",
+      "source": "INST",
+      "authorUsername": "1231232",
+      "authorName": "Mickey Mouse",
+      "text": "Some Text",
+      "locationId": "LEI",
+      "amendments": []
     }
   ],
   "pageable": {
@@ -24,17 +40,17 @@
     "paged": true,
     "unpaged": false
   },
-  "totalElements": 3,
+  "totalElements": 4,
   "totalPages": 2,
   "last": true,
   "size": 2,
-  "first": false,
-  "numberOfElements": 1,
+  "numberOfElements": 2,
+  "number": 1,
   "sort": {
     "sorted": true,
     "unsorted": false,
     "empty": false
   },
-  "number": 1,
+  "first": false,
   "empty": false
 }

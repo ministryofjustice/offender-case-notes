@@ -1,18 +1,6 @@
 {
   "content": [
     {
-      "offenderIdentifier": "A1234AA",
-      "type": "POM",
-      "typeDescription": "POM Notes",
-      "subType": "GEN",
-      "subTypeDescription": "General POM Note",
-      "authorUsername": "SECURE_CASENOTE_USER",
-      "authorName": "Mikey Mouse",
-      "text": "This is a case note",
-      "locationId": "LEI",
-      "amendments": []
-    },
-    {
       "caseNoteId": 131232,
       "offenderIdentifier": "A1234AA",
       "type": "OBS",
@@ -39,12 +27,12 @@
     "paged": true,
     "unpaged": false
   },
-  "totalElements": 2,
+  "totalElements": 1,
   "totalPages": 1,
   "last": true,
   "size": 10,
   "first": true,
-  "numberOfElements": 2,
+  "numberOfElements": 1,
   "sort": {
     "sorted": true,
     "unsorted": false,
