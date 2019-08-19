@@ -32,7 +32,7 @@ public class OffenderCaseNoteFilter implements Specification<OffenderCaseNote> {
             predicateBuilder.add(cb.equal(root.get("locationId"), locationId));
         }
         if (staffUsername != null) {
-            predicateBuilder.add(cb.equal(root.get("staffUsername"), staffUsername));
+            predicateBuilder.add(cb.equal(root.get("authorUsername"), staffUsername));
         }
         if (type != null) {
             final var caseNoteType = root.join("sensitiveCaseNoteType", JoinType.INNER);

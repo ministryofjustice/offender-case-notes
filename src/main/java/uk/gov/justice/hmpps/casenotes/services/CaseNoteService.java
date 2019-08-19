@@ -3,6 +3,7 @@ package uk.gov.justice.hmpps.casenotes.services;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
@@ -18,8 +19,11 @@ import uk.gov.justice.hmpps.casenotes.repository.ParentCaseNoteTypeRepository;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
+
+import static org.springframework.data.domain.Sort.Direction.ASC;
 
 @Service
 @Transactional(readOnly = true)
@@ -40,36 +44,85 @@ public class CaseNoteService {
         this.externalApiService = externalApiService;
     }
 
-    public Page<CaseNote> getCaseNotesByOffenderIdentifier(@NotNull final String offenderIdentifier, final Pageable pageable) {
-        final var filter = OffenderCaseNoteFilter.builder()
-                .offenderIdentifier(offenderIdentifier)
-                .build();
+    public Page<CaseNote> getCaseNotes(final String offenderIdentifier, final CaseNoteFilter caseNoteFilter, final Pageable pageable) {
 
-        return getCaseNotes(pageable, filter);
+        final var sensitiveCaseNotes = new ArrayList<CaseNote>();
+
+        if (SecurityUserContext.hasRoles("VIEW_SENSITIVE_CASE_NOTES", "ADD_SENSITIVE_CASE_NOTES")) {
+
+            final var filter = OffenderCaseNoteFilter.builder()
+                    .offenderIdentifier(offenderIdentifier)
+                    .type(caseNoteFilter.getType())
+                    .subType(caseNoteFilter.getSubType())
+                    .locationId(caseNoteFilter.getLocationId())
+                    .staffUsername(caseNoteFilter.getStaffUsername())
+                    .startDate(caseNoteFilter.getStartDate())
+                    .endDate(caseNoteFilter.getEndDate())
+                    .build();
+
+            sensitiveCaseNotes.addAll(repository.findAll(filter)
+                    .stream()
+                    .map(this::mapper)
+                    .collect(Collectors.toList()));
+        }
+
+        // only supports one field sort.
+        final var direction = pageable.getSort().isSorted() ? pageable.getSort().get().map(Sort.Order::getDirection).collect(Collectors.toList()).get(0) : Sort.Direction.DESC;
+        final var sortField = pageable.getSort().isSorted() ? pageable.getSort().get().map(Sort.Order::getProperty).collect(Collectors.toList()).get(0) : "occurrenceDateTime";
+
+        Page<CaseNote> caseNotes;
+        if (sensitiveCaseNotes.isEmpty()) {
+            // Just degate to elite2 for data
+            final var pagedNotes = externalApiService.getOffenderCaseNotes(offenderIdentifier, caseNoteFilter, pageable.getPageSize(), pageable.getPageNumber(), sortField, direction);
+
+            final var dtoNotes = translateToDto(pagedNotes, offenderIdentifier);
+            caseNotes = new PageImpl<>(dtoNotes, pageable, pagedNotes.getTotalElements());
+
+        } else {
+            // There are both case note sources.  Combine
+            final var pagedNotes = externalApiService.getOffenderCaseNotes(offenderIdentifier, caseNoteFilter, 1000, 0, "caseNoteId", ASC);
+
+            final var dtoNotes = translateToDto(pagedNotes, offenderIdentifier);
+
+            dtoNotes.addAll(sensitiveCaseNotes);
+
+            final var sortedList = sortByFieldName(dtoNotes, sortField, direction);
+
+            int toIndex = (int) (pageable.getOffset() + pageable.getPageSize());
+            final var pagedList = sortedList.subList((int) pageable.getOffset(), toIndex > sortedList.size() ? sortedList.size() : toIndex);
+
+            caseNotes = new PageImpl<>(pagedList, pageable, pagedNotes.getTotalElements() + sensitiveCaseNotes.size());
+        }
+        return caseNotes;
+
     }
 
-    public Page<CaseNote> getCaseNotes(final CaseNoteFilter caseNoteFilter, final Pageable pageable) {
-        final var filter = OffenderCaseNoteFilter.builder()
-                .type(caseNoteFilter.getType())
-                .subType(caseNoteFilter.getSubType())
-                .locationId(caseNoteFilter.getLocationId())
-                .staffUsername(caseNoteFilter.getStaffUsername())
-                .startDate(caseNoteFilter.getStartDate())
-                .endDate(caseNoteFilter.getEndDate())
-                .build();
-
-        return getCaseNotes(pageable, filter);
-    }
-
-    private Page<CaseNote> getCaseNotes(final Pageable pageable, final OffenderCaseNoteFilter filter) {
-        final var pagedResults = repository.findAll(filter, pageable);
-
-        final var caseNotes = pagedResults.getContent()
+    private List<CaseNote> translateToDto(final Page<NomisCaseNote> pagedNotes, final String offenderIdentifier) {
+        return pagedNotes.getContent()
                 .stream()
-                .map(this::mapper)
+                .map(cn -> mapper(cn, offenderIdentifier))
                 .collect(Collectors.toList());
+    }
 
-        return new PageImpl<>(caseNotes, pageable, pagedResults.getTotalElements());
+    @SuppressWarnings("unchecked")
+    private static List<CaseNote> sortByFieldName(List<CaseNote> list, String fieldName, Sort.Direction direction)  {
+        try {
+            final var field = CaseNote.class.getDeclaredField(fieldName);
+            field.setAccessible(true);
+
+            return list.stream()
+                    .sorted((first, second) -> {
+                        try {
+                            return direction == ASC ? ((Comparable<Object>) field.get(first)).compareTo(field.get(second))
+                                    : ((Comparable<Object>) field.get(second)).compareTo(field.get(first));
+                        } catch (IllegalAccessException e) {
+                            throw new RuntimeException("Error", e);
+                        }
+                    })
+                .collect(Collectors.toList());
+        } catch (NoSuchFieldException e) {
+            return list;
+        }
     }
 
     private CaseNote mapper(final OffenderCaseNote cn) {
@@ -78,12 +131,13 @@ public class CaseNoteService {
                 .caseNoteId(cn.getId())
                 .offenderIdentifier(cn.getOffenderIdentifier())
                 .occurrenceDateTime(cn.getOccurrenceDateTime())
-                .staffUsername(cn.getStaffUsername())
-                .staffName(cn.getStaffName())
+                .authorUsername(cn.getStaffUsername())
+                .authorName(cn.getStaffName())
                 .type(parentType.getType())
                 .typeDescription(parentType.getDescription())
                 .subType(cn.getSensitiveCaseNoteType().getType())
                 .subTypeDescription(cn.getSensitiveCaseNoteType().getDescription())
+                .source("OCNS") // Indicates its a Offender Case Note Service Type
                 .text(cn.getNoteText())
                 .creationDateTime(cn.getCreateDateTime())
                 .amendments(cn.getAmendments().stream().map(
@@ -97,6 +151,31 @@ public class CaseNoteService {
                                 .build()
                 ).collect(Collectors.toList()))
                 .locationId(cn.getLocationId())
+                .build();
+    }
+
+    private CaseNote mapper(final NomisCaseNote cn, final String offenderIdentifier) {
+        return CaseNote.builder()
+                .caseNoteId(cn.getCaseNoteId())
+                .offenderIdentifier(offenderIdentifier)
+                .occurrenceDateTime(cn.getOccurrenceDateTime())
+                .authorName(cn.getAuthorName())
+                .authorUsername(String.valueOf(cn.getStaffId()))  //TODO: this should be username not id.
+                .type(cn.getType())
+                .typeDescription(cn.getTypeDescription())
+                .subType(cn.getSubType())
+                .subTypeDescription(cn.getSubTypeDescription())
+                .source(cn.getSource())
+                .text(cn.getOriginalNoteText())
+                .creationDateTime(cn.getCreationDateTime())
+                .amendments(cn.getAmendments().stream().map(
+                        a -> CaseNoteAmendment.builder()
+                                .authorName(a.getAuthorName()) //TODO: Missing the username
+                                .additionalNoteText(a.getAdditionalNoteText())
+                                .creationDateTime(a.getCreationDateTime())
+                                .build()
+                ).collect(Collectors.toList()))
+                .locationId(cn.getAgencyId())
                 .build();
     }
 

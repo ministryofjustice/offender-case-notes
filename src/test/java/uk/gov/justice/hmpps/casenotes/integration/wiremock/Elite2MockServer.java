@@ -1,15 +1,19 @@
 package uk.gov.justice.hmpps.casenotes.integration.wiremock;
 
+
 import com.github.tomakehurst.wiremock.client.WireMock;
 import com.github.tomakehurst.wiremock.junit.WireMockRule;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
+import com.google.gson.*;
 import uk.gov.justice.hmpps.casenotes.dto.CaseNoteType;
+import uk.gov.justice.hmpps.casenotes.dto.NomisCaseNote;
 
+import java.lang.reflect.Type;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 public class Elite2MockServer extends WireMockRule {
-    private final Gson gson = new GsonBuilder().create();
+    private final Gson gson;
 
     private static final int WIREMOCK_PORT = 8999;
 
@@ -17,6 +21,8 @@ public class Elite2MockServer extends WireMockRule {
 
     public Elite2MockServer() {
         super(WIREMOCK_PORT);
+
+        gson = new GsonBuilder().registerTypeAdapter(LocalDateTime.class, new LocalDateTimeConverter()).create();
     }
 
     public void subGetCaseNoteTypes() {
@@ -64,7 +70,7 @@ public class Elite2MockServer extends WireMockRule {
     }
 
     public void subGetOffender(final String offenderIdentifier) {
-        final var getCaseNoteTypes = API_PREFIX + "/bookings/offenderNo/"+offenderIdentifier;
+        final var getCaseNoteTypes = API_PREFIX + "/bookings/offenderNo/" + offenderIdentifier;
         stubFor(
                 WireMock.get(WireMock.urlPathMatching(getCaseNoteTypes))
                         .willReturn(WireMock.aResponse()
@@ -77,6 +83,52 @@ public class Elite2MockServer extends WireMockRule {
                                 .withStatus(200)
                         ));
 
+    }
+
+    public void subGetCaseNotesForOffender(final String offenderIdentifier) {
+        final var getCaseNotes = API_PREFIX + "/offenders/" + offenderIdentifier + "/case-notes";
+        final var body = gson.toJson(List.of(
+                NomisCaseNote.builder()
+                        .caseNoteId(131232L)
+                        .agencyId("LEI")
+                        .authorName("Mickey Mouse")
+                        .creationDateTime(LocalDateTime.now().minusMonths(1))
+                        .source("INST")
+                        .originalNoteText("Some Text")
+                        .staffId(1231232L)
+                        .type("OBS")
+                        .subType("GEN")
+                        .typeDescription("Observation")
+                        .subTypeDescription("General")
+                        .text("Some Text")
+                        .occurrenceDateTime(LocalDateTime.now().minusMonths(1))
+                        .build()
+        ));
+        stubFor(
+                WireMock.get(WireMock.urlPathMatching(getCaseNotes))
+                        .willReturn(WireMock.aResponse()
+                                .withHeader("Content-Type", "application/json")
+                                .withHeader("Total-Records", "1")
+                                .withHeader("Page-Offset", "0")
+                                .withHeader("Page-Limit", "10")
+                                .withBody(body)
+                                .withStatus(200)
+                        ));
+
+    }
+
+    private static class LocalDateTimeConverter implements JsonSerializer<LocalDateTime>, JsonDeserializer<LocalDateTime> {
+        private static DateTimeFormatter FORMATTER = DateTimeFormatter.ISO_LOCAL_DATE_TIME;
+
+        @Override
+        public LocalDateTime deserialize(final JsonElement json, final Type typeOfT, final JsonDeserializationContext context) throws JsonParseException {
+            return LocalDateTime.parse(json.getAsJsonPrimitive().getAsString());
+        }
+
+        @Override
+        public JsonElement serialize(final LocalDateTime src, final Type typeOfSrc, final JsonSerializationContext context) {
+            return new JsonPrimitive(FORMATTER.format(src));
+        }
     }
 
 }

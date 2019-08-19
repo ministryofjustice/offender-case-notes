@@ -6,8 +6,8 @@
       "typeDescription": "POM Notes",
       "subType": "GEN",
       "subTypeDescription": "General POM Note",
-      "staffUsername": "SECURE_CASENOTE_USER",
-      "staffName": "Mikey Mouse",
+      "authorUsername": "SECURE_CASENOTE_USER",
+      "authorName": "Mikey Mouse",
       "text": "This is another case note",
       "locationId": "LEI",
       "amendments": [
@@ -17,6 +17,20 @@
           "additionalNoteText": "Amended case note"
         }
       ]
+    },
+    {
+      "caseNoteId": 131232,
+      "offenderIdentifier": "A1234AB",
+      "type": "OBS",
+      "typeDescription": "Observation",
+      "subType": "GEN",
+      "subTypeDescription": "General",
+      "source": "INST",
+      "authorUsername": "1231232",
+      "authorName": "Mickey Mouse",
+      "text": "Some Text",
+      "locationId": "LEI",
+      "amendments": []
     }
   ],
   "pageable": {
@@ -31,12 +45,12 @@
     "paged": true,
     "unpaged": false
   },
-  "totalElements": 1,
+  "totalElements": 2,
   "totalPages": 1,
   "last": true,
   "size": 10,
   "first": true,
-  "numberOfElements": 1,
+  "numberOfElements": 2,
   "sort": {
     "sorted": true,
     "unsorted": false,
