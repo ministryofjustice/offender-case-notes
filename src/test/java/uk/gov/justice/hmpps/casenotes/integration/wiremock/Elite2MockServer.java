@@ -87,23 +87,7 @@ public class Elite2MockServer extends WireMockRule {
 
     public void subGetCaseNotesForOffender(final String offenderIdentifier) {
         final var getCaseNotes = API_PREFIX + "/offenders/" + offenderIdentifier + "/case-notes";
-        final var body = gson.toJson(List.of(
-                NomisCaseNote.builder()
-                        .caseNoteId(131232L)
-                        .agencyId("LEI")
-                        .authorName("Mickey Mouse")
-                        .creationDateTime(LocalDateTime.now().minusMonths(1))
-                        .source("INST")
-                        .originalNoteText("Some Text")
-                        .staffId(1231232L)
-                        .type("OBS")
-                        .subType("GEN")
-                        .typeDescription("Observation")
-                        .subTypeDescription("General")
-                        .text("Some Text")
-                        .occurrenceDateTime(LocalDateTime.now().minusMonths(1))
-                        .build()
-        ));
+        final var body = gson.toJson(List.of(createNomisCaseNote()));
         stubFor(
                 WireMock.get(WireMock.urlPathMatching(getCaseNotes))
                         .willReturn(WireMock.aResponse()
@@ -113,6 +97,35 @@ public class Elite2MockServer extends WireMockRule {
                                 .withHeader("Page-Limit", "10")
                                 .withBody(body)
                                 .withStatus(200)
+                        ));
+
+    }
+
+    private NomisCaseNote createNomisCaseNote() {
+        return NomisCaseNote.builder()
+                .caseNoteId(131232L)
+                .agencyId("LEI")
+                .authorName("Mickey Mouse")
+                .creationDateTime(LocalDateTime.now().minusMonths(1))
+                .source("INST")
+                .originalNoteText("Some Text")
+                .staffId(1231232L)
+                .type("OBS")
+                .subType("GEN")
+                .typeDescription("Observation")
+                .subTypeDescription("General")
+                .text("Some Text")
+                .occurrenceDateTime(LocalDateTime.now().minusMonths(1))
+                .build();
+    }
+
+    public void subCreateCaseNote(final String offenderIdentifier) {
+        final var body = gson.toJson(createNomisCaseNote());
+        stubFor(WireMock.post(WireMock.urlPathMatching(String.format("%s/offenders/%s/case-notes", API_PREFIX, offenderIdentifier)))
+                        .willReturn(WireMock.aResponse()
+                                .withHeader("Content-Type", "application/json")
+                                .withBody(body)
+                                .withStatus(201)
                         ));
 
     }

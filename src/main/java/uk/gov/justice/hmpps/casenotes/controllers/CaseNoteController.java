@@ -1,6 +1,7 @@
 package uk.gov.justice.hmpps.casenotes.controllers;
 
 import io.swagger.annotations.*;
+import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -22,13 +23,10 @@ import java.util.List;
         value = "case-notes",
         produces = MediaType.APPLICATION_JSON_VALUE)
 @Slf4j
+@AllArgsConstructor
 public class CaseNoteController {
 
     private final CaseNoteService caseNoteService;
-
-    public CaseNoteController(final CaseNoteService caseNoteService) {
-        this.caseNoteService = caseNoteService;
-    }
 
     @RequestMapping(value = "/{offenderIdentifier}", method = RequestMethod.GET, consumes = "application/json", produces = "application/json")
     @ResponseBody
@@ -55,12 +53,10 @@ public class CaseNoteController {
     @ResponseStatus(HttpStatus.CREATED)
     @ApiOperation(value = "Add Case Note for offender",
             response = CaseNote.class,
-            authorizations = {@Authorization("ROLE_ADD_SENSITIVE_CASE_NOTES")},
             notes = "Creates a note for a specific type/subType")
     @ApiResponses(value = {
             @ApiResponse(code = 201, message = "The Case Note has been recorded. The updated object is returned including the status.", response = CaseNote.class),
             @ApiResponse(code = 409, message = "The case note has already been recorded under the booking. The current unmodified object (including status) is returned.", response = ErrorResponse.class)})
-    @PreAuthorize("hasRole('ROLE_ADD_SENSITIVE_CASE_NOTES')")
     public CaseNote createCaseNote(
             @ApiParam(value = "Offender Identifier", required = true, example = "A1234AA") @PathVariable("offenderIdentifier") final String offenderIdentifier,
             @RequestBody @NotNull final NewCaseNote newCaseNote) {

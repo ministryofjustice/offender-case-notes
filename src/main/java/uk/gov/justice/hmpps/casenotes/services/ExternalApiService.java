@@ -1,6 +1,7 @@
 package uk.gov.justice.hmpps.casenotes.services;
 
 import com.google.common.base.Joiner;
+import lombok.AllArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.data.domain.Page;
@@ -15,31 +16,24 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import uk.gov.justice.hmpps.casenotes.dto.CaseNoteFilter;
 import uk.gov.justice.hmpps.casenotes.dto.CaseNoteType;
+import uk.gov.justice.hmpps.casenotes.dto.NewCaseNote;
 import uk.gov.justice.hmpps.casenotes.dto.NomisCaseNote;
 
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Service
+@AllArgsConstructor
 public class ExternalApiService {
 
     private final RestTemplate elite2ApiRestTemplate;
-
     private final RestTemplate oauthApiRestTemplate;
 
-    public ExternalApiService(final RestTemplate elite2ApiRestTemplate, final RestTemplate oauthApiRestTemplate) {
-        this.elite2ApiRestTemplate = elite2ApiRestTemplate;
-        this.oauthApiRestTemplate = oauthApiRestTemplate;
-    }
-
-    public List<CaseNoteType> getCaseNoteTypes() {
+    List<CaseNoteType> getCaseNoteTypes() {
         return getCaseNoteTypes("/reference-domains/caseNoteTypes");
     }
 
-    public List<CaseNoteType> getUserCaseNoteTypes() {
+    List<CaseNoteType> getUserCaseNoteTypes() {
         return getCaseNoteTypes("/users/me/caseNoteTypes");
     }
 
@@ -57,7 +51,7 @@ public class ExternalApiService {
         return body;
     }
 
-    public String getUserFullName(final String currentUsername) {
+    String getUserFullName(final String currentUsername) {
         final var response = oauthApiRestTemplate.exchange("/user/{username}", HttpMethod.GET, null, Map.class, currentUsername);
         if (response.getBody() != null) {
             return (String) response.getBody().get("name");
@@ -65,7 +59,7 @@ public class ExternalApiService {
         return currentUsername;
     }
 
-    public String getOffenderLocation(final String offenderIdentifier) {
+    String getOffenderLocation(final String offenderIdentifier) {
         final var response = elite2ApiRestTemplate.exchange("/bookings/offenderNo/{offenderNo}", HttpMethod.GET, null, Map.class, offenderIdentifier);
         final var body = response.getBody();
         if (body == null) {
@@ -75,21 +69,22 @@ public class ExternalApiService {
         return (String) response.getBody().get("agencyId");
     }
 
-    public Page<NomisCaseNote> getOffenderCaseNotes(final String offenderIdentifier, final CaseNoteFilter filter, final int pageLimit, final int pageNumber, final String sortFields, final Sort.Direction direction) {
+    Page<NomisCaseNote> getOffenderCaseNotes(final String offenderIdentifier, final CaseNoteFilter filter, final int pageLimit, final int pageNumber, final String sortFields, final Sort.Direction direction) {
 
         final var headers = new HttpHeaders();
         final var offset = pageLimit * pageNumber;
-        Map.of( "Page-Limit", String.valueOf(pageLimit),
+        Map.of("Page-Limit", String.valueOf(pageLimit),
                 "Page-Offset", String.valueOf(offset),
                 "Sort-Fields", sortFields,
                 "Sort-Order", direction.name())
                 .forEach(headers::add);
 
         final var queryFilter = getQueryFilter(filter);
-        final var url = "/offenders/{offenderIdentifier}/case-notes" + (queryFilter != null ? "?"+queryFilter : "");
+        final var url = "/offenders/{offenderIdentifier}/case-notes" + (queryFilter != null ? "?" + queryFilter : "");
 
         final var response = elite2ApiRestTemplate.exchange(url, HttpMethod.GET, new HttpEntity<>(null, headers),
-                new ParameterizedTypeReference<List<NomisCaseNote>>() {}, offenderIdentifier);
+                new ParameterizedTypeReference<List<NomisCaseNote>>() {
+                }, offenderIdentifier);
 
         final var body = response.getBody();
         if (body == null) {
@@ -97,9 +92,9 @@ public class ExternalApiService {
         }
 
         return new PageImpl<>(response.getBody(),
-                PageRequest.of( pageNumber, pageLimit),
-                        getHeader(response, "Total-Records")
-                    );
+                PageRequest.of(pageNumber, pageLimit),
+                getHeader(response, "Total-Records")
+        );
     }
 
     private int getHeader(final ResponseEntity response, final String headerKey) {
@@ -135,5 +130,9 @@ public class ExternalApiService {
         return queryParamsMap.isEmpty() ? null : Joiner.on("&").withKeyValueSeparator("=").join(queryParamsMap);
     }
 
+    NomisCaseNote createCaseNote(final String offenderIdentifier, final NewCaseNote newCaseNote) {
+        final var response = elite2ApiRestTemplate.postForEntity("/offenders/{offenderNo}/case-notes", newCaseNote, NomisCaseNote.class, offenderIdentifier);
+        return Optional.ofNullable(response.getBody()).orElseThrow(EntityNotFoundException.withId(offenderIdentifier));
+    }
 }
 
