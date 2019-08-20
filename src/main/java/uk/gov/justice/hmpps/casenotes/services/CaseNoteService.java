@@ -36,7 +36,7 @@ public class CaseNoteService {
     private final SecurityUserContext securityUserContext;
     private final ExternalApiService externalApiService;
 
-    public CaseNoteService(OffenderCaseNoteRepository repository, CaseNoteTypeRepository caseNoteTypeRepository, ParentCaseNoteTypeRepository parentCaseNoteTypeRepository, SecurityUserContext securityUserContext, ExternalApiService externalApiService) {
+    public CaseNoteService(final OffenderCaseNoteRepository repository, final CaseNoteTypeRepository caseNoteTypeRepository, final ParentCaseNoteTypeRepository parentCaseNoteTypeRepository, final SecurityUserContext securityUserContext, final ExternalApiService externalApiService) {
         this.repository = repository;
         this.caseNoteTypeRepository = caseNoteTypeRepository;
         this.parentCaseNoteTypeRepository = parentCaseNoteTypeRepository;
@@ -55,7 +55,7 @@ public class CaseNoteService {
                     .type(caseNoteFilter.getType())
                     .subType(caseNoteFilter.getSubType())
                     .locationId(caseNoteFilter.getLocationId())
-                    .staffUsername(caseNoteFilter.getStaffUsername())
+                    .authorUsername(caseNoteFilter.getAuthorUsername())
                     .startDate(caseNoteFilter.getStartDate())
                     .endDate(caseNoteFilter.getEndDate())
                     .build();
@@ -70,7 +70,7 @@ public class CaseNoteService {
         final var direction = pageable.getSort().isSorted() ? pageable.getSort().get().map(Sort.Order::getDirection).collect(Collectors.toList()).get(0) : Sort.Direction.DESC;
         final var sortField = pageable.getSort().isSorted() ? pageable.getSort().get().map(Sort.Order::getProperty).collect(Collectors.toList()).get(0) : "occurrenceDateTime";
 
-        Page<CaseNote> caseNotes;
+        final Page<CaseNote> caseNotes;
         if (sensitiveCaseNotes.isEmpty()) {
             // Just degate to elite2 for data
             final var pagedNotes = externalApiService.getOffenderCaseNotes(offenderIdentifier, caseNoteFilter, pageable.getPageSize(), pageable.getPageNumber(), sortField, direction);
@@ -88,7 +88,7 @@ public class CaseNoteService {
 
             final var sortedList = sortByFieldName(dtoNotes, sortField, direction);
 
-            int toIndex = (int) (pageable.getOffset() + pageable.getPageSize());
+            final var toIndex = (int) (pageable.getOffset() + pageable.getPageSize());
             final var pagedList = sortedList.subList((int) pageable.getOffset(), toIndex > sortedList.size() ? sortedList.size() : toIndex);
 
             caseNotes = new PageImpl<>(pagedList, pageable, pagedNotes.getTotalElements() + sensitiveCaseNotes.size());
@@ -105,7 +105,7 @@ public class CaseNoteService {
     }
 
     @SuppressWarnings("unchecked")
-    private static List<CaseNote> sortByFieldName(List<CaseNote> list, String fieldName, Sort.Direction direction)  {
+    private static List<CaseNote> sortByFieldName(final List<CaseNote> list, final String fieldName, final Sort.Direction direction) {
         try {
             final var field = CaseNote.class.getDeclaredField(fieldName);
             field.setAccessible(true);
@@ -120,7 +120,7 @@ public class CaseNoteService {
                         }
                     })
                 .collect(Collectors.toList());
-        } catch (NoSuchFieldException e) {
+        } catch (final NoSuchFieldException e) {
             return list;
         }
     }

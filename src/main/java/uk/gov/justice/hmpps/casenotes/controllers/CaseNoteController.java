@@ -26,7 +26,7 @@ public class CaseNoteController {
 
     private final CaseNoteService caseNoteService;
 
-    public CaseNoteController(CaseNoteService caseNoteService) {
+    public CaseNoteController(final CaseNoteService caseNoteService) {
         this.caseNoteService = caseNoteService;
     }
 
@@ -35,7 +35,7 @@ public class CaseNoteController {
     @ApiOperation(value = "Retrieves a list of case notes",
             nickname = "retrieve case notes")
     @ApiResponses({
-            @ApiResponse(code = 404, message = "Case notes not found"),
+            @ApiResponse(code = 404, message = "Offender not found"),
             @ApiResponse(code = 200, message = "OK", response = CaseNote.class, responseContainer = "List")})
     @ApiImplicitParams({
             @ApiImplicitParam(name = "page", dataType = "int", paramType = "query",
@@ -46,7 +46,7 @@ public class CaseNoteController {
                     value = "Sort column and direction, e.g. sort=occurrenceDateTime,desc. Multiple sort params allowed.")})
     public Page<CaseNote> getCaseNotes(
             @ApiParam(value = "Offender Identifier", required = true, example = "A1234AA") @PathVariable("offenderIdentifier") final String offenderIdentifier,
-            @ApiParam(value = "Optionally specify a case note filter") CaseNoteFilter filter,
+            @ApiParam(value = "Optionally specify a case note filter") final CaseNoteFilter filter,
             @PageableDefault(sort = {"occurrenceDateTime"}, direction = Sort.Direction.DESC) final Pageable pageable) {
         return caseNoteService.getCaseNotes(offenderIdentifier, filter, pageable);
     }
