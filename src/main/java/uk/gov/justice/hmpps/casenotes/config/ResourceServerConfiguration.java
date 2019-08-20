@@ -46,7 +46,7 @@ public class ResourceServerConfiguration extends ResourceServerConfigurerAdapter
     @Autowired(required = false)
     private BuildProperties buildProperties;
 
-    public ResourceServerConfiguration(OffenderCaseNoteProperties properties) {
+    public ResourceServerConfiguration(final OffenderCaseNoteProperties properties) {
         this.properties = properties;
     }
 
@@ -152,8 +152,8 @@ public class ResourceServerConfiguration extends ResourceServerConfigurerAdapter
     }
 
     private ApiInfo apiInfo() {
-        StringVendorExtension vendorExtension = new StringVendorExtension("", "");
-        Collection<VendorExtension> vendorExtensions = new ArrayList<>();
+        final var vendorExtension = new StringVendorExtension("", "");
+        final Collection<VendorExtension> vendorExtensions = new ArrayList<>();
         vendorExtensions.add(vendorExtension);
 
         return new ApiInfo(

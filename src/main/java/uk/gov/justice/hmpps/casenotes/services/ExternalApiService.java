@@ -30,7 +30,7 @@ public class ExternalApiService {
 
     private final RestTemplate oauthApiRestTemplate;
 
-    public ExternalApiService(RestTemplate elite2ApiRestTemplate, RestTemplate oauthApiRestTemplate) {
+    public ExternalApiService(final RestTemplate elite2ApiRestTemplate, final RestTemplate oauthApiRestTemplate) {
         this.elite2ApiRestTemplate = elite2ApiRestTemplate;
         this.oauthApiRestTemplate = oauthApiRestTemplate;
     }
@@ -75,10 +75,10 @@ public class ExternalApiService {
         return (String) response.getBody().get("agencyId");
     }
 
-    public Page<NomisCaseNote> getOffenderCaseNotes(final String offenderIdentifier, CaseNoteFilter filter, int pageLimit, int pageNumber, String sortFields, Sort.Direction direction) {
+    public Page<NomisCaseNote> getOffenderCaseNotes(final String offenderIdentifier, final CaseNoteFilter filter, final int pageLimit, final int pageNumber, final String sortFields, final Sort.Direction direction) {
 
         final var headers = new HttpHeaders();
-        var offset = pageLimit * pageNumber;
+        final var offset = pageLimit * pageNumber;
         Map.of( "Page-Limit", String.valueOf(pageLimit),
                 "Page-Offset", String.valueOf(offset),
                 "Sort-Fields", sortFields,

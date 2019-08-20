@@ -56,7 +56,7 @@ public class OffenderCaseNote {
     @Builder.Default
     @SortComparator(AmendmentComparator.class)
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "caseNote")
-    private List<OffenderCaseNoteAmendment> amendments = new ArrayList<>();
+    private final List<OffenderCaseNoteAmendment> amendments = new ArrayList<>();
 
     @CreatedDate
     @Column(nullable = false)
@@ -104,7 +104,7 @@ public class OffenderCaseNote {
 
     public static class AmendmentComparator implements Comparator<OffenderCaseNoteAmendment> {
         @Override
-        public int compare(OffenderCaseNoteAmendment a1, OffenderCaseNoteAmendment a2) {
+        public int compare(final OffenderCaseNoteAmendment a1, final OffenderCaseNoteAmendment a2) {
             return a1.getAmendSequence() - a2.getAmendSequence();
         }
     }

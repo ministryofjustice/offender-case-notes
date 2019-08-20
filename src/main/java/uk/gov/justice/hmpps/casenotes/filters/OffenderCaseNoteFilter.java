@@ -13,17 +13,17 @@ import java.time.LocalDateTime;
 @EqualsAndHashCode
 public class OffenderCaseNoteFilter implements Specification<OffenderCaseNote> {
 
-    private String offenderIdentifier;
-    private String locationId;
-    private String staffUsername;
-    private String type;
-    private String subType;
-    private LocalDateTime startDate;
-    private LocalDateTime endDate;
+    private final String offenderIdentifier;
+    private final String locationId;
+    private final String authorUsername;
+    private final String type;
+    private final String subType;
+    private final LocalDateTime startDate;
+    private final LocalDateTime endDate;
 
     @Override
-    public Predicate toPredicate(Root<OffenderCaseNote> root, CriteriaQuery<?> query, CriteriaBuilder cb) {
-        ImmutableList.Builder<Predicate> predicateBuilder = ImmutableList.builder();
+    public Predicate toPredicate(final Root<OffenderCaseNote> root, final CriteriaQuery<?> query, final CriteriaBuilder cb) {
+        final ImmutableList.Builder<Predicate> predicateBuilder = ImmutableList.builder();
 
         if (offenderIdentifier != null) {
             predicateBuilder.add(cb.equal(root.get("offenderIdentifier"), offenderIdentifier));
@@ -31,8 +31,8 @@ public class OffenderCaseNoteFilter implements Specification<OffenderCaseNote> {
         if (locationId != null) {
             predicateBuilder.add(cb.equal(root.get("locationId"), locationId));
         }
-        if (staffUsername != null) {
-            predicateBuilder.add(cb.equal(root.get("authorUsername"), staffUsername));
+        if (authorUsername != null) {
+            predicateBuilder.add(cb.equal(root.get("authorUsername"), authorUsername));
         }
         if (type != null) {
             final var caseNoteType = root.join("sensitiveCaseNoteType", JoinType.INNER);
@@ -50,7 +50,7 @@ public class OffenderCaseNoteFilter implements Specification<OffenderCaseNote> {
             predicateBuilder.add(cb.lessThanOrEqualTo(root.get("occurrenceDateTime"), endDate));
         }
 
-        ImmutableList<Predicate> predicates = predicateBuilder.build();
+        final var predicates = predicateBuilder.build();
         return cb.and(predicates.toArray(new Predicate[0]));
     }
 

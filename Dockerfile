@@ -21,6 +21,6 @@ WORKDIR /app
 COPY --chown=appuser:appgroup build/libs/offender-case-notes*.jar /app/app.jar
 COPY --chown=appuser:appgroup run.sh /app
 
-USER 2000
+USER appuser
 
 ENTRYPOINT ["/bin/sh", "/app/run.sh"]

@@ -26,7 +26,7 @@ public class CaseNoteFilter {
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
     private LocalDateTime startDate;
 
-    @ApiModelProperty(required = true, value = "Filter case notes up to this date", position = 4, example = "2019-05-31T01:30:00")
+    @ApiModelProperty(required = true, value = "Filter case notes up to this date", position = 4, example = "2019-05-31T01:30:00", dataType = "LocalDateTime")
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
     private LocalDateTime endDate;
 
@@ -34,6 +34,6 @@ public class CaseNoteFilter {
     private String locationId;
 
     @ApiModelProperty(required = true, value = "Filter by username", position = 6, example = "USER1")
-    private String staffUsername;
+    private String authorUsername;
 
 }

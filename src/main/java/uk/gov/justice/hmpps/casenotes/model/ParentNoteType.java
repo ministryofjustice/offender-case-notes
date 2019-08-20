@@ -31,7 +31,7 @@ public class ParentNoteType {
 
     @Column(name = "ACTIVE", nullable = false)
     @Builder.Default
-    private boolean active = true;
+    private final boolean active = true;
 
     @CreatedDate
     @Column(nullable = false)
