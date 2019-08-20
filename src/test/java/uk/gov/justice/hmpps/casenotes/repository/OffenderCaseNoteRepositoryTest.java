@@ -11,7 +11,6 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.context.transaction.TestTransaction;
 import org.springframework.transaction.annotation.Transactional;
 import uk.gov.justice.hmpps.casenotes.model.OffenderCaseNote;
-import uk.gov.justice.hmpps.casenotes.model.OffenderCaseNoteAmendment;
 import uk.gov.justice.hmpps.casenotes.model.SensitiveCaseNoteType;
 
 import java.time.LocalDateTime;
@@ -47,9 +46,9 @@ public class OffenderCaseNoteRepositoryTest {
     @Test
     public void testPersistCaseNote() {
 
-        var caseNote = transientEntity();
+        final var caseNote = transientEntity();
 
-        var persistedEntity = repository.save(caseNote);
+        final var persistedEntity = repository.save(caseNote);
 
         TestTransaction.flagForCommit();
         TestTransaction.end();
@@ -70,12 +69,12 @@ public class OffenderCaseNoteRepositoryTest {
     @WithAnonymousUser
     public void testPersistCaseNoteAndAmendment() {
 
-        var caseNote = transientEntity();
+        final var caseNote = transientEntity();
 
         caseNote.addAmendment("Another Note 0");
         assertThat(caseNote.getAmendments()).hasSize(1);
 
-        var persistedEntity = repository.save(caseNote);
+        final var persistedEntity = repository.save(caseNote);
 
         TestTransaction.flagForCommit();
         TestTransaction.end();
@@ -98,8 +97,8 @@ public class OffenderCaseNoteRepositoryTest {
 
         assertThat(retrievedEntity2.getAmendments()).hasSize(3);
 
-        assertThat(retrievedEntity2.getAmendment(1).get().getNoteText()).isEqualTo("Another Note 0");
-        OffenderCaseNoteAmendment offenderCaseNoteAmendment3 = retrievedEntity2.getAmendment(3).get();
+        assertThat(retrievedEntity2.getAmendment(1).orElseThrow().getNoteText()).isEqualTo("Another Note 0");
+        final var offenderCaseNoteAmendment3 = retrievedEntity2.getAmendment(3).orElseThrow();
         assertThat(offenderCaseNoteAmendment3.getNoteText()).isEqualTo("Another Note 2");
 
         retrievedEntity2.addAmendment("Another Note 3", "USER1", "Mickey Mouse");
@@ -113,7 +112,7 @@ public class OffenderCaseNoteRepositoryTest {
 
         assertThat(retrievedEntity3.getAmendments()).hasSize(4);
 
-        assertThat(retrievedEntity3.getAmendment(4).get().getNoteText()).isEqualTo("Another Note 3");
+        assertThat(retrievedEntity3.getAmendment(4).orElseThrow().getNoteText()).isEqualTo("Another Note 3");
 
     }
 
@@ -123,7 +122,7 @@ public class OffenderCaseNoteRepositoryTest {
                 .locationId("MDI")
                 .staffUsername("USER2")
                 .staffName("Mickey Mouse")
-                .offenderIdentifier("A1234AC")
+                .offenderIdentifier("A1234BD")
                 .sensitiveCaseNoteType(sampleType)
                 .noteText("HELLO")
                 .build();

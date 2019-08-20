@@ -15,7 +15,7 @@ public class RestTemplateConfiguration {
 
     private final OffenderCaseNoteProperties properties;
 
-    public RestTemplateConfiguration(OffenderCaseNoteProperties properties) {
+    public RestTemplateConfiguration(final OffenderCaseNoteProperties properties) {
         this.properties = properties;
     }
 
