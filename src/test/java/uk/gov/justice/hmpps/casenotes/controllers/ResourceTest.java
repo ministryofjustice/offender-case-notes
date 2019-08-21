@@ -1,6 +1,7 @@
 package uk.gov.justice.hmpps.casenotes.controllers;
 
-import org.junit.Rule;
+import org.junit.Before;
+import org.junit.ClassRule;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -27,11 +28,17 @@ public abstract class ResourceTest {
     @Autowired
     protected TestRestTemplate testRestTemplate;
 
-    @Rule
-    public final Elite2MockServer elite2MockServer = new Elite2MockServer();
+    @ClassRule
+    public static final Elite2MockServer elite2MockServer = new Elite2MockServer();
 
-    @Rule
-    public final OauthMockServer oauthMockServer = new OauthMockServer();
+    @ClassRule
+    public static final OauthMockServer oauthMockServer = new OauthMockServer();
+
+    @Before
+    public void resetStubs() {
+        elite2MockServer.resetAll();
+        oauthMockServer.resetAll();
+    }
 
     HttpEntity<?> createHttpEntity(final String bearerToken, final Object body) {
         return createHttpEntity(bearerToken, body, Collections.emptyMap());
