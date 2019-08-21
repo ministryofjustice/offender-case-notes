@@ -134,5 +134,10 @@ public class ExternalApiService {
         final var response = elite2ApiRestTemplate.postForEntity("/offenders/{offenderNo}/case-notes", newCaseNote, NomisCaseNote.class, offenderIdentifier);
         return Optional.ofNullable(response.getBody()).orElseThrow(EntityNotFoundException.withId(offenderIdentifier));
     }
+
+    NomisCaseNote getOffenderCaseNote(final String offenderIdentifier, final long caseNoteIdentifier) {
+        final var response = elite2ApiRestTemplate.getForEntity("/offenders/{offenderNo}/case-notes/{caseNoteIdentifier}", NomisCaseNote.class, offenderIdentifier, caseNoteIdentifier);
+        return Optional.ofNullable(response.getBody()).orElseThrow(EntityNotFoundException.withId(offenderIdentifier));
+    }
 }
 

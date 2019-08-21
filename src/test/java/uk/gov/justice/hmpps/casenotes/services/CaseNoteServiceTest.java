@@ -18,6 +18,7 @@ import uk.gov.justice.hmpps.casenotes.repository.ParentCaseNoteTypeRepository;
 
 import java.time.LocalDateTime;
 import java.util.Optional;
+import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -55,10 +56,11 @@ public class CaseNoteServiceTest {
 
         final var caseNote = caseNoteService.createCaseNote("12345", NewCaseNote.builder().type("type").build());
 
-        assertThat(caseNote).isEqualToIgnoringGivenFields(nomisCaseNote, "authorUsername", "locationId", "text");
+        assertThat(caseNote).isEqualToIgnoringGivenFields(nomisCaseNote, "authorUsername", "locationId", "text", "caseNoteId");
         assertThat(caseNote.getText()).isEqualTo("original");
         assertThat(caseNote.getAuthorUsername()).isEqualTo("23456");
         assertThat(caseNote.getLocationId()).isEqualTo("agency");
+        assertThat(caseNote.getCaseNoteId()).isEqualTo("12345");
         verify(parentCaseNoteTypeRepository).findById("type");
     }
 
@@ -116,6 +118,7 @@ public class CaseNoteServiceTest {
 
     private OffenderCaseNote createOffenderCaseNote(final SensitiveCaseNoteType caseNoteType) {
         return OffenderCaseNote.builder()
+                .id(UUID.randomUUID())
                 .occurrenceDateTime(LocalDateTime.now())
                 .locationId("MDI")
                 .staffUsername("USER2")

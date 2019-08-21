@@ -92,7 +92,7 @@ public class CaseNoteResourceTest extends ResourceTest {
     }
 
     @Test
-    public void testRetrieveCaseNotesForOffenderSenstive() {
+    public void testRetrieveCaseNotesForOffenderSensitive() {
         oauthMockServer.subGetUserDetails(SECURE_CASENOTE_USER);
         elite2MockServer.subGetOffender("A1234AA");
         elite2MockServer.subGetCaseNotesForOffender("A1234AA");
@@ -137,6 +137,52 @@ public class CaseNoteResourceTest extends ResourceTest {
                 "A1234AA");
 
         assertJsonAndStatus(response, CaseNote.class, 200, "A1234AA-normal-casenote.json");
+    }
+
+    @Test
+    public void testCanRetrieveCaseNoteForOffender() {
+        oauthMockServer.subGetUserDetails(API_TEST_USER);
+        elite2MockServer.subGetOffender("A1234AA");
+        elite2MockServer.subGetCaseNoteForOffender("A1234AA", 131232L);
+
+        final var token = authTokenHelper.getToken(API_TEST_USER);
+
+        final var response = testRestTemplate.exchange(
+                "/case-notes/{offenderIdentifier}/{caseNoteIdentifier}",
+                HttpMethod.GET,
+                createHttpEntity(token, null),
+                new ParameterizedTypeReference<String>() {
+                },
+                "A1234AA", "131232");
+
+        assertJsonAndStatus(response, CaseNote.class, 200, "A1234AA-single-normal-casenote.json");
+    }
+
+    @Test
+    public void testRetrieveCaseNoteForOffenderSensitive() {
+        oauthMockServer.subGetUserDetails(SECURE_CASENOTE_USER);
+        elite2MockServer.subGetOffender("A1234AF");
+
+        final var token = authTokenHelper.getToken(SECURE_CASENOTE_USER);
+
+        final var postResponse = testRestTemplate.exchange(
+                "/case-notes/{offenderIdentifier}",
+                HttpMethod.POST,
+                createHttpEntity(token, format(CREATE_CASE_NOTE_WITHOUT_LOC, "This is a case note")),
+                new ParameterizedTypeReference<CaseNote>() {
+                },
+                "A1234AF");
+        final var id = Objects.requireNonNull(postResponse.getBody()).getCaseNoteId();
+
+        final var response = testRestTemplate.exchange(
+                "/case-notes/{offenderIdentifier}/{caseNoteIdentifier}",
+                HttpMethod.GET,
+                createHttpEntity(token, null),
+                new ParameterizedTypeReference<String>() {
+                },
+                "A1234AF", id);
+
+        assertJsonAndStatus(response, CaseNote.class, 200, "A1234AF-single-casenote.json");
     }
 
     @Test

@@ -1,6 +1,7 @@
 package uk.gov.justice.hmpps.casenotes.services;
 
 import lombok.AllArgsConstructor;
+import org.apache.commons.lang3.math.NumberUtils;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -23,6 +24,7 @@ import javax.validation.constraints.NotNull;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import static org.springframework.data.domain.Sort.Direction.ASC;
@@ -123,7 +125,7 @@ public class CaseNoteService {
     private CaseNote mapper(final OffenderCaseNote cn) {
         final var parentType = cn.getSensitiveCaseNoteType().getParentType();
         return CaseNote.builder()
-                .caseNoteId(cn.getId())
+                .caseNoteId(cn.getId().toString())
                 .offenderIdentifier(cn.getOffenderIdentifier())
                 .occurrenceDateTime(cn.getOccurrenceDateTime())
                 .authorUsername(cn.getStaffUsername())
@@ -151,7 +153,7 @@ public class CaseNoteService {
 
     private CaseNote mapper(final NomisCaseNote cn, final String offenderIdentifier) {
         return CaseNote.builder()
-                .caseNoteId(cn.getCaseNoteId())
+                .caseNoteId(cn.getCaseNoteId().toString())
                 .offenderIdentifier(offenderIdentifier)
                 .occurrenceDateTime(cn.getOccurrenceDateTime())
                 .authorName(cn.getAuthorName())
@@ -214,8 +216,8 @@ public class CaseNoteService {
     }
 
     @Transactional
-    public CaseNote amendCaseNote(@NotNull final String offenderIdentifier, @NotNull final Long caseNoteId, @NotNull final String amendCaseNote) {
-        final var offenderCaseNote = repository.findById(caseNoteId).orElseThrow(() -> EntityNotFoundException.withId(caseNoteId));
+    public CaseNote amendCaseNote(@NotNull final String offenderIdentifier, @NotNull final String caseNoteId, @NotNull final String amendCaseNote) {
+        final var offenderCaseNote = repository.findById(UUID.fromString(caseNoteId)).orElseThrow(() -> EntityNotFoundException.withId(caseNoteId));
 
         if (!offenderIdentifier.equals(offenderCaseNote.getOffenderIdentifier())) {
             throw EntityNotFoundException.withId(offenderIdentifier);
@@ -262,5 +264,15 @@ public class CaseNoteService {
                                 .collect(Collectors.toList()))
                         .build())
                 .collect(Collectors.toList());
+    }
+
+    public CaseNote getCaseNote(final String offenderIdentifier, final String caseNoteIdentifier) {
+        if (NumberUtils.isDigits(caseNoteIdentifier)) {
+            return mapper(externalApiService.getOffenderCaseNote(offenderIdentifier, NumberUtils.toLong(caseNoteIdentifier)), offenderIdentifier);
+        }
+        if (!securityUserContext.isOverrideRole("VIEW_SENSITIVE_CASE_NOTES", "ADD_SENSITIVE_CASE_NOTES")) {
+            throw new AccessDeniedException("User not allowed to view sensitive case notes");
+        }
+        return mapper(repository.findById(UUID.fromString(caseNoteIdentifier)).orElseThrow(() -> EntityNotFoundException.withId(caseNoteIdentifier)));
     }
 }

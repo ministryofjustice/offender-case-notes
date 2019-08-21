@@ -101,6 +101,18 @@ public class Elite2MockServer extends WireMockRule {
 
     }
 
+    public void subGetCaseNoteForOffender(final String offenderIdentifier, final Long caseNoteIdentifier) {
+        final var getCaseNote = String.format("%s/offenders/%s/case-notes/%s", API_PREFIX, offenderIdentifier, caseNoteIdentifier);
+        final var body = gson.toJson(createNomisCaseNote());
+        stubFor(
+                WireMock.get(WireMock.urlPathMatching(getCaseNote))
+                        .willReturn(WireMock.aResponse()
+                                .withHeader("Content-Type", "application/json")
+                                .withBody(body)
+                                .withStatus(200)
+                        ));
+    }
+
     private NomisCaseNote createNomisCaseNote() {
         return NomisCaseNote.builder()
                 .caseNoteId(131232L)

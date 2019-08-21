@@ -28,6 +28,26 @@ public class CaseNoteController {
 
     private final CaseNoteService caseNoteService;
 
+    @RequestMapping(value = "/{offenderIdentifier}/{caseNoteIdentifier}", method = RequestMethod.GET, consumes = "application/json", produces = "application/json")
+    @ResponseBody
+    @ApiOperation(value = "Retrieves a case note",
+            nickname = "retrieve case note")
+    @ApiResponses({
+            @ApiResponse(code = 404, message = "Offender or case note not found"),
+            @ApiResponse(code = 200, message = "OK", response = CaseNote.class, responseContainer = "List")})
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "page", dataType = "int", paramType = "query",
+                    value = "Results page you want to retrieve (0..N)", example = "0", defaultValue = "0"),
+            @ApiImplicitParam(name = "size", dataType = "int", paramType = "query",
+                    value = "Number of records per page.", example = "10", defaultValue = "10"),
+            @ApiImplicitParam(name = "sort", dataType = "string", paramType = "query",
+                    value = "Sort column and direction, e.g. sort=occurrenceDateTime,desc. Multiple sort params allowed.")})
+    public CaseNote getCaseNote(
+            @ApiParam(value = "Offender Identifier", required = true, example = "A1234AA") @PathVariable("offenderIdentifier") final String offenderIdentifier,
+            @ApiParam(value = "Case Note Id", required = true, example = "A1234AA") @PathVariable("caseNoteIdentifier") final String caseNoteIdentifier) {
+        return caseNoteService.getCaseNote(offenderIdentifier, caseNoteIdentifier);
+    }
+
     @RequestMapping(value = "/{offenderIdentifier}", method = RequestMethod.GET, consumes = "application/json", produces = "application/json")
     @ResponseBody
     @ApiOperation(value = "Retrieves a list of case notes",
@@ -73,7 +93,7 @@ public class CaseNoteController {
     @PreAuthorize("hasRole('ROLE_ADD_SENSITIVE_CASE_NOTES')")
     public CaseNote amendCaseNote(
             @ApiParam(value = "Offender Identifier", required = true, example = "A1234AA") @PathVariable("offenderIdentifier") final String offenderIdentifier,
-            @ApiParam(value = "Case Note Id", required = true, example = "A1234AA") @PathVariable("caseNoteIdentifier") final Long caseNoteIdentifier,
+            @ApiParam(value = "Case Note Id", required = true, example = "A1234AA") @PathVariable("caseNoteIdentifier") final String caseNoteIdentifier,
             @RequestBody @NotNull final String amendedText) {
         return caseNoteService.amendCaseNote(offenderIdentifier, caseNoteIdentifier, amendedText);
     }
