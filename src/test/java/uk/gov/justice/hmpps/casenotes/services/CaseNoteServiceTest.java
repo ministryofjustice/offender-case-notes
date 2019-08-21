@@ -58,7 +58,6 @@ public class CaseNoteServiceTest {
 
         assertThat(caseNote).isEqualToIgnoringGivenFields(nomisCaseNote, "authorUsername", "locationId", "text", "caseNoteId");
         assertThat(caseNote.getText()).isEqualTo("original");
-        assertThat(caseNote.getAuthorUsername()).isEqualTo("23456");
         assertThat(caseNote.getLocationId()).isEqualTo("agency");
         assertThat(caseNote.getCaseNoteId()).isEqualTo("12345");
         verify(parentCaseNoteTypeRepository).findById("type");
@@ -93,7 +92,7 @@ public class CaseNoteServiceTest {
 
         final var createdNote = caseNoteService.createCaseNote("12345", NewCaseNote.builder().type("type").subType("sub").build());
         assertThat(createdNote).isEqualToIgnoringGivenFields(offenderCaseNote,
-                "caseNoteId", "type", "typeDescription", "subType", "subTypeDescription", "source", "creationDateTime", "authorUsername", "authorName", "text");
+                "caseNoteId", "type", "typeDescription", "subType", "subTypeDescription", "source", "creationDateTime", "text");
         assertThat(createdNote.getText()).isEqualTo("HELLO");
     }
 
@@ -121,8 +120,8 @@ public class CaseNoteServiceTest {
                 .id(UUID.randomUUID())
                 .occurrenceDateTime(LocalDateTime.now())
                 .locationId("MDI")
-                .staffUsername("USER2")
-                .staffName("Mickey Mouse")
+                .authorUsername("USER2")
+                .authorName("Mickey Mouse")
                 .offenderIdentifier("A1234AC")
                 .sensitiveCaseNoteType(caseNoteType)
                 .noteText("HELLO")

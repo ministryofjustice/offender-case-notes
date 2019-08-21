@@ -21,8 +21,8 @@ import java.util.*;
 @AllArgsConstructor
 @EntityListeners(AuditingEntityListener.class)
 @Builder(toBuilder = true)
-@EqualsAndHashCode(of = {"offenderIdentifier", "occurrenceDateTime", "locationId", "staffUsername", "sensitiveCaseNoteType", "noteText"})
-@ToString(of = {"id", "offenderIdentifier", "occurrenceDateTime", "locationId", "staffUsername", "sensitiveCaseNoteType"})
+@EqualsAndHashCode(of = {"offenderIdentifier", "occurrenceDateTime", "locationId", "authorUsername", "sensitiveCaseNoteType", "noteText"})
+@ToString(of = {"id", "offenderIdentifier", "occurrenceDateTime", "locationId", "authorUsername", "sensitiveCaseNoteType"})
 public class OffenderCaseNote {
 
     @Id
@@ -41,10 +41,10 @@ public class OffenderCaseNote {
     private String locationId;
 
     @Column(nullable = false)
-    private String staffUsername;
+    private String authorUsername;
 
     @Column(nullable = false)
-    private String staffName;
+    private String authorName;
 
     @ManyToOne
     @JoinColumn(name = "CASE_NOTE_TYPE_ID", nullable = false)
@@ -72,16 +72,16 @@ public class OffenderCaseNote {
     private String modifyUserId;
 
     public OffenderCaseNoteAmendment addAmendment(final String noteText) {
-        return addAmendment(noteText, staffUsername, staffName);
+        return addAmendment(noteText, authorUsername, authorName);
     }
 
-    public OffenderCaseNoteAmendment addAmendment(final String noteText, final String staffUsername, final String staffName) {
+    public OffenderCaseNoteAmendment addAmendment(final String noteText, final String authorUsername, final String authorName) {
 
         final var amendment = OffenderCaseNoteAmendment.builder()
                 .caseNote(this)
                 .noteText(noteText)
-                .staffUsername(staffUsername)
-                .staffName(staffName)
+                .authorUsername(authorUsername)
+                .authorName(authorName)
                 .amendSequence(getLatestSequence() + 1)
                 .build();
 
