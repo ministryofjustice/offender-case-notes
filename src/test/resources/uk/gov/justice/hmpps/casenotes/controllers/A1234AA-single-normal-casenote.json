@@ -1,0 +1,14 @@
+{
+  "caseNoteId": "131232",
+  "offenderIdentifier": "A1234AA",
+  "type": "OBS",
+  "typeDescription": "Observation",
+  "subType": "GEN",
+  "subTypeDescription": "General",
+  "source": "INST",
+  "authorUsername": "1231232",
+  "authorName": "Mickey Mouse",
+  "text": "Some Text",
+  "locationId": "LEI",
+  "amendments": []
+}

@@ -1,6 +1,7 @@
 package uk.gov.justice.hmpps.casenotes.model;
 
 import lombok.*;
+import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.SortComparator;
 import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.CreatedDate;
@@ -11,10 +12,7 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 @Entity
 @Table(name = "OFFENDER_CASE_NOTE")
@@ -27,10 +25,11 @@ import java.util.Optional;
 @ToString(of = {"id", "offenderIdentifier", "occurrenceDateTime", "locationId", "staffUsername", "sensitiveCaseNoteType"})
 public class OffenderCaseNote {
 
-    @Id()
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "OFFENDER_CASE_NOTE_ID", nullable = false)
-    private Long id;
+    @Id
+    @GeneratedValue(generator = "UUID")
+    @GenericGenerator(name = "UUID", strategy = "org.hibernate.id.UUIDGenerator")
+    @Column(name = "OFFENDER_CASE_NOTE_ID", updatable = false, nullable = false)
+    private UUID id;
 
     @Column(nullable = false)
     private LocalDateTime occurrenceDateTime;

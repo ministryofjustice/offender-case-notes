@@ -23,7 +23,7 @@ public class CaseNote {
 
     @ApiModelProperty(required = true, value = "Case Note Id (unique)", position = 1, example = "12311312")
     @NotNull
-    private Long caseNoteId;
+    private String caseNoteId;
 
     @ApiModelProperty(required = true, value = "Offender Unique Identifier", position = 2, example = "A1234AA")
     @NotNull

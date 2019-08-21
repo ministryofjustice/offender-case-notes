@@ -6,9 +6,10 @@ import org.springframework.stereotype.Repository;
 import uk.gov.justice.hmpps.casenotes.model.OffenderCaseNote;
 
 import java.util.List;
+import java.util.UUID;
 
 @Repository
-public interface OffenderCaseNoteRepository extends PagingAndSortingRepository<OffenderCaseNote, Long>, JpaSpecificationExecutor<OffenderCaseNote> {
+public interface OffenderCaseNoteRepository extends PagingAndSortingRepository<OffenderCaseNote, UUID>, JpaSpecificationExecutor<OffenderCaseNote> {
 
     List<OffenderCaseNote> findAllByOffenderIdentifier(String offenderIdentifier);
 
