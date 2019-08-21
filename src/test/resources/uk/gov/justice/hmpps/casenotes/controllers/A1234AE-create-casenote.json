@@ -1,0 +1,12 @@
+{
+  "offenderIdentifier": "A1234AE",
+  "type": "OBS",
+  "typeDescription": "Observation",
+  "subType": "GEN",
+  "subTypeDescription": "General",
+  "authorUsername": "1231232",
+  "authorName": "Mickey Mouse",
+  "text": "Some Text",
+  "locationId": "LEI",
+  "amendments": []
+}

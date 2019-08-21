@@ -22,6 +22,7 @@ public class CaseNoteResourceTest extends ResourceTest {
 
     private static final String CREATE_CASE_NOTE = "{\"locationId\": \"%s\", \"type\": \"POM\", \"subType\": \"GEN\", \"text\": \"%s\"}";
     private static final String CREATE_CASE_NOTE_WITHOUT_LOC = "{\"type\": \"POM\", \"subType\": \"GEN\", \"text\": \"%s\"}";
+    private static final String CREATE_NORMAL_CASE_NOTE_WITHOUT_LOC = "{\"type\": \"BOB\", \"subType\": \"SMITH\", \"text\": \"%s\"}";
 
     @Autowired
     private AuthTokenHelper authTokenHelper;
@@ -91,7 +92,7 @@ public class CaseNoteResourceTest extends ResourceTest {
     }
 
     @Test
-    public void testCanCreateAndRetrieveCaseNotesForOffenderSenstive() {
+    public void testRetrieveCaseNotesForOffenderSenstive() {
         oauthMockServer.subGetUserDetails(SECURE_CASENOTE_USER);
         elite2MockServer.subGetOffender("A1234AA");
         elite2MockServer.subGetCaseNotesForOffender("A1234AA");
@@ -120,7 +121,7 @@ public class CaseNoteResourceTest extends ResourceTest {
     }
 
     @Test
-    public void testCanCreateAndRetrieveCaseNotesForOffenderNormal() {
+    public void testCanRetrieveCaseNotesForOffenderNormal() {
         oauthMockServer.subGetUserDetails(API_TEST_USER);
         elite2MockServer.subGetOffender("A1234AA");
         elite2MockServer.subGetCaseNotesForOffender("A1234AA");
@@ -139,6 +140,42 @@ public class CaseNoteResourceTest extends ResourceTest {
     }
 
     @Test
+    public void testCanCreateCaseNote_Normal() {
+        oauthMockServer.subGetUserDetails(SECURE_CASENOTE_USER);
+        elite2MockServer.subCreateCaseNote("A1234AE");
+
+        final var token = authTokenHelper.getToken(SECURE_CASENOTE_USER);
+
+        // create the case note
+        final var response = testRestTemplate.exchange(
+                "/case-notes/{offenderIdentifier}",
+                HttpMethod.POST,
+                createHttpEntity(token, format(CREATE_NORMAL_CASE_NOTE_WITHOUT_LOC, "This is another case note")),
+                String.class,
+                "A1234AE");
+
+        assertJsonAndStatus(response, CaseNote.class, 201, "A1234AE-create-casenote.json");
+    }
+
+    @Test
+    public void testCanCreateCaseNote_Secure() {
+        oauthMockServer.subGetUserDetails(SECURE_CASENOTE_USER);
+        elite2MockServer.subGetOffender("A1234AD");
+
+        final var token = authTokenHelper.getToken(SECURE_CASENOTE_USER);
+
+        // create the case note
+        final var response = testRestTemplate.exchange(
+                "/case-notes/{offenderIdentifier}",
+                HttpMethod.POST,
+                createHttpEntity(token, format(CREATE_CASE_NOTE_WITHOUT_LOC, "This is another case note")),
+                String.class,
+                "A1234AD");
+
+        assertJsonAndStatus(response, CaseNote.class, 201, "A1234AD-create-casenote.json");
+    }
+
+    @Test
     public void testCanCreateAmendments() {
         oauthMockServer.subGetUserDetails(SECURE_CASENOTE_USER);
         elite2MockServer.subGetOffender("A1234AB");
@@ -146,6 +183,7 @@ public class CaseNoteResourceTest extends ResourceTest {
 
         final var token = authTokenHelper.getToken(SECURE_CASENOTE_USER);
 
+        // create the case note
         final var postResponse = testRestTemplate.exchange(
                 "/case-notes/{offenderIdentifier}",
                 HttpMethod.POST,
@@ -156,6 +194,7 @@ public class CaseNoteResourceTest extends ResourceTest {
 
         assertThat(postResponse.getStatusCodeValue()).isEqualTo(201);
 
+        // amend the case note
         final var postAmendResponse = testRestTemplate.exchange(
                 "/case-notes/{offenderIdentifier}/{caseNoteId}",
                 HttpMethod.PUT,
@@ -166,6 +205,7 @@ public class CaseNoteResourceTest extends ResourceTest {
 
         assertJsonAndStatus(postAmendResponse, CaseNote.class, 200, "A1234AB-update-casenote.json");
 
+        // check the case note now correct
         final var response = testRestTemplate.exchange(
                 "/case-notes/{offenderIdentifier}",
                 HttpMethod.GET,

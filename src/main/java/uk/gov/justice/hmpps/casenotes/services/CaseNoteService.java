@@ -1,9 +1,11 @@
 package uk.gov.justice.hmpps.casenotes.services;
 
+import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
@@ -28,6 +30,7 @@ import static org.springframework.data.domain.Sort.Direction.ASC;
 @Service
 @Transactional(readOnly = true)
 @Validated
+@AllArgsConstructor
 public class CaseNoteService {
 
     private final OffenderCaseNoteRepository repository;
@@ -36,19 +39,11 @@ public class CaseNoteService {
     private final SecurityUserContext securityUserContext;
     private final ExternalApiService externalApiService;
 
-    public CaseNoteService(final OffenderCaseNoteRepository repository, final CaseNoteTypeRepository caseNoteTypeRepository, final ParentCaseNoteTypeRepository parentCaseNoteTypeRepository, final SecurityUserContext securityUserContext, final ExternalApiService externalApiService) {
-        this.repository = repository;
-        this.caseNoteTypeRepository = caseNoteTypeRepository;
-        this.parentCaseNoteTypeRepository = parentCaseNoteTypeRepository;
-        this.securityUserContext = securityUserContext;
-        this.externalApiService = externalApiService;
-    }
-
     public Page<CaseNote> getCaseNotes(final String offenderIdentifier, final CaseNoteFilter caseNoteFilter, final Pageable pageable) {
 
         final var sensitiveCaseNotes = new ArrayList<CaseNote>();
 
-        if (SecurityUserContext.hasRoles("VIEW_SENSITIVE_CASE_NOTES", "ADD_SENSITIVE_CASE_NOTES")) {
+        if (securityUserContext.isOverrideRole("VIEW_SENSITIVE_CASE_NOTES", "ADD_SENSITIVE_CASE_NOTES")) {
 
             final var filter = OffenderCaseNoteFilter.builder()
                     .offenderIdentifier(offenderIdentifier)
@@ -72,7 +67,7 @@ public class CaseNoteService {
 
         final Page<CaseNote> caseNotes;
         if (sensitiveCaseNotes.isEmpty()) {
-            // Just degate to elite2 for data
+            // Just delegate to elite2 for data
             final var pagedNotes = externalApiService.getOffenderCaseNotes(offenderIdentifier, caseNoteFilter, pageable.getPageSize(), pageable.getPageNumber(), sortField, direction);
 
             final var dtoNotes = translateToDto(pagedNotes, offenderIdentifier);
@@ -181,7 +176,19 @@ public class CaseNoteService {
 
     @Transactional
     public CaseNote createCaseNote(@NotNull final String offenderIdentifier, @NotNull @Valid final NewCaseNote newCaseNote) {
-        final var parentType = parentCaseNoteTypeRepository.findById(newCaseNote.getType()).orElseThrow(() -> EntityNotFoundException.withId(newCaseNote.getType()));
+        final var parentNoteTypeOptional = parentCaseNoteTypeRepository.findById(newCaseNote.getType());
+
+        // If we don't have the type locally then won't be secure, so delegate to elite2
+        if (parentNoteTypeOptional.isEmpty()) {
+            return mapper(externalApiService.createCaseNote(offenderIdentifier, newCaseNote), offenderIdentifier);
+        }
+
+        // ensure that the user can then create a secure case note
+        if (!securityUserContext.isOverrideRole("ADD_SENSITIVE_CASE_NOTES")) {
+            throw new AccessDeniedException("User not allowed to create sensitive case notes");
+        }
+
+        final var parentType = parentNoteTypeOptional.get();
         final var type = caseNoteTypeRepository.findCaseNoteTypeByParentTypeAndType(parentType, newCaseNote.getSubType());
 
         if (type == null) {
@@ -222,7 +229,7 @@ public class CaseNoteService {
     public List<CaseNoteType> getCaseNoteTypes() {
         final var caseNoteTypes = externalApiService.getCaseNoteTypes();
 
-        if (SecurityUserContext.hasRoles("VIEW_SENSITIVE_CASE_NOTES", "ADD_SENSITIVE_CASE_NOTES")) {
+        if (securityUserContext.isOverrideRole("VIEW_SENSITIVE_CASE_NOTES", "ADD_SENSITIVE_CASE_NOTES")) {
             caseNoteTypes.addAll(getSensitiveCaseNotes());
         }
 
@@ -231,7 +238,7 @@ public class CaseNoteService {
 
     public List<CaseNoteType> getUserCaseNoteTypes() {
         final var userCaseNoteTypes = externalApiService.getUserCaseNoteTypes();
-        if (SecurityUserContext.hasRoles("ADD_SENSITIVE_CASE_NOTES")) {
+        if (securityUserContext.isOverrideRole("ADD_SENSITIVE_CASE_NOTES")) {
             userCaseNoteTypes.addAll(getSensitiveCaseNotes());
         }
         return userCaseNoteTypes;
