@@ -7,6 +7,7 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.security.access.AccessDeniedException;
 import uk.gov.justice.hmpps.casenotes.config.SecurityUserContext;
+import uk.gov.justice.hmpps.casenotes.dto.CaseNoteAmendment;
 import uk.gov.justice.hmpps.casenotes.dto.NewCaseNote;
 import uk.gov.justice.hmpps.casenotes.dto.NomisCaseNote;
 import uk.gov.justice.hmpps.casenotes.model.OffenderCaseNote;
@@ -22,8 +23,7 @@ import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -94,6 +94,104 @@ public class CaseNoteServiceTest {
         assertThat(createdNote).isEqualToIgnoringGivenFields(offenderCaseNote,
                 "caseNoteId", "type", "typeDescription", "subType", "subTypeDescription", "source", "creationDateTime", "text");
         assertThat(createdNote.getText()).isEqualTo("HELLO");
+    }
+
+    @Test
+    public void getCaseNote_noAddRole() {
+        assertThatThrownBy(() -> caseNoteService.getCaseNote("12345", UUID.randomUUID().toString())).isInstanceOf(AccessDeniedException.class);
+
+        verify(securityUserContext).isOverrideRole("VIEW_SENSITIVE_CASE_NOTES", "ADD_SENSITIVE_CASE_NOTES");
+    }
+
+    @Test
+    public void getCaseNote_notFound() {
+        when(securityUserContext.isOverrideRole(anyString(), anyString())).thenReturn(Boolean.TRUE);
+
+        assertThatThrownBy(() -> caseNoteService.getCaseNote("12345", UUID.randomUUID().toString())).isInstanceOf(EntityNotFoundException.class);
+    }
+
+    @Test
+    public void getCaseNote() {
+        final var noteType = SensitiveCaseNoteType.builder().type("sometype").parentType(ParentNoteType.builder().build()).build();
+        final var offenderCaseNote = createOffenderCaseNote(noteType);
+        when(repository.findById(any())).thenReturn(Optional.of(offenderCaseNote));
+        when(securityUserContext.isOverrideRole(anyString(), anyString())).thenReturn(Boolean.TRUE);
+
+        final var caseNote = caseNoteService.getCaseNote("12345", UUID.randomUUID().toString());
+        assertThat(caseNote).isEqualToIgnoringGivenFields(offenderCaseNote,
+                "caseNoteId", "type", "typeDescription", "subType", "subTypeDescription", "source", "creationDateTime", "authorUsername", "authorName", "text");
+        assertThat(caseNote.getText()).isEqualTo("HELLO");
+    }
+
+    @Test
+    public void getCaseNote_callElite2() {
+        final var nomisCaseNote = createNomisCaseNote();
+        when(externalApiService.getOffenderCaseNote(anyString(), anyLong())).thenReturn(nomisCaseNote);
+
+        final var caseNote = caseNoteService.getCaseNote("12345", "21455");
+
+        assertThat(caseNote).isEqualToIgnoringGivenFields(nomisCaseNote, "authorUsername", "locationId", "text", "caseNoteId");
+        assertThat(caseNote.getText()).isEqualTo("original");
+        assertThat(caseNote.getAuthorUsername()).isEqualTo("23456");
+        assertThat(caseNote.getLocationId()).isEqualTo("agency");
+        assertThat(caseNote.getCaseNoteId()).isEqualTo("12345");
+    }
+
+    @Test
+    public void amendCaseNote_callElite2() {
+        final var nomisCaseNote = createNomisCaseNote();
+        when(externalApiService.amendOffenderCaseNote(anyString(), anyLong(), anyString())).thenReturn(nomisCaseNote);
+
+        final var caseNote = caseNoteService.amendCaseNote("12345", "21455", "text");
+
+        assertThat(caseNote).isEqualToIgnoringGivenFields(nomisCaseNote, "authorUsername", "locationId", "text", "caseNoteId");
+        assertThat(caseNote.getText()).isEqualTo("original");
+        assertThat(caseNote.getAuthorUsername()).isEqualTo("23456");
+        assertThat(caseNote.getLocationId()).isEqualTo("agency");
+        assertThat(caseNote.getCaseNoteId()).isEqualTo("12345");
+    }
+
+    @Test
+    public void amendCaseNote_noAddRole() {
+        assertThatThrownBy(() -> caseNoteService.amendCaseNote("12345", UUID.randomUUID().toString(), "text")).isInstanceOf(AccessDeniedException.class);
+
+        verify(securityUserContext).isOverrideRole("ADD_SENSITIVE_CASE_NOTES");
+    }
+
+    @Test
+    public void amendCaseNote_notFound() {
+        when(securityUserContext.isOverrideRole(anyString())).thenReturn(Boolean.TRUE);
+        final var caseNoteIdentifier = UUID.randomUUID().toString();
+
+        assertThatThrownBy(() -> {
+            caseNoteService.amendCaseNote("12345", caseNoteIdentifier, "text");
+        }).isInstanceOf(EntityNotFoundException.class).hasMessage(String.format("Resource with id [%s] not found.", caseNoteIdentifier));
+    }
+
+    @Test
+    public void amendCaseNote_wrongOffender() {
+        final var noteType = SensitiveCaseNoteType.builder().type("sometype").parentType(ParentNoteType.builder().build()).build();
+        final var offenderCaseNote = createOffenderCaseNote(noteType);
+        when(repository.findById(any())).thenReturn(Optional.of(offenderCaseNote));
+        when(securityUserContext.isOverrideRole(anyString())).thenReturn(Boolean.TRUE);
+
+        assertThatThrownBy(() -> caseNoteService.amendCaseNote("12345", UUID.randomUUID().toString(), "text"))
+                .isInstanceOf(EntityNotFoundException.class).hasMessage("Resource with id [12345] not found.");
+    }
+
+    @Test
+    public void amendCaseNote() {
+        final var noteType = SensitiveCaseNoteType.builder().type("sometype").parentType(ParentNoteType.builder().build()).build();
+        final var offenderCaseNote = createOffenderCaseNote(noteType);
+        when(repository.findById(any())).thenReturn(Optional.of(offenderCaseNote));
+        when(securityUserContext.isOverrideRole(anyString())).thenReturn(Boolean.TRUE);
+        when(securityUserContext.getCurrentUsername()).thenReturn("user");
+        when(externalApiService.getUserFullName(anyString())).thenReturn("author");
+
+        final var caseNote = caseNoteService.amendCaseNote("A1234AC", UUID.randomUUID().toString(), "text");
+        assertThat(caseNote.getAmendments()).hasSize(1);
+        final var expected = CaseNoteAmendment.builder().additionalNoteText("text").authorName("author").authorUserName("user").sequence(1).build();
+        assertThat(caseNote.getAmendments().get(0)).isEqualToComparingOnlyGivenFields(expected, "additionalNoteText", "authorName", "authorUserName", "sequence");
     }
 
     private NomisCaseNote createNomisCaseNote() {

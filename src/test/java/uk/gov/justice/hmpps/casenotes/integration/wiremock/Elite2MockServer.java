@@ -142,6 +142,16 @@ public class Elite2MockServer extends WireMockRule {
 
     }
 
+    public void subAmendCaseNote(final String offenderIdentifier, final String caseNoteIdentifier) {
+        final var body = gson.toJson(createNomisCaseNote());
+        stubFor(WireMock.put(WireMock.urlPathMatching(String.format("%s/offenders/%s/case-notes/%s", API_PREFIX, offenderIdentifier, caseNoteIdentifier)))
+                .willReturn(WireMock.aResponse()
+                        .withHeader("Content-Type", "application/json")
+                        .withBody(body)
+                        .withStatus(200)
+                ));
+    }
+
     private static class LocalDateTimeConverter implements JsonSerializer<LocalDateTime>, JsonDeserializer<LocalDateTime> {
         private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ISO_LOCAL_DATE_TIME;
 
