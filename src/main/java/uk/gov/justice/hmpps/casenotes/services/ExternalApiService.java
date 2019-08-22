@@ -14,10 +14,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
-import uk.gov.justice.hmpps.casenotes.dto.CaseNoteFilter;
-import uk.gov.justice.hmpps.casenotes.dto.CaseNoteType;
-import uk.gov.justice.hmpps.casenotes.dto.NewCaseNote;
-import uk.gov.justice.hmpps.casenotes.dto.NomisCaseNote;
+import uk.gov.justice.hmpps.casenotes.dto.*;
 
 import java.time.format.DateTimeFormatter;
 import java.util.*;
@@ -137,6 +134,12 @@ public class ExternalApiService {
 
     NomisCaseNote getOffenderCaseNote(final String offenderIdentifier, final long caseNoteIdentifier) {
         final var response = elite2ApiRestTemplate.getForEntity("/offenders/{offenderNo}/case-notes/{caseNoteIdentifier}", NomisCaseNote.class, offenderIdentifier, caseNoteIdentifier);
+        return Optional.ofNullable(response.getBody()).orElseThrow(EntityNotFoundException.withId(offenderIdentifier));
+    }
+
+    NomisCaseNote amendOffenderCaseNote(final String offenderIdentifier, final long caseNoteIdentifier, final String caseNote) {
+        final var response = elite2ApiRestTemplate.exchange("/offenders/{offenderNo}/case-notes/{caseNoteIdentifier}", HttpMethod.PUT,
+                new HttpEntity<>(new UpdateCaseNote(caseNote)), NomisCaseNote.class, offenderIdentifier, caseNoteIdentifier);
         return Optional.ofNullable(response.getBody()).orElseThrow(EntityNotFoundException.withId(offenderIdentifier));
     }
 }

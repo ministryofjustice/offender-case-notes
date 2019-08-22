@@ -216,9 +216,15 @@ public class CaseNoteService {
     }
 
     @Transactional
-    public CaseNote amendCaseNote(@NotNull final String offenderIdentifier, @NotNull final String caseNoteId, @NotNull final String amendCaseNote) {
-        final var offenderCaseNote = repository.findById(UUID.fromString(caseNoteId)).orElseThrow(() -> EntityNotFoundException.withId(caseNoteId));
+    public CaseNote amendCaseNote(@NotNull final String offenderIdentifier, @NotNull final String caseNoteIdentifier, @NotNull final String amendCaseNote) {
+        if (isNotSensitiveCaseNote(caseNoteIdentifier)) {
+            return mapper(externalApiService.amendOffenderCaseNote(offenderIdentifier, NumberUtils.toLong(caseNoteIdentifier), amendCaseNote), offenderIdentifier);
+        }
+        if (!securityUserContext.isOverrideRole("ADD_SENSITIVE_CASE_NOTES")) {
+            throw new AccessDeniedException("User not allowed to view sensitive case notes");
+        }
 
+        final var offenderCaseNote = repository.findById(UUID.fromString(caseNoteIdentifier)).orElseThrow(() -> EntityNotFoundException.withId(caseNoteIdentifier));
         if (!offenderIdentifier.equals(offenderCaseNote.getOffenderIdentifier())) {
             throw EntityNotFoundException.withId(offenderIdentifier);
         }
@@ -267,12 +273,16 @@ public class CaseNoteService {
     }
 
     public CaseNote getCaseNote(final String offenderIdentifier, final String caseNoteIdentifier) {
-        if (NumberUtils.isDigits(caseNoteIdentifier)) {
+        if (isNotSensitiveCaseNote(caseNoteIdentifier)) {
             return mapper(externalApiService.getOffenderCaseNote(offenderIdentifier, NumberUtils.toLong(caseNoteIdentifier)), offenderIdentifier);
         }
         if (!securityUserContext.isOverrideRole("VIEW_SENSITIVE_CASE_NOTES", "ADD_SENSITIVE_CASE_NOTES")) {
             throw new AccessDeniedException("User not allowed to view sensitive case notes");
         }
         return mapper(repository.findById(UUID.fromString(caseNoteIdentifier)).orElseThrow(() -> EntityNotFoundException.withId(caseNoteIdentifier)));
+    }
+
+    private boolean isNotSensitiveCaseNote(final String caseNoteIdentifier) {
+        return NumberUtils.isDigits(caseNoteIdentifier);
     }
 }

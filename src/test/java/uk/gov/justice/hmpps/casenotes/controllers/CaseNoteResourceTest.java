@@ -264,6 +264,25 @@ public class CaseNoteResourceTest extends ResourceTest {
     }
 
     @Test
+    public void testCanCreateAmendments_Normal() {
+        oauthMockServer.subGetUserDetails(SECURE_CASENOTE_USER);
+        elite2MockServer.subAmendCaseNote("A1234AE", "12345");
+
+        final var token = authTokenHelper.getToken(SECURE_CASENOTE_USER);
+
+        // amend the case note
+        final var response = testRestTemplate.exchange(
+                "/case-notes/{offenderIdentifier}/{caseNoteId}",
+                HttpMethod.PUT,
+                createHttpEntity(token, "Amended case note"),
+                new ParameterizedTypeReference<String>() {
+                },
+                "A1234AE", "12345");
+
+        assertJsonAndStatus(response, CaseNote.class, 200, "A1234AE-create-casenote.json");
+    }
+
+    @Test
     public void testCanFilterCaseNotes() {
         oauthMockServer.subGetUserDetails(SECURE_CASENOTE_USER);
         elite2MockServer.subGetOffender("A1234AC");
