@@ -26,8 +26,9 @@ helm init --tiller-namespace offender-case-notes-prod --service-account tiller -
 
 ### Setup Lets Encrypt cert
 
+Ensure the certificate definition exists in the cloud-platform-environments repo under the relevant namespaces folder
+
+e.g.
 ```
-kubectl -n offender-case-notes-dev apply -f certificate-dev.yaml
-kubectl -n offender-case-notes-preprod apply -f certificate-preprod.yaml
-kubectl -n offender-case-notes-prod apply -f certificate-prod.yaml
+cloud-platform-environments/namespaces/live-1.cloud-platform.service.justice.gov.uk/[INSERT NAMESPACE NAME]/05-certificate.yaml
 ```
