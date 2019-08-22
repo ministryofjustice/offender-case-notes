@@ -34,10 +34,10 @@ public class OffenderCaseNoteAmendment {
     private int amendSequence;
 
     @Column(nullable = false)
-    private String staffUsername;
+    private String authorUsername;
 
     @Column(nullable = false)
-    private String staffName;
+    private String authorName;
 
     @Column(nullable = false)
     private String noteText;
