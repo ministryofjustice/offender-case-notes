@@ -11,6 +11,8 @@ import org.springframework.web.client.RestClientResponseException;
 import uk.gov.justice.hmpps.casenotes.dto.ErrorResponse;
 import uk.gov.justice.hmpps.casenotes.services.EntityNotFoundException;
 
+import javax.persistence.EntityExistsException;
+
 
 @RestControllerAdvice(
         basePackages = {"uk.gov.justice.hmpps.casenotes.controllers"}
@@ -68,6 +70,17 @@ public class ControllerAdvice {
                 .body(ErrorResponse
                         .builder()
                         .status(HttpStatus.NOT_FOUND.value())
+                        .developerMessage(e.getMessage())
+                        .build());
+    }
+
+    @ExceptionHandler(EntityExistsException.class)
+    public ResponseEntity<ErrorResponse> handleExistsException(final Exception e) {
+        return ResponseEntity
+                .status(HttpStatus.CONFLICT)
+                .body(ErrorResponse
+                        .builder()
+                        .status(HttpStatus.CONFLICT.value())
                         .developerMessage(e.getMessage())
                         .build());
     }
