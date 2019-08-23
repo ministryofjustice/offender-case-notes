@@ -142,12 +142,12 @@ public class CaseNoteController {
     }
 
     @PutMapping(value = "/types/{parentType}", consumes = "application/json")
-    @ResponseStatus(HttpStatus.CREATED)
+    @ResponseStatus(HttpStatus.OK)
     @ApiOperation(value = "Add New Case Note Type",
             response = UpdateCaseNoteType.class,
             notes = "Creates a new case note type")
     @ApiResponses(value = {
-            @ApiResponse(code = 201, message = "The Case Note Type has been recorded. The updated object is returned including the status.", response = CaseNoteType.class),
+            @ApiResponse(code = 200, message = "The Case Note Type has been recorded. The updated object is returned including the status.", response = CaseNoteType.class),
             @ApiResponse(code = 404, message = "The case note type is not found", response = ErrorResponse.class)})
     public CaseNoteType updateCaseNoteType(
             @ApiParam(value = "Parent Case Note Type", required = true, example = "OBS") @PathVariable("parentType") final String parentType,
@@ -156,12 +156,12 @@ public class CaseNoteController {
     }
 
     @PutMapping(value = "/types/{parentType}/{subType}", consumes = "application/json")
-    @ResponseStatus(HttpStatus.CREATED)
+    @ResponseStatus(HttpStatus.OK)
     @ApiOperation(value = "Add New Case Note Sub Type",
             response = UpdateCaseNoteType.class,
             notes = "Creates a new case note sub type")
     @ApiResponses(value = {
-            @ApiResponse(code = 201, message = "The Case Note Sub Type update has been recorded. The updated object is returned including the status.", response = CaseNoteType.class),
+            @ApiResponse(code = 200, message = "The Case Note Sub Type update has been recorded. The updated object is returned including the status.", response = CaseNoteType.class),
             @ApiResponse(code = 404, message = "The case note sub type is not found", response = ErrorResponse.class)})
     public CaseNoteType updateCaseNoteSubType(
             @ApiParam(value = "Parent Case Note Type", required = true, example = "OBS") @PathVariable("parentType") final String parentType,

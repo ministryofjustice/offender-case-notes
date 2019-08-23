@@ -327,7 +327,7 @@ public class CaseNoteResourceTest extends ResourceTest {
 
         final var token = authTokenHelper.getToken(SYSTEM_USER_READ_WRITE);
 
-        // amend the case note
+        // add a new case note parent type called NEWTYPE1
         final var response = testRestTemplate.exchange(
                 "/case-notes/types",
                 HttpMethod.POST,
@@ -341,7 +341,7 @@ public class CaseNoteResourceTest extends ResourceTest {
 
         assertJsonAndStatus(response, CaseNoteType.class, 201, "newCaseNoteType1.json");
 
-        // amend the case note
+        // amend the case note type from inactive to active and change description
         final var responseUpdate = testRestTemplate.exchange(
                 "/case-notes/types/NEWTYPE1",
                 HttpMethod.PUT,
@@ -352,9 +352,9 @@ public class CaseNoteResourceTest extends ResourceTest {
                 new ParameterizedTypeReference<String>() {
                 });
 
-        assertJsonAndStatus(responseUpdate, CaseNoteType.class, 201, "updateCaseNoteType1.json");
+        assertJsonAndStatus(responseUpdate, CaseNoteType.class, 200, "updateCaseNoteType1.json");
 
-        // amend the case note
+        // add a new sub case note type called NEWSUBTYPE1
         final var responseSubType = testRestTemplate.exchange(
                 "/case-notes/types/NEWTYPE1",
                 HttpMethod.POST,
@@ -368,7 +368,7 @@ public class CaseNoteResourceTest extends ResourceTest {
 
         assertJsonAndStatus(responseSubType, CaseNoteType.class, 201, "newCaseNoteSubType1.json");
 
-        // amend the case note
+        // amend the case note sub type to active and new description
         final var responseUpdateSubType = testRestTemplate.exchange(
                 "/case-notes/types/NEWTYPE1/NEWSUBTYPE1",
                 HttpMethod.PUT,
@@ -379,6 +379,6 @@ public class CaseNoteResourceTest extends ResourceTest {
                 new ParameterizedTypeReference<String>() {
                 });
 
-        assertJsonAndStatus(responseUpdateSubType, CaseNoteType.class, 201, "updateCaseNoteSubType1.json");
+        assertJsonAndStatus(responseUpdateSubType, CaseNoteType.class, 200, "updateCaseNoteSubType1.json");
     }
 }

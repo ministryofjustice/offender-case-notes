@@ -17,12 +17,12 @@ import javax.validation.constraints.NotBlank;
 @Data
 public class UpdateCaseNoteType {
 
-    @ApiModelProperty(required = true, value = "Type Description", example = "General Note Type", position = 2)
+    @ApiModelProperty(required = true, value = "Type Description", example = "General Note Type", position = 1)
     @Length(max = 80)
     @NotBlank
     private String description;
 
-    @ApiModelProperty(value = "Active Type", example = "true", position = 3)
+    @ApiModelProperty(value = "Active Type", example = "true", position = 2)
     @Builder.Default
     private boolean active = true;
 
