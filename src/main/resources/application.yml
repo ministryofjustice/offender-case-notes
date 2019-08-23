@@ -72,14 +72,3 @@ azure:
   application-insights:
     web:
       enable-W3C: true
-      enable-W3C-backcompat-mode: true
-
-app:
-  jwt-public-key: ${JWT_PUBLIC_KEY}
-  elite2-api-base-url: ${ELITE2_API_BASE_URL}
-  elite2-api-rest-url: ${app.elite2-api-base-url}/api
-  oauth-api-rest-url: ${OAUTH_API_REST_URL}
-
-
-
-

@@ -1,7 +1,6 @@
 package uk.gov.justice.hmpps.casenotes.integration.wiremock;
 
 
-import com.github.tomakehurst.wiremock.client.WireMock;
 import com.github.tomakehurst.wiremock.junit.WireMockRule;
 import com.google.gson.*;
 import uk.gov.justice.hmpps.casenotes.dto.CaseNoteType;
@@ -11,6 +10,8 @@ import java.lang.reflect.Type;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+
+import static com.github.tomakehurst.wiremock.client.WireMock.*;
 
 public class Elite2MockServer extends WireMockRule {
     private final Gson gson;
@@ -28,8 +29,8 @@ public class Elite2MockServer extends WireMockRule {
     public void subGetCaseNoteTypes() {
         final var getCaseNoteTypes = API_PREFIX + "/reference-domains/caseNoteTypes";
         stubFor(
-                WireMock.get(WireMock.urlPathEqualTo(getCaseNoteTypes))
-                        .willReturn(WireMock.aResponse()
+                get(urlPathEqualTo(getCaseNoteTypes))
+                        .willReturn(aResponse()
                                 .withHeader("Content-Type", "application/json")
                                 .withBody(gson.toJson(List.of(
                                         CaseNoteType.builder().code("KA").description("Key worker")
@@ -51,8 +52,8 @@ public class Elite2MockServer extends WireMockRule {
     public void subUserCaseNoteTypes() {
         final var getCaseNoteTypes = API_PREFIX + "/users/me/caseNoteTypes";
         stubFor(
-                WireMock.get(WireMock.urlPathEqualTo(getCaseNoteTypes))
-                        .willReturn(WireMock.aResponse()
+                get(urlPathEqualTo(getCaseNoteTypes))
+                        .willReturn(aResponse()
                                 .withHeader("Content-Type", "application/json")
                                 .withBody(gson.toJson(List.of(
                                         CaseNoteType.builder().code("KA").description("Key worker")
@@ -72,8 +73,8 @@ public class Elite2MockServer extends WireMockRule {
     public void subGetOffender(final String offenderIdentifier) {
         final var getCaseNoteTypes = API_PREFIX + "/bookings/offenderNo/" + offenderIdentifier;
         stubFor(
-                WireMock.get(WireMock.urlPathMatching(getCaseNoteTypes))
-                        .willReturn(WireMock.aResponse()
+                get(urlPathMatching(getCaseNoteTypes))
+                        .willReturn(aResponse()
                                 .withHeader("Content-Type", "application/json")
                                 .withBody("{\n" +
                                         "  \"bookingId\": 1,\n" +
@@ -89,8 +90,8 @@ public class Elite2MockServer extends WireMockRule {
         final var getCaseNotes = API_PREFIX + "/offenders/" + offenderIdentifier + "/case-notes";
         final var body = gson.toJson(List.of(createNomisCaseNote()));
         stubFor(
-                WireMock.get(WireMock.urlPathMatching(getCaseNotes))
-                        .willReturn(WireMock.aResponse()
+                get(urlPathMatching(getCaseNotes))
+                        .willReturn(aResponse()
                                 .withHeader("Content-Type", "application/json")
                                 .withHeader("Total-Records", "1")
                                 .withHeader("Page-Offset", "0")
@@ -105,8 +106,8 @@ public class Elite2MockServer extends WireMockRule {
         final var getCaseNote = String.format("%s/offenders/%s/case-notes/%s", API_PREFIX, offenderIdentifier, caseNoteIdentifier);
         final var body = gson.toJson(createNomisCaseNote());
         stubFor(
-                WireMock.get(WireMock.urlPathMatching(getCaseNote))
-                        .willReturn(WireMock.aResponse()
+                get(urlPathMatching(getCaseNote))
+                        .willReturn(aResponse()
                                 .withHeader("Content-Type", "application/json")
                                 .withBody(body)
                                 .withStatus(200)
@@ -133,8 +134,8 @@ public class Elite2MockServer extends WireMockRule {
 
     public void subCreateCaseNote(final String offenderIdentifier) {
         final var body = gson.toJson(createNomisCaseNote());
-        stubFor(WireMock.post(WireMock.urlPathMatching(String.format("%s/offenders/%s/case-notes", API_PREFIX, offenderIdentifier)))
-                        .willReturn(WireMock.aResponse()
+        stubFor(post(urlPathMatching(String.format("%s/offenders/%s/case-notes", API_PREFIX, offenderIdentifier)))
+                .willReturn(aResponse()
                                 .withHeader("Content-Type", "application/json")
                                 .withBody(body)
                                 .withStatus(201)
@@ -144,12 +145,19 @@ public class Elite2MockServer extends WireMockRule {
 
     public void subAmendCaseNote(final String offenderIdentifier, final String caseNoteIdentifier) {
         final var body = gson.toJson(createNomisCaseNote());
-        stubFor(WireMock.put(WireMock.urlPathMatching(String.format("%s/offenders/%s/case-notes/%s", API_PREFIX, offenderIdentifier, caseNoteIdentifier)))
-                .willReturn(WireMock.aResponse()
+        stubFor(put(urlPathMatching(String.format("%s/offenders/%s/case-notes/%s", API_PREFIX, offenderIdentifier, caseNoteIdentifier)))
+                .willReturn(aResponse()
                         .withHeader("Content-Type", "application/json")
                         .withBody(body)
                         .withStatus(200)
                 ));
+    }
+
+    public void subPing(final int status) {
+        stubFor(get("/ping").willReturn(aResponse()
+                .withHeader("Content-Type", "application/json")
+                .withBody(status == 200 ? "pong" : "some error")
+                .withStatus(status)));
     }
 
     private static class LocalDateTimeConverter implements JsonSerializer<LocalDateTime>, JsonDeserializer<LocalDateTime> {

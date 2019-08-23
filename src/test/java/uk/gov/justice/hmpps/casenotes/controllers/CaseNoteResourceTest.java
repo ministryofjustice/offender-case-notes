@@ -2,10 +2,8 @@ package uk.gov.justice.hmpps.casenotes.controllers;
 
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.json.JsonContent;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpMethod;
-import org.springframework.http.ResponseEntity;
 import uk.gov.justice.hmpps.casenotes.dto.CaseNote;
 import uk.gov.justice.hmpps.casenotes.dto.CaseNoteType;
 import uk.gov.justice.hmpps.casenotes.utils.AuthTokenHelper;
@@ -14,7 +12,6 @@ import java.util.Objects;
 
 import static java.lang.String.format;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.springframework.core.ResolvableType.forType;
 import static uk.gov.justice.hmpps.casenotes.utils.AuthTokenHelper.AuthToken.API_TEST_USER;
 import static uk.gov.justice.hmpps.casenotes.utils.AuthTokenHelper.AuthToken.SECURE_CASENOTE_USER;
 
@@ -324,15 +321,4 @@ public class CaseNoteResourceTest extends ResourceTest {
 
         assertJsonAndStatus(response, CaseNote.class, 200, "A1234AC-casenote.json");
     }
-
-    private <T> void assertJsonAndStatus(final ResponseEntity<String> response, final Class<T> type, final int status, final String jsonFile) {
-        assertThat(response.getStatusCodeValue()).withFailMessage("Expecting status code value <%s> to be equal to <%s> but it was not.\nBody was\n%s", response.getStatusCodeValue(), status, response.getBody()).isEqualTo(status);
-
-        assertThat(getBodyAsJsonContent(type, response)).isEqualToJson(jsonFile);
-    }
-
-    private <T> JsonContent<CaseNote> getBodyAsJsonContent(final Class<T> type, final ResponseEntity<String> response) {
-        return new JsonContent<>(getClass(), forType(type), Objects.requireNonNull(response.getBody()));
-    }
-
 }
