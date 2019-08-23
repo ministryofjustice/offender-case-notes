@@ -1,35 +1,33 @@
 package uk.gov.justice.hmpps.casenotes.config;
 
-import lombok.Data;
+import lombok.Getter;
 import org.hibernate.validator.constraints.URL;
-import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.validation.annotation.Validated;
 
-@ConfigurationProperties(value = "app")
-@Data
+@Configuration
 @Validated
+@Getter
 public class OffenderCaseNoteProperties {
 
     /**
      * Elite2 API Base URL endpoint ("http://localhost:8080")
      */
-    @URL
-    private String elite2ApiBaseUrl;
-
-    /**
-     * Elite2 API Rest URL endpoint ("http://localhost:8080/api")
-     */
-    @URL
-    private String elite2ApiRestUrl;
+    private final String elite2ApiBaseUrl;
 
     /**
      * OAUTH2 API Rest URL endpoint ("http://localhost:9090/auth/api")
      */
-    @URL
-    private String oauthApiRestUrl;
+    private final String oauthApiBaseUrl;
 
-    /**
-     * JWT Public Key
-     */
-    private String jwtPublicKey;
+    private final String jwtPublicKey;
+
+    public OffenderCaseNoteProperties(@Value("${elite2.api.base.url}") @URL final String elite2ApiBaseUrl,
+                                      @Value("${oauth.api.base.url}") @URL final String oauthApiBaseUrl,
+                                      @Value("${jwt.public.key}") final String jwtPublicKey) {
+        this.elite2ApiBaseUrl = elite2ApiBaseUrl;
+        this.oauthApiBaseUrl = oauthApiBaseUrl;
+        this.jwtPublicKey = jwtPublicKey;
+    }
 }

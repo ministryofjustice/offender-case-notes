@@ -21,12 +21,12 @@ public class RestTemplateConfiguration {
 
     @Bean(name = "elite2ApiRestTemplate")
     public RestTemplate elite2ApiRestTemplate(final RestTemplateBuilder restTemplateBuilder) {
-        return getRestTemplate(restTemplateBuilder, properties.getElite2ApiRestUrl());
+        return getRestTemplate(restTemplateBuilder, properties.getElite2ApiBaseUrl());
     }
 
     @Bean(name = "oauthApiRestTemplate")
     public RestTemplate oauthApiRestTemplate(final RestTemplateBuilder restTemplateBuilder) {
-        return getRestTemplate(restTemplateBuilder, properties.getOauthApiRestUrl());
+        return getRestTemplate(restTemplateBuilder, properties.getOauthApiBaseUrl());
     }
 
 

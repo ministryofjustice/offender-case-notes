@@ -27,11 +27,11 @@ public class ExternalApiService {
     private final RestTemplate oauthApiRestTemplate;
 
     List<CaseNoteType> getCaseNoteTypes() {
-        return getCaseNoteTypes("/reference-domains/caseNoteTypes");
+        return getCaseNoteTypes("/api/reference-domains/caseNoteTypes");
     }
 
     List<CaseNoteType> getUserCaseNoteTypes() {
-        return getCaseNoteTypes("/users/me/caseNoteTypes");
+        return getCaseNoteTypes("/api/users/me/caseNoteTypes");
     }
 
     private List<CaseNoteType> getCaseNoteTypes(final String url) {
@@ -49,7 +49,7 @@ public class ExternalApiService {
     }
 
     String getUserFullName(final String currentUsername) {
-        final var response = oauthApiRestTemplate.exchange("/user/{username}", HttpMethod.GET, null, Map.class, currentUsername);
+        final var response = oauthApiRestTemplate.exchange("/api/user/{username}", HttpMethod.GET, null, Map.class, currentUsername);
         if (response.getBody() != null) {
             return (String) response.getBody().get("name");
         }
@@ -57,7 +57,7 @@ public class ExternalApiService {
     }
 
     String getOffenderLocation(final String offenderIdentifier) {
-        final var response = elite2ApiRestTemplate.exchange("/bookings/offenderNo/{offenderNo}", HttpMethod.GET, null, Map.class, offenderIdentifier);
+        final var response = elite2ApiRestTemplate.exchange("/api/bookings/offenderNo/{offenderNo}", HttpMethod.GET, null, Map.class, offenderIdentifier);
         final var body = response.getBody();
         if (body == null) {
             throw EntityNotFoundException.withId(offenderIdentifier);
@@ -77,7 +77,7 @@ public class ExternalApiService {
                 .forEach(headers::add);
 
         final var queryFilter = getQueryFilter(filter);
-        final var url = "/offenders/{offenderIdentifier}/case-notes" + (queryFilter != null ? "?" + queryFilter : "");
+        final var url = "/api/offenders/{offenderIdentifier}/case-notes" + (queryFilter != null ? "?" + queryFilter : "");
 
         final var response = elite2ApiRestTemplate.exchange(url, HttpMethod.GET, new HttpEntity<>(null, headers),
                 new ParameterizedTypeReference<List<NomisCaseNote>>() {
@@ -90,13 +90,13 @@ public class ExternalApiService {
 
         return new PageImpl<>(response.getBody(),
                 PageRequest.of(pageNumber, pageLimit),
-                getHeader(response, "Total-Records")
+                getHeader(response)
         );
     }
 
-    private int getHeader(final ResponseEntity response, final String headerKey) {
+    private int getHeader(final ResponseEntity response) {
         final var responseHeaders = response.getHeaders();
-        final var value = responseHeaders.get(headerKey);
+        final var value = responseHeaders.get("Total-Records");
         return value != null && !value.isEmpty() ? Integer.valueOf(value.get(0)) : 0;
     }
 
@@ -128,17 +128,17 @@ public class ExternalApiService {
     }
 
     NomisCaseNote createCaseNote(final String offenderIdentifier, final NewCaseNote newCaseNote) {
-        final var response = elite2ApiRestTemplate.postForEntity("/offenders/{offenderNo}/case-notes", newCaseNote, NomisCaseNote.class, offenderIdentifier);
+        final var response = elite2ApiRestTemplate.postForEntity("/api/offenders/{offenderNo}/case-notes", newCaseNote, NomisCaseNote.class, offenderIdentifier);
         return Optional.ofNullable(response.getBody()).orElseThrow(EntityNotFoundException.withId(offenderIdentifier));
     }
 
     NomisCaseNote getOffenderCaseNote(final String offenderIdentifier, final long caseNoteIdentifier) {
-        final var response = elite2ApiRestTemplate.getForEntity("/offenders/{offenderNo}/case-notes/{caseNoteIdentifier}", NomisCaseNote.class, offenderIdentifier, caseNoteIdentifier);
+        final var response = elite2ApiRestTemplate.getForEntity("/api/offenders/{offenderNo}/case-notes/{caseNoteIdentifier}", NomisCaseNote.class, offenderIdentifier, caseNoteIdentifier);
         return Optional.ofNullable(response.getBody()).orElseThrow(EntityNotFoundException.withId(offenderIdentifier));
     }
 
     NomisCaseNote amendOffenderCaseNote(final String offenderIdentifier, final long caseNoteIdentifier, final String caseNote) {
-        final var response = elite2ApiRestTemplate.exchange("/offenders/{offenderNo}/case-notes/{caseNoteIdentifier}", HttpMethod.PUT,
+        final var response = elite2ApiRestTemplate.exchange("/api/offenders/{offenderNo}/case-notes/{caseNoteIdentifier}", HttpMethod.PUT,
                 new HttpEntity<>(new UpdateCaseNote(caseNote)), NomisCaseNote.class, offenderIdentifier, caseNoteIdentifier);
         return Optional.ofNullable(response.getBody()).orElseThrow(EntityNotFoundException.withId(offenderIdentifier));
     }
