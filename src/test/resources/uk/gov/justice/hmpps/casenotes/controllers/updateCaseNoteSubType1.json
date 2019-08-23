@@ -1,0 +1,12 @@
+{
+  "code": "NEWTYPE1",
+  "description": "Change The Desc",
+  "activeFlag": "Y",
+  "subCodes": [
+    {
+      "code": "NEWSUBTYPE1",
+      "description": "Change The Desc",
+      "activeFlag": "Y"
+    }
+  ]
+}

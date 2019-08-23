@@ -38,7 +38,7 @@ import java.util.Optional;
 
 @Configuration
 @EnableSwagger2
-@EnableGlobalMethodSecurity(prePostEnabled = true, proxyTargetClass = true)
+@EnableGlobalMethodSecurity(prePostEnabled = true)
 public class ResourceServerConfiguration extends ResourceServerConfigurerAdapter {
 
     private final OffenderCaseNoteProperties properties;

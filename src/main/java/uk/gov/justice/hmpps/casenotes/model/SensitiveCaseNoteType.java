@@ -38,7 +38,7 @@ public class SensitiveCaseNoteType {
 
     @Column(name = "ACTIVE", nullable = false)
     @Builder.Default
-    private final boolean active = true;
+    private boolean active = true;
 
     @CreatedDate
     @Column(nullable = false)
@@ -54,4 +54,8 @@ public class SensitiveCaseNoteType {
     @LastModifiedBy
     private String modifyUserId;
 
+    public void update(final String description, boolean active) {
+        this.description = description;
+        this.active = active;
+    }
 }

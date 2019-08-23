@@ -7,6 +7,7 @@ import lombok.*;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @ApiModel(description = "Case Note Filter")
 @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -35,5 +36,8 @@ public class CaseNoteFilter {
 
     @ApiModelProperty(required = true, value = "Filter by username", position = 6, example = "USER1")
     private String authorUsername;
+
+    @ApiModelProperty(required = true, value = "Filter by a list of case note types and optional case not sub types separated by plus", position = 7, example = "KA+KE,OBS,POM+GEN")
+    private List<String> caseNoteTypeSubTypes;
 
 }

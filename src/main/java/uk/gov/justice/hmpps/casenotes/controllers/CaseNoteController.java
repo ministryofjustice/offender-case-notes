@@ -114,4 +114,59 @@ public class CaseNoteController {
         return caseNoteService.getUserCaseNoteTypes();
 
     }
+
+    @PostMapping(value = "/types", consumes = "application/json")
+    @ResponseStatus(HttpStatus.CREATED)
+    @ApiOperation(value = "Add New Case Note Type",
+            response = NewCaseNoteType.class,
+            notes = "Creates a new case note type")
+    @ApiResponses(value = {
+            @ApiResponse(code = 201, message = "The Case Note Type has been recorded. The updated object is returned including the status.", response = CaseNoteType.class),
+            @ApiResponse(code = 409, message = "The case note type has already been recorded. The current unmodified object (including status) is returned.", response = ErrorResponse.class)})
+    public CaseNoteType createCaseNoteType(@RequestBody @NotNull final NewCaseNoteType body) {
+        return caseNoteService.createCaseNoteType(body);
+    }
+
+    @PostMapping(value = "/types/{parentType}", consumes = "application/json")
+    @ResponseStatus(HttpStatus.CREATED)
+    @ApiOperation(value = "Add New Case Note Sub Type",
+            response = NewCaseNoteType.class,
+            notes = "Creates a new case note sub type")
+    @ApiResponses(value = {
+            @ApiResponse(code = 201, message = "The Case Note Sub Type has been recorded. The updated object is returned including the status.", response = CaseNoteType.class),
+            @ApiResponse(code = 409, message = "The case note sub type has already been recorded. The current unmodified object (including status) is returned.", response = ErrorResponse.class)})
+    public CaseNoteType createCaseNoteSubType(
+            @ApiParam(value = "Parent Case Note Type", required = true, example = "GEN") @PathVariable("parentType") final String parentType,
+            @RequestBody @NotNull final NewCaseNoteType body) {
+        return caseNoteService.createCaseNoteSubType(parentType, body);
+    }
+
+    @PutMapping(value = "/types/{parentType}", consumes = "application/json")
+    @ResponseStatus(HttpStatus.OK)
+    @ApiOperation(value = "Update Case Note Type",
+            response = UpdateCaseNoteType.class,
+            notes = "Creates a new case note type")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "The case note type has been updated. The updated object is returned.", response = CaseNoteType.class),
+            @ApiResponse(code = 404, message = "The case note type is not found", response = ErrorResponse.class)})
+    public CaseNoteType updateCaseNoteType(
+            @ApiParam(value = "Parent Case Note Type", required = true, example = "OBS") @PathVariable("parentType") final String parentType,
+            @RequestBody @NotNull final UpdateCaseNoteType body) {
+        return caseNoteService.updateCaseNoteType(parentType, body);
+    }
+
+    @PutMapping(value = "/types/{parentType}/{subType}", consumes = "application/json")
+    @ResponseStatus(HttpStatus.OK)
+    @ApiOperation(value = "Update Case Note Sub Type",
+            response = UpdateCaseNoteType.class,
+            notes = "Creates a new case note sub type")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "The case note sub type update has been updated. The updated object is returned.", response = CaseNoteType.class),
+            @ApiResponse(code = 404, message = "The case note sub type is not found", response = ErrorResponse.class)})
+    public CaseNoteType updateCaseNoteSubType(
+            @ApiParam(value = "Parent Case Note Type", required = true, example = "OBS") @PathVariable("parentType") final String parentType,
+            @ApiParam(value = "Sub Case Note Type", required = true, example = "GEN") @PathVariable("subType") final String subType,
+            @RequestBody @NotNull final UpdateCaseNoteType body) {
+        return caseNoteService.updateCaseNoteSubType(parentType, subType, body);
+    }
 }

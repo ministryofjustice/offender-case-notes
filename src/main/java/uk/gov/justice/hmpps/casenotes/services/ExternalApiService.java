@@ -114,6 +114,10 @@ public class ExternalApiService {
             queryFilters.add(String.format("subType:in:'%s'", filter.getSubType()));
         }
 
+        if (filter.getLocationId() != null) {
+            queryFilters.add(String.format("agencyId:eq:'%s'", filter.getLocationId()));
+        }
+
         final var queryParamsMap = new HashMap<String, String>();
         if (!queryFilters.isEmpty()) {
             queryParamsMap.put("query", StringUtils.join(queryFilters, ",and:"));

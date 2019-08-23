@@ -9,7 +9,9 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Entity
 @Table(name = "CASE_NOTE_PARENT_TYPE")
@@ -31,7 +33,7 @@ public class ParentNoteType {
 
     @Column(name = "ACTIVE", nullable = false)
     @Builder.Default
-    private final boolean active = true;
+    private boolean active = true;
 
     @CreatedDate
     @Column(nullable = false)
@@ -47,6 +49,16 @@ public class ParentNoteType {
     @LastModifiedBy
     private String modifyUserId;
 
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "type")
-    private List<SensitiveCaseNoteType> subTypes;
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "parentType")
+    @Builder.Default
+    private List<SensitiveCaseNoteType> subTypes = new ArrayList<>();
+
+    public Optional<SensitiveCaseNoteType> getSubType(final String subType) {
+        return getSubTypes().stream().filter(t -> t.getType().equalsIgnoreCase(subType)).findFirst();
+    }
+
+    public void update(final String description, boolean active) {
+        this.description = description;
+        this.active = active;
+    }
 }
