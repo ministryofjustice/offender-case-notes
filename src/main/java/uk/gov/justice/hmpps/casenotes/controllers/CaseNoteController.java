@@ -92,7 +92,7 @@ public class CaseNoteController {
     public CaseNote amendCaseNote(
             @ApiParam(value = "Offender Identifier", required = true, example = "A1234AA") @PathVariable("offenderIdentifier") final String offenderIdentifier,
             @ApiParam(value = "Case Note Id", required = true, example = "A1234AA") @PathVariable("caseNoteIdentifier") final String caseNoteIdentifier,
-            @RequestBody @NotNull final String amendedText) {
+            @RequestBody @NotNull final UpdateCaseNote amendedText) {
         return caseNoteService.amendCaseNote(offenderIdentifier, caseNoteIdentifier, amendedText);
     }
 
