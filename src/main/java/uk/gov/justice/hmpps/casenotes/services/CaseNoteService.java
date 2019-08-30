@@ -219,7 +219,7 @@ public class CaseNoteService {
     }
 
     @Transactional
-    public CaseNote amendCaseNote(@NotNull final String offenderIdentifier, @NotNull final String caseNoteIdentifier, @NotNull final String amendCaseNote) {
+    public CaseNote amendCaseNote(@NotNull final String offenderIdentifier, @NotNull final String caseNoteIdentifier, final UpdateCaseNote amendCaseNote) {
         if (isNotSensitiveCaseNote(caseNoteIdentifier)) {
             return mapper(externalApiService.amendOffenderCaseNote(offenderIdentifier, NumberUtils.toLong(caseNoteIdentifier), amendCaseNote), offenderIdentifier);
         }
@@ -232,7 +232,7 @@ public class CaseNoteService {
             throw EntityNotFoundException.withId(offenderIdentifier);
         }
 
-        offenderCaseNote.addAmendment(amendCaseNote, securityUserContext.getCurrentUsername(), externalApiService.getUserFullName(securityUserContext.getCurrentUsername()));
+        offenderCaseNote.addAmendment(amendCaseNote.getText(), securityUserContext.getCurrentUsername(), externalApiService.getUserFullName(securityUserContext.getCurrentUsername()));
         repository.save(offenderCaseNote);
         return mapper(offenderCaseNote);
     }

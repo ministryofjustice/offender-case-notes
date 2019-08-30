@@ -240,7 +240,7 @@ public class CaseNoteResourceTest extends ResourceTest {
         final var postAmendResponse = testRestTemplate.exchange(
                 "/case-notes/{offenderIdentifier}/{caseNoteId}",
                 HttpMethod.PUT,
-                createHttpEntity(token, "Amended case note"),
+                createHttpEntity(token, "{ \"text\": \"Amended case note\" }"),
                 new ParameterizedTypeReference<String>() {
                 },
                 "A1234AB", Objects.requireNonNull(postResponse.getBody()).getCaseNoteId());
@@ -270,7 +270,7 @@ public class CaseNoteResourceTest extends ResourceTest {
         final var response = testRestTemplate.exchange(
                 "/case-notes/{offenderIdentifier}/{caseNoteId}",
                 HttpMethod.PUT,
-                createHttpEntity(token, "Amended case note"),
+                createHttpEntity(token, "{ \"text\": \"Amended case note\" }"),
                 new ParameterizedTypeReference<String>() {
                 },
                 "A1234AE", "12345");
