@@ -146,7 +146,7 @@ public class ExternalApiService {
 
     NomisCaseNote amendOffenderCaseNote(final String offenderIdentifier, final long caseNoteIdentifier, final String caseNote) {
         final var response = elite2ApiRestTemplate.exchange("/api/offenders/{offenderNo}/case-notes/{caseNoteIdentifier}", HttpMethod.PUT,
-                new HttpEntity<>(Map.of("text", caseNote)), NomisCaseNote.class, offenderIdentifier, caseNoteIdentifier);
+                new HttpEntity<>(caseNote), NomisCaseNote.class, offenderIdentifier, caseNoteIdentifier);
         return Optional.ofNullable(response.getBody()).orElseThrow(EntityNotFoundException.withId(offenderIdentifier));
     }
 }
