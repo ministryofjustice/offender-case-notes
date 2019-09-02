@@ -62,6 +62,10 @@ public abstract class ResourceTest {
         return new HttpEntity<>(body, headers);
     }
 
+    <T> void assertStatus(final ResponseEntity<String> response, final int status) {
+        assertThat(response.getStatusCodeValue()).withFailMessage("Expecting status code value <%s> to be equal to <%s> but it was not.\nBody was\n%s", response.getStatusCodeValue(), status, response.getBody()).isEqualTo(status);
+    }
+
     <T> void assertJsonAndStatus(final ResponseEntity<String> response, final Class<T> type, final int status, final String jsonFile) {
         assertThat(response.getStatusCodeValue()).withFailMessage("Expecting status code value <%s> to be equal to <%s> but it was not.\nBody was\n%s", response.getStatusCodeValue(), status, response.getBody()).isEqualTo(status);
 

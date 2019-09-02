@@ -12,6 +12,7 @@ import uk.gov.justice.hmpps.casenotes.dto.ErrorResponse;
 import uk.gov.justice.hmpps.casenotes.services.EntityNotFoundException;
 
 import javax.persistence.EntityExistsException;
+import javax.validation.ValidationException;
 
 
 @RestControllerAdvice(
@@ -48,6 +49,17 @@ public class ControllerAdvice {
                 .body(ErrorResponse
                         .builder()
                         .status(HttpStatus.FORBIDDEN.value())
+                        .build());
+    }
+
+    @ExceptionHandler(ValidationException.class)
+    public ResponseEntity<ErrorResponse> handleException(final ValidationException e) {
+        log.debug("Bad Request (400) returned", e);
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(ErrorResponse
+                        .builder()
+                        .status(HttpStatus.BAD_REQUEST.value())
                         .build());
     }
 

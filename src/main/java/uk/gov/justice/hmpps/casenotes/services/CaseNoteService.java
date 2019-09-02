@@ -23,6 +23,7 @@ import uk.gov.justice.hmpps.casenotes.repository.ParentCaseNoteTypeRepository;
 
 import javax.persistence.EntityExistsException;
 import javax.validation.Valid;
+import javax.validation.ValidationException;
 import javax.validation.constraints.NotNull;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -30,6 +31,7 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import static java.lang.String.format;
 import static org.springframework.data.domain.Sort.Direction.ASC;
 
 @Service
@@ -182,10 +184,10 @@ public class CaseNoteService {
 
     @Transactional
     public CaseNote createCaseNote(@NotNull final String offenderIdentifier, @NotNull @Valid final NewCaseNote newCaseNote) {
-        final var parentNoteTypeOptional = parentCaseNoteTypeRepository.findById(newCaseNote.getType());
+        final var type = caseNoteTypeRepository.findSensitiveCaseNoteTypeByParentType_TypeAndType(newCaseNote.getType(), newCaseNote.getSubType());
 
         // If we don't have the type locally then won't be secure, so delegate to elite2
-        if (parentNoteTypeOptional.isEmpty()) {
+        if (type == null) {
             return mapper(externalApiService.createCaseNote(offenderIdentifier, newCaseNote), offenderIdentifier);
         }
 
@@ -194,11 +196,9 @@ public class CaseNoteService {
             throw new AccessDeniedException("User not allowed to create sensitive case notes");
         }
 
-        final var parentType = parentNoteTypeOptional.get();
-        final var type = caseNoteTypeRepository.findCaseNoteTypeByParentTypeAndType(parentType, newCaseNote.getSubType());
-
-        if (type == null) {
-            throw EntityNotFoundException.withId(newCaseNote.getSubType());
+        // ensure that the case note type is active
+        if (!type.getParentType().isActive() || !type.isActive()) {
+            throw new ValidationException(format("Case Note Type %s/%s is not active", type.getParentType().getType(), type.getType()));
         }
 
         final var currentUsername = securityUserContext.getCurrentUsername();

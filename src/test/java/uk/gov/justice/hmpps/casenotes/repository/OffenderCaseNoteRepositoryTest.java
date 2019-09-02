@@ -33,14 +33,11 @@ public class OffenderCaseNoteRepositoryTest {
     @Autowired
     private CaseNoteTypeRepository caseNoteTypeRepository;
 
-    @Autowired
-    private ParentCaseNoteTypeRepository parentCaseNoteTypeRepository;
-
     private SensitiveCaseNoteType sampleType;
 
     @Before
     public void setUp() {
-        sampleType = caseNoteTypeRepository.findCaseNoteTypeByParentTypeAndType(parentCaseNoteTypeRepository.findById(PARENT_TYPE).orElseThrow(), SUB_TYPE);
+        sampleType = caseNoteTypeRepository.findSensitiveCaseNoteTypeByParentType_TypeAndType(PARENT_TYPE, SUB_TYPE);
     }
 
     @Test

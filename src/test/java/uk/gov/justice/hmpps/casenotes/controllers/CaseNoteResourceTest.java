@@ -19,6 +19,7 @@ public class CaseNoteResourceTest extends ResourceTest {
     private static final String CREATE_CASE_NOTE = "{\"locationId\": \"%s\", \"type\": \"POM\", \"subType\": \"GEN\", \"text\": \"%s\"}";
     private static final String CREATE_CASE_NOTE_WITHOUT_LOC = "{\"type\": \"POM\", \"subType\": \"GEN\", \"text\": \"%s\"}";
     private static final String CREATE_NORMAL_CASE_NOTE_WITHOUT_LOC = "{\"type\": \"BOB\", \"subType\": \"SMITH\", \"text\": \"%s\"}";
+    private static final String CREATE_CASE_NOTE_BY_TYPE = "{\"type\": \"%s\", \"subType\": \"%s\", \"text\": \"%s\"}";
 
     @Autowired
     private AuthTokenHelper authTokenHelper;
@@ -215,6 +216,24 @@ public class CaseNoteResourceTest extends ResourceTest {
                 "A1234AD");
 
         assertJsonAndStatus(response, CaseNote.class, 201, "A1234AD-create-casenote.json");
+    }
+
+    @Test
+    public void testCannotCreateInactiveCaseNote_Secure() {
+        oauthMockServer.subGetUserDetails(SECURE_CASENOTE_USER);
+        elite2MockServer.subGetOffender("A1234AD");
+
+        final var token = authTokenHelper.getToken(SECURE_CASENOTE_USER);
+
+        // create the case note
+        final var response = testRestTemplate.exchange(
+                "/case-notes/{offenderIdentifier}",
+                HttpMethod.POST,
+                createHttpEntity(token, format(CREATE_CASE_NOTE_BY_TYPE, "OLDPOM", "OLDTWO", "This is another case note with inactive case note type")),
+                String.class,
+                "A1234AD");
+
+        assertStatus(response, 400);
     }
 
     @Test
