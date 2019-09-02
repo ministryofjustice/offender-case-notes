@@ -14,6 +14,7 @@ import uk.gov.justice.hmpps.casenotes.dto.*;
 import uk.gov.justice.hmpps.casenotes.services.CaseNoteService;
 
 import javax.validation.constraints.NotNull;
+import java.time.LocalDate;
 import java.util.List;
 
 @Api(tags = {"case-notes"})
@@ -67,6 +68,24 @@ public class CaseNoteController {
             @PageableDefault(sort = {"occurrenceDateTime"}, direction = Sort.Direction.DESC) final Pageable pageable) {
         return caseNoteService.getCaseNotes(offenderIdentifier, filter, pageable);
     }
+
+    @RequestMapping(value = "/{offenderIdentifier}/{type}/{subType}/count", method = RequestMethod.GET, produces = "application/json")
+    @ApiOperation(value = "Count of case notes", notes = "Count of case notes", nickname = "getCaseNoteCount")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "OK", response = CaseNoteCount.class),
+            @ApiResponse(code = 400, message = "Invalid request.", response = ErrorResponse.class),
+            @ApiResponse(code = 404, message = "Requested resource not found.", response = ErrorResponse.class),
+            @ApiResponse(code = 500, message = "Unrecoverable error occurred whilst processing request.", response = ErrorResponse.class)})
+    public CaseNoteCount getCaseNoteCount(
+            @ApiParam(value = "Offender Identifier", required = true, example = "1234567") @PathVariable("offenderIdentifier") final Long bookingId,
+            @ApiParam(value = "Case note type.", required = true) @PathVariable("type") String type,
+            @ApiParam(value = "Case note sub-type.", required = true) @PathVariable("subType") String subType,
+            @ApiParam(value = "Only case notes occurring on or after this date (in YYYY-MM-DD format) will be considered.") @RequestParam("fromDate") String fromDate,
+            @ApiParam(value = "Only case notes occurring on or before this date (in YYYY-MM-DD format) will be considered.") @RequestParam("toDate") String toDate) {
+        return caseNoteService.getCaseNoteCount(bookingId, type, subType, LocalDate.parse(fromDate), LocalDate.parse(toDate));
+    }
+
+    ;
 
     @PostMapping(value = "/{offenderIdentifier}", consumes = "application/json")
     @ResponseStatus(HttpStatus.CREATED)

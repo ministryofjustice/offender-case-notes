@@ -1,0 +1,8 @@
+{
+  "bookingId": 1234567,
+  "type": "NEG",
+  "subType": "IEP_WARN",
+  "count": 2,
+  "fromDate": "2019-05-30",
+  "toDate": "2019-08-30"
+}

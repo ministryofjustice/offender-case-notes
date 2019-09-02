@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import uk.gov.justice.hmpps.casenotes.dto.*;
 
+import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 
@@ -145,6 +146,11 @@ public class ExternalApiService {
         final var response = elite2ApiRestTemplate.exchange("/api/offenders/{offenderNo}/case-notes/{caseNoteIdentifier}", HttpMethod.PUT,
                 new HttpEntity<>(caseNote), NomisCaseNote.class, offenderIdentifier, caseNoteIdentifier);
         return Optional.ofNullable(response.getBody()).orElseThrow(EntityNotFoundException.withId(offenderIdentifier));
+    }
+
+    NomisCaseNoteCount getOffenderCaseNoteCount(final Long bookingId, final String type, final String subType, final LocalDate fromDate, final LocalDate toDate) {
+        final var response = elite2ApiRestTemplate.getForEntity("/api/bookings/{offenderIdentifier}/caseNotes/{type}/{subType}/count?fromDate={fromDate}&toDate={toDate}", NomisCaseNoteCount.class, bookingId, type, subType, fromDate, toDate);
+        return Optional.ofNullable(response.getBody()).orElseThrow(EntityNotFoundException.withId(bookingId));
     }
 }
 

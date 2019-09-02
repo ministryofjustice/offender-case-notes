@@ -24,9 +24,11 @@ import uk.gov.justice.hmpps.casenotes.repository.ParentCaseNoteTypeRepository;
 import javax.persistence.EntityExistsException;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -119,7 +121,7 @@ public class CaseNoteService {
                             throw new RuntimeException("Error", e);
                         }
                     })
-                .collect(Collectors.toList());
+                    .collect(Collectors.toList());
         } catch (final NoSuchFieldException e) {
             return list;
         }
@@ -176,6 +178,17 @@ public class CaseNoteService {
                                 .build()
                 ).collect(Collectors.toList()))
                 .locationId(cn.getAgencyId())
+                .build();
+    }
+
+    private CaseNoteCount caseNoteCountMapper(final NomisCaseNoteCount cnc) {
+        return CaseNoteCount.builder()
+                .bookingId(cnc.getBookingId())
+                .type(cnc.getType())
+                .subType(cnc.getSubType())
+                .count(cnc.getCount())
+                .fromDate(LocalDate.parse(cnc.getFromDate()))
+                .toDate(LocalDate.parse(cnc.getToDate()))
                 .build();
     }
 
@@ -342,8 +355,28 @@ public class CaseNoteService {
     public CaseNoteType updateCaseNoteSubType(final String parentType, final String subType, final UpdateCaseNoteType body) {
 
         final var parentNoteType = parentCaseNoteTypeRepository.findById(parentType).orElseThrow(EntityNotFoundException.withId(parentType));
-        final var existingSubType = parentNoteType.getSubType(subType).orElseThrow(EntityNotFoundException.withId(parentType+" "+subType));
+        final var existingSubType = parentNoteType.getSubType(subType).orElseThrow(EntityNotFoundException.withId(parentType + " " + subType));
         existingSubType.update(body.getDescription(), body.isActive());
         return transform(parentNoteType);
+    }
+
+    public CaseNoteCount getCaseNoteCount(final Long bookingId, final String type, final String subType, final LocalDate fromDate, final LocalDate toDate) {
+        final Optional<ParentNoteType> parentNoteTypeOptional = parentCaseNoteTypeRepository.findById(type);
+        if (parentNoteTypeOptional.isEmpty()) {
+            return caseNoteCountMapper(externalApiService.getOffenderCaseNoteCount(bookingId, type, subType, fromDate, toDate));
+        }
+        if (!securityUserContext.isOverrideRole("VIEW_SENSITIVE_CASE_NOTES", "ADD_SENSITIVE_CASE_NOTES")) {
+            throw new AccessDeniedException("User not allowed to view sensitive case notes");
+        }
+
+        final var caseNoteType = caseNoteTypeRepository.findCaseNoteTypeByParentTypeAndType(parentNoteTypeOptional.get(), subType);
+
+        if (caseNoteType == null) {
+            throw EntityNotFoundException.withId(type);
+
+        }
+        final var count = repository.countOffenderCaseNotesByOffenderIdentifierAndSensitiveCaseNoteTypeAndOccurrenceDateTimeBetween(bookingId, caseNoteType, fromDate, toDate);
+
+        return CaseNoteCount.builder().bookingId(bookingId).type(type).subType(subType).count(count).fromDate(fromDate).toDate(toDate).build();
     }
 }

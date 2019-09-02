@@ -5,6 +5,7 @@ import com.github.tomakehurst.wiremock.junit.WireMockRule;
 import com.google.gson.*;
 import uk.gov.justice.hmpps.casenotes.dto.CaseNoteType;
 import uk.gov.justice.hmpps.casenotes.dto.NomisCaseNote;
+import uk.gov.justice.hmpps.casenotes.dto.NomisCaseNoteCount;
 
 import java.lang.reflect.Type;
 import java.time.LocalDateTime;
@@ -114,6 +115,18 @@ public class Elite2MockServer extends WireMockRule {
                         ));
     }
 
+    public void subGetCaseNoteCount() {
+        final var getCaseNoteCount = "/api/bookings/1234567/caseNotes/NEG/IEP_WARN/count*";
+        final var body = gson.toJson(createNomisCaseNoteCount());
+        stubFor(
+                get(urlPathMatching(getCaseNoteCount))
+                        .willReturn(aResponse()
+                                .withHeader("Content-Type", "application/json")
+                                .withBody(body)
+                                .withStatus(200)
+                        ));
+    }
+
     private NomisCaseNote createNomisCaseNote() {
         return NomisCaseNote.builder()
                 .caseNoteId(131232L)
@@ -132,14 +145,25 @@ public class Elite2MockServer extends WireMockRule {
                 .build();
     }
 
+    private NomisCaseNoteCount createNomisCaseNoteCount() {
+        return NomisCaseNoteCount.builder()
+                .bookingId(1234567L)
+                .type("NEG")
+                .subType("IEP_WARN")
+                .count(2L)
+                .fromDate("2019-05-30")
+                .toDate("2019-08-30")
+                .build();
+    }
+
     public void subCreateCaseNote(final String offenderIdentifier) {
         final var body = gson.toJson(createNomisCaseNote());
         stubFor(post(urlPathMatching(String.format("%s/offenders/%s/case-notes", API_PREFIX, offenderIdentifier)))
                 .willReturn(aResponse()
-                                .withHeader("Content-Type", "application/json")
-                                .withBody(body)
-                                .withStatus(201)
-                        ));
+                        .withHeader("Content-Type", "application/json")
+                        .withBody(body)
+                        .withStatus(201)
+                ));
 
     }
 

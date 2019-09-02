@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpMethod;
 import uk.gov.justice.hmpps.casenotes.dto.CaseNote;
+import uk.gov.justice.hmpps.casenotes.dto.CaseNoteCount;
 import uk.gov.justice.hmpps.casenotes.dto.CaseNoteType;
 import uk.gov.justice.hmpps.casenotes.utils.AuthTokenHelper;
 
@@ -37,6 +38,22 @@ public class CaseNoteResourceTest extends ResourceTest {
                 });
 
         assertJsonAndStatus(response, CaseNoteType.class, 200, "caseNoteTypes.json");
+    }
+
+    @Test
+    public void testGetCaseNoteCountNormal() {
+        elite2MockServer.subGetCaseNoteCount();
+
+        final var token = authTokenHelper.getToken(API_TEST_USER);
+
+        final var response = testRestTemplate.exchange(
+                "/case-notes/{bookingId}/{type}/{subtype}/count?fromDate={fromDate}&toDate={toDate}",
+                HttpMethod.GET,
+                createHttpEntity(token, null),
+                new ParameterizedTypeReference<String>() {
+                }, "1234567", "NEG", "IEP_WARN", "2019-05-30", "2019-08-30");
+
+        assertJsonAndStatus(response, CaseNoteCount.class, 200, "caseNoteCount.json");
     }
 
     @Test
