@@ -6,6 +6,7 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.*;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @ApiModel(description = "Case Note Type")
@@ -17,7 +18,7 @@ import java.util.List;
 @Data
 @ToString
 @Builder(toBuilder = true)
-public class CaseNoteType {
+public class CaseNoteType implements Comparable<CaseNoteType>{
 
     @ApiModelProperty(required = true, value = "Case Note Code", position = 1, example = "OBSERVE")
     private String code;
@@ -30,5 +31,11 @@ public class CaseNoteType {
     private String activeFlag = "Y";
 
     @ApiModelProperty(value = "List of case note sub types", position = 4, allowEmptyValue = true)
-    private List<CaseNoteType> subCodes;
+    @Builder.Default
+    private List<CaseNoteType> subCodes = new ArrayList<>();
+
+    @Override
+    public int compareTo(final CaseNoteType type) {
+        return getDescription().compareToIgnoreCase(type.getDescription());
+    }
 }
