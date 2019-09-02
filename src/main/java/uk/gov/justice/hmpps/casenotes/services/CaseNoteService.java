@@ -43,6 +43,7 @@ public class CaseNoteService {
     private final ParentCaseNoteTypeRepository parentCaseNoteTypeRepository;
     private final SecurityUserContext securityUserContext;
     private final ExternalApiService externalApiService;
+    private final CaseNoteTypeMerger caseNoteTypeMerger;
 
     public Page<CaseNote> getCaseNotes(final String offenderIdentifier, final CaseNoteFilter caseNoteFilter, final Pageable pageable) {
 
@@ -241,7 +242,7 @@ public class CaseNoteService {
         final var caseNoteTypes = externalApiService.getCaseNoteTypes();
 
         if (securityUserContext.isOverrideRole("VIEW_SENSITIVE_CASE_NOTES", "ADD_SENSITIVE_CASE_NOTES")) {
-            caseNoteTypes.addAll(getSensitiveCaseNotes());
+            return caseNoteTypeMerger.mergeAndSortList(caseNoteTypes, getSensitiveCaseNoteTypes(true));
         }
 
         return caseNoteTypes;
@@ -250,23 +251,26 @@ public class CaseNoteService {
     public List<CaseNoteType> getUserCaseNoteTypes() {
         final var userCaseNoteTypes = externalApiService.getUserCaseNoteTypes();
         if (securityUserContext.isOverrideRole("ADD_SENSITIVE_CASE_NOTES")) {
-            userCaseNoteTypes.addAll(getSensitiveCaseNotes());
+            return caseNoteTypeMerger.mergeAndSortList(userCaseNoteTypes, getSensitiveCaseNoteTypes(false));
         }
         return userCaseNoteTypes;
     }
 
-    private List<CaseNoteType> getSensitiveCaseNotes() {
+
+    private List<CaseNoteType> getSensitiveCaseNoteTypes(final boolean allTypes) {
         return parentCaseNoteTypeRepository.findAll().stream()
-                .map(this::transform)
+                .filter(t -> allTypes || t.isActive())
+                .map(st -> transform(st,allTypes))
                 .collect(Collectors.toList());
     }
 
-    private CaseNoteType transform(final ParentNoteType parentNoteType) {
+    private CaseNoteType transform(final ParentNoteType parentNoteType, final boolean allTypes) {
         return CaseNoteType.builder()
                 .code(parentNoteType.getType())
                 .description(parentNoteType.getDescription())
                 .activeFlag(parentNoteType.isActive() ? "Y" : "N")
                 .subCodes(parentNoteType.getSubTypes().stream()
+                        .filter(t -> allTypes || t.isActive())
                         .map(st -> CaseNoteType.builder()
                                 .code(st.getType())
                                 .description(st.getDescription())
@@ -306,7 +310,7 @@ public class CaseNoteService {
                 .active(newCaseNoteType.isActive())
                 .build());
 
-        return transform(parentNoteType);
+        return transform(parentNoteType, true);
     }
 
     @Transactional
@@ -326,7 +330,7 @@ public class CaseNoteService {
                         .build()
         );
 
-        return transform(parentNoteType);
+        return transform(parentNoteType, true);
     }
 
     @Transactional
@@ -334,7 +338,7 @@ public class CaseNoteService {
     public CaseNoteType updateCaseNoteType(final String parentType, final UpdateCaseNoteType body) {
         final var parentNoteType = parentCaseNoteTypeRepository.findById(parentType).orElseThrow(EntityNotFoundException.withId(parentType));
         parentNoteType.update(body.getDescription(), body.isActive());
-        return transform(parentNoteType);
+        return transform(parentNoteType, true);
     }
 
     @Transactional
@@ -344,6 +348,6 @@ public class CaseNoteService {
         final var parentNoteType = parentCaseNoteTypeRepository.findById(parentType).orElseThrow(EntityNotFoundException.withId(parentType));
         final var existingSubType = parentNoteType.getSubType(subType).orElseThrow(EntityNotFoundException.withId(parentType+" "+subType));
         existingSubType.update(body.getDescription(), body.isActive());
-        return transform(parentNoteType);
+        return transform(parentNoteType, true);
     }
 }

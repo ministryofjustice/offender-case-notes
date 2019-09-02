@@ -40,12 +40,14 @@ public class CaseNoteServiceTest {
     private SecurityUserContext securityUserContext;
     @Mock
     private ExternalApiService externalApiService;
+    @Mock
+    private CaseNoteTypeMerger caseNoteTypeMerger;
 
     private CaseNoteService caseNoteService;
 
     @Before
     public void setUp() {
-        caseNoteService = new CaseNoteService(repository, caseNoteTypeRepository, parentCaseNoteTypeRepository, securityUserContext, externalApiService);
+        caseNoteService = new CaseNoteService(repository, caseNoteTypeRepository, parentCaseNoteTypeRepository, securityUserContext, externalApiService, caseNoteTypeMerger);
     }
 
     @Test
