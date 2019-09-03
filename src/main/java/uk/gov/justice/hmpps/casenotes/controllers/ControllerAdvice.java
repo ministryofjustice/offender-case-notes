@@ -12,6 +12,7 @@ import uk.gov.justice.hmpps.casenotes.dto.ErrorResponse;
 import uk.gov.justice.hmpps.casenotes.services.EntityNotFoundException;
 
 import javax.persistence.EntityExistsException;
+import javax.validation.ValidationException;
 
 
 @RestControllerAdvice(
@@ -21,7 +22,7 @@ import javax.persistence.EntityExistsException;
 public class ControllerAdvice {
 
     @ExceptionHandler(RestClientResponseException.class)
-    public ResponseEntity<byte[]> handleException(final RestClientResponseException e) {
+    public ResponseEntity<byte[]> handleRestClientResponseException(final RestClientResponseException e) {
         log.error("Unexpected exception", e);
         return ResponseEntity
                 .status(e.getRawStatusCode())
@@ -29,7 +30,7 @@ public class ControllerAdvice {
     }
 
     @ExceptionHandler(RestClientException.class)
-    public ResponseEntity<ErrorResponse> handleException(final RestClientException e) {
+    public ResponseEntity<ErrorResponse> handleRestClientException(final RestClientException e) {
         log.error("Unexpected exception", e);
         return ResponseEntity
                 .status(HttpStatus.INTERNAL_SERVER_ERROR)
@@ -41,7 +42,7 @@ public class ControllerAdvice {
     }
 
     @ExceptionHandler(AccessDeniedException.class)
-    public ResponseEntity<ErrorResponse> handleException(final AccessDeniedException e) {
+    public ResponseEntity<ErrorResponse> handleAccessDeniedException(final AccessDeniedException e) {
         log.debug("Forbidden (403) returned", e);
         return ResponseEntity
                 .status(HttpStatus.FORBIDDEN)
@@ -51,9 +52,9 @@ public class ControllerAdvice {
                         .build());
     }
 
-    @ExceptionHandler(Exception.class)
-    public ResponseEntity<ErrorResponse> handleException(final Exception e) {
-        log.error("Unexpected exception", e);
+    @ExceptionHandler(ValidationException.class)
+    public ResponseEntity<ErrorResponse> handleValidationException(final ValidationException e) {
+        log.debug("Bad Request (400) returned", e);
         return ResponseEntity
                 .status(HttpStatus.BAD_REQUEST)
                 .body(ErrorResponse
@@ -63,8 +64,20 @@ public class ControllerAdvice {
                         .build());
     }
 
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<ErrorResponse> handleException(final Exception e) {
+        log.error("Unexpected exception", e);
+        return ResponseEntity
+                .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(ErrorResponse
+                        .builder()
+                        .status(HttpStatus.INTERNAL_SERVER_ERROR.value())
+                        .developerMessage(e.getMessage())
+                        .build());
+    }
+
     @ExceptionHandler(EntityNotFoundException.class)
-    public ResponseEntity<ErrorResponse> handleNotFoundException(final Exception e) {
+    public ResponseEntity<ErrorResponse> handleEntityNotFoundException(final Exception e) {
         return ResponseEntity
                 .status(HttpStatus.NOT_FOUND)
                 .body(ErrorResponse
@@ -75,7 +88,7 @@ public class ControllerAdvice {
     }
 
     @ExceptionHandler(EntityExistsException.class)
-    public ResponseEntity<ErrorResponse> handleExistsException(final Exception e) {
+    public ResponseEntity<ErrorResponse> handleEntityExistsException(final Exception e) {
         return ResponseEntity
                 .status(HttpStatus.CONFLICT)
                 .body(ErrorResponse

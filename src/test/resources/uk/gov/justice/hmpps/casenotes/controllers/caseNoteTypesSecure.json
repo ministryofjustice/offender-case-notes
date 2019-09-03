@@ -34,6 +34,23 @@
     ]
   },
   {
+    "code": "OLDPOM",
+    "description": "OLDPOM Notes",
+    "activeFlag": "N",
+    "subCodes": [
+      {
+        "code": "OLDONE",
+        "description": "Active Old POM Note",
+        "activeFlag": "Y"
+      },
+      {
+        "code": "OLDTWO",
+        "description": "Inactive Old POM Note",
+        "activeFlag": "N"
+      }
+    ]
+  },
+  {
     "code": "POM",
     "description": "POM Notes",
     "activeFlag": "Y",
@@ -42,6 +59,11 @@
         "code": "GEN",
         "description": "General POM Note",
         "activeFlag": "Y"
+      },
+      {
+        "code": "OLD",
+        "description": "Inactive POM Note",
+        "activeFlag": "N"
       },
       {
         "code": "SPECIAL",

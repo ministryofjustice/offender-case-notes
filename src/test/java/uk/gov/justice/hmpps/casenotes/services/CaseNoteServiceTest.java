@@ -52,44 +52,35 @@ public class CaseNoteServiceTest {
 
     @Test
     public void createCaseNote_callElite2() {
-        when(parentCaseNoteTypeRepository.findById(anyString())).thenReturn(Optional.empty());
+        when(caseNoteTypeRepository.findSensitiveCaseNoteTypeByParentType_TypeAndType(anyString(), anyString())).thenReturn(null);
 
         final var nomisCaseNote = createNomisCaseNote();
         when(externalApiService.createCaseNote(anyString(), any())).thenReturn(nomisCaseNote);
 
-        final var caseNote = caseNoteService.createCaseNote("12345", NewCaseNote.builder().type("type").build());
+        final var caseNote = caseNoteService.createCaseNote("12345", NewCaseNote.builder().type("type").subType("SUB").build());
 
         assertThat(caseNote).isEqualToIgnoringGivenFields(nomisCaseNote, "authorUsername", "locationId", "text", "caseNoteId");
         assertThat(caseNote.getText()).isEqualTo("original");
         assertThat(caseNote.getLocationId()).isEqualTo("agency");
         assertThat(caseNote.getCaseNoteId()).isEqualTo("12345");
-        verify(parentCaseNoteTypeRepository).findById("type");
+        verify(caseNoteTypeRepository).findSensitiveCaseNoteTypeByParentType_TypeAndType("type", "SUB");
     }
 
     @Test
     public void createCaseNote_noAddRole() {
-        when(parentCaseNoteTypeRepository.findById(anyString())).thenReturn(Optional.of(ParentNoteType.builder().build()));
+        when(caseNoteTypeRepository.findSensitiveCaseNoteTypeByParentType_TypeAndType(anyString(), anyString())).thenReturn(SensitiveCaseNoteType.builder().build());
         when(securityUserContext.isOverrideRole(anyString())).thenReturn(Boolean.FALSE);
 
-        assertThatThrownBy(() -> caseNoteService.createCaseNote("12345", NewCaseNote.builder().type("type").build())).isInstanceOf(AccessDeniedException.class);
+        assertThatThrownBy(() -> caseNoteService.createCaseNote("12345", NewCaseNote.builder().type("type").subType("SUB").build())).isInstanceOf(AccessDeniedException.class);
 
         verify(securityUserContext).isOverrideRole("ADD_SENSITIVE_CASE_NOTES");
     }
 
     @Test
-    public void createCaseNote_caseNoteTypeNotFound() {
-        when(parentCaseNoteTypeRepository.findById(anyString())).thenReturn(Optional.of(ParentNoteType.builder().build()));
-        when(securityUserContext.isOverrideRole(anyString())).thenReturn(Boolean.TRUE);
-
-        assertThatThrownBy(() -> caseNoteService.createCaseNote("12345", NewCaseNote.builder().type("type").build())).isInstanceOf(EntityNotFoundException.class);
-    }
-
-    @Test
     public void createCaseNote() {
-        when(parentCaseNoteTypeRepository.findById(anyString())).thenReturn(Optional.of(ParentNoteType.builder().build()));
-        when(securityUserContext.isOverrideRole(anyString())).thenReturn(Boolean.TRUE);
         final var noteType = SensitiveCaseNoteType.builder().type("sometype").parentType(ParentNoteType.builder().build()).build();
-        when(caseNoteTypeRepository.findCaseNoteTypeByParentTypeAndType(any(), anyString())).thenReturn(noteType);
+        when(caseNoteTypeRepository.findSensitiveCaseNoteTypeByParentType_TypeAndType(anyString(), anyString())).thenReturn(noteType);
+        when(securityUserContext.isOverrideRole(anyString())).thenReturn(Boolean.TRUE);
         final var offenderCaseNote = createOffenderCaseNote(noteType);
         when(repository.save(any())).thenReturn(offenderCaseNote);
 
