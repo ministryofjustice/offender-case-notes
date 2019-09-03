@@ -8,7 +8,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 import uk.gov.justice.hmpps.casenotes.dto.*;
 import uk.gov.justice.hmpps.casenotes.services.CaseNoteService;
@@ -16,38 +15,33 @@ import uk.gov.justice.hmpps.casenotes.services.CaseNoteService;
 import javax.validation.constraints.NotNull;
 import java.util.List;
 
+import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
+
 @Api(tags = {"case-notes"})
 @RestController
 @RequestMapping(
         value = "case-notes",
-        produces = MediaType.APPLICATION_JSON_VALUE)
+        produces = APPLICATION_JSON_VALUE)
 @Slf4j
 @AllArgsConstructor
 public class CaseNoteController {
 
     private final CaseNoteService caseNoteService;
 
-    @RequestMapping(value = "/{offenderIdentifier}/{caseNoteIdentifier}", method = RequestMethod.GET, consumes = "application/json", produces = "application/json")
+    @GetMapping("/{offenderIdentifier}/{caseNoteIdentifier}")
     @ResponseBody
     @ApiOperation(value = "Retrieves a case note",
             nickname = "retrieve case note")
     @ApiResponses({
             @ApiResponse(code = 404, message = "Offender or case note not found"),
             @ApiResponse(code = 200, message = "OK", response = CaseNote.class, responseContainer = "List")})
-    @ApiImplicitParams({
-            @ApiImplicitParam(name = "page", dataType = "int", paramType = "query",
-                    value = "Results page you want to retrieve (0..N)", example = "0", defaultValue = "0"),
-            @ApiImplicitParam(name = "size", dataType = "int", paramType = "query",
-                    value = "Number of records per page.", example = "10", defaultValue = "10"),
-            @ApiImplicitParam(name = "sort", dataType = "string", paramType = "query",
-                    value = "Sort column and direction, e.g. sort=occurrenceDateTime,desc. Multiple sort params allowed.")})
     public CaseNote getCaseNote(
             @ApiParam(value = "Offender Identifier", required = true, example = "A1234AA") @PathVariable("offenderIdentifier") final String offenderIdentifier,
             @ApiParam(value = "Case Note Id", required = true, example = "A1234AA") @PathVariable("caseNoteIdentifier") final String caseNoteIdentifier) {
         return caseNoteService.getCaseNote(offenderIdentifier, caseNoteIdentifier);
     }
 
-    @RequestMapping(value = "/{offenderIdentifier}", method = RequestMethod.GET, consumes = "application/json", produces = "application/json")
+    @GetMapping("/{offenderIdentifier}")
     @ResponseBody
     @ApiOperation(value = "Retrieves a list of case notes",
             nickname = "retrieve case notes")
@@ -68,7 +62,7 @@ public class CaseNoteController {
         return caseNoteService.getCaseNotes(offenderIdentifier, filter, pageable);
     }
 
-    @PostMapping(value = "/{offenderIdentifier}", consumes = "application/json")
+    @PostMapping(value = "/{offenderIdentifier}", consumes = APPLICATION_JSON_VALUE)
     @ResponseStatus(HttpStatus.CREATED)
     @ApiOperation(value = "Add Case Note for offender",
             response = CaseNote.class,
@@ -82,7 +76,7 @@ public class CaseNoteController {
         return caseNoteService.createCaseNote(offenderIdentifier, newCaseNote);
     }
 
-    @PutMapping(value = "/{offenderIdentifier}/{caseNoteIdentifier}", consumes = "application/json")
+    @PutMapping(value = "/{offenderIdentifier}/{caseNoteIdentifier}", consumes = APPLICATION_JSON_VALUE)
     @ApiOperation(value = "Amend Case Note for offender",
             response = CaseNote.class,
             notes = "Amend a case note information adds and additional entry to the note")
@@ -96,7 +90,7 @@ public class CaseNoteController {
         return caseNoteService.amendCaseNote(offenderIdentifier, caseNoteIdentifier, amendedText);
     }
 
-    @GetMapping("/types")
+    @GetMapping(value = "/types")
     @ApiOperation(value = "Retrieves a list of case note types", response = CaseNoteType.class)
     @ApiResponses({
             @ApiResponse(code = 404, message = "Case notes types not found"),
@@ -115,7 +109,7 @@ public class CaseNoteController {
 
     }
 
-    @PostMapping(value = "/types", consumes = "application/json")
+    @PostMapping(value = "/types", consumes = APPLICATION_JSON_VALUE)
     @ResponseStatus(HttpStatus.CREATED)
     @ApiOperation(value = "Add New Case Note Type",
             response = NewCaseNoteType.class,
@@ -127,7 +121,7 @@ public class CaseNoteController {
         return caseNoteService.createCaseNoteType(body);
     }
 
-    @PostMapping(value = "/types/{parentType}", consumes = "application/json")
+    @PostMapping(value = "/types/{parentType}", consumes = APPLICATION_JSON_VALUE)
     @ResponseStatus(HttpStatus.CREATED)
     @ApiOperation(value = "Add New Case Note Sub Type",
             response = NewCaseNoteType.class,
@@ -141,7 +135,7 @@ public class CaseNoteController {
         return caseNoteService.createCaseNoteSubType(parentType, body);
     }
 
-    @PutMapping(value = "/types/{parentType}", consumes = "application/json")
+    @PutMapping(value = "/types/{parentType}", consumes = APPLICATION_JSON_VALUE)
     @ResponseStatus(HttpStatus.OK)
     @ApiOperation(value = "Update Case Note Type",
             response = UpdateCaseNoteType.class,
@@ -155,7 +149,7 @@ public class CaseNoteController {
         return caseNoteService.updateCaseNoteType(parentType, body);
     }
 
-    @PutMapping(value = "/types/{parentType}/{subType}", consumes = "application/json")
+    @PutMapping(value = "/types/{parentType}/{subType}", consumes = APPLICATION_JSON_VALUE)
     @ResponseStatus(HttpStatus.OK)
     @ApiOperation(value = "Update Case Note Sub Type",
             response = UpdateCaseNoteType.class,
