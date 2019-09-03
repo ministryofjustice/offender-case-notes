@@ -9,6 +9,7 @@ import org.springframework.boot.test.json.JsonContent;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
@@ -24,6 +25,9 @@ import java.util.Objects;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
 import static org.springframework.core.ResolvableType.forType;
+import static org.springframework.http.HttpHeaders.ACCEPT;
+import static org.springframework.http.HttpHeaders.AUTHORIZATION;
+import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_CLASS)
 @RunWith(SpringRunner.class)
@@ -47,17 +51,12 @@ public abstract class ResourceTest {
     }
 
     HttpEntity<?> createHttpEntity(final String bearerToken, final Object body) {
-        return createHttpEntity(bearerToken, body, Collections.emptyMap());
-    }
-
-    private HttpEntity<?> createHttpEntity(final String bearerToken, final Object body, final Map<String, String> additionalHeaders) {
         final var headers = new HttpHeaders();
 
-        headers.add("Authorization", "Bearer " + bearerToken);
-        headers.add("Content-Type", "application/json");
-        headers.add("Accept", "application/json");
+        headers.add(AUTHORIZATION, "Bearer " + bearerToken);
+        headers.add(ACCEPT, APPLICATION_JSON_VALUE);
 
-        additionalHeaders.forEach(headers::add);
+        if (body != null) headers.add(HttpHeaders.CONTENT_TYPE, APPLICATION_JSON_VALUE);
 
         return new HttpEntity<>(body, headers);
     }
