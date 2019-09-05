@@ -220,7 +220,7 @@ public class CaseNoteService {
     }
 
     @Transactional
-    public CaseNote amendCaseNote(@NotNull final String offenderIdentifier, @NotNull final String caseNoteIdentifier, final UpdateCaseNote amendCaseNote) {
+    public CaseNote amendCaseNote(@NotNull final String offenderIdentifier, @NotNull final String caseNoteIdentifier, @NotNull @Valid final UpdateCaseNote amendCaseNote) {
         if (isNotSensitiveCaseNote(caseNoteIdentifier)) {
             return mapper(externalApiService.amendOffenderCaseNote(offenderIdentifier, NumberUtils.toLong(caseNoteIdentifier), amendCaseNote), offenderIdentifier);
         }
@@ -296,7 +296,7 @@ public class CaseNoteService {
 
     @Transactional
     @PreAuthorize("hasAnyRole('MAINTAIN_REF_DATA', 'SYSTEM_USER')")
-    public CaseNoteType createCaseNoteType(@Valid final NewCaseNoteType newCaseNoteType) {
+    public CaseNoteType createCaseNoteType(@NotNull @Valid final NewCaseNoteType newCaseNoteType) {
 
         final var parentNoteTypeOptional = parentCaseNoteTypeRepository.findById(newCaseNoteType.getType());
 
@@ -315,7 +315,7 @@ public class CaseNoteService {
 
     @Transactional
     @PreAuthorize("hasAnyRole('MAINTAIN_REF_DATA', 'SYSTEM_USER')")
-    public CaseNoteType createCaseNoteSubType(final String parentType, @Valid final NewCaseNoteType newCaseNoteType) {
+    public CaseNoteType createCaseNoteSubType(final String parentType, @NotNull @Valid final NewCaseNoteType newCaseNoteType) {
         final var parentNoteType = parentCaseNoteTypeRepository.findById(parentType).orElseThrow(EntityNotFoundException.withId(parentType));
 
         if (parentNoteType.getSubType(newCaseNoteType.getType()).isPresent()) {
@@ -335,7 +335,7 @@ public class CaseNoteService {
 
     @Transactional
     @PreAuthorize("hasAnyRole('MAINTAIN_REF_DATA', 'SYSTEM_USER')")
-    public CaseNoteType updateCaseNoteType(final String parentType, final UpdateCaseNoteType body) {
+    public CaseNoteType updateCaseNoteType(final String parentType, @NotNull @Valid final UpdateCaseNoteType body) {
         final var parentNoteType = parentCaseNoteTypeRepository.findById(parentType).orElseThrow(EntityNotFoundException.withId(parentType));
         parentNoteType.update(body.getDescription(), body.isActive());
         return transform(parentNoteType, true);
@@ -343,7 +343,7 @@ public class CaseNoteService {
 
     @Transactional
     @PreAuthorize("hasAnyRole('MAINTAIN_REF_DATA', 'SYSTEM_USER')")
-    public CaseNoteType updateCaseNoteSubType(final String parentType, final String subType, final UpdateCaseNoteType body) {
+    public CaseNoteType updateCaseNoteSubType(final String parentType, final String subType, @NotNull @Valid final UpdateCaseNoteType body) {
 
         final var parentNoteType = parentCaseNoteTypeRepository.findById(parentType).orElseThrow(EntityNotFoundException.withId(parentType));
         final var existingSubType = parentNoteType.getSubType(subType).orElseThrow(EntityNotFoundException.withId(parentType+" "+subType));
