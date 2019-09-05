@@ -4,6 +4,7 @@ import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseEntity;
 import uk.gov.justice.hmpps.casenotes.dto.CaseNote;
 import uk.gov.justice.hmpps.casenotes.dto.CaseNoteType;
 import uk.gov.justice.hmpps.casenotes.utils.AuthTokenHelper;
@@ -400,4 +401,93 @@ public class CaseNoteResourceTest extends ResourceTest {
 
         assertJsonAndStatus(responseUpdateSubType, CaseNoteType.class, 200, "updateCaseNoteSubType1.json");
     }
+
+    @Test
+    public void testCannotCreateAndUpdateTypesWhenInvalid() {
+        oauthMockServer.subGetUserDetails(SYSTEM_USER_READ_WRITE);
+
+        final var token = authTokenHelper.getToken(SYSTEM_USER_READ_WRITE);
+
+        // add a new case note parent type called TOOLONG1234567890 that is more than 12 chars
+        final var response = testRestTemplate.exchange(
+                "/case-notes/types",
+                HttpMethod.POST,
+                createHttpEntity(token, "{" +
+                        "\"type\": \"TOOLONG1234567890\",\n" +
+                        "\"description\": \"Wrong!\"," +
+                        "\"active\": false" +
+                        "}"),
+                new ParameterizedTypeReference<String>() {
+                });
+
+        assertJsonAndStatus(response, ResponseEntity.class, 400, "validation-error1.json");
+
+        // amend the case note type and use an invalid boolean value
+        final var responseUpdate = testRestTemplate.exchange(
+                "/case-notes/types/POM",
+                HttpMethod.PUT,
+                createHttpEntity(token, "{" +
+                        "\"description\": \"Change The Desc\"," +
+                        "\"active\": notvalidtype" +
+                        "}"),
+                new ParameterizedTypeReference<String>() {
+                });
+
+        assertStatus(responseUpdate, 500);
+
+        // amend the case note type to description that is too long
+        final var responseUpdate2 = testRestTemplate.exchange(
+                "/case-notes/types/POM",
+                HttpMethod.PUT,
+                createHttpEntity(token, "{" +
+                        "\"description\": \"012345678901234567890123456789012345678901234567890123456789012345678901234567890\"," +
+                        "\"active\": true" +
+                        "}"),
+                new ParameterizedTypeReference<String>() {
+                });
+
+        assertJsonAndStatus(responseUpdate2, ResponseEntity.class, 400, "validation-error2.json");
+
+        // try to add a new sub case note type that is too long
+        final var responseSubType = testRestTemplate.exchange(
+                "/case-notes/types/POM",
+                HttpMethod.POST,
+                createHttpEntity(token, "{" +
+                        "\"type\": \"TOOLONG1234567890\",\n" +
+                        "\"description\": \"New Type\"," +
+                        "\"active\": false" +
+                        "}"),
+                new ParameterizedTypeReference<String>() {
+                });
+
+        assertStatus(responseSubType, 400);
+
+        // try to add a new sub case note type where description is too long
+        final var responseSubType2 = testRestTemplate.exchange(
+                "/case-notes/types/POM",
+                HttpMethod.POST,
+                createHttpEntity(token, "{" +
+                        "\"type\": \"NEWSUBTYPE1\",\n" +
+                        "\"description\": \"012345678901234567890123456789012345678901234567890123456789012345678901234567890\"," +
+                        "\"active\": false" +
+                        "}"),
+                new ParameterizedTypeReference<String>() {
+                });
+
+        assertStatus(responseSubType2, 400);
+
+        // amend the case note sub type with description is too long
+        final var responseUpdateSubType = testRestTemplate.exchange(
+                "/case-notes/types/POM/GEN",
+                HttpMethod.PUT,
+                createHttpEntity(token, "{" +
+                        "\"description\": \"012345678901234567890123456789012345678901234567890123456789012345678901234567890\"," +
+                        "\"active\": true" +
+                        "}"),
+                new ParameterizedTypeReference<String>() {
+                });
+
+        assertStatus(responseUpdateSubType, 400);
+    }
+
 }
