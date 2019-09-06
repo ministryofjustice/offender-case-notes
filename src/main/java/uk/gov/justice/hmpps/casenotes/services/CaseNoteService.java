@@ -26,7 +26,6 @@ import javax.validation.Valid;
 import javax.validation.ValidationException;
 import javax.validation.constraints.NotNull;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -49,7 +48,7 @@ public class CaseNoteService {
 
     public Page<CaseNote> getCaseNotes(final String offenderIdentifier, final CaseNoteFilter caseNoteFilter, final Pageable pageable) {
 
-        final var sensitiveCaseNotes = new ArrayList<CaseNote>();
+        final List<CaseNote> sensitiveCaseNotes;
 
         if (securityUserContext.isOverrideRole("VIEW_SENSITIVE_CASE_NOTES", "ADD_SENSITIVE_CASE_NOTES")) {
 
@@ -63,10 +62,12 @@ public class CaseNoteService {
                     .endDate(caseNoteFilter.getEndDate())
                     .build();
 
-            sensitiveCaseNotes.addAll(repository.findAll(filter)
+            sensitiveCaseNotes = repository.findAll(filter)
                     .stream()
                     .map(this::mapper)
-                    .collect(Collectors.toList()));
+                    .collect(Collectors.toList());
+        } else {
+            sensitiveCaseNotes = List.of();
         }
 
         // only supports one field sort.
