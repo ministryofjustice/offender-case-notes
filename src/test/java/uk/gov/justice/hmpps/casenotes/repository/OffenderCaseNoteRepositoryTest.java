@@ -10,6 +10,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.context.transaction.TestTransaction;
 import org.springframework.transaction.annotation.Transactional;
+import uk.gov.justice.hmpps.casenotes.filters.OffenderCaseNoteFilter;
 import uk.gov.justice.hmpps.casenotes.model.OffenderCaseNote;
 import uk.gov.justice.hmpps.casenotes.model.SensitiveCaseNoteType;
 
@@ -110,7 +111,28 @@ public class OffenderCaseNoteRepositoryTest {
         assertThat(retrievedEntity3.getAmendments()).hasSize(4);
 
         assertThat(retrievedEntity3.getAmendment(4).orElseThrow().getNoteText()).isEqualTo("Another Note 3");
+    }
 
+    @Test
+    public void testOffenderCaseNoteFilter() {
+        final var entity = OffenderCaseNote.builder()
+                .occurrenceDateTime(LocalDateTime.now())
+                .locationId("BOB")
+                .authorUsername("FILTER")
+                .authorName("Mickey Mouse")
+                .offenderIdentifier("A1234BD")
+                .sensitiveCaseNoteType(sampleType)
+                .noteText("HELLO")
+                .build();
+        repository.save(entity);
+
+        final var allCaseNotes = repository.findAll(OffenderCaseNoteFilter.builder()
+                .type(" ").subType(" ").authorUsername(" ").locationId(" ").offenderIdentifier(" ").build());
+        assertThat(allCaseNotes.size()).isGreaterThan(0);
+
+        final var caseNotes = repository.findAll(OffenderCaseNoteFilter.builder()
+                .type(PARENT_TYPE).subType(SUB_TYPE).authorUsername("FILTER").locationId("BOB").offenderIdentifier("A1234BD").build());
+        assertThat(caseNotes.size()).isEqualTo(1);
     }
 
     private OffenderCaseNote transientEntity() {

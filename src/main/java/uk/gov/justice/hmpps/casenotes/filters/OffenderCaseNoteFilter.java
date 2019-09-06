@@ -3,6 +3,7 @@ package uk.gov.justice.hmpps.casenotes.filters;
 import com.google.common.collect.ImmutableList;
 import lombok.Builder;
 import lombok.EqualsAndHashCode;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.jpa.domain.Specification;
 import uk.gov.justice.hmpps.casenotes.model.OffenderCaseNote;
 
@@ -25,21 +26,21 @@ public class OffenderCaseNoteFilter implements Specification<OffenderCaseNote> {
     public Predicate toPredicate(final Root<OffenderCaseNote> root, final CriteriaQuery<?> query, final CriteriaBuilder cb) {
         final ImmutableList.Builder<Predicate> predicateBuilder = ImmutableList.builder();
 
-        if (offenderIdentifier != null) {
+        if (StringUtils.isNotBlank(offenderIdentifier)) {
             predicateBuilder.add(cb.equal(root.get("offenderIdentifier"), offenderIdentifier));
         }
-        if (locationId != null) {
+        if (StringUtils.isNotBlank(locationId)) {
             predicateBuilder.add(cb.equal(root.get("locationId"), locationId));
         }
-        if (authorUsername != null) {
+        if (StringUtils.isNotBlank(authorUsername)) {
             predicateBuilder.add(cb.equal(root.get("authorUsername"), authorUsername));
         }
-        if (type != null) {
+        if (StringUtils.isNotBlank(type)) {
             final var caseNoteType = root.join("sensitiveCaseNoteType", JoinType.INNER);
             final var parentType = caseNoteType.join("parentType", JoinType.INNER);
             predicateBuilder.add(cb.equal(parentType.get("type"), type));
         }
-        if (subType != null) {
+        if (StringUtils.isNotBlank(subType)) {
             final var caseNoteType = root.join("sensitiveCaseNoteType", JoinType.INNER);
             predicateBuilder.add(cb.equal(caseNoteType.get("type"), subType));
         }
