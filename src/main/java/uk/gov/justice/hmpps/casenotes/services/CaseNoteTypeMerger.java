@@ -28,7 +28,12 @@ public class CaseNoteTypeMerger {
 
     private List<CaseNoteType> merge(final List<CaseNoteType> list1, final List<CaseNoteType> list2) {
 
-        final var map1 = list1 != null ? list1.stream().collect(Collectors.toMap(CaseNoteType::getCode, cn -> cn)) : new HashMap<String, CaseNoteType>();
+        final var map1 = list1 != null ? list1.stream().peek(cn -> {
+            if (cn.getActiveFlag().equals("N")) {
+                cn.getSubCodes().forEach(cns -> cns.setActiveFlag("N"));
+            }
+        }).collect(Collectors.toMap(CaseNoteType::getCode, cn -> cn)) : new HashMap<String, CaseNoteType>();
+
         final var map2 = list2 != null ? list2.stream().collect(Collectors.toMap(CaseNoteType::getCode, cn -> cn)) : new HashMap<String, CaseNoteType>();
 
         final var mergedMap = Stream.of(map1, map2)

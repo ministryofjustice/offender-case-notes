@@ -15,41 +15,88 @@ public class CaseNoteTypeMergerTest {
     public void testSimpleMerge() {
 
         final var list1 = List.of(
-                CaseNoteType.builder().code("OBS").description("Observation").subCodes(
-                        List.of(CaseNoteType.builder().code("GEN").description("General").build(), CaseNoteType.builder().code("SP").description("Special").build())
+                createBuilder("OBS", "Observation").subCodes(
+                        List.of(create("GEN", "General"), create("SP", "Special"))
                 ).build(),
-                CaseNoteType.builder().code("KA").description("Key worker").subCodes(
-                        List.of(CaseNoteType.builder().code("KS").description("Session").build(), CaseNoteType.builder().code("KE").description("Entry").build())
+                createBuilder("KA", "Key worker").subCodes(
+                        List.of(create("KS", "Session"), create("KE", "Entry"))
                 ).build()
         );
 
         final var list2 = List.of(
-                CaseNoteType.builder().code("OBS").description("Observation").subCodes(
-                        List.of(CaseNoteType.builder().code("NEW").description("New Stuff").build(), CaseNoteType.builder().code("GEN").description("Different Gen").build())
+                createBuilder("OBS", "Observation").subCodes(
+                        List.of(create("NEW", "New Stuff"), create("GEN", "Different Gen"))
                 ).build(),
-                CaseNoteType.builder().code("POM").description("POM Stuff").subCodes(
-                        List.of(CaseNoteType.builder().code("SPC").description("Special").build(), CaseNoteType.builder().code("GEN").description("General").build())
+                createBuilder("POM", "POM Stuff").subCodes(
+                        List.of(create("SPC", "Special"), create("GEN", "General"))
                 ).build()
         );
 
         List<CaseNoteType> resultantList = merger.mergeAndSortList(list1, list2);
 
-        assertThat(resultantList).hasSize(3);
-
         assertThat(resultantList).containsExactly(
-                List.of(
-                        CaseNoteType.builder().code("KA").description("Key worker").subCodes(
-                                List.of(CaseNoteType.builder().code("KE").description("Entry").build(), CaseNoteType.builder().code("KS").description("Session").build())
-                        ).build(),
-                        CaseNoteType.builder().code("OBS").description("Observation").subCodes(
-                                List.of(CaseNoteType.builder().code("GEN").description("Different Gen").build(), CaseNoteType.builder().code("NEW").description("New Stuff").build(), CaseNoteType.builder().code("SP").description("Special").build())
-                        ).build(),
-                        CaseNoteType.builder().code("POM").description("POM Stuff").subCodes(
-                                List.of(CaseNoteType.builder().code("GEN").description("General").build(), CaseNoteType.builder().code("SPC").description("Special").build())
-                        ).build()
-                ).toArray(new CaseNoteType[0])
+                createBuilder("KA", "Key worker").subCodes(
+                        List.of(create("KE", "Entry"), create("KS", "Session"))
+                ).build(),
+                createBuilder("OBS", "Observation").subCodes(
+                        List.of(create("GEN", "Different Gen"), create("NEW", "New Stuff"), create("SP", "Special"))
+                ).build(),
+                createBuilder("POM", "POM Stuff").subCodes(
+                        List.of(create("GEN", "General"), create("SPC", "Special"))
+                ).build()
+
+        );
+    }
+
+    @Test
+    public void testActiveFlagUpdatedWhenParentInactiveDuringMerge() {
+
+        final var list1 = List.of(
+                createBuilder("OBS", "Observation").subCodes(
+                        List.of(create("GEN", "General"), createInactive("SP", "Special"))
+                ).build(),
+                createBuilder("DRR", "Drug Rehabilitation Requirement").activeFlag("N").subCodes(
+                        List.of(create("DCOUN", "Drug Counselling Session"), createInactive("DTEST", "Drug Test"))
+                ).build()
         );
 
+        final var list2 = List.of(
+                createBuilder("OBS", "Observation").subCodes(
+                        List.of(create("NEW", "New Stuff"), create("GEN", "Different Gen"))
+                ).build(),
+                createBuilder("POM", "POM Stuff").subCodes(
+                        List.of(create("SPC", "Special"), create("GEN", "General"))
+                ).build(),
+                createBuilder("DRR", "Drug Rehabilitation Requirement").subCodes(
+                        List.of(create("DCOUN", "Drug Counselling Session"))
+                ).build()
+        );
 
+        List<CaseNoteType> resultantList = merger.mergeAndSortList(list1, list2);
+
+        assertThat(resultantList).containsExactly(
+
+                createBuilder("DRR", "Drug Rehabilitation Requirement").subCodes(
+                        List.of(create("DCOUN", "Drug Counselling Session"), createInactive("DTEST", "Drug Test"))
+                ).build(),
+                createBuilder("OBS", "Observation").subCodes(
+                        List.of(create("GEN", "Different Gen"), create("NEW", "New Stuff"), createInactive("SP", "Special"))
+                ).build(),
+                createBuilder("POM", "POM Stuff").subCodes(
+                        List.of(create("GEN", "General"), create("SPC", "Special"))
+                ).build()
+        );
+    }
+
+    private CaseNoteType.CaseNoteTypeBuilder createBuilder(final String obs, final String observation) {
+        return CaseNoteType.builder().code(obs).description(observation);
+    }
+
+    private CaseNoteType createInactive(final String sp, final String special) {
+        return createBuilder(sp, special).activeFlag("N").build();
+    }
+
+    private CaseNoteType create(final String gen, final String general) {
+        return createBuilder(gen, general).build();
     }
 }
