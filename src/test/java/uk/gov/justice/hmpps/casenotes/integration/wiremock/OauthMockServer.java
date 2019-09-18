@@ -1,7 +1,6 @@
 package uk.gov.justice.hmpps.casenotes.integration.wiremock;
 
 import com.github.tomakehurst.wiremock.junit.WireMockRule;
-import uk.gov.justice.hmpps.casenotes.utils.AuthTokenHelper.AuthToken;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
 
@@ -15,14 +14,14 @@ public class OauthMockServer extends WireMockRule {
         super(WIREMOCK_PORT);
     }
 
-    public void subGetUserDetails(final AuthToken username) {
+    public void subGetUserDetails(final String username) {
         stubFor(
-                get(urlPathMatching(String.format("%s/user/%s", API_PREFIX, username.name())))
+                get(urlPathMatching(String.format("%s/user/%s", API_PREFIX, username)))
                         .willReturn(aResponse()
                                 .withHeader("Content-Type", "application/json")
                                 .withBody("{\n" +
                                         "  \"staffId\": 1111,\n" +
-                                        "  \"username\": \"" + username.name() + "\",\n" +
+                                        "  \"username\": \"" + username + "\",\n" +
                                         "  \"active\": true,\n" +
                                         "  \"name\": \"Mikey Mouse\",\n" +
                                         "  \"authSource\": \"nomis\",\n" +

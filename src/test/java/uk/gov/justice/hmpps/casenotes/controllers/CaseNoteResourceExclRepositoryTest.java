@@ -1,0 +1,104 @@
+package uk.gov.justice.hmpps.casenotes.controllers;
+
+import org.junit.Test;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.http.HttpMethod;
+import uk.gov.justice.hmpps.casenotes.dto.CaseNoteEvent;
+import uk.gov.justice.hmpps.casenotes.model.OffenderCaseNote;
+import uk.gov.justice.hmpps.casenotes.model.ParentNoteType;
+import uk.gov.justice.hmpps.casenotes.model.SensitiveCaseNoteType;
+import uk.gov.justice.hmpps.casenotes.repository.OffenderCaseNoteRepository;
+
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
+
+import static java.time.LocalDateTime.now;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anySet;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+public class CaseNoteResourceExclRepositoryTest extends ResourceTest {
+    private static final List<String> EVENT_ROLE = List.of("ROLE_CASE_NOTE_EVENTS");
+
+    @MockBean
+    private OffenderCaseNoteRepository caseNoteRepository;
+
+    @Test
+    public void getCaseNoteEvents_noLimit() {
+        elite2MockServer.stubGetCaseNoteEventsNoLimit();
+
+        final var fromDate = LocalDateTime.now();
+        final var fredEvent = createOffenderCaseNote(UUID.fromString("aaaaaaaa-4931-48e5-bb1b-dcb90892c90d"), "FRED", "JOE");
+        final var bobJoeEvent = createOffenderCaseNote(UUID.fromString("bbbbbbbb-4931-48e5-bb1b-dcb90892c90d"), "BOB", "JOE");
+        when(caseNoteRepository.findBySensitiveCaseNoteType_ParentType_TypeAndModifyDateTimeAfterOrderByModifyDateTime(anySet(), any(), any()))
+                .thenReturn(List.of(bobJoeEvent, fredEvent, createOffenderCaseNote(UUID.randomUUID(), "BOB", "OTHER"), createOffenderCaseNote(UUID.randomUUID(), "WRONG", "TYPE")));
+
+        final var requestEntity = createHttpEntityWithBearerAuthorisation("ITAG_USER", EVENT_ROLE, Map.of());
+
+        final var responseEntity = testRestTemplate.exchange("/case-notes/events_no_limit?type=BOB+JOE&type=FRED&createdDate=" + fromDate, HttpMethod.GET, requestEntity, String.class);
+
+        assertThatJsonFileAndStatus(responseEntity, 200, "casenoteevents.json");
+
+        verify(caseNoteRepository).findBySensitiveCaseNoteType_ParentType_TypeAndModifyDateTimeAfterOrderByModifyDateTime(Set.of("BOB", "FRED"), fromDate, PageRequest.of(0, Integer.MAX_VALUE));
+    }
+
+    @Test
+    public void getCaseNoteEvents() {
+        elite2MockServer.stubGetCaseNoteEvents();
+
+        final var fromDate = LocalDateTime.now();
+        final var fredEvent = createOffenderCaseNote(UUID.fromString("aaaaaaaa-4931-48e5-bb1b-dcb90892c90d"), "FRED", "JOE");
+        final var bobJoeEvent = createOffenderCaseNote(UUID.fromString("bbbbbbbb-4931-48e5-bb1b-dcb90892c90d"), "BOB", "JOE");
+        when(caseNoteRepository.findBySensitiveCaseNoteType_ParentType_TypeAndModifyDateTimeAfterOrderByModifyDateTime(anySet(), any(), any()))
+                .thenReturn(List.of(bobJoeEvent, fredEvent, createOffenderCaseNote(UUID.randomUUID(), "BOB", "OTHER"), createOffenderCaseNote(UUID.randomUUID(), "WRONG", "TYPE")));
+
+        final var requestEntity = createHttpEntityWithBearerAuthorisation("ITAG_USER", EVENT_ROLE, Map.of());
+
+        final var responseEntity = testRestTemplate.exchange("/case-notes/events?limit=10&type=BOB+JOE&type=FRED&createdDate=" + fromDate, HttpMethod.GET, requestEntity, String.class);
+
+        assertThatJsonFileAndStatus(responseEntity, 200, "casenoteevents.json");
+
+        verify(caseNoteRepository).findBySensitiveCaseNoteType_ParentType_TypeAndModifyDateTimeAfterOrderByModifyDateTime(Set.of("BOB", "FRED"), fromDate, PageRequest.of(0, 10));
+    }
+
+    @Test
+    public void getCaseNoteEvents_missingLimit() {
+        elite2MockServer.stubGetCaseNoteEvents();
+
+        final var requestEntity = createHttpEntityWithBearerAuthorisation("ITAG_USER", EVENT_ROLE, Map.of());
+        final var responseEntity = testRestTemplate.exchange("/case-notes/events?&type=BOB+JOE&type=FRED&createdDate=" + LocalDateTime.now(), HttpMethod.GET, requestEntity, String.class);
+        assertThatJsonFileAndStatus(responseEntity, 400, "casenoteevents_validation.json");
+    }
+
+    private CaseNoteEvent createEvent(final String type, final String subType) {
+        return CaseNoteEvent.builder()
+                .noteType(type + " " + subType)
+                .content("Some content for " + subType)
+                .contactTimestamp(LocalDateTime.parse("2019-02-01T23:22:21"))
+                .notificationTimestamp(LocalDateTime.parse("2019-02-01T23:22:21"))
+                .establishmentCode("LEI")
+                .staffName("Last, First")
+                .id("1")
+                .nomsId(123 + subType)
+                .build();
+    }
+
+    private OffenderCaseNote createOffenderCaseNote(final UUID uuid, final String type, final String subType) {
+        return OffenderCaseNote.builder()
+                .id(uuid)
+                .occurrenceDateTime(now())
+                .locationId("MDI")
+                .authorUsername("USER2")
+                .authorName("Mickey Mouse")
+                .offenderIdentifier("A12" + type + subType)
+                .modifyDateTime(LocalDateTime.parse("2019-02-01T23:22:21"))
+                .sensitiveCaseNoteType(SensitiveCaseNoteType.builder().type(subType).parentType(ParentNoteType.builder().type(type).build()).build())
+                .noteText("Some ocn content for " + subType)
+                .build();
+    }
+}

@@ -71,11 +71,7 @@ public class OffenderCaseNote {
     @LastModifiedBy
     private String modifyUserId;
 
-    public OffenderCaseNoteAmendment addAmendment(final String noteText) {
-        return addAmendment(noteText, authorUsername, authorName);
-    }
-
-    public OffenderCaseNoteAmendment addAmendment(final String noteText, final String authorUsername, final String authorName) {
+    public void addAmendment(final String noteText, final String authorUsername, final String authorName) {
 
         final var amendment = OffenderCaseNoteAmendment.builder()
                 .caseNote(this)
@@ -87,7 +83,8 @@ public class OffenderCaseNote {
 
         amendments.add(amendment);
 
-        return amendment;
+        // force modification date change on adding amendment
+        modifyDateTime = LocalDateTime.now();
     }
 
     @NotNull
