@@ -1,0 +1,38 @@
+{
+  "events": [
+    {
+      "nomsId": "AB2",
+      "id": "2",
+      "content": "another note",
+      "notificationTimestamp": "2018-01-02T11:10:09",
+      "noteType": "MAIN SUB",
+      "staffName": "Staff name"
+    },
+    {
+      "nomsId": "A12BOBJOE",
+      "id": "bbbbbbbb-4931-48e5-bb1b-dcb90892c90d",
+      "content": "Some ocn content for JOE",
+      "notificationTimestamp": "2019-02-01T23:22:21",
+      "establishmentCode": "MDI",
+      "noteType": "BOB JOE",
+      "staffName": "Mickey Mouse"
+    },
+    {
+      "nomsId": "A12FREDJOE",
+      "id": "aaaaaaaa-4931-48e5-bb1b-dcb90892c90d",
+      "content": "Some ocn content for JOE",
+      "notificationTimestamp": "2019-02-01T23:22:21",
+      "establishmentCode": "MDI",
+      "noteType": "FRED JOE",
+      "staffName": "Mickey Mouse"
+    },
+    {
+      "nomsId": "AB1",
+      "id": "1",
+      "content": "a note",
+      "notificationTimestamp": "2019-02-03T11:10:09",
+      "noteType": "MAIN SUB",
+      "staffName": "Staff name"
+    }
+  ]
+}

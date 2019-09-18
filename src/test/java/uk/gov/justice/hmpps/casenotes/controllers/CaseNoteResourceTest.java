@@ -1,19 +1,15 @@
 package uk.gov.justice.hmpps.casenotes.controllers;
 
 import org.junit.Test;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpMethod;
-import org.springframework.http.ResponseEntity;
 import uk.gov.justice.hmpps.casenotes.dto.CaseNote;
-import uk.gov.justice.hmpps.casenotes.dto.CaseNoteType;
-import uk.gov.justice.hmpps.casenotes.utils.AuthTokenHelper;
 
+import java.util.List;
 import java.util.Objects;
 
 import static java.lang.String.format;
 import static org.assertj.core.api.Assertions.assertThat;
-import static uk.gov.justice.hmpps.casenotes.utils.AuthTokenHelper.AuthToken.*;
 
 public class CaseNoteResourceTest extends ResourceTest {
 
@@ -22,80 +18,72 @@ public class CaseNoteResourceTest extends ResourceTest {
     private static final String CREATE_NORMAL_CASE_NOTE_WITHOUT_LOC = "{\"type\": \"BOB\", \"subType\": \"SMITH\", \"text\": \"%s\"}";
     private static final String CREATE_CASE_NOTE_BY_TYPE = "{\"type\": \"%s\", \"subType\": \"%s\", \"text\": \"%s\"}";
 
-    @Autowired
-    private AuthTokenHelper authTokenHelper;
+    private static final List<String> CASENOTES_ROLES = List.of("ROLE_VIEW_SENSITIVE_CASE_NOTES", "ROLE_ADD_SENSITIVE_CASE_NOTES");
+    private static final List<String> SYSTEM_ROLES = List.of("ROLE_SYSTEM_USER");
 
     @Test
     public void testGetCaseNoteTypesNormal() {
         elite2MockServer.subGetCaseNoteTypes();
 
-        final var token = authTokenHelper.getToken(API_TEST_USER);
-
         final var response = testRestTemplate.exchange(
                 "/case-notes/types",
                 HttpMethod.GET,
-                createHttpEntity(token, null),
+                createHttpEntityWithBearerAuthorisation("API_TEST_USER", List.of()),
                 new ParameterizedTypeReference<String>() {
                 });
 
-        assertJsonAndStatus(response, CaseNoteType.class, 200, "caseNoteTypes.json");
+        assertThatJsonFileAndStatus(response, 200, "caseNoteTypes.json");
     }
 
     @Test
     public void testGetCaseNoteTypesSecure() {
         elite2MockServer.subGetCaseNoteTypes();
 
-        final var token = authTokenHelper.getToken(SECURE_CASENOTE_USER);
-
         final var response = testRestTemplate.exchange(
                 "/case-notes/types",
                 HttpMethod.GET,
-                createHttpEntity(token, null),
+                createHttpEntityWithBearerAuthorisation("SECURE_CASENOTE_USER", CASENOTES_ROLES),
                 new ParameterizedTypeReference<String>() {
                 });
 
-        assertJsonAndStatus(response, CaseNoteType.class, 200, "caseNoteTypesSecure.json");
+        assertThatJsonFileAndStatus(response, 200, "caseNoteTypesSecure.json");
     }
 
     @Test
     public void testUserCaseNoteTypesNormal() {
         elite2MockServer.subUserCaseNoteTypes();
 
-        final var token = authTokenHelper.getToken(API_TEST_USER);
-
         final var response = testRestTemplate.exchange(
                 "/case-notes/types-for-user",
                 HttpMethod.GET,
-                createHttpEntity(token, null),
+                createHttpEntityWithBearerAuthorisation("API_TEST_USER", List.of()),
                 new ParameterizedTypeReference<String>() {
                 });
 
-        assertJsonAndStatus(response, CaseNoteType.class, 200, "userCaseNoteTypes.json");
+        assertThatJsonFileAndStatus(response, 200, "userCaseNoteTypes.json");
     }
 
     @Test
     public void testUserCaseNoteTypesSecure() {
         elite2MockServer.subUserCaseNoteTypes();
 
-        final var token = authTokenHelper.getToken(SECURE_CASENOTE_USER);
-
         final var response = testRestTemplate.exchange(
                 "/case-notes/types-for-user",
                 HttpMethod.GET,
-                createHttpEntity(token, null),
+                createHttpEntityWithBearerAuthorisation("SECURE_CASENOTE_USER", CASENOTES_ROLES),
                 new ParameterizedTypeReference<String>() {
                 });
 
-        assertJsonAndStatus(response, CaseNoteType.class, 200, "userCaseNoteTypesSecure.json");
+        assertThatJsonFileAndStatus(response, 200, "userCaseNoteTypesSecure.json");
     }
 
     @Test
     public void testRetrieveCaseNotesForOffenderSensitive() {
-        oauthMockServer.subGetUserDetails(SECURE_CASENOTE_USER);
+        oauthMockServer.subGetUserDetails("SECURE_CASENOTE_USER");
         elite2MockServer.subGetOffender("A1234AA");
         elite2MockServer.subGetCaseNotesForOffender("A1234AA");
 
-        final var token = authTokenHelper.getToken(SECURE_CASENOTE_USER);
+        final var token = createJwt("SECURE_CASENOTE_USER", CASENOTES_ROLES);
 
         final var postResponse = testRestTemplate.exchange(
                 "/case-notes/{offenderIdentifier}",
@@ -105,7 +93,7 @@ public class CaseNoteResourceTest extends ResourceTest {
                 },
                 "A1234AA");
 
-        assertJsonAndStatus(postResponse, CaseNote.class, 201, "A1234AA-create-casenote.json");
+        assertThatJsonFileAndStatus(postResponse, 201, "A1234AA-create-casenote.json");
 
         final var response = testRestTemplate.exchange(
                 "/case-notes/{offenderIdentifier}",
@@ -115,53 +103,49 @@ public class CaseNoteResourceTest extends ResourceTest {
                 },
                 "A1234AA");
 
-        assertJsonAndStatus(response, CaseNote.class, 200, "A1234AA-casenote.json");
+        assertThatJsonFileAndStatus(response, 200, "A1234AA-casenote.json");
     }
 
     @Test
     public void testCanRetrieveCaseNotesForOffenderNormal() {
-        oauthMockServer.subGetUserDetails(API_TEST_USER);
+        oauthMockServer.subGetUserDetails("API_TEST_USER");
         elite2MockServer.subGetOffender("A1234AA");
         elite2MockServer.subGetCaseNotesForOffender("A1234AA");
-
-        final var token = authTokenHelper.getToken(API_TEST_USER);
 
         final var response = testRestTemplate.exchange(
                 "/case-notes/{offenderIdentifier}",
                 HttpMethod.GET,
-                createHttpEntity(token, null),
+                createHttpEntityWithBearerAuthorisation("API_TEST_USER", List.of()),
                 new ParameterizedTypeReference<String>() {
                 },
                 "A1234AA");
 
-        assertJsonAndStatus(response, CaseNote.class, 200, "A1234AA-normal-casenote.json");
+        assertThatJsonFileAndStatus(response, 200, "A1234AA-normal-casenote.json");
     }
 
     @Test
     public void testCanRetrieveCaseNoteForOffender() {
-        oauthMockServer.subGetUserDetails(API_TEST_USER);
+        oauthMockServer.subGetUserDetails("API_TEST_USER");
         elite2MockServer.subGetOffender("A1234AA");
         elite2MockServer.subGetCaseNoteForOffender("A1234AA", 131232L);
-
-        final var token = authTokenHelper.getToken(API_TEST_USER);
 
         final var response = testRestTemplate.exchange(
                 "/case-notes/{offenderIdentifier}/{caseNoteIdentifier}",
                 HttpMethod.GET,
-                createHttpEntity(token, null),
+                createHttpEntityWithBearerAuthorisation("API_TEST_USER", List.of()),
                 new ParameterizedTypeReference<String>() {
                 },
                 "A1234AA", "131232");
 
-        assertJsonAndStatus(response, CaseNote.class, 200, "A1234AA-single-normal-casenote.json");
+        assertThatJsonFileAndStatus(response, 200, "A1234AA-single-normal-casenote.json");
     }
 
     @Test
     public void testRetrieveCaseNoteForOffenderSensitive() {
-        oauthMockServer.subGetUserDetails(SECURE_CASENOTE_USER);
+        oauthMockServer.subGetUserDetails("SECURE_CASENOTE_USER");
         elite2MockServer.subGetOffender("A1234AF");
 
-        final var token = authTokenHelper.getToken(SECURE_CASENOTE_USER);
+        final var token = createJwt("SECURE_CASENOTE_USER", CASENOTES_ROLES);
 
         final var postResponse = testRestTemplate.exchange(
                 "/case-notes/{offenderIdentifier}",
@@ -180,70 +164,64 @@ public class CaseNoteResourceTest extends ResourceTest {
                 },
                 "A1234AF", id);
 
-        assertJsonAndStatus(response, CaseNote.class, 200, "A1234AF-single-casenote.json");
+        assertThatJsonFileAndStatus(response, 200, "A1234AF-single-casenote.json");
     }
 
     @Test
     public void testCanCreateCaseNote_Normal() {
-        oauthMockServer.subGetUserDetails(SECURE_CASENOTE_USER);
+        oauthMockServer.subGetUserDetails("SECURE_CASENOTE_USER");
         elite2MockServer.subCreateCaseNote("A1234AE");
-
-        final var token = authTokenHelper.getToken(SECURE_CASENOTE_USER);
 
         // create the case note
         final var response = testRestTemplate.exchange(
                 "/case-notes/{offenderIdentifier}",
                 HttpMethod.POST,
-                createHttpEntity(token, format(CREATE_NORMAL_CASE_NOTE_WITHOUT_LOC, "This is another case note")),
+                createHttpEntityWithBearerAuthorisation("SECURE_CASENOTE_USER", CASENOTES_ROLES, format(CREATE_NORMAL_CASE_NOTE_WITHOUT_LOC, "This is another case note")),
                 String.class,
                 "A1234AE");
 
-        assertJsonAndStatus(response, CaseNote.class, 201, "A1234AE-create-casenote.json");
+        assertThatJsonFileAndStatus(response, 201, "A1234AE-create-casenote.json");
     }
 
     @Test
     public void testCanCreateCaseNote_Secure() {
-        oauthMockServer.subGetUserDetails(SECURE_CASENOTE_USER);
+        oauthMockServer.subGetUserDetails("SECURE_CASENOTE_USER");
         elite2MockServer.subGetOffender("A1234AD");
-
-        final var token = authTokenHelper.getToken(SECURE_CASENOTE_USER);
 
         // create the case note
         final var response = testRestTemplate.exchange(
                 "/case-notes/{offenderIdentifier}",
                 HttpMethod.POST,
-                createHttpEntity(token, format(CREATE_CASE_NOTE_WITHOUT_LOC, "This is another case note")),
+                createHttpEntityWithBearerAuthorisation("SECURE_CASENOTE_USER", CASENOTES_ROLES, format(CREATE_CASE_NOTE_WITHOUT_LOC, "This is another case note")),
                 String.class,
                 "A1234AD");
 
-        assertJsonAndStatus(response, CaseNote.class, 201, "A1234AD-create-casenote.json");
+        assertThatJsonFileAndStatus(response, 201, "A1234AD-create-casenote.json");
     }
 
     @Test
     public void testCannotCreateInactiveCaseNote_Secure() {
-        oauthMockServer.subGetUserDetails(SECURE_CASENOTE_USER);
+        oauthMockServer.subGetUserDetails("SECURE_CASENOTE_USER");
         elite2MockServer.subGetOffender("A1234AD");
-
-        final var token = authTokenHelper.getToken(SECURE_CASENOTE_USER);
 
         // create the case note
         final var response = testRestTemplate.exchange(
                 "/case-notes/{offenderIdentifier}",
                 HttpMethod.POST,
-                createHttpEntity(token, format(CREATE_CASE_NOTE_BY_TYPE, "OLDPOM", "OLDTWO", "This is another case note with inactive case note type")),
+                createHttpEntityWithBearerAuthorisation("SECURE_CASENOTE_USER", CASENOTES_ROLES, format(CREATE_CASE_NOTE_BY_TYPE, "OLDPOM", "OLDTWO", "This is another case note with inactive case note type")),
                 String.class,
                 "A1234AD");
 
-        assertStatus(response, 400);
+        assertThatStatus(response, 400);
     }
 
     @Test
     public void testCanCreateAmendments() {
-        oauthMockServer.subGetUserDetails(SECURE_CASENOTE_USER);
+        oauthMockServer.subGetUserDetails("SECURE_CASENOTE_USER");
         elite2MockServer.subGetOffender("A1234AB");
         elite2MockServer.subGetCaseNotesForOffender("A1234AB");
 
-        final var token = authTokenHelper.getToken(SECURE_CASENOTE_USER);
+        final var token = createJwt("SECURE_CASENOTE_USER", CASENOTES_ROLES);
 
         // create the case note
         final var postResponse = testRestTemplate.exchange(
@@ -265,7 +243,7 @@ public class CaseNoteResourceTest extends ResourceTest {
                 },
                 "A1234AB", Objects.requireNonNull(postResponse.getBody()).getCaseNoteId());
 
-        assertJsonAndStatus(postAmendResponse, CaseNote.class, 200, "A1234AB-update-casenote.json");
+        assertThatJsonFileAndStatus(postAmendResponse, 200, "A1234AB-update-casenote.json");
 
         // check the case note now correct
         final var response = testRestTemplate.exchange(
@@ -276,35 +254,33 @@ public class CaseNoteResourceTest extends ResourceTest {
                 },
                 "A1234AB");
 
-        assertJsonAndStatus(response, CaseNote.class, 200, "A1234AB-casenote.json");
+        assertThatJsonFileAndStatus(response, 200, "A1234AB-casenote.json");
     }
 
     @Test
     public void testCanCreateAmendments_Normal() {
-        oauthMockServer.subGetUserDetails(SECURE_CASENOTE_USER);
+        oauthMockServer.subGetUserDetails("SECURE_CASENOTE_USER");
         elite2MockServer.subAmendCaseNote("A1234AE", "12345");
-
-        final var token = authTokenHelper.getToken(SECURE_CASENOTE_USER);
 
         // amend the case note
         final var response = testRestTemplate.exchange(
                 "/case-notes/{offenderIdentifier}/{caseNoteId}",
                 HttpMethod.PUT,
-                createHttpEntity(token, "{ \"text\": \"Amended case note\" }"),
+                createHttpEntityWithBearerAuthorisation("SECURE_CASENOTE_USER", CASENOTES_ROLES, "{ \"text\": \"Amended case note\" }"),
                 new ParameterizedTypeReference<String>() {
                 },
                 "A1234AE", "12345");
 
-        assertJsonAndStatus(response, CaseNote.class, 200, "A1234AE-create-casenote.json");
+        assertThatJsonFileAndStatus(response, 200, "A1234AE-create-casenote.json");
     }
 
     @Test
     public void testCanFilterCaseNotes() {
-        oauthMockServer.subGetUserDetails(SECURE_CASENOTE_USER);
+        oauthMockServer.subGetUserDetails("SECURE_CASENOTE_USER");
         elite2MockServer.subGetOffender("A1234AC");
         elite2MockServer.subGetCaseNotesForOffender("A1234AC");
 
-        final var token = authTokenHelper.getToken(SECURE_CASENOTE_USER);
+        final var token = createJwt("SECURE_CASENOTE_USER", CASENOTES_ROLES);
 
         testRestTemplate.exchange(
                 "/case-notes/{offenderIdentifier}",
@@ -338,14 +314,14 @@ public class CaseNoteResourceTest extends ResourceTest {
                 },
                 "A1234AC", "2", "1");
 
-        assertJsonAndStatus(response, CaseNote.class, 200, "A1234AC-casenote.json");
+        assertThatJsonFileAndStatus(response, 200, "A1234AC-casenote.json");
     }
 
     @Test
     public void testCanCreateAndUpdateTypes() {
-        oauthMockServer.subGetUserDetails(SYSTEM_USER_READ_WRITE);
+        oauthMockServer.subGetUserDetails("SYSTEM_USER_READ_WRITE");
 
-        final var token = authTokenHelper.getToken(SYSTEM_USER_READ_WRITE);
+        final var token = createJwt("SYSTEM_USER_READ_WRITE", SYSTEM_ROLES);
 
         // add a new case note parent type called NEWTYPE1
         final var response = testRestTemplate.exchange(
@@ -359,7 +335,7 @@ public class CaseNoteResourceTest extends ResourceTest {
                 new ParameterizedTypeReference<String>() {
                 });
 
-        assertJsonAndStatus(response, CaseNoteType.class, 201, "newCaseNoteType1.json");
+        assertThatJsonFileAndStatus(response, 201, "newCaseNoteType1.json");
 
         // amend the case note type from inactive to active and change description
         final var responseUpdate = testRestTemplate.exchange(
@@ -372,7 +348,7 @@ public class CaseNoteResourceTest extends ResourceTest {
                 new ParameterizedTypeReference<String>() {
                 });
 
-        assertJsonAndStatus(responseUpdate, CaseNoteType.class, 200, "updateCaseNoteType1.json");
+        assertThatJsonFileAndStatus(responseUpdate, 200, "updateCaseNoteType1.json");
 
         // add a new sub case note type called NEWSUBTYPE1
         final var responseSubType = testRestTemplate.exchange(
@@ -386,7 +362,7 @@ public class CaseNoteResourceTest extends ResourceTest {
                 new ParameterizedTypeReference<String>() {
                 });
 
-        assertJsonAndStatus(responseSubType, CaseNoteType.class, 201, "newCaseNoteSubType1.json");
+        assertThatJsonFileAndStatus(responseSubType, 201, "newCaseNoteSubType1.json");
 
         // amend the case note sub type to active and new description
         final var responseUpdateSubType = testRestTemplate.exchange(
@@ -399,14 +375,14 @@ public class CaseNoteResourceTest extends ResourceTest {
                 new ParameterizedTypeReference<String>() {
                 });
 
-        assertJsonAndStatus(responseUpdateSubType, CaseNoteType.class, 200, "updateCaseNoteSubType1.json");
+        assertThatJsonFileAndStatus(responseUpdateSubType, 200, "updateCaseNoteSubType1.json");
     }
 
     @Test
     public void testCannotCreateAndUpdateTypesWhenInvalid() {
-        oauthMockServer.subGetUserDetails(SYSTEM_USER_READ_WRITE);
+        oauthMockServer.subGetUserDetails("SYSTEM_USER_READ_WRITE");
 
-        final var token = authTokenHelper.getToken(SYSTEM_USER_READ_WRITE);
+        final var token = createJwt("SYSTEM_USER_READ_WRITE", SYSTEM_ROLES);
 
         // add a new case note parent type called TOOLONG1234567890 that is more than 12 chars
         final var response = testRestTemplate.exchange(
@@ -420,7 +396,7 @@ public class CaseNoteResourceTest extends ResourceTest {
                 new ParameterizedTypeReference<String>() {
                 });
 
-        assertJsonAndStatus(response, ResponseEntity.class, 400, "validation-error1.json");
+        assertThatJsonFileAndStatus(response, 400, "validation-error1.json");
 
         // amend the case note type and use an invalid boolean value
         final var responseUpdate = testRestTemplate.exchange(
@@ -433,7 +409,7 @@ public class CaseNoteResourceTest extends ResourceTest {
                 new ParameterizedTypeReference<String>() {
                 });
 
-        assertStatus(responseUpdate, 500);
+        assertThatStatus(responseUpdate, 500);
 
         // amend the case note type to description that is too long
         final var responseUpdate2 = testRestTemplate.exchange(
@@ -446,7 +422,7 @@ public class CaseNoteResourceTest extends ResourceTest {
                 new ParameterizedTypeReference<String>() {
                 });
 
-        assertJsonAndStatus(responseUpdate2, ResponseEntity.class, 400, "validation-error2.json");
+        assertThatJsonFileAndStatus(responseUpdate2, 400, "validation-error2.json");
 
         // try to add a new sub case note type that is too long
         final var responseSubType = testRestTemplate.exchange(
@@ -460,7 +436,7 @@ public class CaseNoteResourceTest extends ResourceTest {
                 new ParameterizedTypeReference<String>() {
                 });
 
-        assertStatus(responseSubType, 400);
+        assertThatStatus(responseSubType, 400);
 
         // try to add a new sub case note type where description is too long
         final var responseSubType2 = testRestTemplate.exchange(
@@ -474,7 +450,7 @@ public class CaseNoteResourceTest extends ResourceTest {
                 new ParameterizedTypeReference<String>() {
                 });
 
-        assertStatus(responseSubType2, 400);
+        assertThatStatus(responseSubType2, 400);
 
         // amend the case note sub type with description is too long
         final var responseUpdateSubType = testRestTemplate.exchange(
@@ -487,7 +463,7 @@ public class CaseNoteResourceTest extends ResourceTest {
                 new ParameterizedTypeReference<String>() {
                 });
 
-        assertStatus(responseUpdateSubType, 400);
+        assertThatStatus(responseUpdateSubType, 400);
     }
 
 }

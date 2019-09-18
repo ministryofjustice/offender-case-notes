@@ -5,6 +5,8 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.test.context.support.WithAnonymousUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -12,10 +14,12 @@ import org.springframework.test.context.transaction.TestTransaction;
 import org.springframework.transaction.annotation.Transactional;
 import uk.gov.justice.hmpps.casenotes.filters.OffenderCaseNoteFilter;
 import uk.gov.justice.hmpps.casenotes.model.OffenderCaseNote;
+import uk.gov.justice.hmpps.casenotes.model.OffenderCaseNote.OffenderCaseNoteBuilder;
 import uk.gov.justice.hmpps.casenotes.model.SensitiveCaseNoteType;
 
-import java.time.LocalDateTime;
+import java.util.Set;
 
+import static java.time.LocalDateTime.now;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @ActiveProfiles("test")
@@ -34,11 +38,14 @@ public class OffenderCaseNoteRepositoryTest {
     @Autowired
     private CaseNoteTypeRepository caseNoteTypeRepository;
 
-    private SensitiveCaseNoteType sampleType;
+    @Autowired
+    private JdbcTemplate jdbcTemplate;
+
+    private SensitiveCaseNoteType genType;
 
     @Before
     public void setUp() {
-        sampleType = caseNoteTypeRepository.findSensitiveCaseNoteTypeByParentType_TypeAndType(PARENT_TYPE, SUB_TYPE);
+        genType = caseNoteTypeRepository.findSensitiveCaseNoteTypeByParentType_TypeAndType(PARENT_TYPE, SUB_TYPE);
     }
 
     @Test
@@ -69,7 +76,7 @@ public class OffenderCaseNoteRepositoryTest {
 
         final var caseNote = transientEntity();
 
-        caseNote.addAmendment("Another Note 0");
+        caseNote.addAmendment("Another Note 0", "someuser", "Some User");
         assertThat(caseNote.getAmendments()).hasSize(1);
 
         final var persistedEntity = repository.save(caseNote);
@@ -83,8 +90,8 @@ public class OffenderCaseNoteRepositoryTest {
 
         final var retrievedEntity = repository.findById(persistedEntity.getId()).orElseThrow();
 
-        retrievedEntity.addAmendment("Another Note 1");
-        retrievedEntity.addAmendment("Another Note 2");
+        retrievedEntity.addAmendment("Another Note 1", "someuser", "Some User");
+        retrievedEntity.addAmendment("Another Note 2", "someuser", "Some User");
 
         TestTransaction.flagForCommit();
         TestTransaction.end();
@@ -116,12 +123,12 @@ public class OffenderCaseNoteRepositoryTest {
     @Test
     public void testOffenderCaseNoteFilter() {
         final var entity = OffenderCaseNote.builder()
-                .occurrenceDateTime(LocalDateTime.now())
+                .occurrenceDateTime(now())
                 .locationId("BOB")
                 .authorUsername("FILTER")
                 .authorName("Mickey Mouse")
                 .offenderIdentifier("A1234BD")
-                .sensitiveCaseNoteType(sampleType)
+                .sensitiveCaseNoteType(genType)
                 .noteText("HELLO")
                 .build();
         repository.save(entity);
@@ -132,18 +139,77 @@ public class OffenderCaseNoteRepositoryTest {
 
         final var caseNotes = repository.findAll(OffenderCaseNoteFilter.builder()
                 .type(PARENT_TYPE).subType(SUB_TYPE).authorUsername("FILTER").locationId("BOB").offenderIdentifier("A1234BD").build());
-        assertThat(caseNotes.size()).isEqualTo(1);
+        assertThat(caseNotes).hasSize(1);
+    }
+
+    @Test
+    public void testAmendmentUpdatesCaseNoteModification() {
+        final var twoDaysAgo = now().minusDays(2);
+
+        final var noteText = "updates old note";
+        final var oldNote = repository.save(transientEntityBuilder().noteText(noteText).build());
+
+        final var noteTextWithAmendment = "updates old note with old amendment";
+        final var oldNoteWithOldAmendment = repository.save(transientEntityBuilder().noteText(noteTextWithAmendment).build());
+        oldNoteWithOldAmendment.addAmendment("Some amendment", "someuser", "Some User");
+        repository.save(oldNoteWithOldAmendment);
+
+        TestTransaction.flagForCommit();
+        TestTransaction.end();
+
+        TestTransaction.start();
+
+        // set the notes to two days ago
+        final var update = jdbcTemplate.update("update offender_case_note set modify_date_time = ? where offender_case_note_id in (?, ?)", twoDaysAgo,
+                oldNote.getId().toString(), oldNoteWithOldAmendment.getId().toString());
+        assertThat(update).isEqualTo(2);
+
+        // now add an amendment
+        final var retrievedOldNote = repository.findById(oldNote.getId()).orElseThrow();
+        retrievedOldNote.addAmendment("An amendment", "anotheruser", "Another User");
+        repository.save(retrievedOldNote);
+
+        final var yesterday = now().minusDays(1);
+        final var rows = repository.findBySensitiveCaseNoteType_ParentType_TypeAndModifyDateTimeAfterOrderByModifyDateTime(Set.of("POM"), yesterday, Pageable.unpaged());
+        assertThat(rows).extracting(OffenderCaseNote::getNoteText).contains(noteText).doesNotContain(noteTextWithAmendment);
+    }
+
+
+    @Test
+    public void findByModifiedDate() {
+        final var twoDaysAgo = now().minusDays(2);
+
+        final var oldNoteText = "old note";
+        final var oldNote = repository.save(transientEntityBuilder().noteText(oldNoteText).build());
+
+        final var newNoteText = "new note";
+        repository.save(transientEntityBuilder().noteText(newNoteText).build());
+
+        TestTransaction.flagForCommit();
+        TestTransaction.end();
+        TestTransaction.start();
+
+        // set the old notes two days ago so won't be returned
+        final var update = jdbcTemplate.update("update offender_case_note set modify_date_time = ? where offender_case_note_id in (?)", twoDaysAgo, oldNote.getId().toString());
+        assertThat(update).isEqualTo(1);
+
+        final var yesterday = now().minusDays(1);
+        final var rows = repository.findBySensitiveCaseNoteType_ParentType_TypeAndModifyDateTimeAfterOrderByModifyDateTime(Set.of("POM"), yesterday, Pageable.unpaged());
+        assertThat(rows).extracting(OffenderCaseNote::getNoteText).contains(newNoteText).doesNotContain(oldNoteText);
     }
 
     private OffenderCaseNote transientEntity() {
+        return transientEntityBuilder().build();
+    }
+
+    private OffenderCaseNoteBuilder transientEntityBuilder() {
         return OffenderCaseNote.builder()
-                .occurrenceDateTime(LocalDateTime.now())
+                .occurrenceDateTime(now())
                 .locationId("MDI")
                 .authorUsername("USER2")
                 .authorName("Mickey Mouse")
                 .offenderIdentifier("A1234BD")
-                .sensitiveCaseNoteType(sampleType)
-                .noteText("HELLO")
-                .build();
+                .sensitiveCaseNoteType(genType)
+                .noteText("HELLO");
     }
 }

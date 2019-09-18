@@ -9,17 +9,17 @@ import org.springframework.boot.test.json.JsonContent;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
-import uk.gov.justice.hmpps.casenotes.dto.CaseNote;
 import uk.gov.justice.hmpps.casenotes.integration.wiremock.Elite2MockServer;
 import uk.gov.justice.hmpps.casenotes.integration.wiremock.OauthMockServer;
+import uk.gov.justice.hmpps.casenotes.utils.JwtAuthenticationHelper;
+import uk.gov.justice.hmpps.casenotes.utils.JwtAuthenticationHelper.JwtParameters;
 
-import java.util.Collections;
-import java.util.Map;
+import java.time.Duration;
+import java.util.List;
 import java.util.Objects;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -38,6 +38,9 @@ public abstract class ResourceTest {
     @Autowired
     protected TestRestTemplate testRestTemplate;
 
+    @Autowired
+    protected JwtAuthenticationHelper jwtAuthenticationHelper;
+
     @ClassRule
     public static final Elite2MockServer elite2MockServer = new Elite2MockServer();
 
@@ -48,6 +51,16 @@ public abstract class ResourceTest {
     public void resetStubs() {
         elite2MockServer.resetAll();
         oauthMockServer.resetAll();
+    }
+
+    HttpEntity<?> createHttpEntityWithBearerAuthorisation(final String user, final List<String> roles) {
+        final var jwt = createJwt(user, roles);
+        return createHttpEntity(jwt, null);
+    }
+
+    HttpEntity<?> createHttpEntityWithBearerAuthorisation(final String user, final List<String> roles, final Object body) {
+        final var jwt = createJwt(user, roles);
+        return createHttpEntity(jwt, body);
     }
 
     HttpEntity<?> createHttpEntity(final String bearerToken, final Object body) {
@@ -61,19 +74,26 @@ public abstract class ResourceTest {
         return new HttpEntity<>(body, headers);
     }
 
-    <T> void assertStatus(final ResponseEntity<String> response, final int status) {
+    <T> void assertThatStatus(final ResponseEntity<String> response, final int status) {
         assertThat(response.getStatusCodeValue()).withFailMessage("Expecting status code value <%s> to be equal to <%s> but it was not.\nBody was\n%s", response.getStatusCodeValue(), status, response.getBody()).isEqualTo(status);
     }
 
-    <T> void assertJsonAndStatus(final ResponseEntity<String> response, final Class<T> type, final int status, final String jsonFile) {
-        assertThat(response.getStatusCodeValue()).withFailMessage("Expecting status code value <%s> to be equal to <%s> but it was not.\nBody was\n%s", response.getStatusCodeValue(), status, response.getBody()).isEqualTo(status);
-
-        assertThat(getBodyAsJsonContent(type, response)).isEqualToJson(jsonFile);
+    <T> void assertThatJsonFileAndStatus(final ResponseEntity<String> response, final int status, final String jsonFile) {
+        assertThatStatus(response, status);
+        assertThat(getBodyAsJsonContent(response)).isEqualToJson(jsonFile);
     }
 
-    private <T> JsonContent<CaseNote> getBodyAsJsonContent(final Class<T> type, final ResponseEntity<String> response) {
-        return new JsonContent<>(getClass(), forType(type), Objects.requireNonNull(response.getBody()));
+    private <T> JsonContent<T> getBodyAsJsonContent(final ResponseEntity<String> response) {
+        return new JsonContent<>(getClass(), forType(String.class), Objects.requireNonNull(response.getBody()));
     }
 
+    String createJwt(final String user, final List<String> roles) {
+        return jwtAuthenticationHelper.createJwt(JwtParameters.builder()
+                .username(user)
+                .roles(roles)
+                .scope(List.of("read", "write"))
+                .expiryTime(Duration.ofDays(1))
+                .build());
+    }
 }
 
