@@ -177,7 +177,7 @@ public class CaseNoteController {
             "The note type only filters at the top note type level not the sub type.<br/>" +
             "note_type can be presented multiples times in the URL to filter by multiple note types.", nickname = "getCaseNotesEvents")
     @ApiResponses(value = {
-            @ApiResponse(code = 200, message = "OK", response = CaseNoteEvent.class, responseContainer = "List"),
+            @ApiResponse(code = 200, message = "OK", response = CaseNoteEvents.class),
             @ApiResponse(code = 400, message = "Invalid request.", response = ErrorResponse.class),
             @ApiResponse(code = 500, message = "Unrecoverable error occurred whilst processing request.", response = ErrorResponse.class)})
     CaseNoteEvents getCaseNotesEventsNoLimit(@ApiParam(value = "a list of types and optionally subtypes (joined with +) to search.", example = "ACP+ASSESSMENT", required = true) @RequestParam("type") final List<String> noteTypes,
@@ -193,7 +193,7 @@ public class CaseNoteController {
             "The note type only filters at the top note type level not the sub type.<br/>" +
             "note_type can be presented multiples times in the URL to filter by multiple note types.", nickname = "getCaseNotesEvents")
     @ApiResponses(value = {
-            @ApiResponse(code = 200, message = "OK", response = CaseNoteEvent.class, responseContainer = "List"),
+            @ApiResponse(code = 200, message = "OK", response = CaseNoteEvents.class),
             @ApiResponse(code = 400, message = "Invalid request.", response = ErrorResponse.class),
             @ApiResponse(code = 500, message = "Unrecoverable error occurred whilst processing request.", response = ErrorResponse.class)})
     CaseNoteEvents getCaseNotesEvents(@ApiParam(value = "a list of types and optionally subtypes (joined with +) to search.", example = "ACP+ASSESSMENT", required = true) @RequestParam("type") final List<String> noteTypes,
