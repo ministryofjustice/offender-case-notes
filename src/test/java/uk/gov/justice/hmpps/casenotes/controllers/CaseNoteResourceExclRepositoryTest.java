@@ -1,5 +1,7 @@
 package uk.gov.justice.hmpps.casenotes.controllers;
 
+import com.github.tomakehurst.wiremock.client.WireMock;
+import com.github.tomakehurst.wiremock.matching.MatchResult;
 import org.junit.Test;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.domain.PageRequest;
@@ -16,7 +18,9 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
+import static com.github.tomakehurst.wiremock.client.WireMock.*;
 import static java.time.LocalDateTime.now;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anySet;
 import static org.mockito.Mockito.verify;
@@ -32,7 +36,8 @@ public class CaseNoteResourceExclRepositoryTest extends ResourceTest {
     public void getCaseNoteEvents_noLimit() {
         elite2MockServer.stubGetCaseNoteEventsNoLimit();
 
-        final var fromDate = LocalDateTime.now();
+        final var fromDateAsString = "2019-03-02T11:10:09";
+        final var fromDate = LocalDateTime.parse(fromDateAsString);
         final var fredEvent = createOffenderCaseNote(UUID.fromString("aaaaaaaa-4931-48e5-bb1b-dcb90892c90d"), "FRED", "JOE");
         final var bobJoeEvent = createOffenderCaseNote(UUID.fromString("bbbbbbbb-4931-48e5-bb1b-dcb90892c90d"), "BOB", "JOE");
         when(caseNoteRepository.findBySensitiveCaseNoteType_ParentType_TypeAndModifyDateTimeAfterOrderByModifyDateTime(anySet(), any(), any()))
@@ -40,18 +45,28 @@ public class CaseNoteResourceExclRepositoryTest extends ResourceTest {
 
         final var requestEntity = createHttpEntityWithBearerAuthorisation("ITAG_USER", EVENT_ROLE, Map.of());
 
-        final var responseEntity = testRestTemplate.exchange("/case-notes/events_no_limit?type=BOB+JOE&type=FRED&createdDate=" + fromDate, HttpMethod.GET, requestEntity, String.class);
+        final var responseEntity = testRestTemplate.exchange("/case-notes/events_no_limit?type={type}&type=FRED&createdDate=" + fromDate, HttpMethod.GET, requestEntity, String.class, "BOB+JOE");
 
         assertThatJsonFileAndStatus(responseEntity, 200, "casenoteevents.json");
 
         verify(caseNoteRepository).findBySensitiveCaseNoteType_ParentType_TypeAndModifyDateTimeAfterOrderByModifyDateTime(Set.of("BOB", "FRED"), fromDate, PageRequest.of(0, Integer.MAX_VALUE));
+
+        WireMock.verify(getRequestedFor(urlPathEqualTo("/api/case-notes/events_no_limit"))
+                .andMatching(request -> {
+                    // query param matching can only match one parameter, so need custom matcher instead
+                    assertThat(request.getUrl()).contains("?type=BOB+JOE&type=FRED");
+                    return MatchResult.exactMatch();
+                })
+                .withQueryParam("createdDate", equalTo(fromDateAsString))
+        );
     }
 
     @Test
     public void getCaseNoteEvents() {
         elite2MockServer.stubGetCaseNoteEvents();
 
-        final var fromDate = LocalDateTime.now();
+        final var fromDateAsString = "2019-03-02T11:10:09";
+        final var fromDate = LocalDateTime.parse(fromDateAsString);
         final var fredEvent = createOffenderCaseNote(UUID.fromString("aaaaaaaa-4931-48e5-bb1b-dcb90892c90d"), "FRED", "JOE");
         final var bobJoeEvent = createOffenderCaseNote(UUID.fromString("bbbbbbbb-4931-48e5-bb1b-dcb90892c90d"), "BOB", "JOE");
         when(caseNoteRepository.findBySensitiveCaseNoteType_ParentType_TypeAndModifyDateTimeAfterOrderByModifyDateTime(anySet(), any(), any()))
@@ -64,6 +79,16 @@ public class CaseNoteResourceExclRepositoryTest extends ResourceTest {
         assertThatJsonFileAndStatus(responseEntity, 200, "casenoteevents.json");
 
         verify(caseNoteRepository).findBySensitiveCaseNoteType_ParentType_TypeAndModifyDateTimeAfterOrderByModifyDateTime(Set.of("BOB", "FRED"), fromDate, PageRequest.of(0, 10));
+
+        WireMock.verify(getRequestedFor(urlPathEqualTo("/api/case-notes/events"))
+                .andMatching(request -> {
+                    // query param matching can only match one parameter, so need custom matcher instead
+                    assertThat(request.getUrl()).contains("?type=BOB%20JOE&type=FRED");
+                    return MatchResult.exactMatch();
+                })
+                .withQueryParam("createdDate", equalTo(fromDateAsString))
+                .withQueryParam("limit", equalTo("10"))
+        );
     }
 
     @Test
