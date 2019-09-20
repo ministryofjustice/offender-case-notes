@@ -14,6 +14,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.util.UriComponentsBuilder;
 import uk.gov.justice.hmpps.casenotes.dto.*;
 
 import java.time.LocalDateTime;
@@ -98,7 +99,7 @@ public class ExternalApiService {
     private int getHeader(final ResponseEntity response) {
         final var responseHeaders = response.getHeaders();
         final var value = responseHeaders.get("Total-Records");
-        return value != null && !value.isEmpty() ? Integer.valueOf(value.get(0)) : 0;
+        return value != null && !value.isEmpty() ? Integer.parseInt(value.get(0)) : 0;
     }
 
     private String getQueryFilter(final CaseNoteFilter filter) {
@@ -149,17 +150,25 @@ public class ExternalApiService {
     }
 
     List<CaseNoteEvent> getCaseNoteEvents(final List<String> noteTypes, final LocalDateTime createdDate) {
-        final var response = elite2ApiRestTemplate.exchange("/api/case-notes/events_no_limit?type={type}&createdDate={createdDate}",
-                HttpMethod.GET, null, new ParameterizedTypeReference<List<CaseNoteEvent>>() {
-                }, noteTypes, createdDate);
+        final var url = getUriComponentsBuilder("events_no_limit", noteTypes, createdDate).build().toUri();
+        final var response = elite2ApiRestTemplate.exchange(url, HttpMethod.GET, null, new ParameterizedTypeReference<List<CaseNoteEvent>>() {
+        });
         return response.getBody();
     }
 
     List<CaseNoteEvent> getCaseNoteEvents(final List<String> noteTypes, final LocalDateTime createdDate, final Integer limit) {
-        final var response = elite2ApiRestTemplate.exchange("/api/case-notes/events?type={type}&createdDate={createdDate}&limit={limit}",
-                HttpMethod.GET, null, new ParameterizedTypeReference<List<CaseNoteEvent>>() {
-                }, noteTypes, createdDate, limit);
+        final var uri = getUriComponentsBuilder("events", noteTypes, createdDate).queryParam("limit", limit).build().toUri();
+        final var response = elite2ApiRestTemplate.exchange(uri, HttpMethod.GET, null, new ParameterizedTypeReference<List<CaseNoteEvent>>() {
+        });
         return response.getBody();
+    }
+
+    private UriComponentsBuilder getUriComponentsBuilder(final String urlSuffix, final List<String> noteTypes, final LocalDateTime createdDate) {
+        // bit naff, but the template handler holds the root uri that we need, so have to create a uri from it to then pass to the builder
+        final var uri = elite2ApiRestTemplate.getUriTemplateHandler().expand("/api/case-notes/" + urlSuffix).normalize();
+        return UriComponentsBuilder.fromUri(uri)
+                .queryParam("type", noteTypes.toArray())
+                .queryParam("createdDate", createdDate);
     }
 }
 
