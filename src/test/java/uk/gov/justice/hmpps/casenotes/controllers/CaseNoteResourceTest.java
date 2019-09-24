@@ -18,6 +18,7 @@ public class CaseNoteResourceTest extends ResourceTest {
     private static final String CREATE_NORMAL_CASE_NOTE_WITHOUT_LOC = "{\"type\": \"BOB\", \"subType\": \"SMITH\", \"text\": \"%s\"}";
     private static final String CREATE_CASE_NOTE_BY_TYPE = "{\"type\": \"%s\", \"subType\": \"%s\", \"text\": \"%s\"}";
 
+    private static final List<String> POM_ROLE = List.of("ROLE_POM");
     private static final List<String> CASENOTES_ROLES = List.of("ROLE_VIEW_SENSITIVE_CASE_NOTES", "ROLE_ADD_SENSITIVE_CASE_NOTES");
     private static final List<String> SYSTEM_ROLES = List.of("ROLE_SYSTEM_USER");
 
@@ -50,6 +51,20 @@ public class CaseNoteResourceTest extends ResourceTest {
     }
 
     @Test
+    public void testGetCaseNoteTypesSecurePomRole() {
+        elite2MockServer.subGetCaseNoteTypes();
+
+        final var response = testRestTemplate.exchange(
+                "/case-notes/types",
+                HttpMethod.GET,
+                createHttpEntityWithBearerAuthorisation("SECURE_CASENOTE_USER", POM_ROLE),
+                new ParameterizedTypeReference<String>() {
+                });
+
+        assertThatJsonFileAndStatus(response, 200, "caseNoteTypesSecure.json");
+    }
+
+    @Test
     public void testUserCaseNoteTypesNormal() {
         elite2MockServer.subUserCaseNoteTypes();
 
@@ -71,6 +86,20 @@ public class CaseNoteResourceTest extends ResourceTest {
                 "/case-notes/types-for-user",
                 HttpMethod.GET,
                 createHttpEntityWithBearerAuthorisation("SECURE_CASENOTE_USER", CASENOTES_ROLES),
+                new ParameterizedTypeReference<String>() {
+                });
+
+        assertThatJsonFileAndStatus(response, 200, "userCaseNoteTypesSecure.json");
+    }
+
+    @Test
+    public void testUserCaseNoteTypesSecurePomRole() {
+        elite2MockServer.subUserCaseNoteTypes();
+
+        final var response = testRestTemplate.exchange(
+                "/case-notes/types-for-user",
+                HttpMethod.GET,
+                createHttpEntityWithBearerAuthorisation("SECURE_CASENOTE_USER", POM_ROLE),
                 new ParameterizedTypeReference<String>() {
                 });
 
@@ -193,6 +222,22 @@ public class CaseNoteResourceTest extends ResourceTest {
                 "/case-notes/{offenderIdentifier}",
                 HttpMethod.POST,
                 createHttpEntityWithBearerAuthorisation("SECURE_CASENOTE_USER", CASENOTES_ROLES, format(CREATE_CASE_NOTE_WITHOUT_LOC, "This is another case note")),
+                String.class,
+                "A1234AD");
+
+        assertThatJsonFileAndStatus(response, 201, "A1234AD-create-casenote.json");
+    }
+
+    @Test
+    public void testCanCreateCaseNote_SecureWithPomRole() {
+        oauthMockServer.subGetUserDetails("SECURE_CASENOTE_USER");
+        elite2MockServer.subGetOffender("A1234AD");
+
+        // create the case note
+        final var response = testRestTemplate.exchange(
+                "/case-notes/{offenderIdentifier}",
+                HttpMethod.POST,
+                createHttpEntityWithBearerAuthorisation("SECURE_CASENOTE_USER", POM_ROLE, format(CREATE_CASE_NOTE_WITHOUT_LOC, "This is another case note")),
                 String.class,
                 "A1234AD");
 
