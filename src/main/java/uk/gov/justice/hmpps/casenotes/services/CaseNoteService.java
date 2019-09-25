@@ -52,7 +52,7 @@ public class CaseNoteService {
 
         final List<CaseNote> sensitiveCaseNotes;
 
-        if (securityUserContext.isOverrideRole("VIEW_SENSITIVE_CASE_NOTES", "ADD_SENSITIVE_CASE_NOTES")) {
+        if (securityUserContext.isOverrideRole("POM", "VIEW_SENSITIVE_CASE_NOTES", "ADD_SENSITIVE_CASE_NOTES")) {
 
             final var filter = OffenderCaseNoteFilter.builder()
                     .offenderIdentifier(offenderIdentifier)
@@ -195,7 +195,7 @@ public class CaseNoteService {
         }
 
         // ensure that the user can then create a secure case note
-        if (!securityUserContext.isOverrideRole("ADD_SENSITIVE_CASE_NOTES")) {
+        if (!securityUserContext.isOverrideRole("POM", "ADD_SENSITIVE_CASE_NOTES")) {
             throw new AccessDeniedException("User not allowed to create sensitive case notes");
         }
 
@@ -227,7 +227,7 @@ public class CaseNoteService {
         if (isNotSensitiveCaseNote(caseNoteIdentifier)) {
             return mapper(externalApiService.amendOffenderCaseNote(offenderIdentifier, NumberUtils.toLong(caseNoteIdentifier), amendCaseNote), offenderIdentifier);
         }
-        if (!securityUserContext.isOverrideRole("ADD_SENSITIVE_CASE_NOTES")) {
+        if (!securityUserContext.isOverrideRole("POM", "ADD_SENSITIVE_CASE_NOTES")) {
             throw new AccessDeniedException("User not allowed to view sensitive case notes");
         }
 
@@ -244,7 +244,7 @@ public class CaseNoteService {
     public List<CaseNoteType> getCaseNoteTypes() {
         final var caseNoteTypes = externalApiService.getCaseNoteTypes();
 
-        if (securityUserContext.isOverrideRole("VIEW_SENSITIVE_CASE_NOTES", "ADD_SENSITIVE_CASE_NOTES")) {
+        if (securityUserContext.isOverrideRole("POM", "VIEW_SENSITIVE_CASE_NOTES", "ADD_SENSITIVE_CASE_NOTES")) {
             return caseNoteTypeMerger.mergeAndSortList(caseNoteTypes, getSensitiveCaseNoteTypes(true));
         }
 
@@ -253,7 +253,7 @@ public class CaseNoteService {
 
     public List<CaseNoteType> getUserCaseNoteTypes() {
         final var userCaseNoteTypes = externalApiService.getUserCaseNoteTypes();
-        if (securityUserContext.isOverrideRole("ADD_SENSITIVE_CASE_NOTES")) {
+        if (securityUserContext.isOverrideRole("POM", "ADD_SENSITIVE_CASE_NOTES")) {
             return caseNoteTypeMerger.mergeAndSortList(userCaseNoteTypes, getSensitiveCaseNoteTypes(false));
         }
         return userCaseNoteTypes;
@@ -287,7 +287,7 @@ public class CaseNoteService {
         if (isNotSensitiveCaseNote(caseNoteIdentifier)) {
             return mapper(externalApiService.getOffenderCaseNote(offenderIdentifier, NumberUtils.toLong(caseNoteIdentifier)), offenderIdentifier);
         }
-        if (!securityUserContext.isOverrideRole("VIEW_SENSITIVE_CASE_NOTES", "ADD_SENSITIVE_CASE_NOTES")) {
+        if (!securityUserContext.isOverrideRole("POM", "VIEW_SENSITIVE_CASE_NOTES", "ADD_SENSITIVE_CASE_NOTES")) {
             throw new AccessDeniedException("User not allowed to view sensitive case notes");
         }
         return mapper(repository.findById(UUID.fromString(caseNoteIdentifier)).orElseThrow(() -> EntityNotFoundException.withId(caseNoteIdentifier)));
