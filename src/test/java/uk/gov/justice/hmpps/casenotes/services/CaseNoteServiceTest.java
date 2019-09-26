@@ -194,7 +194,7 @@ public class CaseNoteServiceTest {
         final var noteTypes = List.of("BOB+SUB", "BOB+OTHER", "FRED");
         caseNoteService.getCaseNoteEvents(noteTypes, now);
         verify(externalApiService).getCaseNoteEvents(noteTypes, now);
-        verify(repository).findBySensitiveCaseNoteType_ParentType_TypeAndModifyDateTimeAfterOrderByModifyDateTime(Set.of("BOB", "FRED"), now, PageRequest.of(0, Integer.MAX_VALUE));
+        verify(repository).findBySensitiveCaseNoteType_ParentType_TypeInAndModifyDateTimeAfterOrderByModifyDateTime(Set.of("BOB", "FRED"), now, PageRequest.of(0, Integer.MAX_VALUE));
     }
 
     @Test
@@ -203,7 +203,7 @@ public class CaseNoteServiceTest {
         final var noteTypes = List.of("BOB+SUB", "BOB+OTHER", "FRED");
         caseNoteService.getCaseNoteEvents(noteTypes, now, 10);
         verify(externalApiService).getCaseNoteEvents(noteTypes, now, 10);
-        verify(repository).findBySensitiveCaseNoteType_ParentType_TypeAndModifyDateTimeAfterOrderByModifyDateTime(Set.of("BOB", "FRED"), now, PageRequest.of(0, 10));
+        verify(repository).findBySensitiveCaseNoteType_ParentType_TypeInAndModifyDateTimeAfterOrderByModifyDateTime(Set.of("BOB", "FRED"), now, PageRequest.of(0, 10));
     }
 
     @Test
@@ -211,7 +211,7 @@ public class CaseNoteServiceTest {
         final var now = now();
         final var noteTypes = List.of("BOB+SUB", "BOB+OTHER", "FRED");
         when(externalApiService.getCaseNoteEvents(anyList(), any(), anyInt())).thenReturn(List.of(createCaseNoteEvent("elite hour ago", now().minusHours(1)), createCaseNoteEvent("elite three hours", now().minusHours(3))));
-        when(repository.findBySensitiveCaseNoteType_ParentType_TypeAndModifyDateTimeAfterOrderByModifyDateTime(anySet(), any(), any())).thenReturn(List.of(createOffenderCaseNote("ocn two hours", "BOB", "SUB", now().minusHours(2))));
+        when(repository.findBySensitiveCaseNoteType_ParentType_TypeInAndModifyDateTimeAfterOrderByModifyDateTime(anySet(), any(), any())).thenReturn(List.of(createOffenderCaseNote("ocn two hours", "BOB", "SUB", now().minusHours(2))));
         final var events = caseNoteService.getCaseNoteEvents(noteTypes, now, 10);
         assertThat(events.getEvents()).extracting(CaseNoteEvent::getContent).containsExactly("elite three hours", "ocn two hours", "elite hour ago");
     }
@@ -220,7 +220,7 @@ public class CaseNoteServiceTest {
     public void getCaseNoteEvents_filterSubTypes() {
         final var now = now();
         final var noteTypes = List.of("BOB+SUB", "BOB+OTHER", "FRED");
-        when(repository.findBySensitiveCaseNoteType_ParentType_TypeAndModifyDateTimeAfterOrderByModifyDateTime(anySet(), any(), any())).thenReturn(
+        when(repository.findBySensitiveCaseNoteType_ParentType_TypeInAndModifyDateTimeAfterOrderByModifyDateTime(anySet(), any(), any())).thenReturn(
                 List.of(createOffenderCaseNote("valid bob sub", "BOB", "SUB", now().minusHours(2)),
                         createOffenderCaseNote("invalid bob joe", "BOB", "JOE", now().minusHours(2)),
                         createOffenderCaseNote("valid fred", "FRED", "JOE", now().minusHours(1))
@@ -233,7 +233,7 @@ public class CaseNoteServiceTest {
     public void getCaseNoteEvents_limitResults() {
         final var noteTypes = List.of("BOB+SUB", "BOB+OTHER", "FRED");
         when(externalApiService.getCaseNoteEvents(anyList(), any(), anyInt())).thenReturn(List.of(createCaseNoteEvent("elite hour ago", now().minusHours(1)), createCaseNoteEvent("elite three hours", now().minusHours(3))));
-        when(repository.findBySensitiveCaseNoteType_ParentType_TypeAndModifyDateTimeAfterOrderByModifyDateTime(anySet(), any(), any())).thenReturn(List.of(createOffenderCaseNote("ocn two hours", "BOB", "SUB", now().minusHours(2))));
+        when(repository.findBySensitiveCaseNoteType_ParentType_TypeInAndModifyDateTimeAfterOrderByModifyDateTime(anySet(), any(), any())).thenReturn(List.of(createOffenderCaseNote("ocn two hours", "BOB", "SUB", now().minusHours(2))));
         final var events = caseNoteService.getCaseNoteEvents(noteTypes, now(), 2);
         assertThat(events.getEvents()).extracting(CaseNoteEvent::getContent).containsExactly("elite three hours", "ocn two hours");
     }
@@ -243,7 +243,7 @@ public class CaseNoteServiceTest {
         final var now = now();
         final var noteTypes = List.of("BOB+SUB", "BOB+OTHER", "FRED");
         when(externalApiService.getCaseNoteEvents(anyList(), any(), anyInt())).thenReturn(List.of(createCaseNoteEvent("elite hour ago", now.minusHours(1)), createCaseNoteEvent("elite three hours", now.minusHours(3))));
-        when(repository.findBySensitiveCaseNoteType_ParentType_TypeAndModifyDateTimeAfterOrderByModifyDateTime(anySet(), any(), any())).thenReturn(List.of(createOffenderCaseNote("ocn two hours", "BOB", "SUB", now().minusHours(2))));
+        when(repository.findBySensitiveCaseNoteType_ParentType_TypeInAndModifyDateTimeAfterOrderByModifyDateTime(anySet(), any(), any())).thenReturn(List.of(createOffenderCaseNote("ocn two hours", "BOB", "SUB", now().minusHours(2))));
         final var events = caseNoteService.getCaseNoteEvents(noteTypes, now, 4);
         assertThat(events.getLatestEventDate()).isAfterOrEqualTo(now);
     }
@@ -254,7 +254,7 @@ public class CaseNoteServiceTest {
         final var noteTypes = List.of("BOB+SUB", "BOB+OTHER", "FRED");
         when(externalApiService.getCaseNoteEvents(anyList(), any(), anyInt())).thenReturn(List.of(createCaseNoteEvent("elite hour ago", now().minusHours(1)), createCaseNoteEvent("elite three hours", now().minusHours(3))));
         final var twoHoursAgo = now().minusHours(2);
-        when(repository.findBySensitiveCaseNoteType_ParentType_TypeAndModifyDateTimeAfterOrderByModifyDateTime(anySet(), any(), any())).thenReturn(List.of(createOffenderCaseNote("ocn two hours", "BOB", "SUB", twoHoursAgo)));
+        when(repository.findBySensitiveCaseNoteType_ParentType_TypeInAndModifyDateTimeAfterOrderByModifyDateTime(anySet(), any(), any())).thenReturn(List.of(createOffenderCaseNote("ocn two hours", "BOB", "SUB", twoHoursAgo)));
         final var events = caseNoteService.getCaseNoteEvents(noteTypes, now, 2);
         assertThat(events.getLatestEventDate()).isEqualTo(twoHoursAgo);
     }

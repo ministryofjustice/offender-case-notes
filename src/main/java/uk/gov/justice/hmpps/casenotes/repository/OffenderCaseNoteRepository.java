@@ -14,5 +14,5 @@ import java.util.UUID;
 @Repository
 public interface OffenderCaseNoteRepository extends PagingAndSortingRepository<OffenderCaseNote, UUID>, JpaSpecificationExecutor<OffenderCaseNote> {
 
-    List<OffenderCaseNote> findBySensitiveCaseNoteType_ParentType_TypeAndModifyDateTimeAfterOrderByModifyDateTime(Set<String> types, LocalDateTime createdDate, Pageable page);
+    List<OffenderCaseNote> findBySensitiveCaseNoteType_ParentType_TypeInAndModifyDateTimeAfterOrderByModifyDateTime(Set<String> types, LocalDateTime createdDate, Pageable page);
 }

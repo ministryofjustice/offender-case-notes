@@ -170,7 +170,7 @@ public class OffenderCaseNoteRepositoryTest {
         repository.save(retrievedOldNote);
 
         final var yesterday = now().minusDays(1);
-        final var rows = repository.findBySensitiveCaseNoteType_ParentType_TypeAndModifyDateTimeAfterOrderByModifyDateTime(Set.of("POM"), yesterday, Pageable.unpaged());
+        final var rows = repository.findBySensitiveCaseNoteType_ParentType_TypeInAndModifyDateTimeAfterOrderByModifyDateTime(Set.of("POM"), yesterday, Pageable.unpaged());
         assertThat(rows).extracting(OffenderCaseNote::getNoteText).contains(noteText).doesNotContain(noteTextWithAmendment);
     }
 
@@ -194,7 +194,7 @@ public class OffenderCaseNoteRepositoryTest {
         assertThat(update).isEqualTo(1);
 
         final var yesterday = now().minusDays(1);
-        final var rows = repository.findBySensitiveCaseNoteType_ParentType_TypeAndModifyDateTimeAfterOrderByModifyDateTime(Set.of("POM"), yesterday, Pageable.unpaged());
+        final var rows = repository.findBySensitiveCaseNoteType_ParentType_TypeInAndModifyDateTimeAfterOrderByModifyDateTime(Set.of("POM", "BOB"), yesterday, Pageable.unpaged());
         assertThat(rows).extracting(OffenderCaseNote::getNoteText).contains(newNoteText).doesNotContain(oldNoteText);
     }
 
