@@ -371,7 +371,7 @@ public class CaseNoteService {
     private CaseNoteEvents combineWithSensitive(final List<String> noteTypes, final LocalDateTime createdDate, final int limit, final LocalDateTime eliteDate, final List<CaseNoteEvent> eliteEvents) {
         final var noteTypesMap = splitTypesAndSubTypes(noteTypes);
 
-        final var sensitiveNotes = repository.findBySensitiveCaseNoteType_ParentType_TypeAndModifyDateTimeAfterOrderByModifyDateTime(noteTypesMap.keySet(), createdDate, PageRequest.of(0, limit));
+        final var sensitiveNotes = repository.findBySensitiveCaseNoteType_ParentType_TypeInAndModifyDateTimeAfterOrderByModifyDateTime(noteTypesMap.keySet(), createdDate, PageRequest.of(0, limit));
         final var sensitiveEvents = sensitiveNotes.stream().filter((event) -> {
             final var subTypes = noteTypesMap.get(event.getSensitiveCaseNoteType().getParentType().getType());
             // will be null if not in map, otherwise will be empty if type in map with no sub type set

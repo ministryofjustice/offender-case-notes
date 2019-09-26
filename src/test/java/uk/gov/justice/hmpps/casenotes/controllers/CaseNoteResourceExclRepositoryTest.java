@@ -40,7 +40,7 @@ public class CaseNoteResourceExclRepositoryTest extends ResourceTest {
         final var fromDate = LocalDateTime.parse(fromDateAsString);
         final var fredEvent = createOffenderCaseNote(UUID.fromString("aaaaaaaa-4931-48e5-bb1b-dcb90892c90d"), "FRED", "JOE");
         final var bobJoeEvent = createOffenderCaseNote(UUID.fromString("bbbbbbbb-4931-48e5-bb1b-dcb90892c90d"), "BOB", "JOE");
-        when(caseNoteRepository.findBySensitiveCaseNoteType_ParentType_TypeAndModifyDateTimeAfterOrderByModifyDateTime(anySet(), any(), any()))
+        when(caseNoteRepository.findBySensitiveCaseNoteType_ParentType_TypeInAndModifyDateTimeAfterOrderByModifyDateTime(anySet(), any(), any()))
                 .thenReturn(List.of(bobJoeEvent, fredEvent, createOffenderCaseNote(UUID.randomUUID(), "BOB", "OTHER"), createOffenderCaseNote(UUID.randomUUID(), "WRONG", "TYPE")));
 
         final var requestEntity = createHttpEntityWithBearerAuthorisation("ITAG_USER", EVENT_ROLE, Map.of());
@@ -49,7 +49,7 @@ public class CaseNoteResourceExclRepositoryTest extends ResourceTest {
 
         assertThatJsonFileAndStatus(responseEntity, 200, "casenoteevents.json");
 
-        verify(caseNoteRepository).findBySensitiveCaseNoteType_ParentType_TypeAndModifyDateTimeAfterOrderByModifyDateTime(Set.of("BOB", "FRED"), fromDate, PageRequest.of(0, Integer.MAX_VALUE));
+        verify(caseNoteRepository).findBySensitiveCaseNoteType_ParentType_TypeInAndModifyDateTimeAfterOrderByModifyDateTime(Set.of("BOB", "FRED"), fromDate, PageRequest.of(0, Integer.MAX_VALUE));
 
         WireMock.verify(getRequestedFor(urlPathEqualTo("/api/case-notes/events_no_limit"))
                 .andMatching(request -> {
@@ -69,7 +69,7 @@ public class CaseNoteResourceExclRepositoryTest extends ResourceTest {
         final var fromDate = LocalDateTime.parse(fromDateAsString);
         final var fredEvent = createOffenderCaseNote(UUID.fromString("aaaaaaaa-4931-48e5-bb1b-dcb90892c90d"), "FRED", "JOE");
         final var bobJoeEvent = createOffenderCaseNote(UUID.fromString("bbbbbbbb-4931-48e5-bb1b-dcb90892c90d"), "BOB", "JOE");
-        when(caseNoteRepository.findBySensitiveCaseNoteType_ParentType_TypeAndModifyDateTimeAfterOrderByModifyDateTime(anySet(), any(), any()))
+        when(caseNoteRepository.findBySensitiveCaseNoteType_ParentType_TypeInAndModifyDateTimeAfterOrderByModifyDateTime(anySet(), any(), any()))
                 .thenReturn(List.of(bobJoeEvent, fredEvent, createOffenderCaseNote(UUID.randomUUID(), "BOB", "OTHER"), createOffenderCaseNote(UUID.randomUUID(), "WRONG", "TYPE")));
 
         final var requestEntity = createHttpEntityWithBearerAuthorisation("ITAG_USER", EVENT_ROLE, Map.of());
@@ -78,7 +78,7 @@ public class CaseNoteResourceExclRepositoryTest extends ResourceTest {
 
         assertThatJsonFileAndStatus(responseEntity, 200, "casenoteevents.json");
 
-        verify(caseNoteRepository).findBySensitiveCaseNoteType_ParentType_TypeAndModifyDateTimeAfterOrderByModifyDateTime(Set.of("BOB", "FRED"), fromDate, PageRequest.of(0, 10));
+        verify(caseNoteRepository).findBySensitiveCaseNoteType_ParentType_TypeInAndModifyDateTimeAfterOrderByModifyDateTime(Set.of("BOB", "FRED"), fromDate, PageRequest.of(0, 10));
 
         WireMock.verify(getRequestedFor(urlPathEqualTo("/api/case-notes/events"))
                 .andMatching(request -> {
