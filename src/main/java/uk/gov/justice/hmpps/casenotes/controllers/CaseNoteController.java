@@ -1,6 +1,5 @@
 package uk.gov.justice.hmpps.casenotes.controllers;
 
-import com.google.common.collect.ImmutableMap;
 import com.microsoft.applicationinsights.TelemetryClient;
 import io.swagger.annotations.*;
 import lombok.AllArgsConstructor;
@@ -13,12 +12,14 @@ import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
+import uk.gov.justice.hmpps.casenotes.config.SecurityUserContext;
 import uk.gov.justice.hmpps.casenotes.dto.*;
 import uk.gov.justice.hmpps.casenotes.services.CaseNoteService;
 
 import javax.validation.constraints.NotNull;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 
 import static org.springframework.format.annotation.DateTimeFormat.ISO;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
@@ -34,6 +35,7 @@ public class CaseNoteController {
 
     private final CaseNoteService caseNoteService;
     private final TelemetryClient telemetryClient;
+    private final SecurityUserContext securityUserContext;
 
     @GetMapping("/{offenderIdentifier}/{caseNoteIdentifier}")
     @ResponseBody
@@ -82,7 +84,7 @@ public class CaseNoteController {
             @RequestBody @NotNull final NewCaseNote newCaseNote) {
         final var caseNoteCreated = caseNoteService.createCaseNote(offenderIdentifier, newCaseNote);
         // Log event
-        telemetryClient.trackEvent("CaseNoteCreated", ImmutableMap.of("type", caseNoteCreated.getType(), "subType", caseNoteCreated.getSubType()), null);
+        telemetryClient.trackEvent("CaseNoteCreated", createEventProperties(caseNoteCreated), null);
         return caseNoteCreated;
     }
 
@@ -100,7 +102,7 @@ public class CaseNoteController {
         final var amendCaseNote = caseNoteService.amendCaseNote(offenderIdentifier, caseNoteIdentifier, amendedText);
 
         // Log event
-        telemetryClient.trackEvent("CaseNoteUpdated", ImmutableMap.of("type", amendCaseNote.getType(), "subType", amendCaseNote.getSubType()), null);
+        telemetryClient.trackEvent("CaseNoteUpdated", createEventProperties(amendCaseNote), null);
         return amendCaseNote;
     }
 
@@ -212,4 +214,12 @@ public class CaseNoteController {
         return caseNoteService.getCaseNoteEvents(noteTypes, createdDate, limit);
     }
 
+    private Map<String, String> createEventProperties(final CaseNote caseNote) {
+        return Map.of(
+                "type", caseNote.getType(),
+                "subType", caseNote.getSubType(),
+                "offenderIdentifier", caseNote.getOffenderIdentifier(),
+                "authorUsername", securityUserContext.getCurrentUsername()
+        );
+    }
 }
