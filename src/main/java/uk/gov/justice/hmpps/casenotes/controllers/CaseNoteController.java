@@ -1,5 +1,7 @@
 package uk.gov.justice.hmpps.casenotes.controllers;
 
+import com.google.common.collect.ImmutableMap;
+import com.microsoft.applicationinsights.TelemetryClient;
 import io.swagger.annotations.*;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -31,6 +33,7 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 public class CaseNoteController {
 
     private final CaseNoteService caseNoteService;
+    private final TelemetryClient telemetryClient;
 
     @GetMapping("/{offenderIdentifier}/{caseNoteIdentifier}")
     @ResponseBody
@@ -77,7 +80,10 @@ public class CaseNoteController {
     public CaseNote createCaseNote(
             @ApiParam(value = "Offender Identifier", required = true, example = "A1234AA") @PathVariable("offenderIdentifier") final String offenderIdentifier,
             @RequestBody @NotNull final NewCaseNote newCaseNote) {
-        return caseNoteService.createCaseNote(offenderIdentifier, newCaseNote);
+        final var caseNoteCreated = caseNoteService.createCaseNote(offenderIdentifier, newCaseNote);
+        // Log event
+        telemetryClient.trackEvent("CaseNoteCreated", ImmutableMap.of("type", caseNoteCreated.getType(), "subType", caseNoteCreated.getSubType()), null);
+        return caseNoteCreated;
     }
 
     @PutMapping(value = "/{offenderIdentifier}/{caseNoteIdentifier}", consumes = APPLICATION_JSON_VALUE)
@@ -91,7 +97,11 @@ public class CaseNoteController {
             @ApiParam(value = "Offender Identifier", required = true, example = "A1234AA") @PathVariable("offenderIdentifier") final String offenderIdentifier,
             @ApiParam(value = "Case Note Id", required = true, example = "A1234AA") @PathVariable("caseNoteIdentifier") final String caseNoteIdentifier,
             @RequestBody @NotNull final UpdateCaseNote amendedText) {
-        return caseNoteService.amendCaseNote(offenderIdentifier, caseNoteIdentifier, amendedText);
+        final var amendCaseNote = caseNoteService.amendCaseNote(offenderIdentifier, caseNoteIdentifier, amendedText);
+
+        // Log event
+        telemetryClient.trackEvent("CaseNoteUpdated", ImmutableMap.of("type", amendCaseNote.getType(), "subType", amendCaseNote.getSubType()), null);
+        return amendCaseNote;
     }
 
     @GetMapping(value = "/types")
