@@ -17,6 +17,7 @@ spring:
 
   flyway:
     enabled: true
+    locations: classpath:db/migration/general,classpath:db/migration/{vendor}
 
   datasource:
     url: 'jdbc:postgresql://${DATABASE_ENDPOINT}/${DATABASE_NAME}?sslmode=verify-full'

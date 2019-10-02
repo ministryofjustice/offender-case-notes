@@ -27,7 +27,7 @@ public class CaseNoteEvent {
     private String nomsId;
 
     @ApiModelProperty(required = true, value = "Case Note Id (unique)", example = "12311312", position = 2)
-    private String id;
+    private Integer id;
 
     @ApiModelProperty(required = true, value = "Case Note Text", position = 3, example = "This is some text")
     private String content;
@@ -49,7 +49,7 @@ public class CaseNoteEvent {
 
     public CaseNoteEvent(final OffenderCaseNote o) {
         nomsId = o.getOffenderIdentifier();
-        id = o.getId().toString();
+        id = o.getEventId();
         content = constructNoteTextWithAmendments(o.getNoteText(), o.getAmendments());
         contactTimestamp = o.getOccurrenceDateTime();
         notificationTimestamp = o.getModifyDateTime();

@@ -6,7 +6,7 @@ spring:
 
   flyway:
     enabled: true
-    locations: classpath:db/migration,classpath:db/test/migration
+    locations: classpath:db/migration/general,classpath:db/migration/{vendor},classpath:db/test/migration
 
   h2:
     console:

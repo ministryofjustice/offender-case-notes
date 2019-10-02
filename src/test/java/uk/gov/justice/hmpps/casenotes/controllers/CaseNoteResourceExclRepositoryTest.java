@@ -38,10 +38,10 @@ public class CaseNoteResourceExclRepositoryTest extends ResourceTest {
 
         final var fromDateAsString = "2019-03-02T11:10:09";
         final var fromDate = LocalDateTime.parse(fromDateAsString);
-        final var fredEvent = createOffenderCaseNote(UUID.fromString("aaaaaaaa-4931-48e5-bb1b-dcb90892c90d"), "FRED", "JOE");
-        final var bobJoeEvent = createOffenderCaseNote(UUID.fromString("bbbbbbbb-4931-48e5-bb1b-dcb90892c90d"), "BOB", "JOE");
+        final var fredEvent = createOffenderCaseNote(-234, "FRED", "JOE");
+        final var bobJoeEvent = createOffenderCaseNote(-456, "BOB", "JOE");
         when(caseNoteRepository.findBySensitiveCaseNoteType_ParentType_TypeInAndModifyDateTimeAfterOrderByModifyDateTime(anySet(), any(), any()))
-                .thenReturn(List.of(bobJoeEvent, fredEvent, createOffenderCaseNote(UUID.randomUUID(), "BOB", "OTHER"), createOffenderCaseNote(UUID.randomUUID(), "WRONG", "TYPE")));
+                .thenReturn(List.of(bobJoeEvent, fredEvent, createOffenderCaseNote(-2, "BOB", "OTHER"), createOffenderCaseNote(-4, "WRONG", "TYPE")));
 
         final var requestEntity = createHttpEntityWithBearerAuthorisation("ITAG_USER", EVENT_ROLE, Map.of());
 
@@ -67,10 +67,10 @@ public class CaseNoteResourceExclRepositoryTest extends ResourceTest {
 
         final var fromDateAsString = "2019-03-02T11:10:09";
         final var fromDate = LocalDateTime.parse(fromDateAsString);
-        final var fredEvent = createOffenderCaseNote(UUID.fromString("aaaaaaaa-4931-48e5-bb1b-dcb90892c90d"), "FRED", "JOE");
-        final var bobJoeEvent = createOffenderCaseNote(UUID.fromString("bbbbbbbb-4931-48e5-bb1b-dcb90892c90d"), "BOB", "JOE");
+        final var fredEvent = createOffenderCaseNote(-234, "FRED", "JOE");
+        final var bobJoeEvent = createOffenderCaseNote(-456, "BOB", "JOE");
         when(caseNoteRepository.findBySensitiveCaseNoteType_ParentType_TypeInAndModifyDateTimeAfterOrderByModifyDateTime(anySet(), any(), any()))
-                .thenReturn(List.of(bobJoeEvent, fredEvent, createOffenderCaseNote(UUID.randomUUID(), "BOB", "OTHER"), createOffenderCaseNote(UUID.randomUUID(), "WRONG", "TYPE")));
+                .thenReturn(List.of(bobJoeEvent, fredEvent, createOffenderCaseNote(-2, "BOB", "OTHER"), createOffenderCaseNote(-3, "WRONG", "TYPE")));
 
         final var requestEntity = createHttpEntityWithBearerAuthorisation("ITAG_USER", EVENT_ROLE, Map.of());
 
@@ -108,14 +108,15 @@ public class CaseNoteResourceExclRepositoryTest extends ResourceTest {
                 .notificationTimestamp(LocalDateTime.parse("2019-02-01T23:22:21"))
                 .establishmentCode("LEI")
                 .staffName("Last, First")
-                .id("1")
+                .id(1)
                 .nomsId(123 + subType)
                 .build();
     }
 
-    private OffenderCaseNote createOffenderCaseNote(final UUID uuid, final String type, final String subType) {
+    private OffenderCaseNote createOffenderCaseNote(final int eventId, final String type, final String subType) {
         return OffenderCaseNote.builder()
-                .id(uuid)
+                .id(UUID.randomUUID())
+                .eventId(eventId)
                 .occurrenceDateTime(now())
                 .locationId("MDI")
                 .authorUsername("USER2")
