@@ -2,7 +2,7 @@
   "events": [
     {
       "nomsId": "AB2",
-      "id": "2",
+      "id": 2,
       "content": "another note",
       "notificationTimestamp": "2018-01-02T11:10:09",
       "noteType": "MAIN SUB",
@@ -10,7 +10,7 @@
     },
     {
       "nomsId": "A12BOBJOE",
-      "id": "bbbbbbbb-4931-48e5-bb1b-dcb90892c90d",
+      "id": -456,
       "content": "Some ocn content for JOE",
       "notificationTimestamp": "2019-02-01T23:22:21",
       "establishmentCode": "MDI",
@@ -19,7 +19,7 @@
     },
     {
       "nomsId": "A12FREDJOE",
-      "id": "aaaaaaaa-4931-48e5-bb1b-dcb90892c90d",
+      "id": -234,
       "content": "Some ocn content for JOE",
       "notificationTimestamp": "2019-02-01T23:22:21",
       "establishmentCode": "MDI",
@@ -28,7 +28,7 @@
     },
     {
       "nomsId": "AB1",
-      "id": "1",
+      "id": 1,
       "content": "a note",
       "notificationTimestamp": "2019-02-03T11:10:09",
       "noteType": "MAIN SUB",

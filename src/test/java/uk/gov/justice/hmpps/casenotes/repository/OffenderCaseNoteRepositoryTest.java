@@ -198,6 +198,17 @@ public class OffenderCaseNoteRepositoryTest {
         assertThat(rows).extracting(OffenderCaseNote::getNoteText).contains(newNoteText).doesNotContain(oldNoteText);
     }
 
+    @Test
+    public void testGenerationOfEventId() {
+        final var note = repository.save(transientEntity());
+
+        TestTransaction.flagForCommit();
+        TestTransaction.end();
+        TestTransaction.start();
+
+        assertThat(repository.findById(note.getId()).orElseThrow().getEventId()).isLessThan(0);
+    }
+
     private OffenderCaseNote transientEntity() {
         return transientEntityBuilder().build();
     }

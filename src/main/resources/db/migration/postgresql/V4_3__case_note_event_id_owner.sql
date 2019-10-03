@@ -1,0 +1,1 @@
+ALTER SEQUENCE offender_case_note_event_id_seq OWNED BY offender_case_note.event_id;

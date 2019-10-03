@@ -71,6 +71,9 @@ public class OffenderCaseNote {
     @LastModifiedBy
     private String modifyUserId;
 
+    @Column(columnDefinition = "serial", insertable = false, updatable = false)
+    private Integer eventId;
+
     public void addAmendment(final String noteText, final String authorUsername, final String authorName) {
 
         final var amendment = OffenderCaseNoteAmendment.builder()

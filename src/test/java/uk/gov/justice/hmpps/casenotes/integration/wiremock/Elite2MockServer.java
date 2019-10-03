@@ -176,12 +176,12 @@ public class Elite2MockServer extends WireMockRule {
                 createCaseNoteEvent(2, "another note", LocalDateTime.parse("2018-01-02T11:10:09")));
     }
 
-    private CaseNoteEvent createCaseNoteEvent(final long id, final String noteText, final LocalDateTime modifyDateTime) {
+    private CaseNoteEvent createCaseNoteEvent(final int id, final String noteText, final LocalDateTime modifyDateTime) {
         return CaseNoteEvent.builder()
                 .content(noteText)
                 .notificationTimestamp(modifyDateTime)
                 .nomsId("AB" + id)
-                .id("" + id)
+                .id(id)
                 .noteType("MAIN SUB")
                 .staffName("Staff name")
                 .build();
