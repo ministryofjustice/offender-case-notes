@@ -86,7 +86,7 @@ public class CaseNoteService {
 
         } else {
             // There are both case note sources.  Combine
-            final var pagedNotes = externalApiService.getOffenderCaseNotes(offenderIdentifier, caseNoteFilter, 1000, 0, "caseNoteId", ASC);
+            final var pagedNotes = externalApiService.getOffenderCaseNotes(offenderIdentifier, caseNoteFilter, 10000, 0, "caseNoteId", ASC);
 
             final var dtoNotes = translateToDto(pagedNotes, offenderIdentifier);
 
@@ -166,7 +166,7 @@ public class CaseNoteService {
                 .offenderIdentifier(offenderIdentifier)
                 .occurrenceDateTime(cn.getOccurrenceDateTime())
                 .authorName(cn.getAuthorName())
-                .authorUsername(String.valueOf(cn.getStaffId()))  //TODO: this should be username not id.
+                .authorUsername(String.valueOf(cn.getStaffId()))  // TODO: this should be username not id.
                 .type(cn.getType())
                 .typeDescription(cn.getTypeDescription())
                 .subType(cn.getSubType())
@@ -176,7 +176,7 @@ public class CaseNoteService {
                 .creationDateTime(cn.getCreationDateTime())
                 .amendments(cn.getAmendments().stream().map(
                         a -> CaseNoteAmendment.builder()
-                                .authorName(a.getAuthorName()) //TODO: Missing the username
+                                .authorName(a.getAuthorName()) // TODO: Missing the username
                                 .additionalNoteText(a.getAdditionalNoteText())
                                 .creationDateTime(a.getCreationDateTime())
                                 .build()
