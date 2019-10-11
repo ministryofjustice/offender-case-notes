@@ -16,6 +16,11 @@ repositories {
     mavenCentral()
 }
 
+configurations {
+    agentDeps
+    agentDeps.transitive = false
+}
+
 project.sourceCompatibility = 11
 project.targetCompatibility = 11
 
@@ -86,6 +91,7 @@ dependencies {
     implementation 'net.logstash.logback:logstash-logback-encoder:6.2'
     implementation 'com.microsoft.azure:applicationinsights-spring-boot-starter:2.5.1-BETA'
     implementation 'com.microsoft.azure:applicationinsights-logging-logback:2.5.1-BETA'
+    agentDeps 'com.microsoft.azure:applicationinsights-agent:2.5.1-BETA'
     implementation 'com.github.timpeeters:spring-boot-graceful-shutdown:2.1.1'
 
     implementation 'javax.annotation:javax.annotation-api:1.3.2'
@@ -116,4 +122,14 @@ dependencies {
     testImplementation 'net.javacrumbs.json-unit:json-unit-assertj:2.9.0'
     testImplementation 'io.github.http-builder-ng:http-builder-ng-apache:1.0.4'
     testImplementation 'com.github.tomakehurst:wiremock-standalone:2.25.0'
+
+    compile configurations.agentDeps
 }
+
+task copyAgent(type: Copy) {
+    from configurations.agentDeps
+    into "$buildDir/agentLibs"
+}
+
+assemble.dependsOn copyAgent
+
