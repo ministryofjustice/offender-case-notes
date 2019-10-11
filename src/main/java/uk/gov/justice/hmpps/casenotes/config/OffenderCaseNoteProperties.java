@@ -6,6 +6,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.validation.annotation.Validated;
 
+import java.time.Duration;
+
 @Configuration
 @Validated
 @Getter
@@ -23,11 +25,15 @@ public class OffenderCaseNoteProperties {
 
     private final String jwtPublicKey;
 
+    private final Duration timeout;
+
     public OffenderCaseNoteProperties(@Value("${elite2.api.base.url}") @URL final String elite2ApiBaseUrl,
                                       @Value("${oauth.api.base.url}") @URL final String oauthApiBaseUrl,
-                                      @Value("${jwt.public.key}") final String jwtPublicKey) {
+                                      @Value("${jwt.public.key}") final String jwtPublicKey,
+                                      @Value("${api.ping.timeout:1s}") final Duration timeout) {
         this.elite2ApiBaseUrl = elite2ApiBaseUrl;
         this.oauthApiBaseUrl = oauthApiBaseUrl;
         this.jwtPublicKey = jwtPublicKey;
+        this.timeout = timeout;
     }
 }

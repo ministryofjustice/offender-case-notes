@@ -39,4 +39,11 @@ public class OauthMockServer extends WireMockRule {
                 .withStatus(status)));
     }
 
+    public void subPingDelay(final int status) {
+        stubFor(get("/auth/ping").willReturn(aResponse().withFixedDelay(2000)
+                .withHeader("Content-Type", "application/json")
+                .withBody(status == 200 ? "pong" : "some error")
+                .withStatus(status)));
+    }
+
 }

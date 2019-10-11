@@ -29,11 +29,30 @@ public class RestTemplateConfiguration {
         return getRestTemplate(restTemplateBuilder, properties.getOauthApiBaseUrl());
     }
 
+    @Bean(name = "elite2ApiRestTemplateWithTimeout")
+    public RestTemplate elite2ApiRestTemplateWithTimeout(final RestTemplateBuilder restTemplateBuilder) {
+        return getRestTemplateWithTimeout(restTemplateBuilder, properties.getElite2ApiBaseUrl());
+    }
+
+    @Bean(name = "oauthApiRestTemplateWithTimeout")
+    public RestTemplate oauthApiRestTemplateWithTimeout(final RestTemplateBuilder restTemplateBuilder) {
+        return getRestTemplateWithTimeout(restTemplateBuilder, properties.getOauthApiBaseUrl());
+    }
+
 
     private RestTemplate getRestTemplate(final RestTemplateBuilder restTemplateBuilder, final String uri) {
         return restTemplateBuilder
                 .rootUri(uri)
                 .additionalInterceptors(getRequestInterceptors())
+                .build();
+    }
+
+    private RestTemplate getRestTemplateWithTimeout(final RestTemplateBuilder restTemplateBuilder, final String uri) {
+        return restTemplateBuilder
+                .rootUri(uri)
+                .additionalInterceptors(getRequestInterceptors())
+                .setConnectTimeout(properties.getTimeout())
+                .setReadTimeout(properties.getTimeout())
                 .build();
     }
 
