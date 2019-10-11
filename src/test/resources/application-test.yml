@@ -38,4 +38,4 @@ oauth:
 
 api:
   ping:
-    timeout: 400ms
+    health-timeout: 400ms

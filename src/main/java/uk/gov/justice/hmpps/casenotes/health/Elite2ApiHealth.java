@@ -9,7 +9,7 @@ import org.springframework.web.client.RestTemplate;
 public class Elite2ApiHealth extends HealthCheck {
 
     @Autowired
-    public Elite2ApiHealth(@Qualifier("elite2ApiRestTemplateWithTimeout") final RestTemplate restTemplate) {
+    public Elite2ApiHealth(@Qualifier("elite2ApiHealthRestTemplate") final RestTemplate restTemplate) {
         super(restTemplate);
     }
 }
