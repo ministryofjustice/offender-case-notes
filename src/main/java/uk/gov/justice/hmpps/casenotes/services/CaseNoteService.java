@@ -138,6 +138,7 @@ public class CaseNoteService {
                 .offenderIdentifier(cn.getOffenderIdentifier())
                 .occurrenceDateTime(cn.getOccurrenceDateTime())
                 .authorUsername(cn.getAuthorUsername())
+                .authorUserId(cn.getAuthorUserId())
                 .authorName(cn.getAuthorName())
                 .type(parentType.getType())
                 .typeDescription(parentType.getDescription())
@@ -149,6 +150,7 @@ public class CaseNoteService {
                 .amendments(cn.getAmendments().stream().map(
                         a -> CaseNoteAmendment.builder()
                                 .authorUserName(a.getAuthorUsername())
+                                .authorUserId(a.getAuthorUserId())
                                 .authorName(a.getAuthorName())
                                 .additionalNoteText(a.getNoteText())
                                 .caseNoteAmendmentId(a.getId())
@@ -167,6 +169,7 @@ public class CaseNoteService {
                 .occurrenceDateTime(cn.getOccurrenceDateTime())
                 .authorName(cn.getAuthorName())
                 .authorUsername(String.valueOf(cn.getStaffId()))  // TODO: this should be username not id.
+                .authorUserId(String.valueOf(cn.getStaffId()))
                 .type(cn.getType())
                 .typeDescription(cn.getTypeDescription())
                 .subType(cn.getSubType())
@@ -176,7 +179,8 @@ public class CaseNoteService {
                 .creationDateTime(cn.getCreationDateTime())
                 .amendments(cn.getAmendments().stream().map(
                         a -> CaseNoteAmendment.builder()
-                                .authorName(a.getAuthorName()) // TODO: Missing the username
+                                .authorName(a.getAuthorName())
+                                .authorUserId(a.getAuthorUserId())
                                 .additionalNoteText(a.getAdditionalNoteText())
                                 .creationDateTime(a.getCreationDateTime())
                                 .build()
@@ -204,14 +208,15 @@ public class CaseNoteService {
             throw new ValidationException(format("Case Note Type %s/%s is not active", type.getParentType().getType(), type.getType()));
         }
 
-        final var currentUsername = securityUserContext.getCurrentUsername();
-        final var staffName = externalApiService.getUserFullName(currentUsername);
+        final var author = securityUserContext.getCurrentUser();
+        final var staffName = externalApiService.getUserFullName(author.getUsername());
 
         final var locationId = newCaseNote.getLocationId() == null ? externalApiService.getOffenderLocation(offenderIdentifier) : newCaseNote.getLocationId();
 
         final var caseNote = OffenderCaseNote.builder()
                 .noteText(newCaseNote.getText())
-                .authorUsername(currentUsername)
+                .authorUsername(author.getUsername())
+                .authorUserId(author.getUserId())
                 .authorName(staffName)
                 .occurrenceDateTime(newCaseNote.getOccurrenceDateTime() == null ? LocalDateTime.now() : newCaseNote.getOccurrenceDateTime())
                 .sensitiveCaseNoteType(type)
@@ -236,7 +241,10 @@ public class CaseNoteService {
             throw EntityNotFoundException.withId(offenderIdentifier);
         }
 
-        offenderCaseNote.addAmendment(amendCaseNote.getText(), securityUserContext.getCurrentUsername(), externalApiService.getUserFullName(securityUserContext.getCurrentUsername()));
+        final var author = securityUserContext.getCurrentUser();
+        final var authorFullName = externalApiService.getUserFullName(author.getUsername());
+
+        offenderCaseNote.addAmendment(amendCaseNote.getText(), author.getUsername(), authorFullName, author.getUserId());
         repository.save(offenderCaseNote);
         return mapper(offenderCaseNote);
     }

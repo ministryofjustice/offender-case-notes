@@ -44,6 +44,9 @@ public class OffenderCaseNote {
     private String authorUsername;
 
     @Column(nullable = false)
+    private String authorUserId;
+
+    @Column(nullable = false)
     private String authorName;
 
     @ManyToOne
@@ -74,13 +77,14 @@ public class OffenderCaseNote {
     @Column(columnDefinition = "serial", insertable = false, updatable = false)
     private Integer eventId;
 
-    public void addAmendment(final String noteText, final String authorUsername, final String authorName) {
+    public void addAmendment(final String noteText, final String authorUsername, final String authorName, final String authorUserId) {
 
         final var amendment = OffenderCaseNoteAmendment.builder()
                 .caseNote(this)
                 .noteText(noteText)
                 .authorUsername(authorUsername)
                 .authorName(authorName)
+                .authorUserId(authorUserId)
                 .amendSequence(getLatestSequence() + 1)
                 .build();
 

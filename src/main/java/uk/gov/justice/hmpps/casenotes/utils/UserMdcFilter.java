@@ -35,14 +35,10 @@ public class UserMdcFilter implements Filter {
         final var currentUsername = securityUserContext.getCurrentUsername();
 
         try {
-            if (currentUsername != null) {
-                MDC.put(USER_ID_HEADER, currentUsername);
-            }
+            currentUsername.ifPresent(u -> MDC.put(USER_ID_HEADER, u));
             chain.doFilter(request, response);
         } finally {
-            if (currentUsername != null) {
-                MDC.remove(USER_ID_HEADER);
-            }
+            currentUsername.ifPresent(u -> MDC.remove(USER_ID_HEADER));
         }
     }
 

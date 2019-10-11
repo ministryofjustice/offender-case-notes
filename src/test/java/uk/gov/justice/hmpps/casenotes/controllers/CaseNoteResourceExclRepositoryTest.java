@@ -120,6 +120,7 @@ public class CaseNoteResourceExclRepositoryTest extends ResourceTest {
                 .occurrenceDateTime(now())
                 .locationId("MDI")
                 .authorUsername("USER2")
+                .authorUserId("some id")
                 .authorName("Mickey Mouse")
                 .offenderIdentifier("A12" + type + subType)
                 .modifyDateTime(LocalDateTime.parse("2019-02-01T23:22:21"))

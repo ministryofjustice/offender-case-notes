@@ -26,9 +26,9 @@ public class CaseNoteEventTest {
     public void testOffenderCaseNote_NoteText() {
         final var ocn = buildOffenderCaseNote()
                 .build();
-        ocn.addAmendment("some amendment", "someuser", "Some Author");
+        ocn.addAmendment("some amendment", "someuser", "Some Author", "user id");
         ReflectionTestUtils.setField(ocn.getAmendments().get(0), "createDateTime", LocalDateTime.parse("2019-03-01T22:21:20"));
-        ocn.addAmendment("another amendment", "anotheruser", "Another Author");
+        ocn.addAmendment("another amendment", "anotheruser", "Another Author", "user id");
         ReflectionTestUtils.setField(ocn.getAmendments().get(1), "createDateTime", LocalDateTime.parse("2019-04-02T22:21:20"));
         assertThat(new CaseNoteEvent(ocn).getContent()).isEqualTo("HELLO ...[someuser updated the case notes on 2019/03/01 22:21:20] some amendment ...[anotheruser updated the case notes on 2019/04/02 22:21:20] another amendment");
     }
@@ -51,6 +51,7 @@ public class CaseNoteEventTest {
                 .occurrenceDateTime(now())
                 .locationId("MDI")
                 .authorUsername("USER2")
+                .authorUserId("some id")
                 .authorName("Mickey Mouse")
                 .offenderIdentifier("A1234BD")
                 .sensitiveCaseNoteType(SensitiveCaseNoteType.builder().type("type").parentType(ParentNoteType.builder().type("parent").build()).build())

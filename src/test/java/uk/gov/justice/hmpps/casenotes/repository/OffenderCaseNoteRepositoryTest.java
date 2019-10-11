@@ -76,7 +76,7 @@ public class OffenderCaseNoteRepositoryTest {
 
         final var caseNote = transientEntity();
 
-        caseNote.addAmendment("Another Note 0", "someuser", "Some User");
+        caseNote.addAmendment("Another Note 0", "someuser", "Some User", "user id");
         assertThat(caseNote.getAmendments()).hasSize(1);
 
         final var persistedEntity = repository.save(caseNote);
@@ -90,8 +90,8 @@ public class OffenderCaseNoteRepositoryTest {
 
         final var retrievedEntity = repository.findById(persistedEntity.getId()).orElseThrow();
 
-        retrievedEntity.addAmendment("Another Note 1", "someuser", "Some User");
-        retrievedEntity.addAmendment("Another Note 2", "someuser", "Some User");
+        retrievedEntity.addAmendment("Another Note 1", "someuser", "Some User", "user id");
+        retrievedEntity.addAmendment("Another Note 2", "someuser", "Some User", "user id");
 
         TestTransaction.flagForCommit();
         TestTransaction.end();
@@ -106,7 +106,7 @@ public class OffenderCaseNoteRepositoryTest {
         final var offenderCaseNoteAmendment3 = retrievedEntity2.getAmendment(3).orElseThrow();
         assertThat(offenderCaseNoteAmendment3.getNoteText()).isEqualTo("Another Note 2");
 
-        retrievedEntity2.addAmendment("Another Note 3", "USER1", "Mickey Mouse");
+        retrievedEntity2.addAmendment("Another Note 3", "USER1", "Mickey Mouse", "user id");
 
         TestTransaction.flagForCommit();
         TestTransaction.end();
@@ -126,6 +126,7 @@ public class OffenderCaseNoteRepositoryTest {
                 .occurrenceDateTime(now())
                 .locationId("BOB")
                 .authorUsername("FILTER")
+                .authorUserId("some id")
                 .authorName("Mickey Mouse")
                 .offenderIdentifier("A1234BD")
                 .sensitiveCaseNoteType(genType)
@@ -151,7 +152,7 @@ public class OffenderCaseNoteRepositoryTest {
 
         final var noteTextWithAmendment = "updates old note with old amendment";
         final var oldNoteWithOldAmendment = repository.save(transientEntityBuilder().noteText(noteTextWithAmendment).build());
-        oldNoteWithOldAmendment.addAmendment("Some amendment", "someuser", "Some User");
+        oldNoteWithOldAmendment.addAmendment("Some amendment", "someuser", "Some User", "user id");
         repository.save(oldNoteWithOldAmendment);
 
         TestTransaction.flagForCommit();
@@ -166,7 +167,7 @@ public class OffenderCaseNoteRepositoryTest {
 
         // now add an amendment
         final var retrievedOldNote = repository.findById(oldNote.getId()).orElseThrow();
-        retrievedOldNote.addAmendment("An amendment", "anotheruser", "Another User");
+        retrievedOldNote.addAmendment("An amendment", "anotheruser", "Another User", "user id");
         repository.save(retrievedOldNote);
 
         final var yesterday = now().minusDays(1);
@@ -218,6 +219,7 @@ public class OffenderCaseNoteRepositoryTest {
                 .occurrenceDateTime(now())
                 .locationId("MDI")
                 .authorUsername("USER2")
+                .authorUserId("some id")
                 .authorName("Mickey Mouse")
                 .offenderIdentifier("A1234BD")
                 .sensitiveCaseNoteType(genType)

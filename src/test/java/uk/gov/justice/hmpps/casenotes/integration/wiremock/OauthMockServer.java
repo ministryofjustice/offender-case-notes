@@ -22,6 +22,7 @@ public class OauthMockServer extends WireMockRule {
                                 .withBody("{\n" +
                                         "  \"staffId\": 1111,\n" +
                                         "  \"username\": \"" + username + "\",\n" +
+                                        "  \"userId\": 1111,\n" +
                                         "  \"active\": true,\n" +
                                         "  \"name\": \"Mikey Mouse\",\n" +
                                         "  \"authSource\": \"nomis\",\n" +

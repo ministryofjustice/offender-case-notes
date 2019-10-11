@@ -8,6 +8,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.security.access.AccessDeniedException;
 import uk.gov.justice.hmpps.casenotes.config.SecurityUserContext;
+import uk.gov.justice.hmpps.casenotes.config.UserIdAuthenticationConverter.UserIdUser;
 import uk.gov.justice.hmpps.casenotes.dto.*;
 import uk.gov.justice.hmpps.casenotes.model.OffenderCaseNote;
 import uk.gov.justice.hmpps.casenotes.model.ParentNoteType;
@@ -60,8 +61,9 @@ public class CaseNoteServiceTest {
 
         final var caseNote = caseNoteService.createCaseNote("12345", NewCaseNote.builder().type("type").subType("SUB").build());
 
-        assertThat(caseNote).isEqualToIgnoringGivenFields(nomisCaseNote, "authorUsername", "locationId", "text", "caseNoteId");
+        assertThat(caseNote).isEqualToIgnoringGivenFields(nomisCaseNote, "authorUsername", "locationId", "text", "caseNoteId", "authorUserId");
         assertThat(caseNote.getText()).isEqualTo("original");
+        assertThat(caseNote.getAuthorUserId()).isEqualTo("23456");
         assertThat(caseNote.getLocationId()).isEqualTo("agency");
         assertThat(caseNote.getCaseNoteId()).isEqualTo("12345");
         verify(caseNoteTypeRepository).findSensitiveCaseNoteTypeByParentType_TypeAndType("type", "SUB");
@@ -82,6 +84,7 @@ public class CaseNoteServiceTest {
         final var noteType = SensitiveCaseNoteType.builder().type("sometype").parentType(ParentNoteType.builder().build()).build();
         when(caseNoteTypeRepository.findSensitiveCaseNoteTypeByParentType_TypeAndType(anyString(), anyString())).thenReturn(noteType);
         when(securityUserContext.isOverrideRole(anyString(), anyString())).thenReturn(Boolean.TRUE);
+        when(securityUserContext.getCurrentUser()).thenReturn(new UserIdUser("someuser", "N/A", List.of(), "some id"));
         final var offenderCaseNote = createOffenderCaseNote(noteType);
         when(repository.save(any())).thenReturn(offenderCaseNote);
 
@@ -95,7 +98,7 @@ public class CaseNoteServiceTest {
     public void getCaseNote_noAddRole() {
         assertThatThrownBy(() -> caseNoteService.getCaseNote("12345", UUID.randomUUID().toString())).isInstanceOf(AccessDeniedException.class);
 
-        verify(securityUserContext).isOverrideRole("POM","VIEW_SENSITIVE_CASE_NOTES", "ADD_SENSITIVE_CASE_NOTES");
+        verify(securityUserContext).isOverrideRole("POM", "VIEW_SENSITIVE_CASE_NOTES", "ADD_SENSITIVE_CASE_NOTES");
     }
 
     @Test
@@ -125,9 +128,9 @@ public class CaseNoteServiceTest {
 
         final var caseNote = caseNoteService.getCaseNote("12345", "21455");
 
-        assertThat(caseNote).isEqualToIgnoringGivenFields(nomisCaseNote, "authorUsername", "locationId", "text", "caseNoteId");
+        assertThat(caseNote).isEqualToIgnoringGivenFields(nomisCaseNote, "authorUsername", "locationId", "text", "caseNoteId", "authorUserId");
         assertThat(caseNote.getText()).isEqualTo("original");
-        assertThat(caseNote.getAuthorUsername()).isEqualTo("23456");
+        assertThat(caseNote.getAuthorUserId()).isEqualTo("23456");
         assertThat(caseNote.getLocationId()).isEqualTo("agency");
         assertThat(caseNote.getCaseNoteId()).isEqualTo("12345");
     }
@@ -139,9 +142,9 @@ public class CaseNoteServiceTest {
 
         final var caseNote = caseNoteService.amendCaseNote("12345", "21455", new UpdateCaseNote("text"));
 
-        assertThat(caseNote).isEqualToIgnoringGivenFields(nomisCaseNote, "authorUsername", "locationId", "text", "caseNoteId");
+        assertThat(caseNote).isEqualToIgnoringGivenFields(nomisCaseNote, "authorUsername", "locationId", "text", "caseNoteId", "authorUserId");
         assertThat(caseNote.getText()).isEqualTo("original");
-        assertThat(caseNote.getAuthorUsername()).isEqualTo("23456");
+        assertThat(caseNote.getAuthorUserId()).isEqualTo("23456");
         assertThat(caseNote.getLocationId()).isEqualTo("agency");
         assertThat(caseNote.getCaseNoteId()).isEqualTo("12345");
     }
@@ -179,12 +182,17 @@ public class CaseNoteServiceTest {
         final var offenderCaseNote = createOffenderCaseNote(noteType);
         when(repository.findById(any())).thenReturn(Optional.of(offenderCaseNote));
         when(securityUserContext.isOverrideRole(anyString(), anyString())).thenReturn(Boolean.TRUE);
-        when(securityUserContext.getCurrentUsername()).thenReturn("user");
+        when(securityUserContext.getCurrentUser()).thenReturn(new UserIdUser("user", "N/A", List.of(), "userId"));
         when(externalApiService.getUserFullName(anyString())).thenReturn("author");
 
         final var caseNote = caseNoteService.amendCaseNote("A1234AC", UUID.randomUUID().toString(), new UpdateCaseNote("text"));
         assertThat(caseNote.getAmendments()).hasSize(1);
-        final var expected = CaseNoteAmendment.builder().additionalNoteText("text").authorName("author").authorUserName("user").sequence(1).build();
+        final var expected = CaseNoteAmendment.builder()
+                .additionalNoteText("text")
+                .authorName("author")
+                .authorUserId("some id")
+                .authorUserName("user")
+                .sequence(1).build();
         assertThat(caseNote.getAmendments().get(0)).isEqualToComparingOnlyGivenFields(expected, "additionalNoteText", "authorName", "authorUserName", "sequence");
     }
 
@@ -284,6 +292,7 @@ public class CaseNoteServiceTest {
                 .occurrenceDateTime(now())
                 .locationId("MDI")
                 .authorUsername("USER2")
+                .authorUserId("some user")
                 .authorName("Mickey Mouse")
                 .offenderIdentifier("A1234AC")
                 .sensitiveCaseNoteType(caseNoteType)
@@ -297,6 +306,7 @@ public class CaseNoteServiceTest {
                 .occurrenceDateTime(now())
                 .locationId("MDI")
                 .authorUsername("USER2")
+                .authorUserId("some id")
                 .authorName("Mickey Mouse")
                 .offenderIdentifier("A1234AC")
                 .modifyDateTime(modifyDateTime)

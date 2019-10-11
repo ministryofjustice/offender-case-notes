@@ -36,6 +36,7 @@ public class JwtAuthenticationHelper {
         final var claims = new HashMap<String, Object>();
 
         claims.put("user_name", parameters.getUsername());
+        claims.put("user_id", parameters.getUserId());
         claims.put("client_id", "elite2apiclient");
 
         if (parameters.getRoles() != null && !parameters.getRoles().isEmpty())
@@ -57,6 +58,7 @@ public class JwtAuthenticationHelper {
     @Data
     public static class JwtParameters {
         private String username;
+        private String userId;
         private List<String> scope;
         private List<String> roles;
         private Duration expiryTime;
