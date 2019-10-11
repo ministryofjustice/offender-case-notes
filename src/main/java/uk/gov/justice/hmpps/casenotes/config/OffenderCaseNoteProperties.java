@@ -30,7 +30,7 @@ public class OffenderCaseNoteProperties {
     public OffenderCaseNoteProperties(@Value("${elite2.api.base.url}") @URL final String elite2ApiBaseUrl,
                                       @Value("${oauth.api.base.url}") @URL final String oauthApiBaseUrl,
                                       @Value("${jwt.public.key}") final String jwtPublicKey,
-                                      @Value("${api.ping.health-timeout:1s}") final Duration healthTimeout) {
+                                      @Value("${api.health-timeout:1s}") final Duration healthTimeout) {
         this.elite2ApiBaseUrl = elite2ApiBaseUrl;
         this.oauthApiBaseUrl = oauthApiBaseUrl;
         this.jwtPublicKey = jwtPublicKey;

@@ -37,5 +37,4 @@ oauth:
   api.base.url: http://localhost:8998/auth
 
 api:
-  ping:
-    health-timeout: 400ms
+  health-timeout: 400ms
