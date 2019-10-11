@@ -19,7 +19,7 @@ RUN mkdir /home/appuser/.postgresql \
 WORKDIR /app
 
 COPY --chown=appuser:appgroup build/libs/offender-case-notes*.jar /app/app.jar
-COPY --chown=appuser:appgroup build/agentLibs/applicationinsights-agent*.jar /app/agent.jar
+COPY --chown=appuser:appgroup build/libs/applicationinsights-agent*.jar /app/agent.jar
 COPY --chown=appuser:appgroup run.sh /app
 COPY --chown=appuser:appgroup AI-Agent.xml /app
 

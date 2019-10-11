@@ -2,13 +2,12 @@ import org.springframework.boot.gradle.plugin.SpringBootPlugin
 
 import java.time.Instant
 import java.time.LocalDate
-import java.time.format.DateTimeFormatter
 
 plugins {
     id 'java'
     id 'org.springframework.boot' version '2.1.9.RELEASE'
     id 'io.spring.dependency-management' version '1.0.8.RELEASE'
-    id 'com.github.ben-manes.versions' version '0.25.0'
+    id 'com.github.ben-manes.versions' version '0.26.0'
 }
 
 repositories {
@@ -24,18 +23,16 @@ configurations {
 project.sourceCompatibility = 11
 project.targetCompatibility = 11
 
-def today = Instant.now()
 group = 'uk.gov.justice.digital.hmpps'
 
-def todayDate = LocalDate.now()
-def formatter = DateTimeFormatter.ofPattern('yyyy-MM-dd')
-version todayDate.format(formatter)
+def today = Instant.now()
+def todaysDate = LocalDate.now().format('yyyy-MM-dd')
+version = System.getenv('CI') ? "${todaysDate}.${System.getenv('CIRCLE_BUILD_NUM')}" : todaysDate
 
 jar {
     baseName = rootProject.name
     manifest {
-        attributes 'Implementation-Title': rootProject.name,
-                'Implementation-Version': System.getenv('CI') ? "${version}.${System.getenv('CIRCLE_BUILD_NUM')}" : version
+        attributes 'Implementation-Title': rootProject.name, 'Implementation-Version': version
     }
 }
 
@@ -43,8 +40,8 @@ springBoot {
     buildInfo {
         properties {
             artifact = rootProject.name
-            version = System.getenv('CI') ? "${version}.${System.getenv('CIRCLE_BUILD_NUM')}" : version
-            group = 'uk.gov.justice.digital.hmpps'
+            version = version
+            group = group
             name = rootProject.name
             time = today
             additional = [
@@ -128,7 +125,7 @@ dependencies {
 
 task copyAgent(type: Copy) {
     from configurations.agentDeps
-    into "$buildDir/agentLibs"
+    into "$buildDir/libs"
 }
 
 assemble.dependsOn copyAgent
