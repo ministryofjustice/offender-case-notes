@@ -14,6 +14,7 @@ import org.springframework.security.oauth2.client.DefaultOAuth2ClientContext;
 import org.springframework.security.oauth2.client.OAuth2ClientContext;
 import org.springframework.security.oauth2.config.annotation.web.configuration.ResourceServerConfigurerAdapter;
 import org.springframework.security.oauth2.config.annotation.web.configurers.ResourceServerSecurityConfigurer;
+import org.springframework.security.oauth2.provider.token.DefaultAccessTokenConverter;
 import org.springframework.security.oauth2.provider.token.DefaultTokenServices;
 import org.springframework.security.oauth2.provider.token.TokenStore;
 import org.springframework.security.oauth2.provider.token.store.JwtAccessTokenConverter;
@@ -83,6 +84,9 @@ public class ResourceServerConfiguration extends ResourceServerConfigurerAdapter
     public JwtAccessTokenConverter accessTokenConverter() {
         final var converter = new JwtAccessTokenConverter();
         converter.setVerifierKey(new String(Base64.decodeBase64(properties.getJwtPublicKey())));
+        final var tokenConverter = new DefaultAccessTokenConverter();
+        tokenConverter.setUserTokenConverter(new UserIdAuthenticationConverter());
+        converter.setAccessTokenConverter(tokenConverter);
         return converter;
     }
 

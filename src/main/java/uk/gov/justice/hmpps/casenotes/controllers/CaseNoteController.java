@@ -219,7 +219,7 @@ public class CaseNoteController {
                 "type", caseNote.getType(),
                 "subType", caseNote.getSubType(),
                 "offenderIdentifier", caseNote.getOffenderIdentifier(),
-                "authorUsername", securityUserContext.getCurrentUsername()
+                "authorUsername", securityUserContext.getCurrentUsername().orElse("unknown")
         );
     }
 }

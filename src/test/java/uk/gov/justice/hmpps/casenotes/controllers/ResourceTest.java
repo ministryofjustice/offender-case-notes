@@ -90,6 +90,7 @@ public abstract class ResourceTest {
     String createJwt(final String user, final List<String> roles) {
         return jwtAuthenticationHelper.createJwt(JwtParameters.builder()
                 .username(user)
+                .userId(user + "_ID")
                 .roles(roles)
                 .scope(List.of("read", "write"))
                 .expiryTime(Duration.ofDays(1))

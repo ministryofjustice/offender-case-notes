@@ -1,27 +1,22 @@
 package uk.gov.justice.hmpps.casenotes.config;
 
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.RegExUtils;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
+import uk.gov.justice.hmpps.casenotes.config.UserIdAuthenticationConverter.UserIdUser;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
+import java.util.Optional;
 
+@Slf4j
 @Component
 public class SecurityUserContext {
-
-    public static boolean hasRoles(final String... allowedRoles) {
-        final var roles = Arrays.stream(allowedRoles)
-                .map(r -> RegExUtils.replaceFirst(r, "ROLE_", ""))
-                .collect(Collectors.toList());
-
-        return hasMatchingRole(roles, SecurityContextHolder.getContext().getAuthentication());
-    }
-
     private static boolean hasMatchingRole(final List<String> roles, final Authentication authentication) {
         return authentication != null &&
                 authentication.getAuthorities().stream()
@@ -32,11 +27,23 @@ public class SecurityUserContext {
         return SecurityContextHolder.getContext().getAuthentication();
     }
 
-    public String getCurrentUsername() {
+    public Optional<String> getCurrentUsername() {
+        return getOptionalCurrentUser().map(User::getUsername);
+    }
+
+    public UserIdUser getCurrentUser() {
+        return getOptionalCurrentUser().orElseThrow(() -> new IllegalStateException("Current user not set but is required"));
+    }
+
+    private Optional<UserIdUser> getOptionalCurrentUser() {
+        final var authentication = getAuthentication();
+        if (authentication == null || authentication.getPrincipal() == null) return Optional.empty();
+
+        final var userPrincipal = authentication.getPrincipal();
+
+        if (userPrincipal instanceof UserIdUser) return Optional.of((UserIdUser) userPrincipal);
+
         final String username;
-
-        final var userPrincipal = getUserPrincipal();
-
         if (userPrincipal instanceof String) {
             username = (String) userPrincipal;
         } else if (userPrincipal instanceof UserDetails) {
@@ -45,21 +52,11 @@ public class SecurityUserContext {
             final var userPrincipalMap = (Map) userPrincipal;
             username = (String) userPrincipalMap.get("username");
         } else {
-            username = null;
+            username = userPrincipal.toString();
         }
 
-        return username;
-    }
-
-    private Object getUserPrincipal() {
-        Object userPrincipal = null;
-
-        final var auth = getAuthentication();
-
-        if (auth != null) {
-            userPrincipal = auth.getPrincipal();
-        }
-        return userPrincipal;
+        log.warn("Unexpected token found of type {} that is missing user id, using username instead", userPrincipal.getClass().getName());
+        return Optional.of(new UserIdUser(username, authentication.getCredentials().toString(), authentication.getAuthorities(), username));
     }
 
     public boolean isOverrideRole(final String... overrideRoles) {

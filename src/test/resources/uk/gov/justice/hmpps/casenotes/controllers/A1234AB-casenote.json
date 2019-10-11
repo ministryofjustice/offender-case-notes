@@ -7,6 +7,7 @@
       "subType": "GEN",
       "subTypeDescription": "General POM Note",
       "authorUsername": "SECURE_CASENOTE_USER",
+      "authorUserId": "SECURE_CASENOTE_USER_ID",
       "authorName": "Mikey Mouse",
       "text": "This is another case note",
       "locationId": "LEI",
@@ -14,6 +15,7 @@
         {
           "sequence": 1,
           "authorUserName": "SECURE_CASENOTE_USER",
+          "authorUserId": "SECURE_CASENOTE_USER_ID",
           "additionalNoteText": "Amended case note"
         }
       ]
@@ -27,6 +29,7 @@
       "subTypeDescription": "General",
       "source": "INST",
       "authorUsername": "1231232",
+      "authorUserId": "1231232",
       "authorName": "Mickey Mouse",
       "text": "Some Text",
       "locationId": "LEI",

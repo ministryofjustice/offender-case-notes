@@ -57,22 +57,26 @@ public class CaseNote {
     @NotNull
     private LocalDateTime occurrenceDateTime;
 
-    @ApiModelProperty(required = true, value = "Id of staff member who created case note", position = 10, example = "USER1")
+    @ApiModelProperty(required = true, value = "Username of case note author", position = 10, example = "USER1")
     @NotNull
     private String authorUsername;
 
-    @ApiModelProperty(required = true, value = "Name of full name who created the case note", position = 11, example = "John Smith")
+    @ApiModelProperty(required = true, value = "Full name of case note author", position = 11, example = "John Smith")
     @NotNull
     private String authorName;
 
-    @ApiModelProperty(required = true, value = "Case Note Text", position = 12, example = "This is some text")
+    @ApiModelProperty(required = true, value = "User Id of case note author - staffId for nomis users, userId for auth users", position = 11, example = "12345")
+    @NotNull
+    private String authorUserId;
+
+    @ApiModelProperty(required = true, value = "Case Note Text", position = 13, example = "This is some text")
     @NotBlank
     private String text;
 
-    @ApiModelProperty(value = "Location Id representing where Case Note was made.", position = 13, example = "MDI")
+    @ApiModelProperty(value = "Location Id representing where Case Note was made.", position = 14, example = "MDI")
     private String locationId;
 
-    @ApiModelProperty(required = true, value = "Ordered list of amendments to the case note (oldest first)", position = 14)
+    @ApiModelProperty(required = true, value = "Ordered list of amendments to the case note (oldest first)", position = 15)
     @NotNull
     @Builder.Default
     private List<CaseNoteAmendment> amendments = new ArrayList<>();
