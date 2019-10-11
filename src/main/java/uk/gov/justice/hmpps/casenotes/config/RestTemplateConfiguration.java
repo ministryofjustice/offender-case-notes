@@ -6,7 +6,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
 import org.springframework.web.client.RestTemplate;
 import uk.gov.justice.hmpps.casenotes.utils.JwtAuthInterceptor;
-import uk.gov.justice.hmpps.casenotes.utils.W3cTracingInterceptor;
 
 import java.util.List;
 
@@ -57,8 +56,6 @@ public class RestTemplateConfiguration {
     }
 
     private List<ClientHttpRequestInterceptor> getRequestInterceptors() {
-        return List.of(
-                new W3cTracingInterceptor(),
-                new JwtAuthInterceptor());
+        return List.of(new JwtAuthInterceptor());
     }
 }
