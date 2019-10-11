@@ -9,7 +9,7 @@ import org.springframework.web.client.RestTemplate;
 public class OAuthApiHealth extends HealthCheck {
 
     @Autowired
-    public OAuthApiHealth(@Qualifier("oauthApiRestTemplate") final RestTemplate restTemplate) {
+    public OAuthApiHealth(@Qualifier("oauthApiHealthRestTemplate") final RestTemplate restTemplate) {
         super(restTemplate);
     }
 }

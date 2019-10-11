@@ -29,11 +29,30 @@ public class RestTemplateConfiguration {
         return getRestTemplate(restTemplateBuilder, properties.getOauthApiBaseUrl());
     }
 
+    @Bean(name = "elite2ApiHealthRestTemplate")
+    public RestTemplate elite2ApiHealthRestTemplate(final RestTemplateBuilder restTemplateBuilder) {
+        return getHealthRestTemplate(restTemplateBuilder, properties.getElite2ApiBaseUrl());
+    }
+
+    @Bean(name = "oauthApiHealthRestTemplate")
+    public RestTemplate oauthApiRestHealthTemplate(final RestTemplateBuilder restTemplateBuilder) {
+        return getHealthRestTemplate(restTemplateBuilder, properties.getOauthApiBaseUrl());
+    }
+
 
     private RestTemplate getRestTemplate(final RestTemplateBuilder restTemplateBuilder, final String uri) {
         return restTemplateBuilder
                 .rootUri(uri)
                 .additionalInterceptors(getRequestInterceptors())
+                .build();
+    }
+
+    private RestTemplate getHealthRestTemplate(final RestTemplateBuilder restTemplateBuilder, final String uri) {
+        return restTemplateBuilder
+                .rootUri(uri)
+                .additionalInterceptors(getRequestInterceptors())
+                .setConnectTimeout(properties.getHealthTimeout())
+                .setReadTimeout(properties.getHealthTimeout())
                 .build();
     }
 

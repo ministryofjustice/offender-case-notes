@@ -42,4 +42,17 @@ public class HealthCheckTest extends ResourceTest {
         assertThatJson(response.getBody()).node("status").isEqualTo("DOWN");
         assertThat(response.getStatusCodeValue()).isEqualTo(503);
     }
+
+    @Test
+    public void testUpTimeout() {
+        elite2MockServer.subPingDelay(200);
+        oauthMockServer.subPingDelay(200);
+
+        final var response = testRestTemplate.getForEntity("/health", String.class);
+        assertThatJson(response.getBody()).node("details.elite2ApiHealth.details.error").isEqualTo("org.springframework.web.client.ResourceAccessException: I/O error on GET request for \\\"http://localhost:8999/ping\\\": Read timed out; nested exception is java.net.SocketTimeoutException: Read timed out");
+        assertThatJson(response.getBody()).node("details.OAuthApiHealth.details.error").isEqualTo("org.springframework.web.client.ResourceAccessException: I/O error on GET request for \\\"http://localhost:8998/auth/ping\\\": Read timed out; nested exception is java.net.SocketTimeoutException: Read timed out");
+        assertThatJson(response.getBody()).node("status").isEqualTo("DOWN");
+        assertThat(response.getStatusCodeValue()).isEqualTo(503);
+    }
 }
+

@@ -161,6 +161,13 @@ public class Elite2MockServer extends WireMockRule {
                 .withStatus(status)));
     }
 
+    public void subPingDelay(final int status) {
+        stubFor(get("/ping").willReturn(aResponse().withFixedDelay(1000)
+                .withHeader("Content-Type", "application/json")
+                .withBody(status == 200 ? "pong" : "some error")
+                .withStatus(status)));
+    }
+
     public void stubGetCaseNoteEvents() {
         final var body = gson.toJson(createEvents());
         stubFor(get(urlPathMatching("/api/case-notes/events?.*")).willReturn(aResponse()
