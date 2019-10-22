@@ -14,6 +14,7 @@ public class UserIdAuthenticationConverter extends DefaultUserAuthenticationConv
     @Override
     public Authentication extractAuthentication(final Map<String, ?> map) {
         final var parentAuth = super.extractAuthentication(map);
+        if (parentAuth == null) return null;
 
         final var user = new UserIdUser(parentAuth.getName(), parentAuth.getCredentials().toString(), parentAuth.getAuthorities(), (String) map.get("user_id"));
 
