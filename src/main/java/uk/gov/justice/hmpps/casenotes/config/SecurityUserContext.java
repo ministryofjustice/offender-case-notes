@@ -2,6 +2,7 @@ package uk.gov.justice.hmpps.casenotes.config;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.RegExUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.User;
@@ -54,6 +55,8 @@ public class SecurityUserContext {
         } else {
             username = userPrincipal.toString();
         }
+
+        if (StringUtils.isEmpty(username) || username.equals("anonymousUser")) return Optional.empty();
 
         log.warn("Unexpected token found of type {} that is missing user id, using username instead", userPrincipal.getClass().getName());
         return Optional.of(new UserIdUser(username, authentication.getCredentials().toString(), authentication.getAuthorities(), username));
