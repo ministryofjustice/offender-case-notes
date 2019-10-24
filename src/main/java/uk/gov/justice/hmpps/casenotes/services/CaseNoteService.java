@@ -1,10 +1,11 @@
 package uk.gov.justice.hmpps.casenotes.services;
 
-import com.google.common.collect.Iterables;
 import lombok.AllArgsConstructor;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
-import org.springframework.data.domain.*;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
@@ -23,14 +24,11 @@ import uk.gov.justice.hmpps.casenotes.repository.ParentCaseNoteTypeRepository;
 import javax.persistence.EntityExistsException;
 import javax.validation.Valid;
 import javax.validation.ValidationException;
-import javax.validation.constraints.Max;
-import javax.validation.constraints.Min;
-import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static java.lang.String.format;
 import static org.springframework.data.domain.Sort.Direction.ASC;
@@ -360,53 +358,5 @@ public class CaseNoteService {
         final var existingSubType = parentNoteType.getSubType(subType).orElseThrow(EntityNotFoundException.withId(parentType + " " + subType));
         existingSubType.update(body.getDescription(), body.isActive());
         return transform(parentNoteType, true);
-    }
-
-    @PreAuthorize("hasAnyRole('CASE_NOTE_EVENTS', 'SYSTEM_USER')")
-    public CaseNoteEvents getCaseNoteEvents(@NotEmpty final List<String> noteTypes, @NotNull final LocalDateTime createdDate, @Min(1) @Max(5000) final int limit) {
-        final var eliteDate = LocalDateTime.now();
-        final var eliteEvents = externalApiService.getCaseNoteEvents(noteTypes, createdDate, limit);
-        return combineWithSensitive(noteTypes, createdDate, limit, eliteDate, eliteEvents);
-    }
-
-    @PreAuthorize("hasAnyRole('CASE_NOTE_EVENTS', 'SYSTEM_USER')")
-    public CaseNoteEvents getCaseNoteEvents(@NotEmpty final List<String> noteTypes, @NotNull final LocalDateTime createdDate) {
-        final var eliteDate = LocalDateTime.now();
-        final var eliteEvents = externalApiService.getCaseNoteEvents(noteTypes, createdDate);
-        return combineWithSensitive(noteTypes, createdDate, Integer.MAX_VALUE, eliteDate, eliteEvents);
-    }
-
-    private CaseNoteEvents combineWithSensitive(final List<String> noteTypes, final LocalDateTime createdDate, final int limit, final LocalDateTime eliteDate, final List<CaseNoteEvent> eliteEvents) {
-        final var noteTypesMap = splitTypesAndSubTypes(noteTypes);
-
-        final var sensitiveNotes = repository.findBySensitiveCaseNoteType_ParentType_TypeInAndModifyDateTimeAfterOrderByModifyDateTime(noteTypesMap.keySet(), createdDate, PageRequest.of(0, limit));
-        final var sensitiveEvents = sensitiveNotes.stream().filter((event) -> {
-            final var subTypes = noteTypesMap.get(event.getSensitiveCaseNoteType().getParentType().getType());
-            // will be null if not in map, otherwise will be empty if type in map with no sub type set
-            return subTypes != null && (subTypes.isEmpty() || subTypes.contains(event.getSensitiveCaseNoteType().getType()));
-        }).map(CaseNoteEvent::new).collect(Collectors.toList());
-
-        final var events = Stream.of(eliteEvents, sensitiveEvents)
-                .flatMap(Collection::stream)
-                .sorted(Comparator.comparing(CaseNoteEvent::getNotificationTimestamp))
-                .limit(limit)
-                .collect(Collectors.toList());
-
-        // if we've limited the results then grab earliest entry from the events
-        final var lastDate = events.isEmpty() || events.size() != limit ? eliteDate : Iterables.getLast(events).getNotificationTimestamp();
-        // also earliest we can possibly return is when we called elite2 (since that was called first)
-        return new CaseNoteEvents(events, eliteDate.isAfter(lastDate) ? lastDate : eliteDate);
-    }
-
-    private Map<String, List<?>> splitTypesAndSubTypes(final List<String> noteTypes) {
-        return noteTypes.stream()
-                .map(t -> t.trim().replace(' ', '+'))
-                .collect(Collectors.toMap(
-                        (n) -> StringUtils.substringBefore(n, "+"),
-                        (n) -> {
-                            final var subType = StringUtils.substringAfter(n, "+");
-                            return subType.isEmpty() ? List.of() : List.of(subType);
-                        },
-                        (v1, v2) -> Stream.of(v1, v2).flatMap(Collection::stream).collect(Collectors.toList())));
     }
 }

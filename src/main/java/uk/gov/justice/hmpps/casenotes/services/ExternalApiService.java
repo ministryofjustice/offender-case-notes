@@ -149,20 +149,6 @@ public class ExternalApiService {
         return Optional.ofNullable(response.getBody()).orElseThrow(EntityNotFoundException.withId(offenderIdentifier));
     }
 
-    List<CaseNoteEvent> getCaseNoteEvents(final List<String> noteTypes, final LocalDateTime createdDate) {
-        final var url = getUriComponentsBuilder("events_no_limit", noteTypes, createdDate).build().toUri();
-        final var response = elite2ApiRestTemplate.exchange(url, HttpMethod.GET, null, new ParameterizedTypeReference<List<CaseNoteEvent>>() {
-        });
-        return response.getBody();
-    }
-
-    List<CaseNoteEvent> getCaseNoteEvents(final List<String> noteTypes, final LocalDateTime createdDate, final Integer limit) {
-        final var uri = getUriComponentsBuilder("events", noteTypes, createdDate).queryParam("limit", limit).build().toUri();
-        final var response = elite2ApiRestTemplate.exchange(uri, HttpMethod.GET, null, new ParameterizedTypeReference<List<CaseNoteEvent>>() {
-        });
-        return response.getBody();
-    }
-
     private UriComponentsBuilder getUriComponentsBuilder(final String urlSuffix, final List<String> noteTypes, final LocalDateTime createdDate) {
         // bit naff, but the template handler holds the root uri that we need, so have to create a uri from it to then pass to the builder
         final var uri = elite2ApiRestTemplate.getUriTemplateHandler().expand("/api/case-notes/" + urlSuffix).normalize();
