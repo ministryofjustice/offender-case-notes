@@ -3,7 +3,6 @@ package uk.gov.justice.hmpps.casenotes.integration.wiremock;
 
 import com.github.tomakehurst.wiremock.junit.WireMockRule;
 import com.google.gson.*;
-import uk.gov.justice.hmpps.casenotes.dto.CaseNoteEvent;
 import uk.gov.justice.hmpps.casenotes.dto.CaseNoteType;
 import uk.gov.justice.hmpps.casenotes.dto.NomisCaseNote;
 
@@ -166,41 +165,6 @@ public class Elite2MockServer extends WireMockRule {
                 .withHeader("Content-Type", "application/json")
                 .withBody(status == 200 ? "pong" : "some error")
                 .withStatus(status)));
-    }
-
-    public void stubGetCaseNoteEvents() {
-        final var body = gson.toJson(createEvents());
-        stubFor(get(urlPathMatching("/api/case-notes/events?.*")).willReturn(aResponse()
-                .withHeader("Content-Type", "application/json")
-                .withBody(body)
-                .withStatus(200)
-        ));
-    }
-
-    private List<CaseNoteEvent> createEvents() {
-        return List.of(
-                createCaseNoteEvent(1, "a note", LocalDateTime.parse("2019-02-03T11:10:09")),
-                createCaseNoteEvent(2, "another note", LocalDateTime.parse("2018-01-02T11:10:09")));
-    }
-
-    private CaseNoteEvent createCaseNoteEvent(final int id, final String noteText, final LocalDateTime modifyDateTime) {
-        return CaseNoteEvent.builder()
-                .content(noteText)
-                .notificationTimestamp(modifyDateTime)
-                .nomsId("AB" + id)
-                .id(id)
-                .noteType("MAIN SUB")
-                .staffName("Staff name")
-                .build();
-    }
-
-    public void stubGetCaseNoteEventsNoLimit() {
-        final var body = gson.toJson(createEvents());
-        stubFor(get(urlPathMatching("/api/case-notes/events_no_limit?.*")).willReturn(aResponse()
-                .withHeader("Content-Type", "application/json")
-                .withBody(body)
-                .withStatus(200)
-        ));
     }
 
     private static class LocalDateTimeConverter implements JsonSerializer<LocalDateTime>, JsonDeserializer<LocalDateTime> {
