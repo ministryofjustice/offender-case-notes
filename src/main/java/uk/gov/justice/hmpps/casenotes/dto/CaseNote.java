@@ -18,7 +18,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @EqualsAndHashCode
-@Data
+@ToString
 public class CaseNote {
 
     @ApiModelProperty(required = true, value = "Case Note Id (unique)", position = 1, example = "12311312")
@@ -76,8 +76,76 @@ public class CaseNote {
     @ApiModelProperty(value = "Location Id representing where Case Note was made.", position = 14, example = "MDI")
     private String locationId;
 
+    @ApiModelProperty(required = true, value = "Delius number representation of the case note id - will be negative for sensitive case note types", position = 15, example = "-23")
+    @NotNull
+    private Integer eventId;
+
     @ApiModelProperty(required = true, value = "Ordered list of amendments to the case note (oldest first)", position = 15)
     @NotNull
     @Builder.Default
     private List<CaseNoteAmendment> amendments = new ArrayList<>();
+
+    public @NotNull String getCaseNoteId() {
+        return this.caseNoteId;
+    }
+
+    public @NotNull String getOffenderIdentifier() {
+        return this.offenderIdentifier;
+    }
+
+    public @NotBlank String getType() {
+        return this.type;
+    }
+
+    public @NotBlank String getTypeDescription() {
+        return this.typeDescription;
+    }
+
+    public @NotBlank String getSubType() {
+        return this.subType;
+    }
+
+    public @NotBlank String getSubTypeDescription() {
+        return this.subTypeDescription;
+    }
+
+    public @NotBlank String getSource() {
+        return this.source;
+    }
+
+    public @NotNull LocalDateTime getCreationDateTime() {
+        return this.creationDateTime;
+    }
+
+    public @NotNull LocalDateTime getOccurrenceDateTime() {
+        return this.occurrenceDateTime;
+    }
+
+    public @NotNull String getAuthorUsername() {
+        return this.authorUsername;
+    }
+
+    public @NotNull String getAuthorName() {
+        return this.authorName;
+    }
+
+    public @NotNull String getAuthorUserId() {
+        return this.authorUserId;
+    }
+
+    public @NotBlank String getText() {
+        return this.text;
+    }
+
+    public String getLocationId() {
+        return this.locationId;
+    }
+
+    public @NonNull Integer getEventId() {
+        return eventId;
+    }
+
+    public @NotNull List<CaseNoteAmendment> getAmendments() {
+        return this.amendments;
+    }
 }

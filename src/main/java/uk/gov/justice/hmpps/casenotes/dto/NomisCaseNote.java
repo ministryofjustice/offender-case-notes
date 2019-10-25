@@ -14,7 +14,7 @@ import java.util.List;
 @Data
 public class NomisCaseNote {
 
-    private Long caseNoteId;
+    private Integer caseNoteId;
     private String offenderIdentifier;
     private String type;
     private String typeDescription;

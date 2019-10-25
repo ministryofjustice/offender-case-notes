@@ -58,7 +58,7 @@ public class SecurityUserContext {
 
         if (StringUtils.isEmpty(username) || username.equals("anonymousUser")) return Optional.empty();
 
-        log.warn("Unexpected token found of type {} that is missing user id, using username instead", userPrincipal.getClass().getName());
+        log.debug("Authentication doesn't contain user id, using username instead");
         return Optional.of(new UserIdUser(username, authentication.getCredentials().toString(), authentication.getAuthorities(), username));
     }
 

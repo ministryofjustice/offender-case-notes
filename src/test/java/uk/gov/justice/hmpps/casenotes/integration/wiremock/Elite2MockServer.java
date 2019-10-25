@@ -116,7 +116,7 @@ public class Elite2MockServer extends WireMockRule {
 
     private NomisCaseNote createNomisCaseNote() {
         return NomisCaseNote.builder()
-                .caseNoteId(131232L)
+                .caseNoteId(131232)
                 .agencyId("LEI")
                 .authorName("Mickey Mouse")
                 .creationDateTime(LocalDateTime.now().minusMonths(1))

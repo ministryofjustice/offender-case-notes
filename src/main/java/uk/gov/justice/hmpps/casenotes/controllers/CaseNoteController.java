@@ -12,6 +12,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import uk.gov.justice.hmpps.casenotes.config.SecurityUserContext;
 import uk.gov.justice.hmpps.casenotes.dto.*;
+import uk.gov.justice.hmpps.casenotes.services.CaseNoteEventPusher;
 import uk.gov.justice.hmpps.casenotes.services.CaseNoteService;
 
 import javax.validation.constraints.NotNull;
@@ -32,6 +33,7 @@ public class CaseNoteController {
     private final CaseNoteService caseNoteService;
     private final TelemetryClient telemetryClient;
     private final SecurityUserContext securityUserContext;
+    private final CaseNoteEventPusher caseNoteEventPusher;
 
     @GetMapping("/{offenderIdentifier}/{caseNoteIdentifier}")
     @ResponseBody
@@ -81,6 +83,8 @@ public class CaseNoteController {
         final var caseNoteCreated = caseNoteService.createCaseNote(offenderIdentifier, newCaseNote);
         // Log event
         telemetryClient.trackEvent("CaseNoteCreated", createEventProperties(caseNoteCreated), null);
+        // and push event to offender events topic
+        caseNoteEventPusher.sendEvent(caseNoteCreated);
         return caseNoteCreated;
     }
 
@@ -99,6 +103,8 @@ public class CaseNoteController {
 
         // Log event
         telemetryClient.trackEvent("CaseNoteUpdated", createEventProperties(amendCaseNote), null);
+        // and push event to offender events topic
+        caseNoteEventPusher.sendEvent(amendCaseNote);
         return amendCaseNote;
     }
 
