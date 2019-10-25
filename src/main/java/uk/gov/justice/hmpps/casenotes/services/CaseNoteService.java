@@ -133,6 +133,7 @@ public class CaseNoteService {
         final var parentType = cn.getSensitiveCaseNoteType().getParentType();
         return CaseNote.builder()
                 .caseNoteId(cn.getId().toString())
+                .eventId(cn.getEventId())
                 .offenderIdentifier(cn.getOffenderIdentifier())
                 .occurrenceDateTime(cn.getOccurrenceDateTime())
                 .authorUsername(cn.getAuthorUsername())
@@ -163,6 +164,7 @@ public class CaseNoteService {
     private CaseNote mapper(final NomisCaseNote cn, final String offenderIdentifier) {
         return CaseNote.builder()
                 .caseNoteId(cn.getCaseNoteId().toString())
+                .eventId(cn.getCaseNoteId())
                 .offenderIdentifier(offenderIdentifier)
                 .occurrenceDateTime(cn.getOccurrenceDateTime())
                 .authorName(cn.getAuthorName())

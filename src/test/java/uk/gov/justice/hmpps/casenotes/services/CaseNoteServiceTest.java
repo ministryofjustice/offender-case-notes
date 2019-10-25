@@ -62,11 +62,12 @@ public class CaseNoteServiceTest {
 
         final var caseNote = caseNoteService.createCaseNote("12345", NewCaseNote.builder().type("type").subType("SUB").build());
 
-        assertThat(caseNote).isEqualToIgnoringGivenFields(nomisCaseNote, "authorUsername", "locationId", "text", "caseNoteId", "authorUserId");
+        assertThat(caseNote).isEqualToIgnoringGivenFields(nomisCaseNote, "authorUsername", "locationId", "text", "caseNoteId", "authorUserId", "eventId");
         assertThat(caseNote.getText()).isEqualTo("original");
         assertThat(caseNote.getAuthorUserId()).isEqualTo("23456");
         assertThat(caseNote.getLocationId()).isEqualTo("agency");
         assertThat(caseNote.getCaseNoteId()).isEqualTo("12345");
+        assertThat(caseNote.getEventId()).isEqualTo(12345);
         verify(caseNoteTypeRepository).findSensitiveCaseNoteTypeByParentType_TypeAndType("type", "SUB");
     }
 
@@ -129,11 +130,12 @@ public class CaseNoteServiceTest {
 
         final var caseNote = caseNoteService.getCaseNote("12345", "21455");
 
-        assertThat(caseNote).isEqualToIgnoringGivenFields(nomisCaseNote, "authorUsername", "locationId", "text", "caseNoteId", "authorUserId");
+        assertThat(caseNote).isEqualToIgnoringGivenFields(nomisCaseNote, "authorUsername", "locationId", "text", "caseNoteId", "authorUserId", "eventId");
         assertThat(caseNote.getText()).isEqualTo("original");
         assertThat(caseNote.getAuthorUserId()).isEqualTo("23456");
         assertThat(caseNote.getLocationId()).isEqualTo("agency");
         assertThat(caseNote.getCaseNoteId()).isEqualTo("12345");
+        assertThat(caseNote.getEventId()).isEqualTo(12345);
     }
 
     @Test
@@ -143,11 +145,12 @@ public class CaseNoteServiceTest {
 
         final var caseNote = caseNoteService.amendCaseNote("12345", "21455", new UpdateCaseNote("text"));
 
-        assertThat(caseNote).isEqualToIgnoringGivenFields(nomisCaseNote, "authorUsername", "locationId", "text", "caseNoteId", "authorUserId");
+        assertThat(caseNote).isEqualToIgnoringGivenFields(nomisCaseNote, "authorUsername", "locationId", "text", "caseNoteId", "authorUserId", "eventId");
         assertThat(caseNote.getText()).isEqualTo("original");
         assertThat(caseNote.getAuthorUserId()).isEqualTo("23456");
         assertThat(caseNote.getLocationId()).isEqualTo("agency");
         assertThat(caseNote.getCaseNoteId()).isEqualTo("12345");
+        assertThat(caseNote.getEventId()).isEqualTo(12345);
     }
 
     @Test
@@ -201,7 +204,7 @@ public class CaseNoteServiceTest {
         return NomisCaseNote.builder()
                 .agencyId("agency")
                 .authorName("somebody")
-                .caseNoteId(12345L)
+                .caseNoteId(12345)
                 .creationDateTime(LocalDateTime.parse("2019-03-23T11:22"))
                 .occurrenceDateTime(LocalDateTime.parse("2019-04-16T10:42"))
                 .originalNoteText("original")
