@@ -10,8 +10,10 @@ import org.mockito.junit.MockitoJUnitRunner
 import software.amazon.awssdk.services.sns.SnsAsyncClient
 import software.amazon.awssdk.services.sns.model.MessageAttributeValue
 import software.amazon.awssdk.services.sns.model.PublishRequest
+import software.amazon.awssdk.services.sns.model.PublishResponse
 import uk.gov.justice.hmpps.casenotes.dto.CaseNote
 import java.time.LocalDateTime
+import java.util.concurrent.CompletableFuture
 
 @RunWith(MockitoJUnitRunner::class)
 class CaseNoteAwsEventPusherTest {
@@ -28,6 +30,7 @@ class CaseNoteAwsEventPusherTest {
   @Test
   fun `send event converts to case note event`() {
     whenever(objectMapper.writeValueAsString(any())).thenReturn("messageAsJson")
+    whenever(snsClient.publish(any<PublishRequest>())).thenReturn(CompletableFuture.completedFuture(PublishResponse.builder().messageId("Hello").build()))
     service.sendEvent(caseCaseNote())
     verify(objectMapper).writeValueAsString(check<CaseNoteEvent> {
       assertThat(it).isEqualTo(CaseNoteEvent(
@@ -42,11 +45,12 @@ class CaseNoteAwsEventPusherTest {
   @Test
   fun `send event sends to the sns client`() {
     whenever(objectMapper.writeValueAsString(any())).thenReturn("messageAsJson")
+    whenever(snsClient.publish(any<PublishRequest>())).thenReturn(CompletableFuture.completedFuture(PublishResponse.builder().messageId("Hello").build()))
     service.sendEvent(caseCaseNote())
     verify(snsClient).publish(check<PublishRequest> {
       assertThat(it.message()).isEqualTo("messageAsJson")
       assertThat(it.topicArn()).isEqualTo("topicArn")
-      assertThat(it.messageAttributes()).containsEntry("eventType", MessageAttributeValue.builder().stringValue("GEN-OSE").build())
+      assertThat(it.messageAttributes()).containsEntry("eventType", MessageAttributeValue.builder().dataType("String").stringValue("GEN-OSE").build())
     })
   }
 
