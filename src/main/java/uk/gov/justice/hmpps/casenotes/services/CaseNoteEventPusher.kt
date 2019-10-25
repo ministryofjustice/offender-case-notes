@@ -34,16 +34,20 @@ open class CaseNoteAwsEventPusher(private val snsClient: SnsAsyncClient,
   override fun sendEvent(caseNote: CaseNote) {
     if (isSensitiveCaseNote(caseNote.caseNoteId)) {
       val cne = CaseNoteEvent(caseNote)
-      log.debug("Pushing case note {} to event topic with event type of {}", cne.caseNoteId, cne.eventType)
+      log.info("Pushing case note {} to event topic with event type of {}", cne.caseNoteId, cne.eventType)
       val publishRequest = PublishRequest.builder()
           .topicArn(topicArn)
           .messageAttributes(mapOf(
-              "eventType" to MessageAttributeValue.builder().stringValue(cne.eventType).build(),
-              "contentType" to MessageAttributeValue.builder().stringValue("text/plain;charset=UTF-8").build()
+              "eventType" to MessageAttributeValue.builder().dataType("String").stringValue(cne.eventType).build(),
+              "contentType" to MessageAttributeValue.builder().dataType("String").stringValue("text/plain;charset=UTF-8").build()
           ))
           .message(objectMapper.writeValueAsString(cne))
           .build()
       snsClient.publish(publishRequest)
+          .whenComplete { publishResponse, throwable ->
+            publishResponse?.run { log.debug("Sent case note with message id {}", publishResponse.messageId()) }
+            throwable?.run { log.error("Failed to send case note", throwable) }
+          }
     }
   }
 }
