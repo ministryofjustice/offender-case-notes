@@ -49,6 +49,9 @@ env:
         name: dps-rds-instance-output
         key: rds_instance_endpoint
 
+  - name: SNS_PROVIDER
+    value: aws
+
   - name: SNS_AWS_ACCESS_KEY_ID
     valueFrom:
       secretKeyRef:
