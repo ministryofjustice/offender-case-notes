@@ -57,10 +57,6 @@ public class CaseNote {
     @NotNull
     private LocalDateTime occurrenceDateTime;
 
-    @ApiModelProperty(required = true, value = "Username of case note author", position = 10, example = "USER1")
-    @NotNull
-    private String authorUsername;
-
     @ApiModelProperty(required = true, value = "Full name of case note author", position = 11, example = "John Smith")
     @NotNull
     private String authorName;
@@ -119,10 +115,6 @@ public class CaseNote {
 
     public @NotNull LocalDateTime getOccurrenceDateTime() {
         return this.occurrenceDateTime;
-    }
-
-    public @NotNull String getAuthorUsername() {
-        return this.authorUsername;
     }
 
     public @NotNull String getAuthorName() {

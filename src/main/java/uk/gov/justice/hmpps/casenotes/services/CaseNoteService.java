@@ -136,7 +136,6 @@ public class CaseNoteService {
                 .eventId(cn.getEventId())
                 .offenderIdentifier(cn.getOffenderIdentifier())
                 .occurrenceDateTime(cn.getOccurrenceDateTime())
-                .authorUsername(cn.getAuthorUsername())
                 .authorUserId(cn.getAuthorUserId())
                 .authorName(cn.getAuthorName())
                 .type(parentType.getType())
@@ -168,7 +167,6 @@ public class CaseNoteService {
                 .offenderIdentifier(offenderIdentifier)
                 .occurrenceDateTime(cn.getOccurrenceDateTime())
                 .authorName(cn.getAuthorName())
-                .authorUsername(String.valueOf(cn.getStaffId()))  // TODO: this should be username not id.
                 .authorUserId(String.valueOf(cn.getStaffId()))
                 .type(cn.getType())
                 .typeDescription(cn.getTypeDescription())
