@@ -5,6 +5,5 @@ spring:
 sns:
   provider: localstack
   endpoint.url: http://localhost:4575
-  endpoint.region: eu-west-2
   topic.arn: arn:aws:sns:eu-west-2:000000000000:offender_events
 
