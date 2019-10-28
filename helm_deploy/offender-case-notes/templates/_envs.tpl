@@ -48,4 +48,26 @@ env:
       secretKeyRef:
         name: dps-rds-instance-output
         key: rds_instance_endpoint
+
+  - name: SNS_PROVIDER
+    value: aws
+
+  - name: SNS_AWS_ACCESS_KEY_ID
+    valueFrom:
+      secretKeyRef:
+        name: {{ template "app.name" . }}
+        key: sns_access_key_id
+
+  - name: SNS_AWS_SECRET_ACCESS_KEY
+    valueFrom:
+      secretKeyRef:
+        name: {{ template "app.name" . }}
+        key: sns_secret_access_key
+
+  - name: SNS_TOPIC_ARN
+    valueFrom:
+      secretKeyRef:
+        name: {{ template "app.name" . }}
+        key: sns_topic_arn
+
 {{- end -}}
