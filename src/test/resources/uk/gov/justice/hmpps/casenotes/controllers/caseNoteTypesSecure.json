@@ -37,16 +37,19 @@
     "code": "OLDPOM",
     "description": "OLDPOM Notes",
     "activeFlag": "N",
+    "source": "OCNS",
     "subCodes": [
       {
         "code": "OLDONE",
         "description": "Active Old POM Note",
-        "activeFlag": "Y"
+        "activeFlag": "Y",
+        "source": "OCNS"
       },
       {
         "code": "OLDTWO",
         "description": "Inactive Old POM Note",
-        "activeFlag": "N"
+        "activeFlag": "N",
+        "source": "OCNS"
       }
     ]
   },
@@ -54,21 +57,25 @@
     "code": "POM",
     "description": "POM Notes",
     "activeFlag": "Y",
+    "source": "OCNS",
     "subCodes": [
       {
         "code": "GEN",
         "description": "General POM Note",
-        "activeFlag": "Y"
+        "activeFlag": "Y",
+        "source": "OCNS"
       },
       {
         "code": "OLD",
         "description": "Inactive POM Note",
-        "activeFlag": "N"
+        "activeFlag": "N",
+        "source": "OCNS"
       },
       {
         "code": "SPECIAL",
         "description": "Special POM Note",
-        "activeFlag": "Y"
+        "activeFlag": "Y",
+        "source": "OCNS"
       }
     ]
   },
@@ -76,16 +83,19 @@
     "code": "OMIC",
     "description": "OMIC Type",
     "activeFlag": "Y",
+    "source": "OCNS",
     "subCodes": [
       {
         "code": "GEN",
         "description": "General OMIC Note",
-        "activeFlag": "Y"
+        "activeFlag": "Y",
+        "source": "OCNS"
       },
       {
         "code": "SPECIAL",
         "description": "Special OMIC Note",
-        "activeFlag": "Y"
+        "activeFlag": "Y",
+        "source": "OCNS"
       }
     ]
   }

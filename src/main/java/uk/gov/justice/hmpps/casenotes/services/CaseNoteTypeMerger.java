@@ -20,6 +20,7 @@ public class CaseNoteTypeMerger {
                             .code(t.getCode())
                             .description(t.getDescription())
                             .activeFlag(t.getActiveFlag())
+                            .source(t.getSource())
                             .subCodes(t.getSubCodes().stream().sorted().collect(Collectors.toList()))
                             .build())
                 .sorted()

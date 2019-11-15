@@ -39,6 +39,7 @@ import static org.springframework.data.domain.Sort.Direction.ASC;
 @AllArgsConstructor
 public class CaseNoteService {
 
+    private static final String SERVICE_NAME = "OCNS";
     private final OffenderCaseNoteRepository repository;
     private final CaseNoteTypeRepository caseNoteTypeRepository;
     private final ParentCaseNoteTypeRepository parentCaseNoteTypeRepository;
@@ -142,7 +143,7 @@ public class CaseNoteService {
                 .typeDescription(parentType.getDescription())
                 .subType(cn.getSensitiveCaseNoteType().getType())
                 .subTypeDescription(cn.getSensitiveCaseNoteType().getDescription())
-                .source("OCNS") // Indicates its a Offender Case Note Service Type
+                .source(SERVICE_NAME) // Indicates its a Offender Case Note Service Type
                 .text(cn.getNoteText())
                 .creationDateTime(cn.getCreateDateTime())
                 .amendments(cn.getAmendments().stream().map(
@@ -278,11 +279,13 @@ public class CaseNoteService {
                 .code(parentNoteType.getType())
                 .description(parentNoteType.getDescription())
                 .activeFlag(parentNoteType.isActive() ? "Y" : "N")
+                .source(SERVICE_NAME)
                 .subCodes(parentNoteType.getSubTypes().stream()
                         .filter(t -> allTypes || t.isActive())
                         .map(st -> CaseNoteType.builder()
                                 .code(st.getType())
                                 .description(st.getDescription())
+                                .source(SERVICE_NAME)
                                 .activeFlag(st.isActive() ? "Y" : "N")
                                 .build())
                         .collect(Collectors.toList()))

@@ -2,11 +2,13 @@
   "code": "NEWTYPE1",
   "description": "Change The Desc",
   "activeFlag": "Y",
+  "source": "OCNS",
   "subCodes": [
     {
       "code": "NEWSUBTYPE1",
       "description": "A New Sub Type 1",
-      "activeFlag": "N"
+      "activeFlag": "N",
+      "source": "OCNS"
     }
   ]
 }
