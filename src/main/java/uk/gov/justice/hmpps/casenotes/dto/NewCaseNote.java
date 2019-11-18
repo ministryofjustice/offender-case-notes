@@ -36,7 +36,6 @@ public class NewCaseNote {
     private LocalDateTime occurrenceDateTime;
 
     @ApiModelProperty(required = true, value = "Text of case note", example = "This is a case note message", position = 5)
-    @Length(max = 4000)
     @NotBlank
     private String text;
 
