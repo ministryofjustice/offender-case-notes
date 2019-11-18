@@ -18,7 +18,6 @@ import javax.validation.constraints.NotBlank;
 @Data
 public class UpdateCaseNote {
     @ApiModelProperty(required = true, value = "Text of case note", example = "This is a case note message", position = 5)
-    @Length(max = 4000)
     @NotBlank
     private String text;
 }
