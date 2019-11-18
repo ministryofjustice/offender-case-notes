@@ -27,16 +27,19 @@
     "code": "POM",
     "description": "POM Notes",
     "activeFlag": "Y",
+    "source": "OCNS",
     "subCodes": [
       {
         "code": "GEN",
         "description": "General POM Note",
-        "activeFlag": "Y"
+        "activeFlag": "Y",
+        "source": "OCNS"
       },
       {
         "code": "SPECIAL",
         "description": "Special POM Note",
-        "activeFlag": "Y"
+        "activeFlag": "Y",
+        "source": "OCNS"
       }
     ]
   },
@@ -44,16 +47,19 @@
     "code": "OMIC",
     "description": "OMIC Type",
     "activeFlag": "Y",
+    "source": "OCNS",
     "subCodes": [
       {
         "code": "GEN",
         "description": "General OMIC Note",
-        "activeFlag": "Y"
+        "activeFlag": "Y",
+        "source": "OCNS"
       },
       {
         "code": "SPECIAL",
         "description": "Special OMIC Note",
-        "activeFlag": "Y"
+        "activeFlag": "Y",
+        "source": "OCNS"
       }
     ]
   }

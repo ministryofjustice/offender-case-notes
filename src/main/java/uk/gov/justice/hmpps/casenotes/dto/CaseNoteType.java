@@ -30,7 +30,10 @@ public class CaseNoteType implements Comparable<CaseNoteType>{
     @Builder.Default
     private String activeFlag = "Y";
 
-    @ApiModelProperty(value = "List of case note sub types", position = 4, allowEmptyValue = true)
+    @ApiModelProperty(value = "Source of Case Note Type, legacy case note are null", example = "OCNS", position = 4)
+    private String source;
+
+    @ApiModelProperty(value = "List of case note sub types", position = 5, allowEmptyValue = true)
     @Builder.Default
     private List<CaseNoteType> subCodes = new ArrayList<>();
 
