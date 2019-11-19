@@ -1,18 +1,15 @@
-package uk.gov.justice.hmpps.casenotes.repository;
+package uk.gov.justice.hmpps.casenotes.repository
 
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
-import org.springframework.data.repository.PagingAndSortingRepository;
-import org.springframework.stereotype.Repository;
-import uk.gov.justice.hmpps.casenotes.model.OffenderCaseNote;
-
-import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
+import org.springframework.data.domain.Pageable
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor
+import org.springframework.data.repository.PagingAndSortingRepository
+import org.springframework.stereotype.Repository
+import uk.gov.justice.hmpps.casenotes.model.OffenderCaseNote
+import java.time.LocalDateTime
+import java.util.*
 
 @Repository
-public interface OffenderCaseNoteRepository extends PagingAndSortingRepository<OffenderCaseNote, UUID>, JpaSpecificationExecutor<OffenderCaseNote> {
-
-    List<OffenderCaseNote> findBySensitiveCaseNoteType_ParentType_TypeInAndModifyDateTimeAfterOrderByModifyDateTime(Set<String> types, LocalDateTime createdDate, Pageable page);
+interface OffenderCaseNoteRepository : PagingAndSortingRepository<OffenderCaseNote, UUID>, JpaSpecificationExecutor<OffenderCaseNote> {
+  fun findBySensitiveCaseNoteType_ParentType_TypeInAndModifyDateTimeAfterOrderByModifyDateTime(types: Set<String>?, createdDate: LocalDateTime?, page: Pageable?): List<OffenderCaseNote>
+  fun findByModifyDateTimeBetweenOrderByModifyDateTime(fromDateTime: LocalDateTime, toDateTime: LocalDateTime): List<OffenderCaseNote>
 }

@@ -16,7 +16,6 @@ import java.util.*;
 
 @Entity
 @Table(name = "OFFENDER_CASE_NOTE")
-@Getter
 @NoArgsConstructor
 @AllArgsConstructor
 @EntityListeners(AuditingEntityListener.class)
@@ -103,6 +102,66 @@ public class OffenderCaseNote {
 
     public Optional<OffenderCaseNoteAmendment> getAmendment(final int sequence) {
         return amendments.stream().filter(a -> a.getAmendSequence() == sequence).findFirst();
+    }
+
+    public UUID getId() {
+        return this.id;
+    }
+
+    public LocalDateTime getOccurrenceDateTime() {
+        return this.occurrenceDateTime;
+    }
+
+    public String getOffenderIdentifier() {
+        return this.offenderIdentifier;
+    }
+
+    public String getLocationId() {
+        return this.locationId;
+    }
+
+    public String getAuthorUsername() {
+        return this.authorUsername;
+    }
+
+    public String getAuthorUserId() {
+        return this.authorUserId;
+    }
+
+    public String getAuthorName() {
+        return this.authorName;
+    }
+
+    public SensitiveCaseNoteType getSensitiveCaseNoteType() {
+        return this.sensitiveCaseNoteType;
+    }
+
+    public String getNoteText() {
+        return this.noteText;
+    }
+
+    public List<OffenderCaseNoteAmendment> getAmendments() {
+        return this.amendments;
+    }
+
+    public LocalDateTime getCreateDateTime() {
+        return this.createDateTime;
+    }
+
+    public String getCreateUserId() {
+        return this.createUserId;
+    }
+
+    public LocalDateTime getModifyDateTime() {
+        return this.modifyDateTime;
+    }
+
+    public String getModifyUserId() {
+        return this.modifyUserId;
+    }
+
+    public Integer getEventId() {
+        return this.eventId;
     }
 
     public static class AmendmentComparator implements Comparator<OffenderCaseNoteAmendment> {

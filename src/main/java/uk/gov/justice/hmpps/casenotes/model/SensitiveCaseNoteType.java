@@ -12,7 +12,6 @@ import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "CASE_NOTE_TYPE")
-@Getter
 @NoArgsConstructor
 @AllArgsConstructor
 @EntityListeners(AuditingEntityListener.class)
@@ -54,8 +53,44 @@ public class SensitiveCaseNoteType {
     @LastModifiedBy
     private String modifyUserId;
 
-    public void update(final String description, boolean active) {
+    public void update(final String description, final boolean active) {
         this.description = description;
         this.active = active;
+    }
+
+    public Long getId() {
+        return this.id;
+    }
+
+    public ParentNoteType getParentType() {
+        return this.parentType;
+    }
+
+    public String getType() {
+        return this.type;
+    }
+
+    public String getDescription() {
+        return this.description;
+    }
+
+    public boolean isActive() {
+        return this.active;
+    }
+
+    public LocalDateTime getCreateDateTime() {
+        return this.createDateTime;
+    }
+
+    public String getCreateUserId() {
+        return this.createUserId;
+    }
+
+    public LocalDateTime getModifyDateTime() {
+        return this.modifyDateTime;
+    }
+
+    public String getModifyUserId() {
+        return this.modifyUserId;
     }
 }
