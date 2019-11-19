@@ -14,7 +14,6 @@ import java.util.List;
 
 @ApiModel(description = "Case Note")
 @JsonInclude(JsonInclude.Include.NON_NULL)
-@Builder
 @AllArgsConstructor
 @NoArgsConstructor
 @EqualsAndHashCode
@@ -78,8 +77,11 @@ public class CaseNote {
 
     @ApiModelProperty(required = true, value = "Ordered list of amendments to the case note (oldest first)", position = 15)
     @NotNull
-    @Builder.Default
     private List<CaseNoteAmendment> amendments = new ArrayList<>();
+
+    public static CaseNoteBuilder builder() {
+        return new CaseNoteBuilder();
+    }
 
     public @NotNull String getCaseNoteId() {
         return this.caseNoteId;
@@ -139,5 +141,109 @@ public class CaseNote {
 
     public @NotNull List<CaseNoteAmendment> getAmendments() {
         return this.amendments;
+    }
+
+    public static class CaseNoteBuilder {
+        private @NotNull String caseNoteId;
+        private @NotNull String offenderIdentifier;
+        private @NotBlank String type;
+        private @NotBlank String typeDescription;
+        private @NotBlank String subType;
+        private @NotBlank String subTypeDescription;
+        private @NotBlank String source;
+        private @NotNull LocalDateTime creationDateTime;
+        private @NotNull LocalDateTime occurrenceDateTime;
+        private @NotNull String authorName;
+        private @NotNull String authorUserId;
+        private @NotBlank String text;
+        private String locationId;
+        private @NotNull Integer eventId;
+        private @NotNull List<CaseNoteAmendment> amendments;
+
+        CaseNoteBuilder() {
+        }
+
+        public CaseNoteBuilder caseNoteId(@NotNull final String caseNoteId) {
+            this.caseNoteId = caseNoteId;
+            return this;
+        }
+
+        public CaseNoteBuilder offenderIdentifier(@NotNull final String offenderIdentifier) {
+            this.offenderIdentifier = offenderIdentifier;
+            return this;
+        }
+
+        public CaseNoteBuilder type(@NotBlank final String type) {
+            this.type = type;
+            return this;
+        }
+
+        public CaseNoteBuilder typeDescription(@NotBlank final String typeDescription) {
+            this.typeDescription = typeDescription;
+            return this;
+        }
+
+        public CaseNoteBuilder subType(@NotBlank final String subType) {
+            this.subType = subType;
+            return this;
+        }
+
+        public CaseNoteBuilder subTypeDescription(@NotBlank final String subTypeDescription) {
+            this.subTypeDescription = subTypeDescription;
+            return this;
+        }
+
+        public CaseNoteBuilder source(@NotBlank final String source) {
+            this.source = source;
+            return this;
+        }
+
+        public CaseNoteBuilder creationDateTime(@NotNull final LocalDateTime creationDateTime) {
+            this.creationDateTime = creationDateTime;
+            return this;
+        }
+
+        public CaseNoteBuilder occurrenceDateTime(@NotNull final LocalDateTime occurrenceDateTime) {
+            this.occurrenceDateTime = occurrenceDateTime;
+            return this;
+        }
+
+        public CaseNoteBuilder authorName(@NotNull final String authorName) {
+            this.authorName = authorName;
+            return this;
+        }
+
+        public CaseNoteBuilder authorUserId(@NotNull final String authorUserId) {
+            this.authorUserId = authorUserId;
+            return this;
+        }
+
+        public CaseNoteBuilder text(@NotBlank final String text) {
+            this.text = text;
+            return this;
+        }
+
+        public CaseNoteBuilder locationId(final String locationId) {
+            this.locationId = locationId;
+            return this;
+        }
+
+        public CaseNoteBuilder eventId(@NotNull final Integer eventId) {
+            this.eventId = eventId;
+            return this;
+        }
+
+        public CaseNoteBuilder amendments(@NotNull final List<CaseNoteAmendment> amendments) {
+            this.amendments = amendments;
+            return this;
+        }
+
+        public CaseNote build() {
+            return new CaseNote(caseNoteId, offenderIdentifier, type, typeDescription, subType, subTypeDescription, source, creationDateTime, occurrenceDateTime, authorName, authorUserId, text, locationId, eventId, amendments);
+        }
+
+        public String toString() {
+            return "CaseNote.CaseNoteBuilder(caseNoteId=" + this.caseNoteId + ", offenderIdentifier=" + this.offenderIdentifier + ", type=" + this.type + ", typeDescription=" + this.typeDescription + ", subType=" + this.subType + ", subTypeDescription=" + this.subTypeDescription + ", source=" + this.source + ", creationDateTime=" + this.creationDateTime + ", occurrenceDateTime=" + this.occurrenceDateTime + ", authorName=" + this.authorName + ", authorUserId=" + this.authorUserId + ", text=" + this.text + ", locationId=" + this.locationId + ", eventId=" + this.eventId + ", amendments=" + this.amendments + ")";
+        }
     }
 }
