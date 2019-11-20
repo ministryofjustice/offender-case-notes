@@ -47,7 +47,7 @@ open class PublishNoteResourceTest : ResourceTest() {
         object : ParameterizedTypeReference<String>() {}, toDate)
     assertThatStatus<String>(response, 200)
     assertThat(response!!.body).isEqualTo("1")
-    verify(repository).findByModifyDateTimeBetweenOrderByModifyDateTime(LocalDateTime.MIN, toDate)
+    verify(repository).findByModifyDateTimeBetweenOrderByModifyDateTime(LocalDateTime.parse("2019-01-01T00:00:00"), toDate)
   }
 
   @Test
