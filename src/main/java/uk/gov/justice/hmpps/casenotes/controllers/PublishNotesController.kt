@@ -32,7 +32,8 @@ open class PublishNotesController(private val publishNoteService: PublishNoteSer
       @ApiParam(value = "A timestamp that indicates the latest record required", required = true)
       @NotNull @RequestParam("toDateTime") @DateTimeFormat(iso = ISO.DATE_TIME) toDateTime: LocalDateTime): Int {
 
-    val caseNotes: List<CaseNote> = publishNoteService.findCaseNotes(fromDateTime ?: LocalDateTime.MIN, toDateTime)
+    val caseNotes: List<CaseNote> = publishNoteService.findCaseNotes(fromDateTime
+        ?: LocalDateTime.parse("2019-01-01T00:00:00"), toDateTime)
     log.info("Found {} notes to publish", caseNotes.size)
     publishNoteService.pushCaseNotes(caseNotes)
 
