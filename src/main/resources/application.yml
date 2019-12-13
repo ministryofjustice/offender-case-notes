@@ -75,5 +75,16 @@ azure:
     web:
       enable-W3C: true
 
+oauth:
+  token.url: ${oauth.endpoint.url}/oauth/token
+
+casenotes:
+  client:
+    client-id: ${oauth.client.id}
+    client-secret: ${oauth.client.secret}
+    access-token-uri: ${oauth.token.url}
+    authentication-scheme: header
+    client-authentication-scheme: header
+
 sns:
   endpoint.region: eu-west-2

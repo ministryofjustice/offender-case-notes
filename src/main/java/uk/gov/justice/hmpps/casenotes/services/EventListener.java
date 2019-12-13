@@ -24,7 +24,7 @@ public class EventListener {
     public void eventListener(final String requestJson) {
         final var event = getOffenderEvent(requestJson);
         if (event != null) {
-            mergeOffenderService.checkForMerge(event);
+            mergeOffenderService.checkAndMerge(event);
         }
     }
 
