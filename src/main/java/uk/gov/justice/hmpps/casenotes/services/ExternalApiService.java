@@ -12,14 +12,18 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.oauth2.client.OAuth2RestTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
+import org.springframework.web.util.UriTemplate;
 import uk.gov.justice.hmpps.casenotes.dto.*;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicReference;
 
 @Service
 @AllArgsConstructor
@@ -27,6 +31,7 @@ public class ExternalApiService {
 
     private final RestTemplate elite2ApiRestTemplate;
     private final RestTemplate oauthApiRestTemplate;
+    private final OAuth2RestTemplate clientCredentialsRestTemplate;
 
     List<CaseNoteType> getCaseNoteTypes() {
         return getCaseNoteTypes("/api/reference-domains/caseNoteTypes");
@@ -48,6 +53,27 @@ public class ExternalApiService {
         }
 
         return body;
+    }
+
+    List<BookingIdentifier> getIdentifiersByBookingId(final Long bookingId) {
+        final var uri = clientCredentialsRestTemplate.getUriTemplateHandler().expand(new UriTemplate("/api/bookings/{bookingId}/identifiers").expand(bookingId).toString());
+
+        final var exchange = clientCredentialsRestTemplate.exchange(uri, HttpMethod.GET, null,
+                new ParameterizedTypeReference<List<BookingIdentifier>>() {
+                });
+        return exchange.getBody();
+    }
+
+    Optional<OffenderBooking> getBooking(final Long bookingId) {
+        final var uri = clientCredentialsRestTemplate.getUriTemplateHandler().expand(new UriTemplate("/api/bookings/{bookingId}?basicInfo=true").expand(bookingId).toString());
+        final var booking = new AtomicReference<Optional<OffenderBooking>>();
+        try {
+            final var exchange = clientCredentialsRestTemplate.exchange(uri, HttpMethod.GET, null, OffenderBooking.class);
+            booking.set(Optional.ofNullable(exchange.getBody()));
+        } catch (RestClientException e) {
+            booking.set(Optional.empty());
+        }
+        return booking.get();
     }
 
     String getUserFullName(final String currentUsername) {

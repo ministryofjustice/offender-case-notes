@@ -75,5 +75,14 @@ azure:
     web:
       enable-W3C: true
 
+
+offendercasenotes:
+  client:
+    client-id: ${offender.case.notes.client.id}
+    client-secret: ${offender.case.notes.client.secret}
+    access-token-uri: ${oauth.api.base.url}/oauth/token
+    authentication-scheme: header
+    client-authentication-scheme: header
+
 sns:
   endpoint.region: eu-west-2
