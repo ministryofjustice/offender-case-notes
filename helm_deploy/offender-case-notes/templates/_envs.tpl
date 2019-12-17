@@ -90,4 +90,18 @@ env:
       secretKeyRef:
         name: ocn-events-sqs-instance-output
         key: sqs_ocne_name
+
+
+  - name: OFFENDER_CASE_NOTES_CLIENT_ID
+    valueFrom:
+      secretKeyRef:
+        name: {{ template "app.name" . }}
+        key: OFFENDER_CASE_NOTES_CLIENT_ID
+
+  - name: OFFENDER_CASE_NOTES_CLIENT_SECRET
+    valueFrom:
+      secretKeyRef:
+        name: {{ template "app.name" . }}
+        key: OFFENDER_CASE_NOTES_CLIENT_SECRET
+
 {{- end -}}

@@ -3,6 +3,7 @@ package uk.gov.justice.hmpps.casenotes.config;
 
 import org.apache.commons.codec.binary.Base64;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.info.BuildProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -12,6 +13,7 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.oauth2.client.DefaultOAuth2ClientContext;
 import org.springframework.security.oauth2.client.OAuth2ClientContext;
+import org.springframework.security.oauth2.client.token.grant.client.ClientCredentialsResourceDetails;
 import org.springframework.security.oauth2.config.annotation.web.configuration.ResourceServerConfigurerAdapter;
 import org.springframework.security.oauth2.config.annotation.web.configurers.ResourceServerSecurityConfigurer;
 import org.springframework.security.oauth2.provider.token.DefaultAccessTokenConverter;
@@ -166,7 +168,7 @@ public class ResourceServerConfiguration extends ResourceServerConfigurerAdapter
                 getVersion(),
                 "https://gateway.nomis-api.service.justice.gov.uk/auth/terms",
                 contactInfo(),
-                "MIT", "https://opensource.org/licenses/MIT", vendorExtensions);
+                "Open Government Licence v3.0", "https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/", vendorExtensions);
     }
 
     @Bean
@@ -174,4 +176,11 @@ public class ResourceServerConfiguration extends ResourceServerConfigurerAdapter
     public OAuth2ClientContext oAuth2ClientContext() {
         return new DefaultOAuth2ClientContext();
     }
+
+    @Bean
+    @ConfigurationProperties("offendercasenotes.client")
+    public ClientCredentialsResourceDetails offenderCaseNotesClientCredentials() {
+        return new ClientCredentialsResourceDetails();
+    }
+
 }

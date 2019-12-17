@@ -75,14 +75,12 @@ azure:
     web:
       enable-W3C: true
 
-oauth:
-  token.url: ${oauth.endpoint.url}/oauth/token
 
-casenotes:
+offendercasenotes:
   client:
-    client-id: ${oauth.client.id}
-    client-secret: ${oauth.client.secret}
-    access-token-uri: ${oauth.token.url}
+    client-id: ${offender.case.notes.client.id}
+    client-secret: ${offender.case.notes.client.secret}
+    access-token-uri: ${oauth.api.base.url}/oauth/token
     authentication-scheme: header
     client-authentication-scheme: header
 
