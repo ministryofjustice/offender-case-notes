@@ -23,13 +23,13 @@ public class MergeOffenderService {
         log.debug("Check for merged booking for ID {}", offenderEvent.getBookingId());
         externalApiService.getIdentifiersByBookingId(offenderEvent.getBookingId()).stream()
                 .filter(id -> "MERGED".equals(id.getType()))
-                .forEach(id -> externalApiService.getBooking(offenderEvent.getBookingId())
-                        .ifPresent(booking -> {
-                            rowsUpdated.set(repository.updateOffenderIdentifier(id.getValue(), booking.getOffenderNo()));
-                            if (rowsUpdated.get() > 0) {
-                                log.info("{} case notes were merged from offender identifier {} to {}", rowsUpdated, id.getValue(), booking.getOffenderNo());
-                            }
-                        }));
+                .forEach(id -> {
+                    final var booking = externalApiService.getBooking(offenderEvent.getBookingId());
+                    rowsUpdated.set(repository.updateOffenderIdentifier(id.getValue(), booking.getOffenderNo()));
+                    if (rowsUpdated.get() > 0) {
+                        log.info("{} case notes were merged from offender identifier {} to {}", rowsUpdated, id.getValue(), booking.getOffenderNo());
+                    }
+                });
 
         if (rowsUpdated.get() == 0) {
             log.debug("No records to merge for booking ID {}", offenderEvent.getBookingId());
