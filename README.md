@@ -57,10 +57,16 @@ Results in:
 }
 ```
 
-## Publish message to topic
+## Publish merge event message to topic
 ```bash
 aws --endpoint-url=http://localhost:4575 sns publish --topic-arn arn:aws:sns:eu-west-2:000000000000:offender_events --message-attributes '{"eventType" : { "DataType":"String", "StringValue":"BOOKING_NUMBER-CHANGED"}}' --message '{"eventType":"BOOKING_NUMBER-CHANGED","bookingId":1196631}' 
 ```
+
+## Publish delete event message to topic
+```bash
+aws --endpoint-url=http://localhost:4575 sns publish --topic-arn arn:aws:sns:eu-west-2:000000000000:offender_events --message-attributes '{"eventType" : { "DataType":"String", "StringValue":"DATA_COMPLIANCE_DELETE-OFFENDER"}}' --message '{"offenderIdDisplay":"A1234AA"}' 
+```
+
 
 ## Read off the queue
 ```bash

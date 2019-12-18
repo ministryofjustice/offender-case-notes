@@ -12,7 +12,6 @@ import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestClientException;
 import uk.gov.justice.hmpps.casenotes.dto.BookingIdentifier;
 import uk.gov.justice.hmpps.casenotes.dto.OffenderBooking;
-import uk.gov.justice.hmpps.casenotes.dto.OffenderEvent;
 import uk.gov.justice.hmpps.casenotes.repository.OffenderCaseNoteRepository;
 
 import java.util.List;
@@ -62,7 +61,7 @@ public class MergeOffenderServiceTest {
         when(repository.updateOffenderIdentifier(eq(MERGED_OFFENDER_NO), eq(OFFENDER_NO)))
                 .thenReturn(numRows);
 
-        final var rowsUpdated = service.checkAndMerge(OffenderEvent.builder().bookingId(BOOKING_ID).build());
+        final var rowsUpdated = service.checkAndMerge(BOOKING_ID);
 
         assertThat(rowsUpdated).isEqualTo(numRows);
         verify(externalApiService).getIdentifiersByBookingId(eq(BOOKING_ID));
@@ -78,11 +77,10 @@ public class MergeOffenderServiceTest {
                         BookingIdentifier.builder().type("PNC").value("XX/11XX").build()
                 ));
 
-        final var rowsUpdated = service.checkAndMerge(OffenderEvent.builder().bookingId(BOOKING_ID).build());
+        final var rowsUpdated = service.checkAndMerge(BOOKING_ID);
 
         assertThat(rowsUpdated).isEqualTo(0);
         verify(externalApiService).getIdentifiersByBookingId(eq(BOOKING_ID));
-
     }
 
     @Test(expected = RestClientException.class)
@@ -96,7 +94,7 @@ public class MergeOffenderServiceTest {
         when(externalApiService.getBooking(eq(BOOKING_ID)))
                 .thenThrow(HttpClientErrorException.create(HttpStatus.NOT_FOUND, "Not Found", new HttpHeaders(), null, null));
 
-        service.checkAndMerge(OffenderEvent.builder().bookingId(BOOKING_ID).build());
+        service.checkAndMerge(BOOKING_ID);
     }
 
 }

@@ -31,6 +31,7 @@ public class OffenderCaseNoteRepositoryTest {
 
     private static final String PARENT_TYPE = "POM";
     private static final String SUB_TYPE = "GEN";
+    public static final String OFFENDER_IDENTIFIER = "A1234BD";
 
     @Autowired
     private OffenderCaseNoteRepository repository;
@@ -51,7 +52,7 @@ public class OffenderCaseNoteRepositoryTest {
     @Test
     public void testPersistCaseNote() {
 
-        final var caseNote = transientEntity();
+        final var caseNote = transientEntity(OFFENDER_IDENTIFIER);
 
         final var persistedEntity = repository.save(caseNote);
 
@@ -74,7 +75,7 @@ public class OffenderCaseNoteRepositoryTest {
     @WithAnonymousUser
     public void testPersistCaseNoteAndAmendment() {
 
-        final var caseNote = transientEntity();
+        final var caseNote = transientEntity(OFFENDER_IDENTIFIER);
 
         caseNote.addAmendment("Another Note 0", "someuser", "Some User", "user id");
         assertThat(caseNote.getAmendments()).hasSize(1);
@@ -128,7 +129,7 @@ public class OffenderCaseNoteRepositoryTest {
                 .authorUsername("FILTER")
                 .authorUserId("some id")
                 .authorName("Mickey Mouse")
-                .offenderIdentifier("A1234BD")
+                .offenderIdentifier(OFFENDER_IDENTIFIER)
                 .sensitiveCaseNoteType(genType)
                 .noteText("HELLO")
                 .build();
@@ -139,7 +140,7 @@ public class OffenderCaseNoteRepositoryTest {
         assertThat(allCaseNotes.size()).isGreaterThan(0);
 
         final var caseNotes = repository.findAll(OffenderCaseNoteFilter.builder()
-                .type(PARENT_TYPE).subType(SUB_TYPE).authorUsername("FILTER").locationId("BOB").offenderIdentifier("A1234BD").build());
+                .type(PARENT_TYPE).subType(SUB_TYPE).authorUsername("FILTER").locationId("BOB").offenderIdentifier(OFFENDER_IDENTIFIER).build());
         assertThat(caseNotes).hasSize(1);
     }
 
@@ -148,10 +149,10 @@ public class OffenderCaseNoteRepositoryTest {
         final var twoDaysAgo = now().minusDays(2);
 
         final var noteText = "updates old note";
-        final var oldNote = repository.save(transientEntityBuilder().noteText(noteText).build());
+        final var oldNote = repository.save(transientEntityBuilder(OFFENDER_IDENTIFIER).noteText(noteText).build());
 
         final var noteTextWithAmendment = "updates old note with old amendment";
-        final var oldNoteWithOldAmendment = repository.save(transientEntityBuilder().noteText(noteTextWithAmendment).build());
+        final var oldNoteWithOldAmendment = repository.save(transientEntityBuilder(OFFENDER_IDENTIFIER).noteText(noteTextWithAmendment).build());
         oldNoteWithOldAmendment.addAmendment("Some amendment", "someuser", "Some User", "user id");
         repository.save(oldNoteWithOldAmendment);
 
@@ -181,10 +182,10 @@ public class OffenderCaseNoteRepositoryTest {
         final var twoDaysAgo = now().minusDays(2);
 
         final var oldNoteText = "old note";
-        final var oldNote = repository.save(transientEntityBuilder().noteText(oldNoteText).build());
+        final var oldNote = repository.save(transientEntityBuilder(OFFENDER_IDENTIFIER).noteText(oldNoteText).build());
 
         final var newNoteText = "new note";
-        repository.save(transientEntityBuilder().noteText(newNoteText).build());
+        repository.save(transientEntityBuilder(OFFENDER_IDENTIFIER).noteText(newNoteText).build());
 
         TestTransaction.flagForCommit();
         TestTransaction.end();
@@ -201,7 +202,7 @@ public class OffenderCaseNoteRepositoryTest {
 
     @Test
     public void testGenerationOfEventId() {
-        final var note = repository.save(transientEntity());
+        final var note = repository.save(transientEntity(OFFENDER_IDENTIFIER));
 
         TestTransaction.flagForCommit();
         TestTransaction.end();
@@ -210,18 +211,72 @@ public class OffenderCaseNoteRepositoryTest {
         assertThat(repository.findById(note.getId()).orElseThrow().getEventId()).isLessThan(0);
     }
 
-    private OffenderCaseNote transientEntity() {
-        return transientEntityBuilder().build();
+    @Test
+    @WithAnonymousUser
+    public void testPersistCaseNoteAndAmendmentAndThenDelete() {
+
+        final var caseNote = transientEntity(OFFENDER_IDENTIFIER);
+        caseNote.addAmendment("Another Note 0", "someuser", "Some User", "user id");
+        final var persistedEntity = repository.save(caseNote);
+        TestTransaction.flagForCommit();
+        TestTransaction.end();
+        TestTransaction.start();
+        final var retrievedEntity = repository.findById(persistedEntity.getId()).orElseThrow();
+
+        retrievedEntity.addAmendment("Another Note 1", "someuser", "Some User", "user id");
+        retrievedEntity.addAmendment("Another Note 2", "someuser", "Some User", "user id");
+
+        TestTransaction.flagForCommit();
+        TestTransaction.end();
+        TestTransaction.start();
+
+        final var deletedEntities = repository.deleteOffenderCaseNoteByOffenderIdentifier(caseNote.getOffenderIdentifier());
+
+        assertThat(deletedEntities).hasSize(1);
+        TestTransaction.flagForCommit();
+        TestTransaction.end();
+        TestTransaction.start();
+
+        final var deletedEntity = repository.findById(persistedEntity.getId());
+        assertThat(deletedEntity).isEmpty();
     }
 
-    private OffenderCaseNoteBuilder transientEntityBuilder() {
+    @Test
+    @WithAnonymousUser
+    public void testModifyOffenderIdentifier() {
+        final var caseNote = transientEntity("A1234ZZ");
+        caseNote.addAmendment("Another Note 0", "someuser", "Some User", "user id");
+        final var persistedEntity = repository.save(caseNote);
+        TestTransaction.flagForCommit();
+        TestTransaction.end();
+        TestTransaction.start();
+
+        final var retrievedCaseNote = repository.findById(persistedEntity.getId()).orElseThrow();
+        assertThat(retrievedCaseNote.getOffenderIdentifier()).isEqualTo("A1234ZZ");
+
+        final var rows = repository.updateOffenderIdentifier("A1234ZZ", OFFENDER_IDENTIFIER);
+
+        assertThat(rows).isEqualTo(1);
+        TestTransaction.flagForCommit();
+        TestTransaction.end();
+        TestTransaction.start();
+
+        final var modifiedIdentity = repository.findById(persistedEntity.getId()).orElseThrow();
+        assertThat(modifiedIdentity.getOffenderIdentifier()).isEqualTo(OFFENDER_IDENTIFIER);
+    }
+
+    private OffenderCaseNote transientEntity(final String offenderIdentifier) {
+        return transientEntityBuilder(offenderIdentifier).build();
+    }
+
+    private OffenderCaseNoteBuilder transientEntityBuilder(final String offenderIdentifier) {
         return OffenderCaseNote.builder()
                 .occurrenceDateTime(now())
                 .locationId("MDI")
                 .authorUsername("USER2")
                 .authorUserId("some id")
                 .authorName("Mickey Mouse")
-                .offenderIdentifier("A1234BD")
+                .offenderIdentifier(offenderIdentifier)
                 .sensitiveCaseNoteType(genType)
                 .noteText("HELLO");
     }
