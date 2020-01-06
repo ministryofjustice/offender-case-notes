@@ -13,8 +13,8 @@ public class HealthCheckTest extends ResourceTest {
         oauthMockServer.subPing(404);
 
         final var response = testRestTemplate.getForEntity("/health", String.class);
-        assertThatJson(response.getBody()).node("components.elite2ApiHealth.details.error").isEqualTo("org.springframework.web.client.HttpClientErrorException$NotFound: 404 Not Found");
-        assertThatJson(response.getBody()).node("components.OAuthApiHealth.details.error").isEqualTo("org.springframework.web.client.HttpClientErrorException$NotFound: 404 Not Found");
+        assertThatJson(response.getBody()).node("components.elite2ApiHealth.details.error").isEqualTo("org.springframework.web.client.HttpClientErrorException$NotFound: 404 Not Found: [some error]");
+        assertThatJson(response.getBody()).node("components.OAuthApiHealth.details.error").isEqualTo("org.springframework.web.client.HttpClientErrorException$NotFound: 404 Not Found: [some error]");
         assertThatJson(response.getBody()).node("status").isEqualTo("DOWN");
         assertThat(response.getStatusCodeValue()).isEqualTo(503);
     }
@@ -37,8 +37,8 @@ public class HealthCheckTest extends ResourceTest {
         oauthMockServer.subPing(418);
 
         final var response = testRestTemplate.getForEntity("/health", String.class);
-        assertThatJson(response.getBody()).node("components.elite2ApiHealth.details.error").isEqualTo("org.springframework.web.client.HttpClientErrorException: 418 418");
-        assertThatJson(response.getBody()).node("components.OAuthApiHealth.details.error").isEqualTo("org.springframework.web.client.HttpClientErrorException: 418 418");
+        assertThatJson(response.getBody()).node("components.elite2ApiHealth.details.error").isEqualTo("org.springframework.web.client.HttpClientErrorException: 418 418: [some error]");
+        assertThatJson(response.getBody()).node("components.OAuthApiHealth.details.error").isEqualTo("org.springframework.web.client.HttpClientErrorException: 418 418: [some error]");
         assertThatJson(response.getBody()).node("status").isEqualTo("DOWN");
         assertThat(response.getStatusCodeValue()).isEqualTo(503);
     }
