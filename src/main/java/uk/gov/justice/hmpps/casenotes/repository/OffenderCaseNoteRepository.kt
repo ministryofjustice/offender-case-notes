@@ -20,4 +20,6 @@ interface OffenderCaseNoteRepository : PagingAndSortingRepository<OffenderCaseNo
   @Modifying
   @Query("UPDATE OffenderCaseNote ocn SET ocn.offenderIdentifier = :newOffenderIdentifier WHERE ocn.offenderIdentifier = :oldOffenderIdentifier")
   fun updateOffenderIdentifier(@Param("oldOffenderIdentifier") oldOffenderIdentifier: String?, @Param("newOffenderIdentifier") newOffenderIdentifier: String?): Int
+
+  fun deleteOffenderCaseNoteByOffenderIdentifier(offenderIdentifier: String) : List<OffenderCaseNote>
 }

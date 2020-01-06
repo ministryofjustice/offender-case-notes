@@ -1,6 +1,7 @@
 package uk.gov.justice.hmpps.casenotes.services;
 
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -37,6 +38,7 @@ import static org.springframework.data.domain.Sort.Direction.ASC;
 @Transactional(readOnly = true)
 @Validated
 @AllArgsConstructor
+@Slf4j
 public class CaseNoteService {
 
     private static final String SERVICE_NAME = "OCNS";
@@ -361,5 +363,12 @@ public class CaseNoteService {
         final var existingSubType = parentNoteType.getSubType(subType).orElseThrow(EntityNotFoundException.withId(parentType + " " + subType));
         existingSubType.update(body.getDescription(), body.isActive());
         return transform(parentNoteType, true);
+    }
+
+    @Transactional
+    public int deleteCaseNotesForOffender(final String offenderIdentifier) {
+        final var deletedCaseNotes = repository.deleteOffenderCaseNoteByOffenderIdentifier(offenderIdentifier);
+        log.info("Deleted {} case notes for offender identifier {}", deletedCaseNotes.size(), offenderIdentifier);
+        return deletedCaseNotes.size();
     }
 }
