@@ -181,6 +181,17 @@ public class CaseNoteServiceTest {
     }
 
     @Test
+    public void deleteOffenderTest() {
+        when(repository.deleteOffenderCaseNoteByOffenderIdentifier(eq("A1234AC"))).thenReturn(List.of(
+                OffenderCaseNote.builder().offenderIdentifier("A1234AC").noteText("Test 1").build(),
+                OffenderCaseNote.builder().offenderIdentifier("A1234AC").noteText("Test 2").build(),
+                OffenderCaseNote.builder().offenderIdentifier("A1234AC").noteText("Test 3").build()
+        ));
+        final var offendersDeleted = caseNoteService.deleteCaseNotesForOffender("A1234AC");
+        assertThat(offendersDeleted).isEqualTo(3);
+    }
+
+    @Test
     public void amendCaseNote() {
         final var noteType = SensitiveCaseNoteType.builder().type("sometype").parentType(ParentNoteType.builder().build()).build();
         final var offenderCaseNote = createOffenderCaseNote(noteType);

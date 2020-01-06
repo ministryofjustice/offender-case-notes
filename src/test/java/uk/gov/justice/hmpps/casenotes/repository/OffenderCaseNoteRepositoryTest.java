@@ -212,6 +212,24 @@ public class OffenderCaseNoteRepositoryTest {
     }
 
     @Test
+    public void testDeleteCaseNotes() {
+
+        repository.save(transientEntityBuilder("X1111XX").noteText("note to delete").build());
+
+        TestTransaction.flagForCommit();
+        TestTransaction.end();
+        TestTransaction.start();
+
+        final var deletedCaseNotes = repository.deleteOffenderCaseNoteByOffenderIdentifier("X1111XX");
+        assertThat(deletedCaseNotes).hasSize(1);
+
+        TestTransaction.flagForCommit();
+        TestTransaction.end();
+        assertThat(repository.findById(deletedCaseNotes.get(0).getId()).isEmpty()).isTrue();
+
+    }
+
+    @Test
     @WithAnonymousUser
     public void testPersistCaseNoteAndAmendmentAndThenDelete() {
 

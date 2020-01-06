@@ -368,7 +368,7 @@ public class CaseNoteService {
     @Transactional
     public int deleteCaseNotesForOffender(final String offenderIdentifier) {
         final var deletedCaseNotes = repository.deleteOffenderCaseNoteByOffenderIdentifier(offenderIdentifier);
-        log.info("Delete {} case notes for offender identifier {}", deletedCaseNotes.size(), offenderIdentifier);
+        log.info("Deleted {} case notes for offender identifier {}", deletedCaseNotes.size(), offenderIdentifier);
         return deletedCaseNotes.size();
     }
 }

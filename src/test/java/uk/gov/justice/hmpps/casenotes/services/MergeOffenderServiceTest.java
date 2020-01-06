@@ -22,7 +22,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
-
 public class MergeOffenderServiceTest {
 
     private static final String OFFENDER_NO = "A1234AA";
