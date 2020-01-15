@@ -18,12 +18,12 @@ open class EventListener(private val caseNoteService: CaseNoteService,
 
   @JmsListener(destination = "\${sqs.queue.name}")
   open fun handleEvents(requestJson: String?) {
-    val (Message, MessageAttributes) = gson.fromJson<Message>(requestJson, Message::class.java)
-    val (offenderIdDisplay, bookingId) = gson.fromJson<EventMessage>(Message, EventMessage::class.java)
+    val (Message, MessageAttributes) = gson.fromJson(requestJson, Message::class.java)
+    val (offenderIdDisplay, bookingId) = gson.fromJson(Message, EventMessage::class.java)
 
     val eventType = MessageAttributes.eventType.Value
     log.info("Processing message of type {}", eventType)
-    
+
     when (eventType) {
       "BOOKING_NUMBER-CHANGED" -> mergeOffenderService.checkAndMerge(bookingId)
       "DATA_COMPLIANCE_DELETE-OFFENDER" -> caseNoteService.deleteCaseNotesForOffender(offenderIdDisplay)
@@ -34,5 +34,5 @@ open class EventListener(private val caseNoteService: CaseNoteService,
 data class Attribute(val Type: String, val Value: String)
 data class MessageAttributes(val eventType: Attribute)
 data class EventMessage(val offenderIdDisplay: String, val bookingId: Long)
-data class Message(val Message: String, val MessageAttributes: MessageAttributes, val message: EventMessage)
+data class Message(val Message: String, val MessageAttributes: MessageAttributes)
 
