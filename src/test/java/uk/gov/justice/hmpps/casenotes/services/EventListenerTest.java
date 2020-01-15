@@ -4,10 +4,14 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
+import wiremock.org.apache.commons.io.IOUtils;
 
+import java.io.IOException;
+
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -27,56 +31,25 @@ public class EventListenerTest {
     }
 
     @Test
-    public void testDeleteEvent() {
-
+    public void testDeleteEvent() throws IOException {
         when(caseNoteService.deleteCaseNotesForOffender(eq("A1234AA"))).thenReturn(3);
 
-        eventListener.handleEvents("{\n" +
-                "  \"MessageId\": \"message1\",\n" +
-                "  \"Type\": \"Notification\",\n" +
-                "  \"Timestamp\": \"2019-11-11T11:11:11.111111Z\",\n" +
-                "  \"Message\": \"{\\\"offenderIdDisplay\\\":\\\"A1234AA\\\"}\",\n" +
-                "  \"TopicArn\": \"arn:aws:sns:eu-west-2:000000000000:offender_events\",\n" +
-                "  \"MessageAttributes\": {\n" +
-                "    \"eventType\": {\n" +
-                "      \"Type\": \"String\",\n" +
-                "      \"Value\": \"DATA_COMPLIANCE_DELETE-OFFENDER\"\n" +
-                "    },\n" +
-                "    \"contentType\": {\n" +
-                "      \"Type\": \"String\",\n" +
-                "      \"Value\": \"text/plain;charset=UTF-8\"\n" +
-                "    }\n" +
-                "  }\n" +
-                "}");
+        eventListener.handleEvents(getJson("offender-deletion-request.json"));
 
-        Mockito.verify(caseNoteService).deleteCaseNotesForOffender(eq("A1234AA"));
+        verify(caseNoteService).deleteCaseNotesForOffender(eq("A1234AA"));
     }
 
 
     @Test
-    public void testMergeEvent() {
-
+    public void testMergeEvent() throws IOException {
         when(mergeOffenderService.checkAndMerge(eq(100001L))).thenReturn(2);
 
-        eventListener.handleEvents("{\n" +
-                "  \"MessageId\": \"message2\",\n" +
-                "  \"Type\": \"Notification\",\n" +
-                "  \"Timestamp\": \"2019-11-11T11:11:11.111111Z\",\n" +
-                "  \"Message\": \"{\\\"eventType\\\": \\\"BOOKING_NUMBER-CHANGED\\\", \\\"bookingId\\\": 100001}\",\n" +
-                "  \"TopicArn\": \"arn:aws:sns:eu-west-2:000000000000:offender_events\",\n" +
-                "  \"MessageAttributes\": {\n" +
-                "    \"eventType\": {\n" +
-                "      \"Type\": \"String\",\n" +
-                "      \"Value\": \"BOOKING_NUMBER-CHANGED\"\n" +
-                "    },\n" +
-                "    \"contentType\": {\n" +
-                "      \"Type\": \"String\",\n" +
-                "      \"Value\": \"text/plain;charset=UTF-8\"\n" +
-                "    }\n" +
-                "  }\n" +
-                "}");
+        eventListener.handleEvents(getJson("booking-number-changed.json"));
 
-        Mockito.verify(mergeOffenderService).checkAndMerge(eq(100001L));
+        verify(mergeOffenderService).checkAndMerge(eq(100001L));
     }
 
+    private String getJson(final String filename) throws IOException {
+        return IOUtils.toString(getClass().getResourceAsStream(filename), UTF_8.toString());
+    }
 }

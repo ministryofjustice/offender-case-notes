@@ -1,5 +1,6 @@
 package uk.gov.justice.hmpps.casenotes.services;
 
+import com.microsoft.applicationinsights.TelemetryClient;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.math.NumberUtils;
@@ -28,6 +29,7 @@ import javax.validation.ValidationException;
 import javax.validation.constraints.NotNull;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -48,6 +50,7 @@ public class CaseNoteService {
     private final SecurityUserContext securityUserContext;
     private final ExternalApiService externalApiService;
     private final CaseNoteTypeMerger caseNoteTypeMerger;
+    private final TelemetryClient telemetryClient;
 
     public Page<CaseNote> getCaseNotes(final String offenderIdentifier, final CaseNoteFilter caseNoteFilter, final Pageable pageable) {
 
@@ -368,7 +371,9 @@ public class CaseNoteService {
     @Transactional
     public int deleteCaseNotesForOffender(final String offenderIdentifier) {
         final var deletedCaseNotes = repository.deleteOffenderCaseNoteByOffenderIdentifier(offenderIdentifier);
-        log.info("Deleted {} case notes for offender identifier {}", deletedCaseNotes.size(), offenderIdentifier);
-        return deletedCaseNotes.size();
+        final var count = deletedCaseNotes.size();
+        log.info("Deleted {} case notes for offender identifier {}", count, offenderIdentifier);
+        telemetryClient.trackEvent("OffenderDelete", Map.of("offenderNo", offenderIdentifier, "count", String.valueOf(count)), null);
+        return count;
     }
 }
