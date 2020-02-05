@@ -86,3 +86,6 @@ offendercasenotes:
 
 sns:
   endpoint.region: eu-west-2
+
+sqs:
+  endpoint.region: eu-west-2

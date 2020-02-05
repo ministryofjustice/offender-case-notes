@@ -91,6 +91,23 @@ env:
         name: ocn-events-sqs-instance-output
         key: sqs_ocne_name
 
+  - name: SQS_AWS_DLQ_ACCESS_KEY_ID
+    valueFrom:
+      secretKeyRef:
+        name: ocn-events-sqs-dl-instance-output
+        key: access_key_id
+
+  - name: SQS_AWS_DLQ_SECRET_ACCESS_KEY
+    valueFrom:
+      secretKeyRef:
+        name: ocn-events-sqs-dl-instance-output
+        key: secret_access_key
+
+  - name: SQS_DLQ_NAME
+    valueFrom:
+      secretKeyRef:
+        name: ocn-events-sqs-dl-instance-output
+        key: sqs_ocne_name
 
   - name: OFFENDER_CASE_NOTES_CLIENT_ID
     valueFrom:

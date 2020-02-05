@@ -7,6 +7,7 @@ services:
     container_name: offender-case-notes
     depends_on:
       - offender-case-notes-db
+      - localstack
     ports:
       - "8083:8080"
     healthcheck:
@@ -14,12 +15,14 @@ services:
     environment:
       - SERVER_PORT=8080
       - SPRING_DATASOURCE_URL=jdbc:postgresql://offender-case-notes-db/offender-case-notes
-      - DATABASE_USERNAME=offender-case-notes
-      - DATABASE_PASSWORD=offender-case-notes
+      - SPRING_DATASOURCE_USERNAME=offender-case-notes
+      - SPRING_DATASOURCE_PASSWORD=offender-case-notes
       - ELITE2_API_BASE_URL=http://elite2-api:8080
       - OAUTH_API_BASE_URL=http://oauth:8080/auth
       - SPRING_PROFILES_ACTIVE=stdout,localstack
       - JWT_PUBLIC_KEY=LS0tLS1CRUdJTiBQVUJMSUMgS0VZLS0tLS0NCk1JSUJJakFOQmdrcWhraUc5dzBCQVFFRkFBT0NBUThBTUlJQkNnS0NBUUVBc09QQXRzUUFEZGJSdS9FSDZMUDUNCkJNMS9tRjQwVkRCbjEyaEpTWFBQZDVXWUswSExZMjBWTTdBeHhSOW1uWUNGNlNvMVd0N2ZHTnFVeC9XeWVtQnANCklKTnJzLzdEendnM3V3aVF1Tmg0ektSK0VHeFdiTHdpM3l3N2xYUFV6eFV5QzV4dDg4ZS83dk8rbHoxb0NuaXoNCmpoNG14TkFtczZaWUY3cWZuaEpFOVd2V1B3TExrb2prWnUxSmR1c0xhVm93TjdHVEdOcE1FOGR6ZUprYW0wZ3ANCjRveEhRR2hNTjg3SzZqcVgzY0V3TzZEdmhlbWc4d2hzOTZuelFsOG4yTEZ2QUsydXA5UHJyOUdpMkxGZ1R0N0sNCnFYQTA2a0M0S2d3MklSMWVGZ3pjQmxUT0V3bXpqcmU2NUhvTmFKQnI5dU5aelY1c0lMUE1jenpoUWovZk1oejMNCi9RSURBUUFCDQotLS0tLUVORCBQVUJMSUMgS0VZLS0tLS0=
+      - SQS_PROVIDER=localstack
+      - SQS_EMBEDDED=false
 
   elite2-api:
     image: mojdigitalstudio/elite2-api:latest
@@ -63,26 +66,19 @@ services:
       - POSTGRES_DB=offender-case-notes
 
   localstack:
-    image: localstack/localstack
+    image: localstack/localstack:0.10.4
     networks:
       - hmpps
     container_name: localstack
     ports:
-      - "4567-4597:4567-4597"
+      - 9000:8080
+      - 4576:4576
+      - 4575:4575
       - 8999:8080
     environment:
-      - SERVICES=sns,sqs
-      - DEBUG=${DEBUG- }
-      - DATA_DIR=${DATA_DIR- }
-      - PORT_WEB_UI=${PORT_WEB_UI- }
-      - LAMBDA_EXECUTOR=${LAMBDA_EXECUTOR- }
-      - KINESIS_ERROR_PROBABILITY=${KINESIS_ERROR_PROBABILITY- }
-      - DOCKER_HOST=unix:///var/run/docker.sock
-      - AWS_EXECUTION_ENV=True
-      - DEFAULT_REGION=eu-west-2
-    volumes:
-      - "${TMPDIR:-/tmp/localstack}:/tmp/localstack"
-      - "/var/run/docker.sock:/var/run/docker.sock"
+      HOSTNAME_EXTERNAL: localhost
+      DEFAULT_REGION: eu-west-2
+      SERVICES: sqs,sns
 
 networks:
   hmpps:

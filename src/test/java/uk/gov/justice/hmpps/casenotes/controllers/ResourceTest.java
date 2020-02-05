@@ -13,8 +13,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
-import uk.gov.justice.hmpps.casenotes.integration.wiremock.Elite2MockServer;
-import uk.gov.justice.hmpps.casenotes.integration.wiremock.OauthMockServer;
+import uk.gov.justice.hmpps.casenotes.health.wiremock.Elite2MockServer;
+import uk.gov.justice.hmpps.casenotes.health.wiremock.OAuthMockServer;
 import uk.gov.justice.hmpps.casenotes.utils.JwtAuthenticationHelper;
 import uk.gov.justice.hmpps.casenotes.utils.JwtAuthenticationHelper.JwtParameters;
 
@@ -45,7 +45,7 @@ public abstract class ResourceTest {
     public static final Elite2MockServer elite2MockServer = new Elite2MockServer();
 
     @ClassRule
-    public static final OauthMockServer oauthMockServer = new OauthMockServer();
+    public static final OAuthMockServer oauthMockServer = new OAuthMockServer();
 
     @Before
     public void resetStubs() {
