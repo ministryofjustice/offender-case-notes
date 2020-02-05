@@ -170,14 +170,14 @@ class HealthCheckIntegrationTest : IntegrationTest() {
   }
 
   private fun subPing(status: Int) {
-    oauthMockServer.stubFor(get("/auth/ping").willReturn(aResponse()
+    oauthMockServer.stubFor(get("/auth/health/ping").willReturn(aResponse()
         .withHeader("Content-Type", "application/json")
-        .withBody(if (status == 200) "pong" else "some error")
+        .withBody(if (status == 200) "{\"status\":\"UP\"}" else "some error")
         .withStatus(status)))
 
-    elite2MockServer.stubFor(get("/ping").willReturn(aResponse()
+    elite2MockServer.stubFor(get("/health/ping").willReturn(aResponse()
         .withHeader("Content-Type", "application/json")
-        .withBody(if (status == 200) "pong" else "some error")
+        .withBody(if (status == 200) "{\"status\":\"UP\"}" else "some error")
         .withStatus(status)))
   }
 
