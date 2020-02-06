@@ -21,7 +21,6 @@ open class LocalStackConfig {
     log.info("Starting embedded localstack...")
     val localStackContainer: LocalStackContainer = LocalStackContainer()
         .withServices(LocalStackContainer.Service.SQS)
-        .withEnv("HOSTNAME_EXTERNAL", "localhost")
 
     localStackContainer.start()
     log.info("Started embedded localstack.")
