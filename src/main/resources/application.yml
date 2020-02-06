@@ -88,4 +88,5 @@ sns:
   endpoint.region: eu-west-2
 
 sqs:
+  provider: aws
   endpoint.region: eu-west-2

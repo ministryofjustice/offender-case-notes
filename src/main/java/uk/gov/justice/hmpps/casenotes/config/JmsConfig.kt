@@ -10,11 +10,9 @@ import com.amazonaws.services.sqs.AmazonSQS
 import com.amazonaws.services.sqs.AmazonSQSClientBuilder
 import com.amazonaws.services.sqs.model.CreateQueueRequest
 import com.amazonaws.services.sqs.model.QueueAttributeName
-import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
-import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
@@ -24,10 +22,11 @@ import org.springframework.jms.support.destination.DynamicDestinationResolver
 import javax.jms.Session
 
 @Configuration
+@ConditionalOnProperty("sqs.provider")
 @EnableJms
 open class JmsConfig {
   companion object {
-    val log: Logger = LoggerFactory.getLogger(this::class.java)
+    private val log = LoggerFactory.getLogger(this::class.java)
   }
 
   @Bean
@@ -36,7 +35,7 @@ open class JmsConfig {
     val factory = DefaultJmsListenerContainerFactory()
     factory.setConnectionFactory(SQSConnectionFactory(ProviderConfiguration(), awsSqsClient))
     factory.setDestinationResolver(DynamicDestinationResolver())
-    factory.setConcurrency("3-10")
+    factory.setConcurrency("1")
     factory.setSessionAcknowledgeMode(Session.CLIENT_ACKNOWLEDGE)
     factory.setErrorHandler { t: Throwable? -> log.error("Error caught in jms listener", t) }
     return factory
@@ -63,7 +62,7 @@ open class JmsConfig {
           .build()
 
   @Bean("awsSqsClient")
-  @ConditionalOnExpression("'\${sqs.provider}'.equals('localstack') and '\${sqs.embedded}'.equals('false')")
+  @ConditionalOnProperty(name = ["sqs.provider"], havingValue = "localstack")
   open fun awsSqsClientLocalstack(@Value("\${sqs.endpoint.url}") serviceEndpoint: String,
                                   @Value("\${sqs.endpoint.region}") region: String): AmazonSQS =
       AmazonSQSClientBuilder.standard()
@@ -72,7 +71,7 @@ open class JmsConfig {
           .build()
 
   @Bean("awsSqsDlqClient")
-  @ConditionalOnExpression("'\${sqs.provider}'.equals('localstack') and '\${sqs.embedded}'.equals('false')")
+  @ConditionalOnProperty(name = ["sqs.provider"], havingValue = "localstack")
   open fun awsSqsDlqClientLocalstack(@Value("\${sqs.endpoint.url}") serviceEndpoint: String,
                                      @Value("\${sqs.endpoint.region}") region: String): AmazonSQS =
       AmazonSQSClientBuilder.standard()
@@ -80,8 +79,9 @@ open class JmsConfig {
           .withCredentials(AWSStaticCredentialsProvider(AnonymousAWSCredentials()))
           .build()
 
+  @Suppress("SpringJavaInjectionPointsAutowiringInspection")
   @Bean
-  @ConditionalOnExpression("'\${sqs.provider}'.equals('localstack')")
+  @ConditionalOnProperty(name = ["sqs.provider"], havingValue = "localstack")
   open fun queueUrl(@Autowired awsSqsClient: AmazonSQS,
                     @Value("\${sqs.queue.name}") queueName: String,
                     @Value("\${sqs.dlq.name}") dlqName: String): String {

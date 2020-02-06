@@ -1,8 +1,6 @@
 package uk.gov.justice.hmpps.casenotes.services
 
 import com.google.gson.Gson
-import com.google.gson.GsonBuilder
-import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.jms.annotation.JmsListener
 import org.springframework.stereotype.Service
@@ -10,10 +8,10 @@ import org.springframework.stereotype.Service
 
 @Service
 open class EventListener(private val caseNoteService: CaseNoteService,
-                         private val mergeOffenderService: MergeOffenderService) {
+                         private val mergeOffenderService: MergeOffenderService,
+                         private val gson: Gson) {
   companion object {
-    val log: Logger = LoggerFactory.getLogger(this::class.java)
-    val gson: Gson = GsonBuilder().create()
+    private val log = LoggerFactory.getLogger(this::class.java)
   }
 
   @JmsListener(destination = "\${sqs.queue.name}")

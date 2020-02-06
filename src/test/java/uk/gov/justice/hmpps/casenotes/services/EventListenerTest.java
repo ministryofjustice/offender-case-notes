@@ -1,5 +1,6 @@
 package uk.gov.justice.hmpps.casenotes.services;
 
+import com.google.gson.GsonBuilder;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -27,7 +28,7 @@ public class EventListenerTest {
 
     @Before
     public void setup() {
-        eventListener = new EventListener(caseNoteService, mergeOffenderService);
+        eventListener = new EventListener(caseNoteService, mergeOffenderService, new GsonBuilder().create());
     }
 
     @Test
