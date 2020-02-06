@@ -9,13 +9,6 @@ sns:
 
 sqs:
   provider: localstack
-  embedded: false
-  queue:
-    name: offender_case_notes_queue
-  dlq:
-    name: offender_case_notes_dlq
-  endpoint:
-    url: http://localhost:4576
-    region: eu-west-2
-  aws.access.key.id: foobar
-  aws.secret.access.key: foobar
+  queue.name: offender_case_notes_queue
+  dlq.name: offender_case_notes_dlq
+  endpoint.url: http://localhost:4576
