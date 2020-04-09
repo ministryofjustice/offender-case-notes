@@ -10,10 +10,11 @@ import java.time.format.DateTimeFormatter.ISO_DATE
 plugins {
   kotlin("jvm") version "1.3.61"
   kotlin("plugin.spring") version "1.3.61"
-  id("org.springframework.boot") version "2.2.5.RELEASE"
+  id("org.springframework.boot") version "2.2.6.RELEASE"
   id("io.spring.dependency-management") version "1.0.9.RELEASE"
-  id("org.owasp.dependencycheck") version "5.3.0"
+  id("org.owasp.dependencycheck") version "5.3.2.1"
   id("com.github.ben-manes.versions") version "0.28.0"
+  id("se.patrikerdes.use-latest-versions") version "0.2.13"
 }
 
 repositories {
@@ -87,8 +88,8 @@ dependencies {
   compileOnly("org.projectlombok:lombok:1.18.8")
 
   runtimeOnly("com.h2database:h2:1.4.200")
-  runtimeOnly("org.flywaydb:flyway-core:6.2.4")
-  runtimeOnly("org.postgresql:postgresql:42.2.10")
+  runtimeOnly("org.flywaydb:flyway-core:6.3.3")
+  runtimeOnly("org.postgresql:postgresql:42.2.12")
 
   implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
   implementation("org.jetbrains.kotlin:kotlin-reflect")
@@ -107,9 +108,9 @@ dependencies {
   implementation("com.amazonaws:amazon-sqs-java-messaging-lib:1.0.8")
 
   implementation("net.logstash.logback:logstash-logback-encoder:6.3")
-  implementation("com.microsoft.azure:applicationinsights-spring-boot-starter:2.5.1")
-  implementation("com.microsoft.azure:applicationinsights-logging-logback:2.5.1")
-  implementation("com.github.timpeeters:spring-boot-graceful-shutdown:2.2.0")
+  implementation("com.microsoft.azure:applicationinsights-spring-boot-starter:2.6.0")
+  implementation("com.microsoft.azure:applicationinsights-logging-logback:2.6.0")
+  implementation("com.github.timpeeters:spring-boot-graceful-shutdown:2.2.1")
 
   implementation("javax.annotation:javax.annotation-api:1.3.2")
   implementation("javax.xml.bind:jaxb-api:2.3.1")
@@ -125,28 +126,28 @@ dependencies {
   implementation("io.jsonwebtoken:jjwt:0.9.1")
 
   implementation("net.sf.ehcache:ehcache:2.10.6")
-  implementation("org.apache.commons:commons-lang3:3.9")
+  implementation("org.apache.commons:commons-lang3:3.10")
   implementation("org.apache.commons:commons-text:1.8")
-  implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.10.2")
-  implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.10.2")
-  implementation("com.pauldijou:jwt-core_2.11:4.2.0")
+  implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.10.3")
+  implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.10.3")
+  implementation("com.pauldijou:jwt-core_2.11:4.3.0")
   implementation("com.google.code.gson:gson:2.8.6")
   implementation("com.google.guava:guava:28.2-jre")
 
-  implementation("software.amazon.awssdk:sns:2.10.74")
+  implementation("software.amazon.awssdk:sns:2.11.12")
 
   testAnnotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
-  testAnnotationProcessor("org.projectlombok:lombok:1.18.12")
-  testCompileOnly("org.projectlombok:lombok:1.18.12")
+  testAnnotationProcessor("org.projectlombok:lombok:1.18.8")
+  testCompileOnly("org.projectlombok:lombok:1.18.8")
   testImplementation("org.springframework.boot:spring-boot-starter-test")
   testImplementation("org.springframework.security:spring-security-test")
   testImplementation("org.springframework.boot:spring-boot-starter-webflux")
   testImplementation("com.tngtech.java:junit-dataprovider:1.13.1")
-  testImplementation("net.javacrumbs.json-unit:json-unit-assertj:2.13.1")
+  testImplementation("net.javacrumbs.json-unit:json-unit-assertj:2.17.0")
   testImplementation("io.github.http-builder-ng:http-builder-ng-apache:1.0.4")
-  testImplementation("com.github.tomakehurst:wiremock-standalone:2.26.1")
+  testImplementation("com.github.tomakehurst:wiremock-standalone:2.26.3")
   testImplementation("com.nhaarman:mockito-kotlin-kt1.1:1.6.0")
-  testImplementation("org.testcontainers:localstack:1.12.5")
+  testImplementation("org.testcontainers:localstack:1.13.0")
   testImplementation("org.awaitility:awaitility-kotlin:4.0.2")
 }
 
@@ -155,7 +156,7 @@ tasks {
 
   val agentDeps by configurations.register("agentDeps") {
     dependencies {
-      "agentDeps"("com.microsoft.azure:applicationinsights-agent:2.5.1") {
+      "agentDeps"("com.microsoft.azure:applicationinsights-agent:2.6.0") {
         isTransitive = false
       }
     }
