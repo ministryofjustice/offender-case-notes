@@ -8,8 +8,8 @@ import java.time.LocalDate
 import java.time.format.DateTimeFormatter.ISO_DATE
 
 plugins {
-  kotlin("jvm") version "1.3.61"
-  kotlin("plugin.spring") version "1.3.61"
+  kotlin("jvm") version "1.3.71"
+  kotlin("plugin.spring") version "1.3.71"
   id("org.springframework.boot") version "2.2.6.RELEASE"
   id("io.spring.dependency-management") version "1.0.9.RELEASE"
   id("org.owasp.dependencycheck") version "5.3.2.1"
