@@ -1,11 +1,10 @@
 package uk.gov.justice.hmpps.casenotes.services;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.client.HttpClientErrorException;
@@ -17,11 +16,12 @@ import uk.gov.justice.hmpps.casenotes.repository.OffenderCaseNoteRepository;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class MergeOffenderServiceTest {
 
     private static final String OFFENDER_NO = "A1234AA";
@@ -36,9 +36,8 @@ public class MergeOffenderServiceTest {
 
     private MergeOffenderService service;
 
-    @Before
+    @BeforeEach
     public void setUp() {
-        MockitoAnnotations.initMocks(this);
         service = new MergeOffenderService(externalApiService, repository);
     }
 
@@ -82,7 +81,7 @@ public class MergeOffenderServiceTest {
         verify(externalApiService).getIdentifiersByBookingId(eq(BOOKING_ID));
     }
 
-    @Test(expected = RestClientException.class)
+    @Test
     public void testCheckForExistingCaseNotesThatNeedMergingNoBookingFound() {
         when(externalApiService.getIdentifiersByBookingId(eq(BOOKING_ID)))
                 .thenReturn(List.of(
@@ -93,7 +92,8 @@ public class MergeOffenderServiceTest {
         when(externalApiService.getBooking(eq(BOOKING_ID)))
                 .thenThrow(HttpClientErrorException.create(HttpStatus.NOT_FOUND, "Not Found", new HttpHeaders(), null, null));
 
-        service.checkAndMerge(BOOKING_ID);
+        assertThatThrownBy(() -> service.checkAndMerge(BOOKING_ID))
+                .isInstanceOf(RestClientException.class);
     }
 
 }

@@ -1,12 +1,13 @@
 package uk.gov.justice.hmpps.casenotes.services
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import com.nhaarman.mockito_kotlin.*
+import com.nhaarman.mockitokotlin2.any
+import com.nhaarman.mockitokotlin2.check
+import com.nhaarman.mockitokotlin2.mock
+import com.nhaarman.mockitokotlin2.verify
+import com.nhaarman.mockitokotlin2.whenever
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.Before
-import org.junit.Test
-import org.junit.runner.RunWith
-import org.mockito.junit.MockitoJUnitRunner
+import org.junit.jupiter.api.Test
 import software.amazon.awssdk.services.sns.SnsAsyncClient
 import software.amazon.awssdk.services.sns.model.MessageAttributeValue
 import software.amazon.awssdk.services.sns.model.PublishRequest
@@ -15,17 +16,11 @@ import uk.gov.justice.hmpps.casenotes.dto.CaseNote
 import java.time.LocalDateTime
 import java.util.concurrent.CompletableFuture
 
-@RunWith(MockitoJUnitRunner::class)
 class CaseNoteAwsEventPusherTest {
   private val snsClient: SnsAsyncClient = mock()
   private val objectMapper: ObjectMapper = mock()
 
-  private lateinit var service: CaseNoteAwsEventPusher
-
-  @Before
-  fun before() {
-    service = CaseNoteAwsEventPusher(snsClient, "topicArn", objectMapper)
-  }
+  private val service = CaseNoteAwsEventPusher(snsClient, "topicArn", objectMapper)
 
   @Test
   fun `send event converts to case note event`() {

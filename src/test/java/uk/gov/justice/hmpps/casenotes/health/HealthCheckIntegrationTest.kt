@@ -5,7 +5,7 @@ import com.amazonaws.services.sqs.model.GetQueueAttributesResult
 import com.amazonaws.services.sqs.model.QueueAttributeName
 import com.github.tomakehurst.wiremock.client.WireMock.aResponse
 import com.github.tomakehurst.wiremock.client.WireMock.get
-import com.nhaarman.mockito_kotlin.whenever
+import com.nhaarman.mockitokotlin2.whenever
 import net.javacrumbs.jsonunit.assertj.JsonAssertions.assertThatJson
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.After
@@ -13,7 +13,9 @@ import org.junit.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.test.util.ReflectionTestUtils
-import uk.gov.justice.hmpps.casenotes.health.QueueAttributes.*
+import uk.gov.justice.hmpps.casenotes.health.QueueAttributes.MESSAGES_IN_FLIGHT
+import uk.gov.justice.hmpps.casenotes.health.QueueAttributes.MESSAGES_ON_DLQ
+import uk.gov.justice.hmpps.casenotes.health.QueueAttributes.MESSAGES_ON_QUEUE
 
 class HealthCheckIntegrationTest : IntegrationTest() {
 
