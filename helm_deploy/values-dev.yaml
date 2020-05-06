@@ -4,7 +4,7 @@
 replicaCount: 2
 
 image:
-  repository: docker.io/mojdigitalstudio/offender-case-notes
+  repository: quay.io/hmpps/offender-case-notes
   tag: latest
   pullPolicy: Always
   port: 8080

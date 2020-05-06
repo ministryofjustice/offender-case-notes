@@ -1,7 +1,7 @@
 version: "3"
 services:
   offender-case-notes:
-    image: mojdigitalstudio/offender-case-notes:latest
+    image: quay.io/hmpps/offender-case-notes:latest
     networks:
       - hmpps
     container_name: offender-case-notes
