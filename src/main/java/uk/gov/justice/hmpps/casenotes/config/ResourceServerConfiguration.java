@@ -26,7 +26,15 @@ import springfox.documentation.builders.AuthorizationCodeGrantBuilder;
 import springfox.documentation.builders.OAuthBuilder;
 import springfox.documentation.builders.PathSelectors;
 import springfox.documentation.builders.RequestHandlerSelectors;
-import springfox.documentation.service.*;
+import springfox.documentation.service.ApiInfo;
+import springfox.documentation.service.AuthorizationScope;
+import springfox.documentation.service.Contact;
+import springfox.documentation.service.SecurityReference;
+import springfox.documentation.service.SecurityScheme;
+import springfox.documentation.service.StringVendorExtension;
+import springfox.documentation.service.TokenEndpoint;
+import springfox.documentation.service.TokenRequestEndpoint;
+import springfox.documentation.service.VendorExtension;
 import springfox.documentation.spi.DocumentationType;
 import springfox.documentation.spi.service.contexts.SecurityContext;
 import springfox.documentation.spring.web.plugins.Docket;
@@ -64,7 +72,7 @@ public class ResourceServerConfiguration extends ResourceServerConfigurerAdapter
                 .and().csrf().disable()
                 .authorizeRequests()
                 .antMatchers("/webjars/**", "/favicon.ico", "/csrf",
-                        "/health", "/health/ping", "/info", "/ping", "/h2-console/**",
+                        "/health/**", "/info", "/ping", "/h2-console/**",
                         "/v2/api-docs",
                         "/swagger-ui.html", "/swagger-resources", "/swagger-resources/configuration/ui",
                         "/swagger-resources/configuration/security").permitAll()
