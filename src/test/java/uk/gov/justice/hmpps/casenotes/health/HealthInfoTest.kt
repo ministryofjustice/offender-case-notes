@@ -1,7 +1,7 @@
 package uk.gov.justice.hmpps.casenotes.health
 
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.Test
+import org.junit.jupiter.api.Test
 import org.springframework.boot.info.BuildProperties
 import java.util.*
 

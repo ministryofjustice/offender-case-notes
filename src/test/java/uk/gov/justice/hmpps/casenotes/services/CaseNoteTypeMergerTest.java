@@ -1,6 +1,6 @@
 package uk.gov.justice.hmpps.casenotes.services;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import uk.gov.justice.hmpps.casenotes.dto.CaseNoteType;
 
 import java.util.List;
