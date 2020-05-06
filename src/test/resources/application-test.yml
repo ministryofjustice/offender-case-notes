@@ -35,6 +35,8 @@ elite2:
   api.base.url: http://localhost:8999
 oauth:
   api.base.url: http://localhost:8998/auth
+tokenverification:
+  api.base.url: http://localhost:9100
 
 api:
   health-timeout: 400ms
