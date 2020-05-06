@@ -42,9 +42,10 @@ class HealthCheckIntegrationTest : IntegrationTest() {
 
     val response = restTemplate.getForEntity("/health", String::class.java)
 
-    assertThatJson(response.body).node("components.OAuthApiHealth.details.HttpStatus").isEqualTo("OK")
-    assertThatJson(response.body).node("components.elite2ApiHealth.details.HttpStatus").isEqualTo("OK")
-    assertThatJson(response.body).node("status").isEqualTo("UP")
+    assertThatJson(response.body!!).node("components.OAuthApiHealth.details.HttpStatus").isEqualTo("OK")
+    assertThatJson(response.body!!).node("components.elite2ApiHealth.details.HttpStatus").isEqualTo("OK")
+    assertThatJson(response.body!!).node("components.tokenVerificationApiHealth.details.HttpStatus").isEqualTo("OK")
+    assertThatJson(response.body!!).node("status").isEqualTo("UP")
     assertThat(response.statusCodeValue).isEqualTo(200)
   }
 
@@ -54,7 +55,7 @@ class HealthCheckIntegrationTest : IntegrationTest() {
 
     val response = restTemplate.getForEntity("/health/ping", String::class.java)
 
-    assertThatJson(response.body).node("status").isEqualTo("UP")
+    assertThatJson(response.body!!).node("status").isEqualTo("UP")
     assertThat(response.statusCodeValue).isEqualTo(200)
   }
 
@@ -64,9 +65,10 @@ class HealthCheckIntegrationTest : IntegrationTest() {
 
     val response = restTemplate.getForEntity("/health", String::class.java)
 
-    assertThatJson(response.body).node("components.OAuthApiHealth.details.error").isEqualTo("org.springframework.web.client.HttpClientErrorException\$NotFound: 404 Not Found: [some error]")
-    assertThatJson(response.body).node("components.elite2ApiHealth.details.error").isEqualTo("org.springframework.web.client.HttpClientErrorException\$NotFound: 404 Not Found: [some error]")
-    assertThatJson(response.body).node("status").isEqualTo("DOWN")
+    assertThatJson(response.body!!).node("components.OAuthApiHealth.details.error").isEqualTo("org.springframework.web.client.HttpClientErrorException\$NotFound: 404 Not Found: [some error]")
+    assertThatJson(response.body!!).node("components.elite2ApiHealth.details.error").isEqualTo("org.springframework.web.client.HttpClientErrorException\$NotFound: 404 Not Found: [some error]")
+    assertThatJson(response.body!!).node("components.tokenVerificationApiHealth.details.error").isEqualTo("org.springframework.web.client.HttpClientErrorException\$NotFound: 404 Not Found: [some error]")
+    assertThatJson(response.body!!).node("status").isEqualTo("DOWN")
     assertThat(response.statusCodeValue).isEqualTo(503)
   }
 
@@ -76,9 +78,10 @@ class HealthCheckIntegrationTest : IntegrationTest() {
 
     val response = restTemplate.getForEntity("/health", String::class.java)
 
-    assertThatJson(response.body).node("components.OAuthApiHealth.details.error").isEqualTo("org.springframework.web.client.HttpClientErrorException: 418 418: [some error]")
-    assertThatJson(response.body).node("components.elite2ApiHealth.details.error").isEqualTo("org.springframework.web.client.HttpClientErrorException: 418 418: [some error]")
-    assertThatJson(response.body).node("status").isEqualTo("DOWN")
+    assertThatJson(response.body!!).node("components.OAuthApiHealth.details.error").isEqualTo("org.springframework.web.client.HttpClientErrorException: 418 418: [some error]")
+    assertThatJson(response.body!!).node("components.elite2ApiHealth.details.error").isEqualTo("org.springframework.web.client.HttpClientErrorException: 418 418: [some error]")
+    assertThatJson(response.body!!).node("components.tokenVerificationApiHealth.details.error").isEqualTo("org.springframework.web.client.HttpClientErrorException: 418 418: [some error]")
+    assertThatJson(response.body!!).node("status").isEqualTo("DOWN")
     assertThat(response.statusCodeValue).isEqualTo(503)
   }
 
@@ -88,8 +91,8 @@ class HealthCheckIntegrationTest : IntegrationTest() {
 
     val response = restTemplate.getForEntity("/health", String::class.java)
 
-    assertThatJson(response.body).node("components.queueHealth.status").isEqualTo("UP")
-    assertThatJson(response.body).node("status").isEqualTo("UP")
+    assertThatJson(response.body!!).node("components.queueHealth.status").isEqualTo("UP")
+    assertThatJson(response.body!!).node("status").isEqualTo("UP")
     assertThat(response.statusCodeValue).isEqualTo(200)
   }
 
@@ -99,8 +102,8 @@ class HealthCheckIntegrationTest : IntegrationTest() {
 
     val response = restTemplate.getForEntity("/health", String::class.java)
 
-    assertThatJson(response.body).node("components.queueHealth.details.${MESSAGES_ON_QUEUE.healthName}").isEqualTo(0)
-    assertThatJson(response.body).node("components.queueHealth.details.${MESSAGES_IN_FLIGHT.healthName}").isEqualTo(0)
+    assertThatJson(response.body!!).node("components.queueHealth.details.${MESSAGES_ON_QUEUE.healthName}").isEqualTo(0)
+    assertThatJson(response.body!!).node("components.queueHealth.details.${MESSAGES_IN_FLIGHT.healthName}").isEqualTo(0)
   }
 
   @Test
@@ -110,8 +113,8 @@ class HealthCheckIntegrationTest : IntegrationTest() {
 
     val response = restTemplate.getForEntity("/health", String::class.java)
 
-    assertThatJson(response.body).node("status").isEqualTo("DOWN")
-    assertThatJson(response.body).node("components.queueHealth.status").isEqualTo("DOWN")
+    assertThatJson(response.body!!).node("status").isEqualTo("DOWN")
+    assertThatJson(response.body!!).node("components.queueHealth.status").isEqualTo("DOWN")
     assertThat(response.statusCodeValue).isEqualTo(503)
   }
 
@@ -121,9 +124,9 @@ class HealthCheckIntegrationTest : IntegrationTest() {
 
     val response = restTemplate.getForEntity("/health", String::class.java)
 
-    assertThatJson(response.body).node("status").isEqualTo("UP")
-    assertThatJson(response.body).node("components.queueHealth.status").isEqualTo("UP")
-    assertThatJson(response.body).node("components.queueHealth.details.dlqStatus").isEqualTo(DlqStatus.UP.description)
+    assertThatJson(response.body!!).node("status").isEqualTo("UP")
+    assertThatJson(response.body!!).node("components.queueHealth.status").isEqualTo("UP")
+    assertThatJson(response.body!!).node("components.queueHealth.details.dlqStatus").isEqualTo(DlqStatus.UP.description)
     assertThat(response.statusCodeValue).isEqualTo(200)
   }
 
@@ -133,7 +136,7 @@ class HealthCheckIntegrationTest : IntegrationTest() {
 
     val response = restTemplate.getForEntity("/health", String::class.java)
 
-    assertThatJson(response.body).node("components.queueHealth.details.${MESSAGES_ON_DLQ.healthName}").isEqualTo(0)
+    assertThatJson(response.body!!).node("components.queueHealth.details.${MESSAGES_ON_DLQ.healthName}").isEqualTo(0)
   }
 
   @Test
@@ -143,9 +146,9 @@ class HealthCheckIntegrationTest : IntegrationTest() {
 
     val response = restTemplate.getForEntity("/health", String::class.java)
 
-    assertThatJson(response.body).node("status").isEqualTo("DOWN")
-    assertThatJson(response.body).node("components.queueHealth.status").isEqualTo("DOWN")
-    assertThatJson(response.body).node("components.queueHealth.details.dlqStatus").isEqualTo(DlqStatus.NOT_ATTACHED.description)
+    assertThatJson(response.body!!).node("status").isEqualTo("DOWN")
+    assertThatJson(response.body!!).node("components.queueHealth.status").isEqualTo("DOWN")
+    assertThatJson(response.body!!).node("components.queueHealth.details.dlqStatus").isEqualTo(DlqStatus.NOT_ATTACHED.description)
     assertThat(response.statusCodeValue).isEqualTo(503)
   }
 
@@ -156,7 +159,7 @@ class HealthCheckIntegrationTest : IntegrationTest() {
 
     val response = restTemplate.getForEntity("/health", String::class.java)
 
-    assertThatJson(response.body).node("components.queueHealth.details.dlqStatus").isEqualTo(DlqStatus.NOT_ATTACHED.description)
+    assertThatJson(response.body!!).node("components.queueHealth.details.dlqStatus").isEqualTo(DlqStatus.NOT_ATTACHED.description)
     assertThat(response.statusCodeValue).isEqualTo(503)
   }
 
@@ -167,7 +170,7 @@ class HealthCheckIntegrationTest : IntegrationTest() {
 
     val response = restTemplate.getForEntity("/health", String::class.java)
 
-    assertThatJson(response.body).node("components.queueHealth.details.dlqStatus").isEqualTo(DlqStatus.NOT_FOUND.description)
+    assertThatJson(response.body!!).node("components.queueHealth.details.dlqStatus").isEqualTo(DlqStatus.NOT_FOUND.description)
     assertThat(response.statusCodeValue).isEqualTo(503)
   }
 
@@ -178,6 +181,11 @@ class HealthCheckIntegrationTest : IntegrationTest() {
         .withStatus(status)))
 
     elite2MockServer.stubFor(get("/health/ping").willReturn(aResponse()
+        .withHeader("Content-Type", "application/json")
+        .withBody(if (status == 200) "{\"status\":\"UP\"}" else "some error")
+        .withStatus(status)))
+
+    tokenVerificationMockServer.stubFor(get("/health/ping").willReturn(aResponse()
         .withHeader("Content-Type", "application/json")
         .withBody(if (status == 200) "{\"status\":\"UP\"}" else "some error")
         .withStatus(status)))

@@ -1,39 +1,19 @@
-package uk.gov.justice.hmpps.casenotes.config;
+package uk.gov.justice.hmpps.casenotes.config
 
-import lombok.Getter;
-import org.hibernate.validator.constraints.URL;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.validation.annotation.Validated;
-
-import java.time.Duration;
+import org.hibernate.validator.constraints.URL
+import org.springframework.beans.factory.annotation.Value
+import org.springframework.context.annotation.Configuration
+import org.springframework.validation.annotation.Validated
+import java.time.Duration
 
 @Configuration
 @Validated
-@Getter
-public class OffenderCaseNoteProperties {
-
-    /**
-     * Elite2 API Base URL endpoint ("http://localhost:8080")
-     */
-    private final String elite2ApiBaseUrl;
-
-    /**
-     * OAUTH2 API Rest URL endpoint ("http://localhost:9090/auth/api")
-     */
-    private final String oauthApiBaseUrl;
-
-    private final String jwtPublicKey;
-
-    private final Duration healthTimeout;
-
-    public OffenderCaseNoteProperties(@Value("${elite2.api.base.url}") @URL final String elite2ApiBaseUrl,
-                                      @Value("${oauth.api.base.url}") @URL final String oauthApiBaseUrl,
-                                      @Value("${jwt.public.key}") final String jwtPublicKey,
-                                      @Value("${api.health-timeout:1s}") final Duration healthTimeout) {
-        this.elite2ApiBaseUrl = elite2ApiBaseUrl;
-        this.oauthApiBaseUrl = oauthApiBaseUrl;
-        this.jwtPublicKey = jwtPublicKey;
-        this.healthTimeout = healthTimeout;
-    }
-}
+data class OffenderCaseNoteProperties(
+    /** Elite2 API Base URL endpoint ("http://localhost:8080") */
+    @Value("\${elite2.api.base.url}") val elite2ApiBaseUrl: @URL String,
+    /**  OAUTH2 API Rest URL endpoint ("http://localhost:9090/auth/api") */
+    @Value("\${oauth.api.base.url}") val oauthApiBaseUrl: @URL String,
+    /** OAUTH2 API Rest URL endpoint ("http://localhost:8100") */
+    @Value("\${tokenverification.api.base.url}") val tokenVerificationApiBaseUrl: @URL String,
+    @Value("\${jwt.public.key}") val jwtPublicKey: String,
+    @Value("\${api.health-timeout:1s}") val healthTimeout: Duration)

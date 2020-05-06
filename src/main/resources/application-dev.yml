@@ -24,3 +24,5 @@ elite2:
   api.base.url: http://localhost:8080
 oauth:
   api.base.url: http://localhost:9090/auth
+tokenverification:
+  api.base.url: http://localhost:8100

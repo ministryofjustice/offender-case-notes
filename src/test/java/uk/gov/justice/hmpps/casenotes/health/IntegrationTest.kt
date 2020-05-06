@@ -19,6 +19,7 @@ import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner
 import uk.gov.justice.hmpps.casenotes.health.wiremock.Elite2MockServer
 import uk.gov.justice.hmpps.casenotes.health.wiremock.OAuthMockServer
+import uk.gov.justice.hmpps.casenotes.health.wiremock.TokenVerificationMockServer
 
 @RunWith(SpringJUnit4ClassRunner::class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -44,6 +45,9 @@ abstract class IntegrationTest {
     @JvmStatic
     val elite2MockServer = Elite2MockServer()
 
+    @get:ClassRule
+    @JvmStatic
+    val tokenVerificationMockServer = TokenVerificationMockServer()
   }
 
   init {
@@ -56,6 +60,7 @@ abstract class IntegrationTest {
   fun resetStubs() {
     oauthMockServer.resetAll()
     elite2MockServer.resetAll()
+    tokenVerificationMockServer.resetAll()
 
     oauthMockServer.stubGrantToken()
   }

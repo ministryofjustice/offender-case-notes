@@ -12,6 +12,7 @@ import uk.gov.justice.hmpps.casenotes.utils.JwtAuthInterceptor;
 
 import java.util.List;
 
+@SuppressWarnings("deprecation")
 @Configuration
 public class RestTemplateConfiguration {
 
@@ -33,6 +34,11 @@ public class RestTemplateConfiguration {
         return getRestTemplate(restTemplateBuilder, properties.getOauthApiBaseUrl());
     }
 
+    @Bean(name = "tokenVerificationApiRestTemplate")
+    public RestTemplate tokenVerificationApiRestTemplate(final RestTemplateBuilder restTemplateBuilder) {
+        return getRestTemplate(restTemplateBuilder, properties.getTokenVerificationApiBaseUrl());
+    }
+
     @Bean(name = "elite2ApiHealthRestTemplate")
     public RestTemplate elite2ApiHealthRestTemplate(final RestTemplateBuilder restTemplateBuilder) {
         return getHealthRestTemplate(restTemplateBuilder, properties.getElite2ApiBaseUrl());
@@ -41,6 +47,11 @@ public class RestTemplateConfiguration {
     @Bean(name = "oauthApiHealthRestTemplate")
     public RestTemplate oauthApiRestHealthTemplate(final RestTemplateBuilder restTemplateBuilder) {
         return getHealthRestTemplate(restTemplateBuilder, properties.getOauthApiBaseUrl());
+    }
+
+    @Bean(name = "tokenVerificationApiHealthRestTemplate")
+    public RestTemplate tokenVerificationApiRestHealthTemplate(final RestTemplateBuilder restTemplateBuilder) {
+        return getHealthRestTemplate(restTemplateBuilder, properties.getTokenVerificationApiBaseUrl());
     }
 
     @Bean(name = "clientCredentialsRestTemplate")

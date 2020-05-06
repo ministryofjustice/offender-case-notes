@@ -27,3 +27,7 @@ constructor(@Qualifier("elite2ApiHealthRestTemplate") restTemplate: RestTemplate
 class OAuthApiHealth
 constructor(@Qualifier("oauthApiHealthRestTemplate") restTemplate: RestTemplate) : HealthCheck(restTemplate)
 
+@Component
+class TokenVerificationApiHealth
+constructor(@Qualifier("tokenVerificationApiHealthRestTemplate") restTemplate: RestTemplate) : HealthCheck(restTemplate)
+
