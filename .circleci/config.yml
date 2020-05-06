@@ -23,7 +23,7 @@ executors:
     working_directory: ~/app
 
 jobs:
-  build:
+  validate:
     executor: validator
     steps:
       - checkout
@@ -35,8 +35,6 @@ jobs:
           environment:
             SQS_PROVIDER: 'localstack'
           command: ./gradlew test
-      - run:
-
       - save_cache:
           paths:
             - ~/.gradle
@@ -60,6 +58,7 @@ workflows:
             tags:
               ignore: /.*/
       - hmpps/helm_lint:
+          name: helm_lint
       - hmpps/build_docker:
           name: build_docker
           filters:
@@ -75,7 +74,7 @@ workflows:
                 - master
           requires:
             - validate
-            - hmpps/helm_lint
+            - helm_lint
             - build_docker
       - request-preprod-approval:
           type: approval
