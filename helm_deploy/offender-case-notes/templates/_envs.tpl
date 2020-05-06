@@ -22,6 +22,9 @@ env:
   - name: OAUTH_API_BASE_URL
     value: "{{ .Values.env.OAUTH_API_BASE_URL }}"
 
+  - name: TOKENVERIFICATION_API_BASE_URL
+    value: "{{ .Values.env.TOKENVERIFICATION_API_BASE_URL }}"
+
   - name: APPINSIGHTS_INSTRUMENTATIONKEY
     valueFrom:
       secretKeyRef:
