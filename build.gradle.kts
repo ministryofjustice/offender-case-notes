@@ -1,5 +1,5 @@
 plugins {
-  id("uk.gov.justice.hmpps.gradle-spring-boot") version "0.1.1"
+  id("uk.gov.justice.hmpps.gradle-spring-boot") version "0.2.0"
   kotlin("plugin.spring") version "1.3.72"
 }
 
@@ -10,9 +10,9 @@ configurations {
 extra["spring-security.version"] = "5.3.1.RELEASE"
 
 dependencies {
-  annotationProcessor("org.projectlombok:lombok:1.18.12")
+  annotationProcessor("org.projectlombok:lombok:1.18.8")
 
-  compileOnly("org.projectlombok:lombok:1.18.12")
+  compileOnly("org.projectlombok:lombok:1.18.8")
 
   runtimeOnly("com.h2database:h2:1.4.200")
   runtimeOnly("org.flywaydb:flyway-core:6.4.1")
@@ -52,8 +52,8 @@ dependencies {
 
   implementation("software.amazon.awssdk:sns:2.13.9")
 
-  testAnnotationProcessor("org.projectlombok:lombok:1.18.12")
-  testCompileOnly("org.projectlombok:lombok:1.18.12")
+  testAnnotationProcessor("org.projectlombok:lombok:1.18.8")
+  testCompileOnly("org.projectlombok:lombok:1.18.8")
   testImplementation("org.springframework.security:spring-security-test")
   testImplementation("org.springframework.boot:spring-boot-starter-webflux")
   testImplementation("com.tngtech.java:junit-dataprovider:1.13.1")
@@ -61,7 +61,7 @@ dependencies {
   testImplementation("io.github.http-builder-ng:http-builder-ng-apache:1.0.4")
   testImplementation("com.github.tomakehurst:wiremock-standalone:2.26.3")
   testImplementation("com.nhaarman:mockito-kotlin-kt1.1:1.6.0")
-  testImplementation("org.testcontainers:localstack:1.14.1")
+  testImplementation("org.testcontainers:localstack:1.13.0")
   testImplementation("org.awaitility:awaitility-kotlin:4.0.2")
 }
 
