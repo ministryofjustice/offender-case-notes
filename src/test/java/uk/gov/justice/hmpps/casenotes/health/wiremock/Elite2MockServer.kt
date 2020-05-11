@@ -1,7 +1,7 @@
 package uk.gov.justice.hmpps.casenotes.health.wiremock
 
+import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.client.WireMock
-import com.github.tomakehurst.wiremock.junit.WireMockRule
 import com.google.gson.GsonBuilder
 import com.google.gson.JsonDeserializationContext
 import com.google.gson.JsonDeserializer
@@ -40,7 +40,7 @@ class Elite2Extension : BeforeAllCallback, AfterAllCallback, BeforeEachCallback 
   }
 }
 
-class Elite2MockServer : WireMockRule(WIREMOCK_PORT) {
+class Elite2MockServer : WireMockServer(WIREMOCK_PORT) {
   private val gson = GsonBuilder().registerTypeAdapter(LocalDateTime::class.java, LocalDateTimeConverter()).create()
 
   fun subGetCaseNoteTypes() {

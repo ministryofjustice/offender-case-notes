@@ -1,15 +1,15 @@
 package uk.gov.justice.hmpps.casenotes.controllers;
 
-import org.junit.Test;
-import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.http.HttpMethod;
+import org.junit.jupiter.api.Test;
 import uk.gov.justice.hmpps.casenotes.dto.CaseNote;
+import uk.gov.justice.hmpps.casenotes.health.wiremock.OAuthExtension;
 
 import java.util.List;
 import java.util.Objects;
 
 import static java.lang.String.format;
-import static org.assertj.core.api.Assertions.assertThat;
+import static uk.gov.justice.hmpps.casenotes.health.wiremock.Elite2Extension.elite2Api;
+import static uk.gov.justice.hmpps.casenotes.health.wiremock.OAuthExtension.oAuthApi;
 
 public class CaseNoteResourceTest extends ResourceTest {
 
@@ -24,506 +24,430 @@ public class CaseNoteResourceTest extends ResourceTest {
 
     @Test
     public void testGetCaseNoteTypesNormal() {
-        elite2MockServer.subGetCaseNoteTypes();
+        elite2Api.subGetCaseNoteTypes();
 
-        final var response = testRestTemplate.exchange(
-                "/case-notes/types",
-                HttpMethod.GET,
-                createHttpEntityWithBearerAuthorisation("API_TEST_USER", List.of()),
-                new ParameterizedTypeReference<String>() {
-                });
-
-        assertThatJsonFileAndStatus(response, 200, "caseNoteTypes.json");
+        webTestClient.get().uri("/case-notes/types")
+                .headers(addBearerAuthorisation("API_TEST_USER", List.of()))
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody()
+                .json(readFile("caseNoteTypes.json"));
     }
 
     @Test
     public void testGetCaseNoteTypesSecure() {
-        elite2MockServer.subGetCaseNoteTypes();
+        elite2Api.subGetCaseNoteTypes();
 
-        final var response = testRestTemplate.exchange(
-                "/case-notes/types",
-                HttpMethod.GET,
-                createHttpEntityWithBearerAuthorisation("SECURE_CASENOTE_USER", CASENOTES_ROLES),
-                new ParameterizedTypeReference<String>() {
-                });
-
-        assertThatJsonFileAndStatus(response, 200, "caseNoteTypesSecure.json");
+        webTestClient.get().uri("/case-notes/types")
+                .headers(addBearerAuthorisation("SECURE_CASENOTE_USER", CASENOTES_ROLES))
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody()
+                .json(readFile("caseNoteTypesSecure.json"));
     }
 
     @Test
     public void testGetCaseNoteTypesSecurePomRole() {
-        elite2MockServer.subGetCaseNoteTypes();
+        elite2Api.subGetCaseNoteTypes();
 
-        final var response = testRestTemplate.exchange(
-                "/case-notes/types",
-                HttpMethod.GET,
-                createHttpEntityWithBearerAuthorisation("SECURE_CASENOTE_USER", POM_ROLE),
-                new ParameterizedTypeReference<String>() {
-                });
-
-        assertThatJsonFileAndStatus(response, 200, "caseNoteTypesSecure.json");
+        webTestClient.get().uri("/case-notes/types")
+                .headers(addBearerAuthorisation("SECURE_CASENOTE_USER", POM_ROLE))
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody()
+                .json(readFile("caseNoteTypesSecure.json"));
     }
 
     @Test
     public void testUserCaseNoteTypesNormal() {
-        elite2MockServer.subUserCaseNoteTypes();
+        elite2Api.subUserCaseNoteTypes();
 
-        final var response = testRestTemplate.exchange(
-                "/case-notes/types-for-user",
-                HttpMethod.GET,
-                createHttpEntityWithBearerAuthorisation("API_TEST_USER", List.of()),
-                new ParameterizedTypeReference<String>() {
-                });
-
-        assertThatJsonFileAndStatus(response, 200, "userCaseNoteTypes.json");
+        webTestClient.get().uri("/case-notes/types-for-user")
+                .headers(addBearerAuthorisation("API_TEST_USER", List.of()))
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody()
+                .json(readFile("userCaseNoteTypes.json"));
     }
 
     @Test
     public void testUserCaseNoteTypesSecure() {
-        elite2MockServer.subUserCaseNoteTypes();
+        elite2Api.subUserCaseNoteTypes();
 
-        final var response = testRestTemplate.exchange(
-                "/case-notes/types-for-user",
-                HttpMethod.GET,
-                createHttpEntityWithBearerAuthorisation("SECURE_CASENOTE_USER", CASENOTES_ROLES),
-                new ParameterizedTypeReference<String>() {
-                });
-
-        assertThatJsonFileAndStatus(response, 200, "userCaseNoteTypesSecure.json");
+        webTestClient.get().uri("/case-notes/types-for-user")
+                .headers(addBearerAuthorisation("SECURE_CASENOTE_USER", CASENOTES_ROLES))
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody()
+                .json(readFile("userCaseNoteTypesSecure.json"));
     }
 
     @Test
     public void testUserCaseNoteTypesSecurePomRole() {
-        elite2MockServer.subUserCaseNoteTypes();
+        elite2Api.subUserCaseNoteTypes();
 
-        final var response = testRestTemplate.exchange(
-                "/case-notes/types-for-user",
-                HttpMethod.GET,
-                createHttpEntityWithBearerAuthorisation("SECURE_CASENOTE_USER", POM_ROLE),
-                new ParameterizedTypeReference<String>() {
-                });
-
-        assertThatJsonFileAndStatus(response, 200, "userCaseNoteTypesSecure.json");
+        webTestClient.get().uri("/case-notes/types-for-user")
+                .headers(addBearerAuthorisation("SECURE_CASENOTE_USER", POM_ROLE))
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody()
+                .json(readFile("userCaseNoteTypesSecure.json"));
     }
 
     @Test
     public void testRetrieveCaseNotesForOffenderSensitive() {
-        oauthMockServer.subGetUserDetails("SECURE_CASENOTE_USER");
-        elite2MockServer.subGetOffender("A1234AA");
-        elite2MockServer.subGetCaseNotesForOffender("A1234AA");
+        oAuthApi.subGetUserDetails("SECURE_CASENOTE_USER");
+        elite2Api.subGetOffender("A1234AA");
+        elite2Api.subGetCaseNotesForOffender("A1234AA");
 
         final var token = createJwt("SECURE_CASENOTE_USER", CASENOTES_ROLES);
 
-        final var postResponse = testRestTemplate.exchange(
-                "/case-notes/{offenderIdentifier}",
-                HttpMethod.POST,
-                createHttpEntity(token, format(CREATE_CASE_NOTE_WITHOUT_LOC, "This is a case note")),
-                new ParameterizedTypeReference<String>() {
-                },
-                "A1234AA");
+        webTestClient.post().uri("/case-notes/{offenderIdentifier}", "A1234AA")
+                .headers(addBearerToken(token))
+                .bodyValue(format(CREATE_CASE_NOTE_WITHOUT_LOC, "This is a case note"))
+                .exchange()
+                .expectStatus().isCreated()
+                .expectBody()
+                .json(readFile("A1234AA-create-casenote.json"));
 
-        assertThatJsonFileAndStatus(postResponse, 201, "A1234AA-create-casenote.json");
-
-        final var response = testRestTemplate.exchange(
-                "/case-notes/{offenderIdentifier}",
-                HttpMethod.GET,
-                createHttpEntity(token, null),
-                new ParameterizedTypeReference<String>() {
-                },
-                "A1234AA");
-
-        assertThatJsonFileAndStatus(response, 200, "A1234AA-casenote.json");
+        webTestClient.get().uri("/case-notes/{offenderIdentifier}", "A1234AA")
+                .headers(addBearerToken(token))
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody()
+                .json(readFile("A1234AA-casenote.json"));
     }
 
     @Test
     public void testCanRetrieveCaseNotesForOffenderNormal() {
-        oauthMockServer.subGetUserDetails("API_TEST_USER");
-        elite2MockServer.subGetCaseNotesForOffender("A1234AA");
+        oAuthApi.subGetUserDetails("API_TEST_USER");
+        elite2Api.subGetCaseNotesForOffender("A1234AA");
 
-        final var response = testRestTemplate.exchange(
-                "/case-notes/{offenderIdentifier}",
-                HttpMethod.GET,
-                createHttpEntityWithBearerAuthorisation("API_TEST_USER", List.of()),
-                new ParameterizedTypeReference<String>() {
-                },
-                "A1234AA");
-
-        assertThatJsonFileAndStatus(response, 200, "A1234AA-normal-casenote.json");
+        webTestClient.get().uri("/case-notes/{offenderIdentifier}", "A1234AA")
+                .headers(addBearerAuthorisation("API_TEST_USER", List.of()))
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody()
+                .json(readFile("A1234AA-normal-casenote.json"));
     }
 
     @Test
     public void testRetrieveCaseNotesWillReturn404IfOffenderNotFound() {
-        oauthMockServer.subGetUserDetails("API_TEST_USER");
-        elite2MockServer.subGetCaseNotesForOffenderNotFound("A1234AA");
+        oAuthApi.subGetUserDetails("API_TEST_USER");
+        elite2Api.subGetCaseNotesForOffenderNotFound("A1234AA");
 
-        final var response = testRestTemplate.exchange(
-                "/case-notes/{offenderIdentifier}",
-                HttpMethod.GET,
-                createHttpEntityWithBearerAuthorisation("API_TEST_USER", List.of()),
-                new ParameterizedTypeReference<String>() {
-                },
-                "A1234AA");
-
-        assertThatJsonFileAndStatus(response, 404, "offender-not-found.json");
+        webTestClient.get().uri("/case-notes/{offenderIdentifier}", "A1234AA")
+                .headers(addBearerAuthorisation("API_TEST_USER", List.of()))
+                .exchange()
+                .expectStatus().isNotFound()
+                .expectBody()
+                .json(readFile("offender-not-found.json"));
     }
 
     @Test
     public void testCanRetrieveCaseNoteForOffender() {
-        oauthMockServer.subGetUserDetails("API_TEST_USER");
-        elite2MockServer.subGetOffender("A1234AA");
-        elite2MockServer.subGetCaseNoteForOffender("A1234AA", 131232L);
+        oAuthApi.subGetUserDetails("API_TEST_USER");
+        elite2Api.subGetOffender("A1234AA");
+        elite2Api.subGetCaseNoteForOffender("A1234AA", 131232L);
 
-        final var response = testRestTemplate.exchange(
-                "/case-notes/{offenderIdentifier}/{caseNoteIdentifier}",
-                HttpMethod.GET,
-                createHttpEntityWithBearerAuthorisation("API_TEST_USER", List.of()),
-                new ParameterizedTypeReference<String>() {
-                },
-                "A1234AA", "131232");
-
-        assertThatJsonFileAndStatus(response, 200, "A1234AA-single-normal-casenote.json");
+        webTestClient.get().uri("/case-notes/{offenderIdentifier}/{caseNoteIdentifier}", "A1234AA", "131232")
+                .headers(addBearerAuthorisation("API_TEST_USER", List.of()))
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody()
+                .json(readFile("A1234AA-single-normal-casenote.json"));
     }
 
     @Test
     public void testRetrieveCaseNoteForOffenderSensitive() {
-        oauthMockServer.subGetUserDetails("SECURE_CASENOTE_USER");
-        elite2MockServer.subGetOffender("A1234AF");
+        oAuthApi.subGetUserDetails("SECURE_CASENOTE_USER");
+        elite2Api.subGetOffender("A1234AF");
 
         final var token = createJwt("SECURE_CASENOTE_USER", CASENOTES_ROLES);
 
-        final var postResponse = testRestTemplate.exchange(
-                "/case-notes/{offenderIdentifier}",
-                HttpMethod.POST,
-                createHttpEntity(token, format(CREATE_CASE_NOTE_WITHOUT_LOC, "This is a case note")),
-                new ParameterizedTypeReference<CaseNote>() {
-                },
-                "A1234AF");
-        final var id = Objects.requireNonNull(postResponse.getBody()).getCaseNoteId();
+        final var postResponse = webTestClient.post().uri("/case-notes/{offenderIdentifier}", "A1234AF")
+                .headers(addBearerToken(token))
+                .bodyValue(format(CREATE_CASE_NOTE_WITHOUT_LOC, "This is a case note"))
+                .exchange()
+                .expectStatus().isCreated()
+                .returnResult(CaseNote.class);
+        final var id = Objects.requireNonNull(postResponse.getResponseBody().blockFirst()).getCaseNoteId();
 
-        final var response = testRestTemplate.exchange(
-                "/case-notes/{offenderIdentifier}/{caseNoteIdentifier}",
-                HttpMethod.GET,
-                createHttpEntity(token, null),
-                new ParameterizedTypeReference<String>() {
-                },
-                "A1234AF", id);
-
-        assertThatJsonFileAndStatus(response, 200, "A1234AF-single-casenote.json");
+        webTestClient.get().uri("/case-notes/{offenderIdentifier}/{caseNoteIdentifier}", "A1234AF", id)
+                .headers(addBearerToken(token))
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody()
+                .json(readFile("A1234AF-single-casenote.json"));
     }
 
     @Test
     public void testCanCreateCaseNote_Normal() {
-        oauthMockServer.subGetUserDetails("SECURE_CASENOTE_USER");
-        elite2MockServer.subCreateCaseNote("A1234AE");
+        oAuthApi.subGetUserDetails("SECURE_CASENOTE_USER");
+        elite2Api.subCreateCaseNote("A1234AE");
 
         // create the case note
-        final var response = testRestTemplate.exchange(
-                "/case-notes/{offenderIdentifier}",
-                HttpMethod.POST,
-                createHttpEntityWithBearerAuthorisation("SECURE_CASENOTE_USER", CASENOTES_ROLES, format(CREATE_NORMAL_CASE_NOTE_WITHOUT_LOC, "This is another case note")),
-                String.class,
-                "A1234AE");
-
-        assertThatJsonFileAndStatus(response, 201, "A1234AE-create-casenote.json");
+        webTestClient.post().uri("/case-notes/{offenderIdentifier}", "A1234AE")
+                .headers(addBearerAuthorisation("SECURE_CASENOTE_USER", CASENOTES_ROLES))
+                .bodyValue(format(CREATE_NORMAL_CASE_NOTE_WITHOUT_LOC, "This is another case note"))
+                .exchange()
+                .expectStatus().isCreated()
+                .expectBody()
+                .json(readFile("A1234AE-create-casenote.json"));
     }
 
     @Test
     public void testCanCreateCaseNote_Secure() {
-        oauthMockServer.subGetUserDetails("SECURE_CASENOTE_USER");
-        elite2MockServer.subGetOffender("A1234AD");
+        oAuthApi.subGetUserDetails("SECURE_CASENOTE_USER");
+        elite2Api.subGetOffender("A1234AD");
 
         // create the case note
-        final var response = testRestTemplate.exchange(
-                "/case-notes/{offenderIdentifier}",
-                HttpMethod.POST,
-                createHttpEntityWithBearerAuthorisation("SECURE_CASENOTE_USER", CASENOTES_ROLES, format(CREATE_CASE_NOTE_WITHOUT_LOC, "This is another case note")),
-                String.class,
-                "A1234AD");
-
-        assertThatJsonFileAndStatus(response, 201, "A1234AD-create-casenote.json");
+        webTestClient.post().uri("/case-notes/{offenderIdentifier}", "A1234AD")
+                .headers(addBearerAuthorisation("SECURE_CASENOTE_USER", CASENOTES_ROLES))
+                .bodyValue(format(CREATE_CASE_NOTE_WITHOUT_LOC, "This is another case note"))
+                .exchange()
+                .expectStatus().isCreated()
+                .expectBody()
+                .json(readFile("A1234AD-create-casenote.json"));
     }
 
     @Test
     public void testCanCreateCaseNote_SecureWithPomRole() {
-        oauthMockServer.subGetUserDetails("SECURE_CASENOTE_USER");
-        elite2MockServer.subGetOffender("A1234AD");
+        oAuthApi.subGetUserDetails("SECURE_CASENOTE_USER");
+        elite2Api.subGetOffender("A1234AD");
 
         // create the case note
-        final var response = testRestTemplate.exchange(
-                "/case-notes/{offenderIdentifier}",
-                HttpMethod.POST,
-                createHttpEntityWithBearerAuthorisation("SECURE_CASENOTE_USER", POM_ROLE, format(CREATE_CASE_NOTE_WITHOUT_LOC, "This is another case note")),
-                String.class,
-                "A1234AD");
-
-        assertThatJsonFileAndStatus(response, 201, "A1234AD-create-casenote.json");
+        webTestClient.post().uri("/case-notes/{offenderIdentifier}", "A1234AD")
+                .headers(addBearerAuthorisation("SECURE_CASENOTE_USER", POM_ROLE))
+                .bodyValue(format(CREATE_CASE_NOTE_WITHOUT_LOC, "This is another case note"))
+                .exchange()
+                .expectStatus().isCreated()
+                .expectBody()
+                .json(readFile("A1234AD-create-casenote.json"));
     }
 
     @Test
     public void testCannotCreateInactiveCaseNote_Secure() {
-        oauthMockServer.subGetUserDetails("SECURE_CASENOTE_USER");
-        elite2MockServer.subGetOffender("A1234AD");
+        oAuthApi.subGetUserDetails("SECURE_CASENOTE_USER");
+        elite2Api.subGetOffender("A1234AD");
 
         // create the case note
-        final var response = testRestTemplate.exchange(
-                "/case-notes/{offenderIdentifier}",
-                HttpMethod.POST,
-                createHttpEntityWithBearerAuthorisation("SECURE_CASENOTE_USER", CASENOTES_ROLES, format(CREATE_CASE_NOTE_BY_TYPE, "OLDPOM", "OLDTWO", "This is another case note with inactive case note type")),
-                String.class,
-                "A1234AD");
-
-        assertThatStatus(response, 400);
+        webTestClient.post().uri("/case-notes/{offenderIdentifier}", "A1234AD")
+                .headers(addBearerAuthorisation("SECURE_CASENOTE_USER", CASENOTES_ROLES))
+                .bodyValue(format(CREATE_CASE_NOTE_BY_TYPE, "OLDPOM", "OLDTWO", "This is another case note with inactive case note type"))
+                .exchange()
+                .expectStatus().isBadRequest();
     }
 
     @Test
     public void testCanCreateAmendments() {
-        oauthMockServer.subGetUserDetails("SECURE_CASENOTE_USER");
-        elite2MockServer.subGetOffender("A1234AB");
-        elite2MockServer.subGetCaseNotesForOffender("A1234AB");
+        oAuthApi.subGetUserDetails("SECURE_CASENOTE_USER");
+        elite2Api.subGetOffender("A1234AB");
+        elite2Api.subGetCaseNotesForOffender("A1234AB");
 
         final var token = createJwt("SECURE_CASENOTE_USER", CASENOTES_ROLES);
 
         // create the case note
-        final var postResponse = testRestTemplate.exchange(
-                "/case-notes/{offenderIdentifier}",
-                HttpMethod.POST,
-                createHttpEntity(token, format(CREATE_CASE_NOTE_WITHOUT_LOC, "This is another case note")),
-                new ParameterizedTypeReference<CaseNote>() {
-                },
-                "A1234AB");
-
-        assertThat(postResponse.getStatusCodeValue()).isEqualTo(201);
+        final var postResponse = webTestClient.post().uri("/case-notes/{offenderIdentifier}", "A1234AB")
+                .headers(addBearerToken(token))
+                .bodyValue(format(CREATE_CASE_NOTE_WITHOUT_LOC, "This is another case note"))
+                .exchange()
+                .expectStatus().isCreated()
+                .returnResult(CaseNote.class);
 
         // amend the case note
-        final var postAmendResponse = testRestTemplate.exchange(
-                "/case-notes/{offenderIdentifier}/{caseNoteId}",
-                HttpMethod.PUT,
-                createHttpEntity(token, "{ \"text\": \"Amended case note\" }"),
-                new ParameterizedTypeReference<String>() {
-                },
-                "A1234AB", Objects.requireNonNull(postResponse.getBody()).getCaseNoteId());
-
-        assertThatJsonFileAndStatus(postAmendResponse, 200, "A1234AB-update-casenote.json");
+        webTestClient.put().uri("/case-notes/{offenderIdentifier}/{caseNoteId}",
+                "A1234AB", Objects.requireNonNull(postResponse.getResponseBody().blockFirst()).getCaseNoteId())
+                .headers(addBearerToken(token))
+                .bodyValue("{ \"text\": \"Amended case note\" }")
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody().json(readFile("A1234AB-update-casenote.json"));
 
         // check the case note now correct
-        final var response = testRestTemplate.exchange(
-                "/case-notes/{offenderIdentifier}",
-                HttpMethod.GET,
-                createHttpEntity(token, null),
-                new ParameterizedTypeReference<String>() {
-                },
-                "A1234AB");
-
-        assertThatJsonFileAndStatus(response, 200, "A1234AB-casenote.json");
+        webTestClient.get().uri("/case-notes/{offenderIdentifier}", "A1234AB")
+                .headers(addBearerToken(token))
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody()
+                .json(readFile("A1234AB-casenote.json"));
     }
 
     @Test
     public void testCanCreateAmendments_Normal() {
-        oauthMockServer.subGetUserDetails("SECURE_CASENOTE_USER");
-        elite2MockServer.subAmendCaseNote("A1234AE", "12345");
+        oAuthApi.subGetUserDetails("SECURE_CASENOTE_USER");
+        elite2Api.subAmendCaseNote("A1234AE", "12345");
 
         // amend the case note
-        final var response = testRestTemplate.exchange(
-                "/case-notes/{offenderIdentifier}/{caseNoteId}",
-                HttpMethod.PUT,
-                createHttpEntityWithBearerAuthorisation("SECURE_CASENOTE_USER", CASENOTES_ROLES, "{ \"text\": \"Amended case note\" }"),
-                new ParameterizedTypeReference<String>() {
-                },
-                "A1234AE", "12345");
-
-        assertThatJsonFileAndStatus(response, 200, "A1234AE-create-casenote.json");
+        webTestClient.put().uri("/case-notes/{offenderIdentifier}/{caseNoteId}", "A1234AE", "12345")
+                .headers(addBearerAuthorisation("SECURE_CASENOTE_USER", CASENOTES_ROLES))
+                .bodyValue("{ \"text\": \"Amended case note\" }")
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody()
+                .json(readFile("A1234AE-create-casenote.json"));
     }
 
     @Test
     public void testCanFilterCaseNotes() {
-        oauthMockServer.subGetUserDetails("SECURE_CASENOTE_USER");
-        elite2MockServer.subGetOffender("A1234AC");
-        elite2MockServer.subGetCaseNotesForOffender("A1234AC");
+        oAuthApi.subGetUserDetails("SECURE_CASENOTE_USER");
+        elite2Api.subGetOffender("A1234AC");
+        elite2Api.subGetCaseNotesForOffender("A1234AC");
 
         final var token = createJwt("SECURE_CASENOTE_USER", CASENOTES_ROLES);
 
-        testRestTemplate.exchange(
-                "/case-notes/{offenderIdentifier}",
-                HttpMethod.POST,
-                createHttpEntity(token, format(CREATE_CASE_NOTE, "MDI", "This is a case note 1")),
-                new ParameterizedTypeReference<String>() {
-                },
-                "A1234AC");
+        webTestClient.post().uri("/case-notes/{offenderIdentifier}", "A1234AC")
+                .headers(addBearerToken(token))
+                .bodyValue(format(CREATE_CASE_NOTE, "MDI", "This is a case note 1"))
+                .exchange()
+                .expectStatus().isCreated();
 
-        testRestTemplate.exchange(
-                "/case-notes/{offenderIdentifier}",
-                HttpMethod.POST,
-                createHttpEntity(token, format(CREATE_CASE_NOTE_WITHOUT_LOC, "This is a case note 2")),
-                new ParameterizedTypeReference<String>() {
-                },
-                "A1234AC");
+        webTestClient.post().uri("/case-notes/{offenderIdentifier}", "A1234AC")
+                .headers(addBearerToken(token))
+                .bodyValue(format(CREATE_CASE_NOTE_WITHOUT_LOC, "This is a case note 2"))
+                .exchange()
+                .expectStatus().isCreated();
 
-        testRestTemplate.exchange(
-                "/case-notes/{offenderIdentifier}",
-                HttpMethod.POST,
-                createHttpEntity(token, format(CREATE_CASE_NOTE, "LEI", "This is a case note 3")),
-                new ParameterizedTypeReference<String>() {
-                },
-                "A1234AC");
+        webTestClient.post().uri("/case-notes/{offenderIdentifier}", "A1234AC")
+                .headers(addBearerToken(token))
+                .bodyValue(format(CREATE_CASE_NOTE, "LEI", "This is a case note 3"))
+                .exchange()
+                .expectStatus().isCreated();
 
-        final var response = testRestTemplate.exchange(
-                "/case-notes/{offenderIdentifier}?size={size}&page={page}",
-                HttpMethod.GET,
-                createHttpEntity(token, null),
-                new ParameterizedTypeReference<String>() {
-                },
-                "A1234AC", "2", "1");
-
-        assertThatJsonFileAndStatus(response, 200, "A1234AC-casenote.json");
+        webTestClient.get().uri("/case-notes/{offenderIdentifier}?size={size}&page={page}", "A1234AC", "2", "1")
+                .headers(addBearerToken(token))
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody()
+                .json(readFile("A1234AC-casenote.json"));
     }
 
     @Test
     public void testCanCreateAndUpdateTypes() {
-        oauthMockServer.subGetUserDetails("SYSTEM_USER_READ_WRITE");
+        oAuthApi.subGetUserDetails("SYSTEM_USER_READ_WRITE");
 
         final var token = createJwt("SYSTEM_USER_READ_WRITE", SYSTEM_ROLES);
 
         // add a new case note parent type called NEWTYPE1
-        final var response = testRestTemplate.exchange(
-                "/case-notes/types",
-                HttpMethod.POST,
-                createHttpEntity(token, "{" +
+        webTestClient.post().uri("/case-notes/types")
+                .headers(addBearerToken(token))
+                .bodyValue("{" +
                         "\"type\": \"NEWTYPE1\",\n" +
                         "\"description\": \"A New Type 1\"," +
                         "\"active\": false" +
-                        "}"),
-                new ParameterizedTypeReference<String>() {
-                });
-
-        assertThatJsonFileAndStatus(response, 201, "newCaseNoteType1.json");
+                        "}")
+                .exchange()
+                .expectStatus().isCreated()
+                .expectBody()
+                .json(readFile("newCaseNoteType1.json"));
 
         // amend the case note type from inactive to active and change description
-        final var responseUpdate = testRestTemplate.exchange(
-                "/case-notes/types/NEWTYPE1",
-                HttpMethod.PUT,
-                createHttpEntity(token, "{" +
+        webTestClient.put().uri("/case-notes/types/NEWTYPE1")
+                .headers(addBearerToken(token))
+                .bodyValue("{" +
                         "\"description\": \"Change The Desc\"," +
                         "\"active\": true" +
-                        "}"),
-                new ParameterizedTypeReference<String>() {
-                });
-
-        assertThatJsonFileAndStatus(responseUpdate, 200, "updateCaseNoteType1.json");
+                        "}")
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody()
+                .json(readFile("updateCaseNoteType1.json"));
 
         // add a new sub case note type called NEWSUBTYPE1
-        final var responseSubType = testRestTemplate.exchange(
-                "/case-notes/types/NEWTYPE1",
-                HttpMethod.POST,
-                createHttpEntity(token, "{" +
+        webTestClient.post().uri("/case-notes/types/NEWTYPE1")
+                .headers(addBearerToken(token))
+                .bodyValue("{" +
                         "\"type\": \"NEWSUBTYPE1\",\n" +
                         "\"description\": \"A New Sub Type 1\"," +
                         "\"active\": false" +
-                        "}"),
-                new ParameterizedTypeReference<String>() {
-                });
-
-        assertThatJsonFileAndStatus(responseSubType, 201, "newCaseNoteSubType1.json");
+                        "}")
+                .exchange()
+                .expectStatus().isCreated()
+                .expectBody()
+                .json(readFile("newCaseNoteSubType1.json"));
 
         // amend the case note sub type to active and new description
-        final var responseUpdateSubType = testRestTemplate.exchange(
-                "/case-notes/types/NEWTYPE1/NEWSUBTYPE1",
-                HttpMethod.PUT,
-                createHttpEntity(token, "{" +
+        webTestClient.put().uri("/case-notes/types/NEWTYPE1/NEWSUBTYPE1")
+                .headers(addBearerToken(token))
+                .bodyValue("{" +
                         "\"description\": \"Change The Desc\"," +
                         "\"active\": true" +
-                        "}"),
-                new ParameterizedTypeReference<String>() {
-                });
-
-        assertThatJsonFileAndStatus(responseUpdateSubType, 200, "updateCaseNoteSubType1.json");
+                        "}")
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody()
+                .json(readFile("updateCaseNoteSubType1.json"));
     }
 
     @Test
     public void testCannotCreateAndUpdateTypesWhenInvalid() {
-        oauthMockServer.subGetUserDetails("SYSTEM_USER_READ_WRITE");
+        OAuthExtension.oAuthApi.subGetUserDetails("SYSTEM_USER_READ_WRITE");
 
         final var token = createJwt("SYSTEM_USER_READ_WRITE", SYSTEM_ROLES);
 
         // add a new case note parent type called TOOLONG1234567890 that is more than 12 chars
-        final var response = testRestTemplate.exchange(
-                "/case-notes/types",
-                HttpMethod.POST,
-                createHttpEntity(token, "{" +
+        webTestClient.post().uri("/case-notes/types")
+                .headers(addBearerToken(token))
+                .bodyValue("{" +
                         "\"type\": \"TOOLONG1234567890\",\n" +
                         "\"description\": \"Wrong!\"," +
                         "\"active\": false" +
-                        "}"),
-                new ParameterizedTypeReference<String>() {
-                });
-
-        assertThatJsonFileAndStatus(response, 400, "validation-error1.json");
+                        "}")
+                .exchange()
+                .expectStatus().isBadRequest()
+                .expectBody().json(readFile("validation-error1.json"));
 
         // amend the case note type and use an invalid boolean value
-        final var responseUpdate = testRestTemplate.exchange(
-                "/case-notes/types/POM",
-                HttpMethod.PUT,
-                createHttpEntity(token, "{" +
+        webTestClient.put().uri("/case-notes/types/POM")
+                .headers(addBearerToken(token))
+                .bodyValue("{" +
                         "\"description\": \"Change The Desc\"," +
                         "\"active\": notvalidtype" +
-                        "}"),
-                new ParameterizedTypeReference<String>() {
-                });
-
-        assertThatStatus(responseUpdate, 500);
+                        "}")
+                .exchange()
+                .expectStatus().is5xxServerError();
 
         // amend the case note type to description that is too long
-        final var responseUpdate2 = testRestTemplate.exchange(
-                "/case-notes/types/POM",
-                HttpMethod.PUT,
-                createHttpEntity(token, "{" +
+        webTestClient.put().uri("/case-notes/types/POM")
+                .headers(addBearerToken(token))
+                .bodyValue("{" +
                         "\"description\": \"012345678901234567890123456789012345678901234567890123456789012345678901234567890\"," +
                         "\"active\": true" +
-                        "}"),
-                new ParameterizedTypeReference<String>() {
-                });
-
-        assertThatJsonFileAndStatus(responseUpdate2, 400, "validation-error2.json");
+                        "}")
+                .exchange()
+                .expectStatus().isBadRequest()
+                .expectBody().json(readFile("validation-error2.json"));
 
         // try to add a new sub case note type that is too long
-        final var responseSubType = testRestTemplate.exchange(
-                "/case-notes/types/POM",
-                HttpMethod.POST,
-                createHttpEntity(token, "{" +
+        webTestClient.post().uri("/case-notes/types/POM")
+                .headers(addBearerToken(token))
+                .bodyValue("{" +
                         "\"type\": \"TOOLONG1234567890\",\n" +
                         "\"description\": \"New Type\"," +
                         "\"active\": false" +
-                        "}"),
-                new ParameterizedTypeReference<String>() {
-                });
-
-        assertThatStatus(responseSubType, 400);
+                        "}")
+                .exchange()
+                .expectStatus().isBadRequest();
 
         // try to add a new sub case note type where description is too long
-        final var responseSubType2 = testRestTemplate.exchange(
-                "/case-notes/types/POM",
-                HttpMethod.POST,
-                createHttpEntity(token, "{" +
+        webTestClient.post().uri("/case-notes/types/POM")
+                .headers(addBearerToken(token))
+                .bodyValue("{" +
                         "\"type\": \"NEWSUBTYPE1\",\n" +
                         "\"description\": \"012345678901234567890123456789012345678901234567890123456789012345678901234567890\"," +
                         "\"active\": false" +
-                        "}"),
-                new ParameterizedTypeReference<String>() {
-                });
-
-        assertThatStatus(responseSubType2, 400);
+                        "}")
+                .exchange()
+                .expectStatus().isBadRequest();
 
         // amend the case note sub type with description is too long
-        final var responseUpdateSubType = testRestTemplate.exchange(
-                "/case-notes/types/POM/GEN",
-                HttpMethod.PUT,
-                createHttpEntity(token, "{" +
+        webTestClient.put().uri("/case-notes/types/POM/GEN")
+                .headers(addBearerToken(token))
+                .bodyValue("{" +
                         "\"description\": \"012345678901234567890123456789012345678901234567890123456789012345678901234567890\"," +
                         "\"active\": true" +
-                        "}"),
-                new ParameterizedTypeReference<String>() {
-                });
-
-        assertThatStatus(responseUpdateSubType, 400);
+                        "}")
+                .exchange()
+                .expectStatus().isBadRequest();
     }
-
 }

@@ -1,9 +1,9 @@
 package uk.gov.justice.hmpps.casenotes.health.wiremock
 
+import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.http.HttpHeader
 import com.github.tomakehurst.wiremock.http.HttpHeaders
-import com.github.tomakehurst.wiremock.junit.WireMockRule
 import com.google.gson.GsonBuilder
 import org.junit.jupiter.api.extension.AfterAllCallback
 import org.junit.jupiter.api.extension.BeforeAllCallback
@@ -31,7 +31,7 @@ class OAuthExtension : BeforeAllCallback, AfterAllCallback, BeforeEachCallback {
   }
 }
 
-class OAuthMockServer : WireMockRule(WIREMOCK_PORT) {
+class OAuthMockServer : WireMockServer(WIREMOCK_PORT) {
   private val gson = GsonBuilder().create()
 
   fun stubGrantToken() {

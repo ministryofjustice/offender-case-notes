@@ -1,6 +1,6 @@
 package uk.gov.justice.hmpps.casenotes.health.wiremock
 
-import com.github.tomakehurst.wiremock.junit.WireMockRule
+import com.github.tomakehurst.wiremock.WireMockServer
 import org.junit.jupiter.api.extension.AfterAllCallback
 import org.junit.jupiter.api.extension.BeforeAllCallback
 import org.junit.jupiter.api.extension.BeforeEachCallback
@@ -25,4 +25,4 @@ class TokenVerificationExtension : BeforeAllCallback, AfterAllCallback, BeforeEa
   }
 }
 
-class TokenVerificationMockServer : WireMockRule(9100)
+class TokenVerificationMockServer : WireMockServer(9100)
