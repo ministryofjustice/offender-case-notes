@@ -2,7 +2,6 @@ package uk.gov.justice.hmpps.casenotes.health.wiremock
 
 import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.junit.WireMockRule
-import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import com.google.gson.JsonDeserializationContext
 import com.google.gson.JsonDeserializer
@@ -11,14 +10,39 @@ import com.google.gson.JsonParseException
 import com.google.gson.JsonPrimitive
 import com.google.gson.JsonSerializationContext
 import com.google.gson.JsonSerializer
+import org.junit.jupiter.api.extension.AfterAllCallback
+import org.junit.jupiter.api.extension.BeforeAllCallback
+import org.junit.jupiter.api.extension.BeforeEachCallback
+import org.junit.jupiter.api.extension.ExtensionContext
 import uk.gov.justice.hmpps.casenotes.dto.CaseNoteType
 import uk.gov.justice.hmpps.casenotes.dto.NomisCaseNote
 import java.lang.reflect.Type
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
+
+class Elite2Extension : BeforeAllCallback, AfterAllCallback, BeforeEachCallback {
+  companion object {
+    @JvmField
+    val elite2Api = Elite2MockServer()
+  }
+
+  override fun beforeAll(context: ExtensionContext) {
+    elite2Api.start()
+  }
+
+  override fun beforeEach(context: ExtensionContext) {
+    elite2Api.resetRequests()
+  }
+
+  override fun afterAll(context: ExtensionContext) {
+    elite2Api.stop()
+  }
+}
+
 class Elite2MockServer : WireMockRule(WIREMOCK_PORT) {
-  private val gson: Gson
+  private val gson = GsonBuilder().registerTypeAdapter(LocalDateTime::class.java, LocalDateTimeConverter()).create()
+
   fun subGetCaseNoteTypes() {
     val getCaseNoteTypes = "$API_PREFIX/reference-domains/caseNoteTypes"
     stubFor(
@@ -179,9 +203,5 @@ class Elite2MockServer : WireMockRule(WIREMOCK_PORT) {
   companion object {
     private const val WIREMOCK_PORT = 8999
     private const val API_PREFIX = "/api"
-  }
-
-  init {
-    gson = GsonBuilder().registerTypeAdapter(LocalDateTime::class.java, LocalDateTimeConverter()).create()
   }
 }
