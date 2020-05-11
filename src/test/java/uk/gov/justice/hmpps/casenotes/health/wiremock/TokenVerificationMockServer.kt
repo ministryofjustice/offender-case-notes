@@ -1,9 +1,28 @@
 package uk.gov.justice.hmpps.casenotes.health.wiremock
 
 import com.github.tomakehurst.wiremock.junit.WireMockRule
+import org.junit.jupiter.api.extension.AfterAllCallback
+import org.junit.jupiter.api.extension.BeforeAllCallback
+import org.junit.jupiter.api.extension.BeforeEachCallback
+import org.junit.jupiter.api.extension.ExtensionContext
 
-class TokenVerificationMockServer : WireMockRule(WIREMOCK_PORT) {
+class TokenVerificationExtension : BeforeAllCallback, AfterAllCallback, BeforeEachCallback {
   companion object {
-    private const val WIREMOCK_PORT = 9100
+    @JvmField
+    val tokenVerificationApi = TokenVerificationMockServer()
+  }
+
+  override fun beforeAll(context: ExtensionContext) {
+    tokenVerificationApi.start()
+  }
+
+  override fun beforeEach(context: ExtensionContext) {
+    tokenVerificationApi.resetRequests()
+  }
+
+  override fun afterAll(context: ExtensionContext) {
+    tokenVerificationApi.stop()
   }
 }
+
+class TokenVerificationMockServer : WireMockRule(9100)

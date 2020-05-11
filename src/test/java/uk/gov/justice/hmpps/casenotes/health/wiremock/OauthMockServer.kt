@@ -5,6 +5,31 @@ import com.github.tomakehurst.wiremock.http.HttpHeader
 import com.github.tomakehurst.wiremock.http.HttpHeaders
 import com.github.tomakehurst.wiremock.junit.WireMockRule
 import com.google.gson.GsonBuilder
+import org.junit.jupiter.api.extension.AfterAllCallback
+import org.junit.jupiter.api.extension.BeforeAllCallback
+import org.junit.jupiter.api.extension.BeforeEachCallback
+import org.junit.jupiter.api.extension.ExtensionContext
+
+
+class OAuthExtension : BeforeAllCallback, AfterAllCallback, BeforeEachCallback {
+  companion object {
+    @JvmField
+    val oAuthApi = OAuthMockServer()
+  }
+
+  override fun beforeAll(context: ExtensionContext) {
+    oAuthApi.start()
+  }
+
+  override fun beforeEach(context: ExtensionContext) {
+    oAuthApi.resetRequests()
+    oAuthApi.stubGrantToken()
+  }
+
+  override fun afterAll(context: ExtensionContext) {
+    oAuthApi.stop()
+  }
+}
 
 class OAuthMockServer : WireMockRule(WIREMOCK_PORT) {
   private val gson = GsonBuilder().create()
