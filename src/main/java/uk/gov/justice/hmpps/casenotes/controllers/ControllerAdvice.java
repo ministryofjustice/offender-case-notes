@@ -7,8 +7,8 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-import org.springframework.web.client.RestClientException;
-import org.springframework.web.client.RestClientResponseException;
+import org.springframework.web.reactive.function.client.WebClientException;
+import org.springframework.web.reactive.function.client.WebClientResponseException;
 import uk.gov.justice.hmpps.casenotes.dto.ErrorResponse;
 import uk.gov.justice.hmpps.casenotes.services.EntityNotFoundException;
 
@@ -22,16 +22,16 @@ import javax.validation.ValidationException;
 @Slf4j
 public class ControllerAdvice {
 
-    @ExceptionHandler(RestClientResponseException.class)
-    public ResponseEntity<byte[]> handleRestClientResponseException(final RestClientResponseException e) {
+    @ExceptionHandler(WebClientResponseException.class)
+    public ResponseEntity<byte[]> handleWebClientResponseException(final WebClientResponseException e) {
         log.error("Unexpected exception", e);
         return ResponseEntity
                 .status(e.getRawStatusCode())
                 .body(e.getResponseBodyAsByteArray());
     }
 
-    @ExceptionHandler(RestClientException.class)
-    public ResponseEntity<ErrorResponse> handleRestClientException(final RestClientException e) {
+    @ExceptionHandler(WebClientException.class)
+    public ResponseEntity<ErrorResponse> handleWebClientException(final WebClientException e) {
         log.error("Unexpected exception", e);
         return ResponseEntity
                 .status(HttpStatus.INTERNAL_SERVER_ERROR)

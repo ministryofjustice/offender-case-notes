@@ -138,7 +138,6 @@ public class CaseNoteResourceTest extends ResourceTest {
     @Test
     public void testCanRetrieveCaseNotesForOffenderNormal() {
         oauthMockServer.subGetUserDetails("API_TEST_USER");
-        elite2MockServer.subGetOffender("A1234AA");
         elite2MockServer.subGetCaseNotesForOffender("A1234AA");
 
         final var response = testRestTemplate.exchange(
@@ -150,6 +149,22 @@ public class CaseNoteResourceTest extends ResourceTest {
                 "A1234AA");
 
         assertThatJsonFileAndStatus(response, 200, "A1234AA-normal-casenote.json");
+    }
+
+    @Test
+    public void testRetrieveCaseNotesWillReturn404IfOffenderNotFound() {
+        oauthMockServer.subGetUserDetails("API_TEST_USER");
+        elite2MockServer.subGetCaseNotesForOffenderNotFound("A1234AA");
+
+        final var response = testRestTemplate.exchange(
+                "/case-notes/{offenderIdentifier}",
+                HttpMethod.GET,
+                createHttpEntityWithBearerAuthorisation("API_TEST_USER", List.of()),
+                new ParameterizedTypeReference<String>() {
+                },
+                "A1234AA");
+
+        assertThatJsonFileAndStatus(response, 404, "offender-not-found.json");
     }
 
     @Test
