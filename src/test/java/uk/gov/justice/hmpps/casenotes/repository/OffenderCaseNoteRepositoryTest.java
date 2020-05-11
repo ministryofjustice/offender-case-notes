@@ -6,15 +6,19 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.test.context.support.WithAnonymousUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.transaction.TestTransaction;
 import org.springframework.transaction.annotation.Transactional;
+import uk.gov.justice.hmpps.casenotes.config.AuthAwareAuthenticationToken;
 import uk.gov.justice.hmpps.casenotes.filters.OffenderCaseNoteFilter;
 import uk.gov.justice.hmpps.casenotes.model.OffenderCaseNote;
 import uk.gov.justice.hmpps.casenotes.model.OffenderCaseNote.OffenderCaseNoteBuilder;
 import uk.gov.justice.hmpps.casenotes.model.SensitiveCaseNoteType;
 
+import java.util.Collections;
 import java.util.Set;
 
 import static java.time.LocalDateTime.now;
@@ -23,7 +27,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 @ActiveProfiles("test")
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK)
 @Transactional
-@WithAnonymousUser
 public class OffenderCaseNoteRepositoryTest {
 
     private static final String PARENT_TYPE = "POM";
@@ -43,6 +46,9 @@ public class OffenderCaseNoteRepositoryTest {
 
     @BeforeEach
     public void setUp() {
+        final var jwt = Jwt.withTokenValue("some").subject("anonymous").header("head", "something").build();
+        SecurityContextHolder.getContext().setAuthentication(
+                new AuthAwareAuthenticationToken(jwt, "userId", Collections.emptyList()));
         genType = caseNoteTypeRepository.findSensitiveCaseNoteTypeByParentType_TypeAndType(PARENT_TYPE, SUB_TYPE);
     }
 

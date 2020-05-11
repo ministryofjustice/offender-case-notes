@@ -1,18 +1,14 @@
 package uk.gov.justice.hmpps.casenotes.config;
 
+import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.RegExUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.User;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
-import uk.gov.justice.hmpps.casenotes.config.UserIdAuthenticationConverter.UserIdUser;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 @Slf4j
@@ -29,7 +25,7 @@ public class SecurityUserContext {
     }
 
     public Optional<String> getCurrentUsername() {
-        return getOptionalCurrentUser().map(User::getUsername);
+        return getOptionalCurrentUser().map(UserIdUser::getUsername);
     }
 
     public UserIdUser getCurrentUser() {
@@ -38,32 +34,24 @@ public class SecurityUserContext {
 
     private Optional<UserIdUser> getOptionalCurrentUser() {
         final var authentication = getAuthentication();
-        if (authentication == null || authentication.getPrincipal() == null) return Optional.empty();
+        if (!(authentication instanceof AuthAwareAuthenticationToken)) return Optional.empty();
 
-        final var userPrincipal = authentication.getPrincipal();
-
-        if (userPrincipal instanceof UserIdUser) return Optional.of((UserIdUser) userPrincipal);
-
-        final String username;
-        if (userPrincipal instanceof String) {
-            username = (String) userPrincipal;
-        } else if (userPrincipal instanceof UserDetails) {
-            username = ((UserDetails) userPrincipal).getUsername();
-        } else if (userPrincipal instanceof Map) {
-            final var userPrincipalMap = (Map) userPrincipal;
-            username = (String) userPrincipalMap.get("username");
-        } else {
-            username = userPrincipal.toString();
-        }
-
-        if (StringUtils.isEmpty(username) || username.equals("anonymousUser")) return Optional.empty();
-
-        log.debug("Authentication doesn't contain user id, using username instead");
-        return Optional.of(new UserIdUser(username, authentication.getCredentials().toString(), authentication.getAuthorities(), username));
+        return Optional.of(((AuthAwareAuthenticationToken) authentication).getUserIdUser());
     }
 
     public boolean isOverrideRole(final String... overrideRoles) {
         final var roles = Arrays.asList(overrideRoles.length > 0 ? overrideRoles : new String[]{"SYSTEM_USER"});
         return hasMatchingRole(roles, getAuthentication());
+    }
+
+    @Data
+    public static final class UserIdUser {
+        private final String username;
+        private final String userId;
+
+        public UserIdUser(final String username, final String userId) {
+            this.username = username;
+            this.userId = userId;
+        }
     }
 }

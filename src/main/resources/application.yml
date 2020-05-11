@@ -35,20 +35,31 @@ spring:
     serialization:
       WRITE_DATES_AS_TIMESTAMPS: false
 
+  security:
+    oauth2:
+      client:
+        registration:
+          elite2-api:
+            provider: hmpps-auth
+            client-id: ${oauth.client.id}
+            client-secret: ${oauth.client.secret}
+            authorization-grant-type: client_credentials
+            scope: read
+        provider:
+          hmpps-auth:
+            token-uri: ${oauth.endpoint.url}/oauth/token
+  codec:
+    max-in-memory-size: 10MB
+
+
 server:
   port: 8080
   servlet:
     context-path: /
-  use-forward-headers: true
+  forward-headers-strategy: native
   tomcat:
     remote-ip-header: x-forwarded-for
     protocol_header: x-forwarded-proto
-
-logging:
-  level:
-    org.springframework: INFO
-    org.springframework.security: INFO
-    uk.gov.justice.hmpps: DEBUG
 
 management:
   endpoints:

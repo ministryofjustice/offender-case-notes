@@ -25,6 +25,9 @@ env:
   - name: TOKENVERIFICATION_API_BASE_URL
     value: "{{ .Values.env.TOKENVERIFICATION_API_BASE_URL }}"
 
+  - name: SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_JWK_SET_URI
+    value: "{{ .Values.env.SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_JWK_SET_URI }}"
+
   - name: APPINSIGHTS_INSTRUMENTATIONKEY
     valueFrom:
       secretKeyRef:
@@ -123,5 +126,4 @@ env:
       secretKeyRef:
         name: {{ template "app.name" . }}
         key: OFFENDER_CASE_NOTES_CLIENT_SECRET
-
 {{- end -}}

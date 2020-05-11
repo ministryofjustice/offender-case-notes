@@ -8,28 +8,30 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
-import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.oauth2.client.OAuth2RestTemplate;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
-import org.springframework.web.util.UriComponentsBuilder;
-import org.springframework.web.util.UriTemplate;
-import uk.gov.justice.hmpps.casenotes.dto.*;
+import org.springframework.web.reactive.function.client.WebClient;
+import uk.gov.justice.hmpps.casenotes.dto.BookingIdentifier;
+import uk.gov.justice.hmpps.casenotes.dto.CaseNoteFilter;
+import uk.gov.justice.hmpps.casenotes.dto.CaseNoteType;
+import uk.gov.justice.hmpps.casenotes.dto.NewCaseNote;
+import uk.gov.justice.hmpps.casenotes.dto.NomisCaseNote;
+import uk.gov.justice.hmpps.casenotes.dto.OffenderBooking;
+import uk.gov.justice.hmpps.casenotes.dto.UpdateCaseNote;
 
-import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @Service
 @AllArgsConstructor
 public class ExternalApiService {
 
-    private final RestTemplate elite2ApiRestTemplate;
-    private final RestTemplate oauthApiRestTemplate;
-    private final OAuth2RestTemplate clientCredentialsRestTemplate;
+    private final WebClient elite2ApiWebClient;
+    private final WebClient oauthApiWebClient;
+    private final WebClient elite2ClientCredentialsWebClient;
 
     List<CaseNoteType> getCaseNoteTypes() {
         return getCaseNoteTypes("/api/reference-domains/caseNoteTypes");
@@ -40,84 +42,78 @@ public class ExternalApiService {
     }
 
     private List<CaseNoteType> getCaseNoteTypes(final String url) {
-        final var response = elite2ApiRestTemplate.exchange(url, HttpMethod.GET, null,
-                new ParameterizedTypeReference<List<CaseNoteType>>() {
-                });
-
-        final var body = response.getBody();
-
-        if (body == null) {
-            throw EntityNotFoundException.withMessage("Case Note Types Not Found");
-        }
-
-        return body;
+        return elite2ApiWebClient.get().uri(url)
+                .retrieve()
+                .bodyToMono(
+                        new ParameterizedTypeReference<List<CaseNoteType>>() {
+                        })
+                .block();
     }
 
     List<BookingIdentifier> getIdentifiersByBookingId(final Long bookingId) {
-        final var uri = clientCredentialsRestTemplate.getUriTemplateHandler().expand(new UriTemplate("/api/bookings/{bookingId}/identifiers").expand(bookingId).toString());
-
-        final var exchange = clientCredentialsRestTemplate.exchange(uri, HttpMethod.GET, null,
-                new ParameterizedTypeReference<List<BookingIdentifier>>() {
-                });
-        return exchange.getBody();
+        return elite2ClientCredentialsWebClient.get().uri("/api/bookings/{bookingId}/identifiers", bookingId)
+                .retrieve()
+                .bodyToMono(
+                        new ParameterizedTypeReference<List<BookingIdentifier>>() {
+                        })
+                .block();
     }
 
     OffenderBooking getBooking(final Long bookingId) {
-        final var uri = clientCredentialsRestTemplate.getUriTemplateHandler().expand(new UriTemplate("/api/bookings/{bookingId}?basicInfo=true").expand(bookingId).toString());
-            final var exchange = clientCredentialsRestTemplate.exchange(uri, HttpMethod.GET, null, OffenderBooking.class);
-            return exchange.getBody();
+        return elite2ClientCredentialsWebClient.get().uri("/api/bookings/{bookingId}?basicInfo=true", bookingId)
+                .retrieve()
+                .bodyToMono(OffenderBooking.class)
+                .block();
     }
 
     String getUserFullName(final String currentUsername) {
-        final var response = oauthApiRestTemplate.exchange("/api/user/{username}", HttpMethod.GET, null, Map.class, currentUsername);
-        if (response.getBody() != null) {
-            return (String) response.getBody().get("name");
-        }
-        return currentUsername;
+        return oauthApiWebClient.get().uri("/api/user/{username}", currentUsername)
+                .retrieve()
+                .bodyToMono(
+                        new ParameterizedTypeReference<Map<String, String>>() {
+                        })
+                .blockOptional().map(u -> u.getOrDefault("name", currentUsername)).orElse(currentUsername);
     }
 
     String getOffenderLocation(final String offenderIdentifier) {
-        final var response = elite2ApiRestTemplate.exchange("/api/bookings/offenderNo/{offenderNo}", HttpMethod.GET, null, Map.class, offenderIdentifier);
-        final var body = response.getBody();
-        if (body == null) {
-            throw EntityNotFoundException.withId(offenderIdentifier);
-        }
-
-        return (String) response.getBody().get("agencyId");
+        return elite2ApiWebClient.get().uri("/api/bookings/offenderNo/{offenderNo}", offenderIdentifier)
+                .retrieve()
+                .bodyToMono(
+                        new ParameterizedTypeReference<Map<String, String>>() {
+                        })
+                .single()
+                .block()
+                .get("agencyId");
     }
 
     Page<NomisCaseNote> getOffenderCaseNotes(final String offenderIdentifier, final CaseNoteFilter filter, final int pageLimit, final int pageNumber, final String sortFields, final Sort.Direction direction) {
 
-        final var headers = new HttpHeaders();
         final var offset = pageLimit * pageNumber;
-        Map.of("Page-Limit", String.valueOf(pageLimit),
+        final var headerMap = Map.of("Page-Limit", String.valueOf(pageLimit),
                 "Page-Offset", String.valueOf(offset),
                 "Sort-Fields", sortFields,
-                "Sort-Order", direction.name())
-                .forEach(headers::add);
+                "Sort-Order", direction.name());
 
         final var queryFilter = getQueryFilter(filter);
         final var url = "/api/offenders/{offenderIdentifier}/case-notes" + (queryFilter != null ? "?" + queryFilter : "");
 
-        final var response = elite2ApiRestTemplate.exchange(url, HttpMethod.GET, new HttpEntity<>(null, headers),
-                new ParameterizedTypeReference<List<NomisCaseNote>>() {
-                }, offenderIdentifier);
-
-        final var body = response.getBody();
-        if (body == null) {
-            throw EntityNotFoundException.withId(offenderIdentifier);
-        }
-
-        return new PageImpl<>(response.getBody(),
-                PageRequest.of(pageNumber, pageLimit),
-                getHeader(response)
-        );
+        return elite2ApiWebClient.get().uri(url, offenderIdentifier)
+                .headers(
+                        c -> {
+                            c.add("Page-Limit", String.valueOf(pageLimit));
+                            c.add("Page-Offset", String.valueOf(offset));
+                            c.add("Sort-Fields", sortFields);
+                            c.add("Sort-Order", direction.name());
+                        })
+                .retrieve()
+                .toEntityList(NomisCaseNote.class)
+                .map(e -> new PageImpl<>(e.getBody(), PageRequest.of(pageNumber, pageLimit), getHeader(e.getHeaders())))
+                .block();
     }
 
-    private int getHeader(final ResponseEntity response) {
-        final var responseHeaders = response.getHeaders();
+    private int getHeader(final HttpHeaders responseHeaders) {
         final var value = responseHeaders.get("Total-Records");
-        return value != null && !value.isEmpty() ? Integer.parseInt(value.get(0)) : 0;
+        return !value.isEmpty() ? Integer.parseInt(value.get(0)) : 0;
     }
 
     private String getQueryFilter(final CaseNoteFilter filter) {
@@ -152,27 +148,28 @@ public class ExternalApiService {
     }
 
     NomisCaseNote createCaseNote(final String offenderIdentifier, final NewCaseNote newCaseNote) {
-        final var response = elite2ApiRestTemplate.postForEntity("/api/offenders/{offenderNo}/case-notes", newCaseNote, NomisCaseNote.class, offenderIdentifier);
-        return Optional.ofNullable(response.getBody()).orElseThrow(EntityNotFoundException.withId(offenderIdentifier));
+        return elite2ApiWebClient.post().uri("/api/offenders/{offenderNo}/case-notes", offenderIdentifier)
+                .bodyValue(newCaseNote)
+                .retrieve()
+                .bodyToMono(NomisCaseNote.class)
+                .block();
     }
 
     NomisCaseNote getOffenderCaseNote(final String offenderIdentifier, final long caseNoteIdentifier) {
-        final var response = elite2ApiRestTemplate.getForEntity("/api/offenders/{offenderNo}/case-notes/{caseNoteIdentifier}", NomisCaseNote.class, offenderIdentifier, caseNoteIdentifier);
-        return Optional.ofNullable(response.getBody()).orElseThrow(EntityNotFoundException.withId(offenderIdentifier));
+        return elite2ApiWebClient.get().uri("/api/offenders/{offenderNo}/case-notes/{caseNoteIdentifier}", offenderIdentifier, caseNoteIdentifier)
+                .retrieve()
+                .bodyToMono(NomisCaseNote.class)
+                .single()
+                .block();
     }
 
     NomisCaseNote amendOffenderCaseNote(final String offenderIdentifier, final long caseNoteIdentifier, final UpdateCaseNote caseNote) {
-        final var response = elite2ApiRestTemplate.exchange("/api/offenders/{offenderNo}/case-notes/{caseNoteIdentifier}", HttpMethod.PUT,
-                new HttpEntity<>(caseNote), NomisCaseNote.class, offenderIdentifier, caseNoteIdentifier);
-        return Optional.ofNullable(response.getBody()).orElseThrow(EntityNotFoundException.withId(offenderIdentifier));
-    }
-
-    private UriComponentsBuilder getUriComponentsBuilder(final String urlSuffix, final List<String> noteTypes, final LocalDateTime createdDate) {
-        // bit naff, but the template handler holds the root uri that we need, so have to create a uri from it to then pass to the builder
-        final var uri = elite2ApiRestTemplate.getUriTemplateHandler().expand("/api/case-notes/" + urlSuffix).normalize();
-        return UriComponentsBuilder.fromUri(uri)
-                .queryParam("type", noteTypes.toArray())
-                .queryParam("createdDate", createdDate);
+        return elite2ApiWebClient.put().uri("/api/offenders/{offenderNo}/case-notes/{caseNoteIdentifier}", offenderIdentifier, caseNoteIdentifier)
+                .bodyValue(caseNote)
+                .retrieve()
+                .bodyToMono(NomisCaseNote.class)
+                .single()
+                .block();
     }
 }
 

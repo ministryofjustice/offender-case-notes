@@ -65,9 +65,9 @@ class HealthCheckIntegrationTest : IntegrationTest() {
 
     val response = restTemplate.getForEntity("/health", String::class.java)
 
-    assertThatJson(response.body!!).node("components.OAuthApiHealth.details.error").isEqualTo("org.springframework.web.client.HttpClientErrorException\$NotFound: 404 Not Found: [some error]")
-    assertThatJson(response.body!!).node("components.elite2ApiHealth.details.error").isEqualTo("org.springframework.web.client.HttpClientErrorException\$NotFound: 404 Not Found: [some error]")
-    assertThatJson(response.body!!).node("components.tokenVerificationApiHealth.details.error").isEqualTo("org.springframework.web.client.HttpClientErrorException\$NotFound: 404 Not Found: [some error]")
+    assertThatJson(response.body!!).node("components.OAuthApiHealth.details.error").isString.contains("WebClientResponseException\$NotFound: 404 Not Found")
+    assertThatJson(response.body!!).node("components.elite2ApiHealth.details.error").isString.contains("WebClientResponseException\$NotFound: 404 Not Found")
+    assertThatJson(response.body!!).node("components.tokenVerificationApiHealth.details.error").isString.contains("WebClientResponseException\$NotFound: 404 Not Found")
     assertThatJson(response.body!!).node("status").isEqualTo("DOWN")
     assertThat(response.statusCodeValue).isEqualTo(503)
   }
@@ -78,9 +78,9 @@ class HealthCheckIntegrationTest : IntegrationTest() {
 
     val response = restTemplate.getForEntity("/health", String::class.java)
 
-    assertThatJson(response.body!!).node("components.OAuthApiHealth.details.error").isEqualTo("org.springframework.web.client.HttpClientErrorException: 418 418: [some error]")
-    assertThatJson(response.body!!).node("components.elite2ApiHealth.details.error").isEqualTo("org.springframework.web.client.HttpClientErrorException: 418 418: [some error]")
-    assertThatJson(response.body!!).node("components.tokenVerificationApiHealth.details.error").isEqualTo("org.springframework.web.client.HttpClientErrorException: 418 418: [some error]")
+    assertThatJson(response.body!!).node("components.OAuthApiHealth.details.error").isString.contains("WebClientResponseException: 418 I'm a teapot")
+    assertThatJson(response.body!!).node("components.elite2ApiHealth.details.error").isString.contains("WebClientResponseException: 418 I'm a teapot")
+    assertThatJson(response.body!!).node("components.tokenVerificationApiHealth.details.error").isString.contains("WebClientResponseException: 418 I'm a teapot")
     assertThatJson(response.body!!).node("status").isEqualTo("DOWN")
     assertThat(response.statusCodeValue).isEqualTo(503)
   }
