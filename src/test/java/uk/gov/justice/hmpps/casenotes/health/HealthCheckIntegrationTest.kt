@@ -115,7 +115,7 @@ class HealthCheckIntegrationTest : IntegrationTest() {
     subPing(200)
 
     webTestClient.get().uri("/health").exchange()
-        .expectStatus().isOk()
+        .expectStatus().isOk
         .expectBody()
         .jsonPath("components.queueHealth.details.${MESSAGES_ON_QUEUE.healthName}").isEqualTo(0)
         .jsonPath("components.queueHealth.details.${MESSAGES_IN_FLIGHT.healthName}").isEqualTo(0)
@@ -138,7 +138,7 @@ class HealthCheckIntegrationTest : IntegrationTest() {
     subPing(200)
 
     webTestClient.get().uri("/health").exchange()
-        .expectStatus().isOk()
+        .expectStatus().isOk
         .expectBody()
         .jsonPath("status").isEqualTo("UP")
         .jsonPath("components.queueHealth.status").isEqualTo("UP")
