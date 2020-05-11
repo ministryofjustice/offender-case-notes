@@ -13,9 +13,6 @@ env:
   - name: JAVA_OPTS
     value: "{{ .Values.env.JAVA_OPTS }}"
 
-  - name: JWT_PUBLIC_KEY
-    value: "{{ .Values.env.JWT_PUBLIC_KEY }}"
-
   - name: ELITE2_API_BASE_URL
     value: "{{ .Values.env.ELITE2_API_BASE_URL }}"
 
