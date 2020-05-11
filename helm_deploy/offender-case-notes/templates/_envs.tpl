@@ -13,9 +13,6 @@ env:
   - name: JAVA_OPTS
     value: "{{ .Values.env.JAVA_OPTS }}"
 
-  - name: JWT_PUBLIC_KEY
-    value: "{{ .Values.env.JWT_PUBLIC_KEY }}"
-
   - name: ELITE2_API_BASE_URL
     value: "{{ .Values.env.ELITE2_API_BASE_URL }}"
 
@@ -24,6 +21,9 @@ env:
 
   - name: TOKENVERIFICATION_API_BASE_URL
     value: "{{ .Values.env.TOKENVERIFICATION_API_BASE_URL }}"
+
+  - name: SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_JWK_SET_URI
+    value: "{{ .Values.env.SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_JWK_SET_URI }}"
 
   - name: APPINSIGHTS_INSTRUMENTATIONKEY
     valueFrom:
@@ -123,5 +123,4 @@ env:
       secretKeyRef:
         name: {{ template "app.name" . }}
         key: OFFENDER_CASE_NOTES_CLIENT_SECRET
-
 {{- end -}}

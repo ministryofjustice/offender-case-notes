@@ -82,22 +82,6 @@ public class ClientTrackingTelemetryModuleTest {
 
     }
 
-    @Test
-    public void shouldNotAddClientIdAndUserNameToInsightTelemetryAsTokenExpired() {
-
-        final var token = createJwt("Fred", List.of(), -1L);
-
-        final var req = new MockHttpServletRequest();
-        req.addHeader(HttpHeaders.AUTHORIZATION, "Bearer " + token);
-        final var res = new MockHttpServletResponse();
-
-        clientTrackingTelemetryModule.onBeginRequest(req, res);
-
-        final var insightTelemetry = ThreadContext.getRequestTelemetryContext().getHttpRequestTelemetry().getProperties();
-
-        assertThat(insightTelemetry).isEmpty();
-    }
-
     private String createJwt(final String user, final List<String> roles, final Long duration) {
         return jwtAuthenticationHelper.createJwt(JwtParameters.builder()
                 .username(user)

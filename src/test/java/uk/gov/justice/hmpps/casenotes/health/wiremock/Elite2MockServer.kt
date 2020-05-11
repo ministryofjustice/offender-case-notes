@@ -2,7 +2,15 @@ package uk.gov.justice.hmpps.casenotes.health.wiremock
 
 import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.junit.WireMockRule
-import com.google.gson.*
+import com.google.gson.Gson
+import com.google.gson.GsonBuilder
+import com.google.gson.JsonDeserializationContext
+import com.google.gson.JsonDeserializer
+import com.google.gson.JsonElement
+import com.google.gson.JsonParseException
+import com.google.gson.JsonPrimitive
+import com.google.gson.JsonSerializationContext
+import com.google.gson.JsonSerializer
 import uk.gov.justice.hmpps.casenotes.dto.CaseNoteType
 import uk.gov.justice.hmpps.casenotes.dto.NomisCaseNote
 import java.lang.reflect.Type
@@ -80,6 +88,26 @@ class Elite2MockServer : WireMockRule(WIREMOCK_PORT) {
                 .withHeader("Page-Limit", "10")
                 .withBody(body)
                 .withStatus(200)
+            ))
+  }
+
+  fun subGetCaseNotesForOffenderNotFound(offenderIdentifier: String) {
+    val getCaseNotes = "$API_PREFIX/offenders/$offenderIdentifier/case-notes"
+    stubFor(
+        WireMock.get(WireMock.urlPathMatching(getCaseNotes))
+            .willReturn(WireMock.aResponse()
+                .withHeader("Content-Type", "application/json")
+                .withHeader("Total-Records", "1")
+                .withHeader("Page-Offset", "0")
+                .withHeader("Page-Limit", "10")
+                .withBody("""
+                  {
+                      "status": 404,
+                      "userMessage": "Resource with id [A9868AN] not found.",
+                      "developerMessage": "Resource with id [A9868AN] not found."
+                  }
+                """.trimIndent())
+                .withStatus(404)
             ))
   }
 

@@ -1,27 +1,16 @@
 package uk.gov.justice.hmpps.casenotes.config;
 
 
-import org.apache.commons.codec.binary.Base64;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.context.properties.ConfigurationProperties;
+import io.swagger.util.ReferenceSerializationConfigurer;
+import lombok.AllArgsConstructor;
 import org.springframework.boot.info.BuildProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Primary;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.oauth2.client.DefaultOAuth2ClientContext;
-import org.springframework.security.oauth2.client.OAuth2ClientContext;
-import org.springframework.security.oauth2.client.token.grant.client.ClientCredentialsResourceDetails;
-import org.springframework.security.oauth2.config.annotation.web.configuration.ResourceServerConfigurerAdapter;
-import org.springframework.security.oauth2.config.annotation.web.configurers.ResourceServerSecurityConfigurer;
-import org.springframework.security.oauth2.provider.token.DefaultAccessTokenConverter;
-import org.springframework.security.oauth2.provider.token.DefaultTokenServices;
-import org.springframework.security.oauth2.provider.token.TokenStore;
-import org.springframework.security.oauth2.provider.token.store.JwtAccessTokenConverter;
-import org.springframework.security.oauth2.provider.token.store.JwtTokenStore;
-import org.springframework.web.context.annotation.RequestScope;
 import springfox.documentation.builders.AuthorizationCodeGrantBuilder;
 import springfox.documentation.builders.OAuthBuilder;
 import springfox.documentation.builders.PathSelectors;
@@ -31,81 +20,46 @@ import springfox.documentation.service.AuthorizationScope;
 import springfox.documentation.service.Contact;
 import springfox.documentation.service.SecurityReference;
 import springfox.documentation.service.SecurityScheme;
-import springfox.documentation.service.StringVendorExtension;
 import springfox.documentation.service.TokenEndpoint;
 import springfox.documentation.service.TokenRequestEndpoint;
-import springfox.documentation.service.VendorExtension;
 import springfox.documentation.spi.DocumentationType;
 import springfox.documentation.spi.service.contexts.SecurityContext;
+import springfox.documentation.spring.web.json.JacksonModuleRegistrar;
 import springfox.documentation.spring.web.plugins.Docket;
 import springfox.documentation.swagger2.annotations.EnableSwagger2;
 
 import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
-import java.util.ArrayList;
-import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
 @Configuration
 @EnableSwagger2
-@EnableGlobalMethodSecurity(prePostEnabled = true)
-public class ResourceServerConfiguration extends ResourceServerConfigurerAdapter {
-
+@EnableWebSecurity
+@EnableGlobalMethodSecurity(prePostEnabled = true, proxyTargetClass = true)
+@AllArgsConstructor
+public class ResourceServerConfiguration extends WebSecurityConfigurerAdapter {
     private final OffenderCaseNoteProperties properties;
-
-    @Autowired(required = false)
-    private BuildProperties buildProperties;
-
-    public ResourceServerConfiguration(final OffenderCaseNoteProperties properties) {
-        this.properties = properties;
-    }
+    private final BuildProperties buildProperties;
 
     @Override
     public void configure(final HttpSecurity http) throws Exception {
-
         http.headers().frameOptions().sameOrigin().and()
                 .sessionManagement()
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
 
                 // Can't have CSRF protection as requires session
                 .and().csrf().disable()
-                .authorizeRequests()
-                .antMatchers("/webjars/**", "/favicon.ico", "/csrf",
-                        "/health/**", "/info", "/ping", "/h2-console/**",
-                        "/v2/api-docs",
-                        "/swagger-ui.html", "/swagger-resources", "/swagger-resources/configuration/ui",
-                        "/swagger-resources/configuration/security").permitAll()
-                .anyRequest()
-                .authenticated();
-    }
-
-    @Override
-    public void configure(final ResourceServerSecurityConfigurer config) {
-        config.tokenServices(tokenServices());
-    }
-
-    @Bean
-    public TokenStore tokenStore() {
-        return new JwtTokenStore(accessTokenConverter());
-    }
-
-    @Bean
-    public JwtAccessTokenConverter accessTokenConverter() {
-        final var converter = new JwtAccessTokenConverter();
-        converter.setVerifierKey(new String(Base64.decodeBase64(properties.getJwtPublicKey())));
-        final var tokenConverter = new DefaultAccessTokenConverter();
-        tokenConverter.setUserTokenConverter(new UserIdAuthenticationConverter());
-        converter.setAccessTokenConverter(tokenConverter);
-        return converter;
-    }
-
-    @Bean
-    @Primary
-    public DefaultTokenServices tokenServices() {
-        final var defaultTokenServices = new DefaultTokenServices();
-        defaultTokenServices.setTokenStore(tokenStore());
-        return defaultTokenServices;
+                .authorizeRequests(auth ->
+                        auth.antMatchers("/webjars/**", "/favicon.ico", "/csrf",
+                                "/health/**", "/info", "/ping", "/h2-console/**",
+                                "/v2/api-docs",
+                                "/swagger-ui.html", "/swagger-resources", "/swagger-resources/configuration/ui",
+                                "/swagger-resources/configuration/security")
+                                .permitAll().anyRequest().authenticated()
+                )
+                .oauth2ResourceServer().jwt().jwtAuthenticationConverter(new AuthAwareTokenConverter());
     }
 
     @Bean
@@ -166,29 +120,18 @@ public class ResourceServerConfiguration extends ResourceServerConfigurerAdapter
     }
 
     private ApiInfo apiInfo() {
-        final var vendorExtension = new StringVendorExtension("", "");
-        final Collection<VendorExtension> vendorExtensions = new ArrayList<>();
-        vendorExtensions.add(vendorExtension);
-
         return new ApiInfo(
                 "HMPPS Offender Case Note Documentation",
                 "API for Case note details for offenders.",
                 getVersion(),
                 "https://gateway.nomis-api.service.justice.gov.uk/auth/terms",
                 contactInfo(),
-                "Open Government Licence v3.0", "https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/", vendorExtensions);
+                "Open Government Licence v3.0", "https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/",
+                Collections.emptyList());
     }
 
     @Bean
-    @RequestScope
-    public OAuth2ClientContext oAuth2ClientContext() {
-        return new DefaultOAuth2ClientContext();
+    public JacksonModuleRegistrar swaggerJacksonModuleRegistrar() {
+        return ReferenceSerializationConfigurer::serializeAsComputedRef;
     }
-
-    @Bean
-    @ConfigurationProperties("offendercasenotes.client")
-    public ClientCredentialsResourceDetails offenderCaseNotesClientCredentials() {
-        return new ClientCredentialsResourceDetails();
-    }
-
 }

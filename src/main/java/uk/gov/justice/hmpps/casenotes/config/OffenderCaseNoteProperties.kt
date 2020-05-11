@@ -15,5 +15,4 @@ data class OffenderCaseNoteProperties(
     @Value("\${oauth.api.base.url}") val oauthApiBaseUrl: @URL String,
     /** OAUTH2 API Rest URL endpoint ("http://localhost:8100") */
     @Value("\${tokenverification.api.base.url}") val tokenVerificationApiBaseUrl: @URL String,
-    @Value("\${jwt.public.key}") val jwtPublicKey: String,
     @Value("\${api.health-timeout:1s}") val healthTimeout: Duration)

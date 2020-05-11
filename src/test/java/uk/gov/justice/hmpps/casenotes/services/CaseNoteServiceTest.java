@@ -8,7 +8,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.access.AccessDeniedException;
 import uk.gov.justice.hmpps.casenotes.config.SecurityUserContext;
-import uk.gov.justice.hmpps.casenotes.config.UserIdAuthenticationConverter.UserIdUser;
+import uk.gov.justice.hmpps.casenotes.config.SecurityUserContext.UserIdUser;
 import uk.gov.justice.hmpps.casenotes.dto.CaseNoteAmendment;
 import uk.gov.justice.hmpps.casenotes.dto.NewCaseNote;
 import uk.gov.justice.hmpps.casenotes.dto.NomisCaseNote;
@@ -93,7 +93,7 @@ public class CaseNoteServiceTest {
         final var noteType = SensitiveCaseNoteType.builder().type("sometype").parentType(ParentNoteType.builder().build()).build();
         when(caseNoteTypeRepository.findSensitiveCaseNoteTypeByParentType_TypeAndType(anyString(), anyString())).thenReturn(noteType);
         when(securityUserContext.isOverrideRole(anyString(), anyString())).thenReturn(Boolean.TRUE);
-        when(securityUserContext.getCurrentUser()).thenReturn(new UserIdUser("someuser", "N/A", List.of(), "some id"));
+        when(securityUserContext.getCurrentUser()).thenReturn(new UserIdUser("someuser", "userId"));
         final var offenderCaseNote = createOffenderCaseNote(noteType);
         when(repository.save(any())).thenReturn(offenderCaseNote);
 
@@ -215,7 +215,7 @@ public class CaseNoteServiceTest {
         final var offenderCaseNote = createOffenderCaseNote(noteType);
         when(repository.findById(any())).thenReturn(Optional.of(offenderCaseNote));
         when(securityUserContext.isOverrideRole(anyString(), anyString())).thenReturn(Boolean.TRUE);
-        when(securityUserContext.getCurrentUser()).thenReturn(new UserIdUser("user", "N/A", List.of(), "userId"));
+        when(securityUserContext.getCurrentUser()).thenReturn(new UserIdUser("user", "userId"));
         when(externalApiService.getUserFullName(anyString())).thenReturn("author");
 
         final var caseNote = caseNoteService.amendCaseNote("A1234AC", UUID.randomUUID().toString(), new UpdateCaseNote("text"));
