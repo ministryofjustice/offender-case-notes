@@ -21,6 +21,7 @@ import uk.gov.justice.hmpps.casenotes.dto.UpdateCaseNote;
 
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -81,7 +82,6 @@ public class ExternalApiService {
                 .bodyToMono(
                         new ParameterizedTypeReference<Map<String, String>>() {
                         })
-                .single()
                 .block()
                 .get("agencyId");
     }
@@ -112,7 +112,7 @@ public class ExternalApiService {
     }
 
     private int getHeader(final HttpHeaders responseHeaders) {
-        final var value = responseHeaders.get("Total-Records");
+        final var value = responseHeaders.getOrDefault("Total-Records", Collections.emptyList());
         return !value.isEmpty() ? Integer.parseInt(value.get(0)) : 0;
     }
 
@@ -159,7 +159,6 @@ public class ExternalApiService {
         return elite2ApiWebClient.get().uri("/api/offenders/{offenderNo}/case-notes/{caseNoteIdentifier}", offenderIdentifier, caseNoteIdentifier)
                 .retrieve()
                 .bodyToMono(NomisCaseNote.class)
-                .single()
                 .block();
     }
 
@@ -168,7 +167,6 @@ public class ExternalApiService {
                 .bodyValue(caseNote)
                 .retrieve()
                 .bodyToMono(NomisCaseNote.class)
-                .single()
                 .block();
     }
 }
