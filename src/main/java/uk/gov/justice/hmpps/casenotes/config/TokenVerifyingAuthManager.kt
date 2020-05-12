@@ -17,7 +17,7 @@ import org.springframework.web.reactive.function.client.WebClient
 @Component
 class TokenVerifyingAuthManager(jwtDecoder: JwtDecoder,
                                 private val tokenVerificationApiWebClient: WebClient,
-                                @Value("\${tokenverification.enabled}") private val tokenVerificationEnabled: Boolean) :
+                                @Value("\${tokenverification.enabled:false}") private val tokenVerificationEnabled: Boolean) :
     AuthenticationManager {
 
   private val jwtAuthenticationProvider = JwtAuthenticationProvider(jwtDecoder)
