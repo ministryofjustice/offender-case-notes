@@ -28,7 +28,7 @@ abstract class ResourceTest {
   @Autowired
   internal lateinit var jwtHelper: JwtAuthHelper
 
-  fun addBearerAuthorisation(user: String, roles: List<String>? = listOf()): Consumer<HttpHeaders> {
+  fun addBearerAuthorisation(user: String, roles: List<String> = listOf()): Consumer<HttpHeaders> {
     val jwt = createJwt(user, roles)
     return addBearerToken(jwt)
   }
