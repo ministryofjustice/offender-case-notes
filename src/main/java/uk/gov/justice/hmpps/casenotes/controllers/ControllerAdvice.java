@@ -24,7 +24,11 @@ public class ControllerAdvice {
 
     @ExceptionHandler(WebClientResponseException.class)
     public ResponseEntity<byte[]> handleWebClientResponseException(final WebClientResponseException e) {
-        log.error("Unexpected exception", e);
+        if (e.getStatusCode().is4xxClientError()) {
+            log.info("Unexpected client exception", e);
+        } else {
+            log.error("Unexpected server exception", e);
+        }
         return ResponseEntity
                 .status(e.getRawStatusCode())
                 .body(e.getResponseBodyAsByteArray());

@@ -5,6 +5,7 @@ import io.netty.handler.timeout.ReadTimeoutHandler
 import io.netty.handler.timeout.WriteTimeoutHandler
 import org.hibernate.validator.constraints.URL
 import org.springframework.beans.factory.annotation.Qualifier
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.http.HttpHeaders
@@ -23,26 +24,35 @@ import org.springframework.web.reactive.function.client.WebClient.Builder
 import reactor.netty.http.client.HttpClient
 import reactor.netty.tcp.TcpClient
 import uk.gov.justice.hmpps.casenotes.utils.UserContext
+import java.time.Duration
 
 @Configuration
-class WebClientConfiguration(private val prop: OffenderCaseNoteProperties) {
-  @Bean
-  fun elite2ApiWebClient(builder: Builder): WebClient = createForwardAuthWebClient(builder, prop.elite2ApiBaseUrl)
+class WebClientConfiguration(
+    /** Elite2 API Base URL endpoint ("http://localhost:8080") */
+    @Value("\${elite2.api.base.url}") private val elite2ApiBaseUrl: @URL String,
+    /**  OAUTH2 API Rest URL endpoint ("http://localhost:9090/auth/api") */
+    @Value("\${oauth.api.base.url}") private val oauthApiBaseUrl: @URL String,
+    /** OAUTH2 API Rest URL endpoint ("http://localhost:8100") */
+    @Value("\${tokenverification.api.base.url}") private val tokenVerificationApiBaseUrl: @URL String,
+    @Value("\${api.health-timeout:1s}") private val healthTimeout: Duration) {
 
   @Bean
-  fun elite2ApiHealthWebClient(builder: Builder): WebClient = createHealthClient(builder, prop.elite2ApiBaseUrl)
+  fun elite2ApiWebClient(builder: Builder): WebClient = createForwardAuthWebClient(builder, elite2ApiBaseUrl)
 
   @Bean
-  fun oauthApiWebClient(builder: Builder): WebClient = createForwardAuthWebClient(builder, prop.oauthApiBaseUrl)
+  fun elite2ApiHealthWebClient(builder: Builder): WebClient = createHealthClient(builder, elite2ApiBaseUrl)
 
   @Bean
-  fun oauthApiHealthWebClient(builder: Builder): WebClient = createHealthClient(builder, prop.oauthApiBaseUrl)
+  fun oauthApiWebClient(builder: Builder): WebClient = createForwardAuthWebClient(builder, oauthApiBaseUrl)
 
   @Bean
-  fun tokenVerificationApiWebClient(builder: Builder): WebClient = createForwardAuthWebClient(builder, prop.tokenVerificationApiBaseUrl)
+  fun oauthApiHealthWebClient(builder: Builder): WebClient = createHealthClient(builder, oauthApiBaseUrl)
 
   @Bean
-  fun tokenVerificationApiHealthWebClient(builder: Builder): WebClient = createHealthClient(builder, prop.tokenVerificationApiBaseUrl)
+  fun tokenVerificationApiWebClient(builder: Builder): WebClient = builder.baseUrl(tokenVerificationApiBaseUrl).build()
+
+  @Bean
+  fun tokenVerificationApiHealthWebClient(builder: Builder): WebClient = createHealthClient(builder, tokenVerificationApiBaseUrl)
 
   private fun createForwardAuthWebClient(builder: Builder, url: @URL String) =
       builder.baseUrl(url)
@@ -50,7 +60,7 @@ class WebClientConfiguration(private val prop: OffenderCaseNoteProperties) {
           .build()
 
   private fun createHealthClient(builder: Builder, url: @URL String): WebClient {
-    val timeout = prop.healthTimeout
+    val timeout = healthTimeout
     val tcpClient = TcpClient.create()
         .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, timeout.toMillis().toInt())
         .doOnConnected { connection ->
@@ -83,7 +93,7 @@ class WebClientConfiguration(private val prop: OffenderCaseNoteProperties) {
       @Qualifier(value = "authorizedClientManagerAppScope")
       authorizedClientManager: OAuth2AuthorizedClientManager,
       builder: Builder): WebClient =
-      getOAuthWebClient(authorizedClientManager, builder, prop.elite2ApiBaseUrl)
+      getOAuthWebClient(authorizedClientManager, builder, elite2ApiBaseUrl)
 
   private fun getOAuthWebClient(authorizedClientManager: OAuth2AuthorizedClientManager, builder: Builder, rootUri: String): WebClient {
     val oauth2Client = ServletOAuth2AuthorizedClientExchangeFilterFunction(authorizedClientManager)

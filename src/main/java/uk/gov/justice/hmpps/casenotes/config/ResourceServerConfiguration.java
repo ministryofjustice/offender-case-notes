@@ -40,8 +40,8 @@ import java.util.Optional;
 @EnableGlobalMethodSecurity(prePostEnabled = true, proxyTargetClass = true)
 @AllArgsConstructor
 public class ResourceServerConfiguration extends WebSecurityConfigurerAdapter {
-    private final OffenderCaseNoteProperties properties;
     private final BuildProperties buildProperties;
+    private final TokenVerifyingAuthManager tokenVerifyingAuthManager;
 
     @Override
     public void configure(final HttpSecurity http) throws Exception {
@@ -59,7 +59,7 @@ public class ResourceServerConfiguration extends WebSecurityConfigurerAdapter {
                                 "/swagger-resources/configuration/security")
                                 .permitAll().anyRequest().authenticated()
                 )
-                .oauth2ResourceServer().jwt().jwtAuthenticationConverter(new AuthAwareTokenConverter());
+                .oauth2ResourceServer().jwt().authenticationManager(tokenVerifyingAuthManager);
     }
 
     @Bean

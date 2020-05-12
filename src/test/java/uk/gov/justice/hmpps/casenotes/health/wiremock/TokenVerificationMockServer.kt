@@ -1,6 +1,9 @@
 package uk.gov.justice.hmpps.casenotes.health.wiremock
 
 import com.github.tomakehurst.wiremock.WireMockServer
+import com.github.tomakehurst.wiremock.client.WireMock
+import com.github.tomakehurst.wiremock.http.HttpHeader
+import com.github.tomakehurst.wiremock.http.HttpHeaders
 import org.junit.jupiter.api.extension.AfterAllCallback
 import org.junit.jupiter.api.extension.BeforeAllCallback
 import org.junit.jupiter.api.extension.BeforeEachCallback
@@ -18,6 +21,7 @@ class TokenVerificationExtension : BeforeAllCallback, AfterAllCallback, BeforeEa
 
   override fun beforeEach(context: ExtensionContext) {
     tokenVerificationApi.resetRequests()
+    tokenVerificationApi.stubVerifyRequest()
   }
 
   override fun afterAll(context: ExtensionContext) {
@@ -25,4 +29,14 @@ class TokenVerificationExtension : BeforeAllCallback, AfterAllCallback, BeforeEa
   }
 }
 
-class TokenVerificationMockServer : WireMockServer(9100)
+class TokenVerificationMockServer : WireMockServer(9100) {
+
+  fun stubVerifyRequest(active: Boolean = true) {
+    stubFor(
+        WireMock.post(WireMock.urlEqualTo("/token/verify"))
+            .willReturn(WireMock.aResponse()
+                .withHeaders(HttpHeaders(HttpHeader("Content-Type", "application/json")))
+                .withBody(""" {"active": "$active"} """))
+    )
+  }
+}
