@@ -12,13 +12,14 @@ import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.web.reactive.server.WebTestClient
 import uk.gov.justice.hmpps.casenotes.health.wiremock.Elite2Extension
 import uk.gov.justice.hmpps.casenotes.health.wiremock.OAuthExtension
+import uk.gov.justice.hmpps.casenotes.health.wiremock.TokenVerificationExtension
 import uk.gov.justice.hmpps.casenotes.utils.JwtAuthHelper
 import java.util.function.Consumer
 
 @DirtiesContext(classMode = BEFORE_CLASS)
 @ActiveProfiles("test", "noqueue")
 @SpringBootTest(webEnvironment = RANDOM_PORT)
-@ExtendWith(Elite2Extension::class, OAuthExtension::class)
+@ExtendWith(Elite2Extension::class, OAuthExtension::class, TokenVerificationExtension::class)
 abstract class ResourceTest {
   @Suppress("SpringJavaInjectionPointsAutowiringInspection")
   @Autowired
@@ -27,7 +28,7 @@ abstract class ResourceTest {
   @Autowired
   internal lateinit var jwtHelper: JwtAuthHelper
 
-  fun addBearerAuthorisation(user: String, roles: List<String>?): Consumer<HttpHeaders> {
+  fun addBearerAuthorisation(user: String, roles: List<String>? = listOf()): Consumer<HttpHeaders> {
     val jwt = createJwt(user, roles)
     return addBearerToken(jwt)
   }
@@ -38,7 +39,7 @@ abstract class ResourceTest {
     headers.add(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
   }
 
-  fun createJwt(user: String, roles: List<String>?): String = jwtHelper.createJwt(user, roles = roles)
+  fun createJwt(user: String, roles: List<String>? = listOf()): String = jwtHelper.createJwt(user, roles = roles)
 
   fun readFile(file: String): String = this.javaClass.getResource(file).readText()
 }
