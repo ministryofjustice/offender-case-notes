@@ -17,7 +17,7 @@ import uk.gov.justice.hmpps.casenotes.utils.JwtAuthHelper
 import java.util.function.Consumer
 
 @DirtiesContext(classMode = BEFORE_CLASS)
-@ActiveProfiles("test", "noqueue")
+@ActiveProfiles("test", "noqueue", "token-verification")
 @SpringBootTest(webEnvironment = RANDOM_PORT)
 @ExtendWith(Elite2Extension::class, OAuthExtension::class, TokenVerificationExtension::class)
 abstract class ResourceTest {

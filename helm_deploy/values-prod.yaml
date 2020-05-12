@@ -24,6 +24,7 @@ env:
   ELITE2_API_BASE_URL: "https://gateway.nomis-api.service.justice.gov.uk/elite2api"
   OAUTH_API_BASE_URL: "https://gateway.nomis-api.service.justice.gov.uk/auth"
   TOKENVERIFICATION_API_BASE_URL: "https://token-verification-api.prison.service.justice.gov.uk"
+  TOKENVERIFICATION_ENABLED: "false"
   SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_JWK_SET_URI: "https://gateway.nomis-api.service.justice.gov.uk/auth/.well-known/jwks.json"
 
 whitelist:
