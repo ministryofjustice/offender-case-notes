@@ -49,7 +49,7 @@ class WebClientConfiguration(
   fun oauthApiHealthWebClient(builder: Builder): WebClient = createHealthClient(builder, oauthApiBaseUrl)
 
   @Bean
-  fun tokenVerificationApiWebClient(builder: Builder): WebClient = createForwardAuthWebClient(builder, tokenVerificationApiBaseUrl)
+  fun tokenVerificationApiWebClient(builder: Builder): WebClient = builder.baseUrl(tokenVerificationApiBaseUrl).build()
 
   @Bean
   fun tokenVerificationApiHealthWebClient(builder: Builder): WebClient = createHealthClient(builder, tokenVerificationApiBaseUrl)
