@@ -4,7 +4,6 @@ import org.junit.jupiter.api.Test
 import uk.gov.justice.hmpps.casenotes.dto.CaseNote
 import uk.gov.justice.hmpps.casenotes.health.wiremock.Elite2Extension.Companion.elite2Api
 import uk.gov.justice.hmpps.casenotes.health.wiremock.OAuthExtension.Companion.oAuthApi
-import java.util.*
 
 class CaseNoteResourceTest : ResourceTest() {
   @Test
@@ -81,7 +80,7 @@ class CaseNoteResourceTest : ResourceTest() {
     val token = createJwt("SECURE_CASENOTE_USER", CASENOTES_ROLES)
     webTestClient.post().uri("/case-notes/{offenderIdentifier}", "A1234AA")
         .headers(addBearerToken(token))
-        .bodyValue(String.format(CREATE_CASE_NOTE_WITHOUT_LOC, "This is a case note"))
+        .bodyValue(CREATE_CASE_NOTE_WITHOUT_LOC.format("This is a case note"))
         .exchange()
         .expectStatus().isCreated
         .expectBody()
@@ -138,11 +137,11 @@ class CaseNoteResourceTest : ResourceTest() {
     val token = createJwt("SECURE_CASENOTE_USER", CASENOTES_ROLES)
     val postResponse = webTestClient.post().uri("/case-notes/{offenderIdentifier}", "A1234AF")
         .headers(addBearerToken(token))
-        .bodyValue(String.format(CREATE_CASE_NOTE_WITHOUT_LOC, "This is a case note"))
+        .bodyValue(CREATE_CASE_NOTE_WITHOUT_LOC.format("This is a case note"))
         .exchange()
         .expectStatus().isCreated
         .returnResult(CaseNote::class.java)
-    val id = Objects.requireNonNull(postResponse.responseBody.blockFirst()).caseNoteId
+    val id = postResponse.responseBody.blockFirst()!!.caseNoteId
     webTestClient.get().uri("/case-notes/{offenderIdentifier}/{caseNoteIdentifier}", "A1234AF", id)
         .headers(addBearerToken(token))
         .exchange()
@@ -159,7 +158,7 @@ class CaseNoteResourceTest : ResourceTest() {
     // create the case note
     webTestClient.post().uri("/case-notes/{offenderIdentifier}", "A1234AE")
         .headers(addBearerAuthorisation("SECURE_CASENOTE_USER", CASENOTES_ROLES))
-        .bodyValue(String.format(CREATE_NORMAL_CASE_NOTE_WITHOUT_LOC, "This is another case note"))
+        .bodyValue(CREATE_NORMAL_CASE_NOTE_WITHOUT_LOC.format("This is another case note"))
         .exchange()
         .expectStatus().isCreated
         .expectBody()
@@ -174,7 +173,7 @@ class CaseNoteResourceTest : ResourceTest() {
     // create the case note
     webTestClient.post().uri("/case-notes/{offenderIdentifier}", "A1234AD")
         .headers(addBearerAuthorisation("SECURE_CASENOTE_USER", CASENOTES_ROLES))
-        .bodyValue(String.format(CREATE_CASE_NOTE_WITHOUT_LOC, "This is another case note"))
+        .bodyValue(CREATE_CASE_NOTE_WITHOUT_LOC.format("This is another case note"))
         .exchange()
         .expectStatus().isCreated
         .expectBody()
@@ -189,7 +188,7 @@ class CaseNoteResourceTest : ResourceTest() {
     // create the case note
     webTestClient.post().uri("/case-notes/{offenderIdentifier}", "A1234AD")
         .headers(addBearerAuthorisation("SECURE_CASENOTE_USER", POM_ROLE))
-        .bodyValue(String.format(CREATE_CASE_NOTE_WITHOUT_LOC, "This is another case note"))
+        .bodyValue(CREATE_CASE_NOTE_WITHOUT_LOC.format("This is another case note"))
         .exchange()
         .expectStatus().isCreated
         .expectBody()
@@ -204,7 +203,7 @@ class CaseNoteResourceTest : ResourceTest() {
     // create the case note
     webTestClient.post().uri("/case-notes/{offenderIdentifier}", "A1234AD")
         .headers(addBearerAuthorisation("SECURE_CASENOTE_USER", CASENOTES_ROLES))
-        .bodyValue(String.format(CREATE_CASE_NOTE_BY_TYPE, "OLDPOM", "OLDTWO", "This is another case note with inactive case note type"))
+        .bodyValue(CREATE_CASE_NOTE_BY_TYPE.format("OLDPOM", "OLDTWO", "This is another case note with inactive case note type"))
         .exchange()
         .expectStatus().isBadRequest
   }
@@ -219,14 +218,14 @@ class CaseNoteResourceTest : ResourceTest() {
     // create the case note
     val postResponse = webTestClient.post().uri("/case-notes/{offenderIdentifier}", "A1234AB")
         .headers(addBearerToken(token))
-        .bodyValue(String.format(CREATE_CASE_NOTE_WITHOUT_LOC, "This is another case note"))
+        .bodyValue(CREATE_CASE_NOTE_WITHOUT_LOC.format("This is another case note"))
         .exchange()
         .expectStatus().isCreated
         .returnResult(CaseNote::class.java)
 
     // amend the case note
     webTestClient.put().uri("/case-notes/{offenderIdentifier}/{caseNoteId}",
-        "A1234AB", Objects.requireNonNull(postResponse.responseBody.blockFirst()).caseNoteId)
+        "A1234AB", postResponse.responseBody.blockFirst()!!.caseNoteId)
         .headers(addBearerToken(token))
         .bodyValue("""{ "text": "Amended case note" }""")
         .exchange()
@@ -265,17 +264,17 @@ class CaseNoteResourceTest : ResourceTest() {
     val token = createJwt("SECURE_CASENOTE_USER", CASENOTES_ROLES)
     webTestClient.post().uri("/case-notes/{offenderIdentifier}", "A1234AC")
         .headers(addBearerToken(token))
-        .bodyValue(String.format(CREATE_CASE_NOTE, "MDI", "This is a case note 1"))
+        .bodyValue(CREATE_CASE_NOTE.format("MDI", "This is a case note 1"))
         .exchange()
         .expectStatus().isCreated
     webTestClient.post().uri("/case-notes/{offenderIdentifier}", "A1234AC")
         .headers(addBearerToken(token))
-        .bodyValue(String.format(CREATE_CASE_NOTE_WITHOUT_LOC, "This is a case note 2"))
+        .bodyValue(CREATE_CASE_NOTE_WITHOUT_LOC.format("This is a case note 2"))
         .exchange()
         .expectStatus().isCreated
     webTestClient.post().uri("/case-notes/{offenderIdentifier}", "A1234AC")
         .headers(addBearerToken(token))
-        .bodyValue(String.format(CREATE_CASE_NOTE, "LEI", "This is a case note 3"))
+        .bodyValue(CREATE_CASE_NOTE.format("LEI", "This is a case note 3"))
         .exchange()
         .expectStatus().isCreated
     webTestClient.get().uri("/case-notes/{offenderIdentifier}?size={size}&page={page}", "A1234AC", "2", "1")
