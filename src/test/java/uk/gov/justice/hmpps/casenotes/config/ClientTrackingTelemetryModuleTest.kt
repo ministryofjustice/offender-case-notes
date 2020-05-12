@@ -1,94 +1,68 @@
-package uk.gov.justice.hmpps.casenotes.config;
+package uk.gov.justice.hmpps.casenotes.config
 
-import com.microsoft.applicationinsights.web.internal.RequestTelemetryContext;
-import com.microsoft.applicationinsights.web.internal.ThreadContext;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.ConfigFileApplicationContextInitializer;
-import org.springframework.context.annotation.Import;
-import org.springframework.http.HttpHeaders;
-import org.springframework.mock.web.MockHttpServletRequest;
-import org.springframework.mock.web.MockHttpServletResponse;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
-import uk.gov.justice.hmpps.casenotes.utils.JwtAuthenticationHelper;
-import uk.gov.justice.hmpps.casenotes.utils.JwtAuthenticationHelper.JwtParameters;
+import com.microsoft.applicationinsights.web.internal.RequestTelemetryContext
+import com.microsoft.applicationinsights.web.internal.ThreadContext
+import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.extension.ExtendWith
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.boot.test.context.ConfigFileApplicationContextInitializer
+import org.springframework.context.annotation.Import
+import org.springframework.http.HttpHeaders
+import org.springframework.mock.web.MockHttpServletRequest
+import org.springframework.mock.web.MockHttpServletResponse
+import org.springframework.test.context.ActiveProfiles
+import org.springframework.test.context.ContextConfiguration
+import org.springframework.test.context.junit.jupiter.SpringExtension
+import uk.gov.justice.hmpps.casenotes.utils.JwtAuthHelper
 
-import java.time.Duration;
-import java.util.List;
-
-import static org.assertj.core.api.Assertions.assertThat;
-
-@Import({JwtAuthenticationHelper.class, ClientTrackingTelemetryModule.class})
-@ContextConfiguration(initializers = {ConfigFileApplicationContextInitializer.class})
+@Import(JwtAuthHelper::class, ClientTrackingTelemetryModule::class)
+@ContextConfiguration(initializers = [ConfigFileApplicationContextInitializer::class])
 @ActiveProfiles("test")
-@ExtendWith(SpringExtension.class)
-public class ClientTrackingTelemetryModuleTest {
+@ExtendWith(SpringExtension::class)
+class ClientTrackingTelemetryModuleTest {
+  @Suppress("SpringJavaInjectionPointsAutowiringInspection")
+  @Autowired
+  private lateinit var clientTrackingTelemetryModule: ClientTrackingTelemetryModule
 
-    @Autowired
-    private ClientTrackingTelemetryModule clientTrackingTelemetryModule;
+  @Suppress("SpringJavaInjectionPointsAutowiringInspection")
+  @Autowired
+  private lateinit var jwtAuthHelper: JwtAuthHelper
 
-    @Autowired
-    private JwtAuthenticationHelper jwtAuthenticationHelper;
+  @BeforeEach
+  fun setup() {
+    ThreadContext.setRequestTelemetryContext(RequestTelemetryContext(1L))
+  }
 
-    @BeforeEach
-    public void setup() {
-        ThreadContext.setRequestTelemetryContext(new RequestTelemetryContext(1L));
-    }
+  @AfterEach
+  fun tearDown() {
+    ThreadContext.remove()
+  }
 
-    @AfterEach
-    public void tearDown() {
-        ThreadContext.remove();
-    }
+  @Test
+  fun shouldAddClientIdAndUserNameToInsightTelemetry() {
+    val token = jwtAuthHelper.createJwt("bob")
+    val req = MockHttpServletRequest()
+    req.addHeader(HttpHeaders.AUTHORIZATION, "Bearer $token")
+    val res = MockHttpServletResponse()
+    clientTrackingTelemetryModule.onBeginRequest(req, res)
+    val insightTelemetry = ThreadContext.getRequestTelemetryContext().httpRequestTelemetry.properties
+    assertThat(insightTelemetry).hasSize(2)
+    assertThat(insightTelemetry["username"]).isEqualTo("bob")
+    assertThat(insightTelemetry["clientId"]).isEqualTo("elite2apiclient")
+  }
 
-    @Test
-    public void shouldAddClientIdAndUserNameToInsightTelemetry() {
-
-        final var token = createJwt("bob", List.of(), 1L);
-
-        final var req = new MockHttpServletRequest();
-        req.addHeader(HttpHeaders.AUTHORIZATION, "Bearer " + token);
-        final var res = new MockHttpServletResponse();
-
-        clientTrackingTelemetryModule.onBeginRequest(req, res);
-
-        final var insightTelemetry = ThreadContext.getRequestTelemetryContext().getHttpRequestTelemetry().getProperties();
-
-        assertThat(insightTelemetry).hasSize(2);
-        assertThat(insightTelemetry.get("username")).isEqualTo("bob");
-        assertThat(insightTelemetry.get("clientId")).isEqualTo("elite2apiclient");
-
-    }
-
-    @Test
-    public void shouldAddOnlyClientIdIfUsernameNullToInsightTelemetry() {
-
-        final var token = createJwt(null, List.of(), 1L);
-
-        final var req = new MockHttpServletRequest();
-        req.addHeader(HttpHeaders.AUTHORIZATION, "Bearer " + token);
-        final var res = new MockHttpServletResponse();
-
-        clientTrackingTelemetryModule.onBeginRequest(req, res);
-
-        final var insightTelemetry = ThreadContext.getRequestTelemetryContext().getHttpRequestTelemetry().getProperties();
-
-        assertThat(insightTelemetry).hasSize(1);
-        assertThat(insightTelemetry.get("clientId")).isEqualTo("elite2apiclient");
-
-    }
-
-    private String createJwt(final String user, final List<String> roles, final Long duration) {
-        return jwtAuthenticationHelper.createJwt(JwtParameters.builder()
-                .username(user)
-                .roles(roles)
-                .scope(List.of("read", "write"))
-                .expiryTime(Duration.ofDays(duration))
-                .build());
-    }
-
+  @Test
+  fun shouldAddOnlyClientIdIfUsernameNullToInsightTelemetry() {
+    val token = jwtAuthHelper.createJwt(null)
+    val req = MockHttpServletRequest()
+    req.addHeader(HttpHeaders.AUTHORIZATION, "Bearer $token")
+    val res = MockHttpServletResponse()
+    clientTrackingTelemetryModule.onBeginRequest(req, res)
+    val insightTelemetry = ThreadContext.getRequestTelemetryContext().httpRequestTelemetry.properties
+    assertThat(insightTelemetry).hasSize(1)
+    assertThat(insightTelemetry["clientId"]).isEqualTo("elite2apiclient")
+  }
 }

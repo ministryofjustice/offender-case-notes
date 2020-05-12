@@ -1,12 +1,9 @@
 package uk.gov.justice.hmpps.casenotes.health
 
-import com.amazonaws.services.sqs.AmazonSQS
 import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.boot.test.mock.mockito.SpyBean
 import org.springframework.security.authentication.TestingAuthenticationToken
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.test.context.ActiveProfiles
@@ -22,10 +19,6 @@ abstract class IntegrationTest {
   @Suppress("SpringJavaInjectionPointsAutowiringInspection")
   @Autowired
   lateinit var webTestClient: WebTestClient
-
-  @SpyBean
-  @Qualifier("awsSqsClient")
-  protected lateinit var awsSqsClient: AmazonSQS
 
   @Value("\${token}")
   private val token: String? = null

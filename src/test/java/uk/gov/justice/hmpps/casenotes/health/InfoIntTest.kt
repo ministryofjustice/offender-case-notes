@@ -1,9 +1,11 @@
 package uk.gov.justice.hmpps.casenotes.health
 
 import org.junit.jupiter.api.Test
+import org.springframework.test.context.ActiveProfiles
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter.ISO_DATE
 
+@ActiveProfiles("noqueue")
 class InfoIntTest : IntegrationTest() {
   @Test
   fun `Info page contains git information`() {
