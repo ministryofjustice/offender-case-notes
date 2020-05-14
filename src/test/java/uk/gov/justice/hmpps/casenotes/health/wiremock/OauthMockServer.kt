@@ -23,7 +23,6 @@ class OAuthExtension : BeforeAllCallback, AfterAllCallback, BeforeEachCallback {
 
   override fun beforeEach(context: ExtensionContext) {
     oAuthApi.resetRequests()
-    oAuthApi.stubGrantToken()
   }
 
   override fun afterAll(context: ExtensionContext) {
@@ -39,7 +38,10 @@ class OAuthMockServer : WireMockServer(WIREMOCK_PORT) {
         WireMock.post(WireMock.urlEqualTo("/auth/oauth/token"))
             .willReturn(WireMock.aResponse()
                 .withHeaders(HttpHeaders(HttpHeader("Content-Type", "application/json")))
-                .withBody(gson.toJson(mapOf("access_token" to "ABCDE"))))
+                .withBody("""{
+                    "token_type": "bearer",
+                    "access_token": "ABCDE"
+                }""".trimIndent()))
     )
   }
 

@@ -18,6 +18,17 @@ class CaseNoteResourceTest : ResourceTest() {
   }
 
   @Test
+  fun testGetCaseNoteClientTokenNoUserId() {
+    elite2Api.subGetCaseNoteTypes()
+    webTestClient.get().uri("/case-notes/types")
+        .headers(addBearerToken(jwtHelper.createJwt("API_TEST_USER", userId = null)))
+        .exchange()
+        .expectStatus().isOk
+        .expectBody()
+        .json(readFile("caseNoteTypes.json"))
+  }
+
+  @Test
   fun testGetCaseNoteTypesSecure() {
     elite2Api.subGetCaseNoteTypes()
     webTestClient.get().uri("/case-notes/types")
@@ -77,7 +88,7 @@ class CaseNoteResourceTest : ResourceTest() {
     oAuthApi.subGetUserDetails("SECURE_CASENOTE_USER")
     elite2Api.subGetOffender("A1234AA")
     elite2Api.subGetCaseNotesForOffender("A1234AA")
-    val token = createJwt("SECURE_CASENOTE_USER", CASENOTES_ROLES)
+    val token = jwtHelper.createJwt("SECURE_CASENOTE_USER", roles = CASENOTES_ROLES)
     webTestClient.post().uri("/case-notes/{offenderIdentifier}", "A1234AA")
         .headers(addBearerToken(token))
         .bodyValue(CREATE_CASE_NOTE_WITHOUT_LOC.format("This is a case note"))
@@ -134,7 +145,7 @@ class CaseNoteResourceTest : ResourceTest() {
   fun testRetrieveCaseNoteForOffenderSensitive() {
     oAuthApi.subGetUserDetails("SECURE_CASENOTE_USER")
     elite2Api.subGetOffender("A1234AF")
-    val token = createJwt("SECURE_CASENOTE_USER", CASENOTES_ROLES)
+    val token = jwtHelper.createJwt("SECURE_CASENOTE_USER", roles = CASENOTES_ROLES)
     val postResponse = webTestClient.post().uri("/case-notes/{offenderIdentifier}", "A1234AF")
         .headers(addBearerToken(token))
         .bodyValue(CREATE_CASE_NOTE_WITHOUT_LOC.format("This is a case note"))
@@ -213,7 +224,7 @@ class CaseNoteResourceTest : ResourceTest() {
     oAuthApi.subGetUserDetails("SECURE_CASENOTE_USER")
     elite2Api.subGetOffender("A1234AB")
     elite2Api.subGetCaseNotesForOffender("A1234AB")
-    val token = createJwt("SECURE_CASENOTE_USER", CASENOTES_ROLES)
+    val token = jwtHelper.createJwt("SECURE_CASENOTE_USER", roles = CASENOTES_ROLES)
 
     // create the case note
     val postResponse = webTestClient.post().uri("/case-notes/{offenderIdentifier}", "A1234AB")
@@ -261,7 +272,7 @@ class CaseNoteResourceTest : ResourceTest() {
     oAuthApi.subGetUserDetails("SECURE_CASENOTE_USER")
     elite2Api.subGetOffender("A1234AC")
     elite2Api.subGetCaseNotesForOffender("A1234AC")
-    val token = createJwt("SECURE_CASENOTE_USER", CASENOTES_ROLES)
+    val token = jwtHelper.createJwt("SECURE_CASENOTE_USER", roles = CASENOTES_ROLES)
     webTestClient.post().uri("/case-notes/{offenderIdentifier}", "A1234AC")
         .headers(addBearerToken(token))
         .bodyValue(CREATE_CASE_NOTE.format("MDI", "This is a case note 1"))
@@ -288,7 +299,7 @@ class CaseNoteResourceTest : ResourceTest() {
   @Test
   fun testCanCreateAndUpdateTypes() {
     oAuthApi.subGetUserDetails("SYSTEM_USER_READ_WRITE")
-    val token = createJwt("SYSTEM_USER_READ_WRITE", SYSTEM_ROLES)
+    val token = jwtHelper.createJwt("SYSTEM_USER_READ_WRITE", roles = SYSTEM_ROLES)
 
     // add a new case note parent type called NEWTYPE1
     webTestClient.post().uri("/case-notes/types")
@@ -344,7 +355,7 @@ class CaseNoteResourceTest : ResourceTest() {
   @Test
   fun testCannotCreateAndUpdateTypesWhenInvalid() {
     oAuthApi.subGetUserDetails("SYSTEM_USER_READ_WRITE")
-    val token = createJwt("SYSTEM_USER_READ_WRITE", SYSTEM_ROLES)
+    val token = jwtHelper.createJwt("SYSTEM_USER_READ_WRITE", roles = SYSTEM_ROLES)
 
     // add a new case note parent type called TOOLONG1234567890 that is more than 12 chars
     webTestClient.post().uri("/case-notes/types")

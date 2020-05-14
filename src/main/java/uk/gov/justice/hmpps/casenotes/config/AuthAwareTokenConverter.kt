@@ -9,8 +9,11 @@ import org.springframework.security.oauth2.server.resource.authentication.JwtAut
 import uk.gov.justice.hmpps.casenotes.config.SecurityUserContext.UserIdUser
 
 class AuthAwareTokenConverter : Converter<Jwt, AbstractAuthenticationToken> {
-  override fun convert(jwt: Jwt): AbstractAuthenticationToken =
-      AuthAwareAuthenticationToken(jwt, jwt.claims["user_id"] as String, extractAuthorities(jwt))
+  override fun convert(jwt: Jwt): AbstractAuthenticationToken {
+    val optionalUserId = jwt.claims["user_id"]
+    val userIdOrUsername = optionalUserId ?: jwt.subject
+    return AuthAwareAuthenticationToken(jwt, userIdOrUsername as String, extractAuthorities(jwt))
+  }
 
   @Suppress("UNCHECKED_CAST")
   private fun extractAuthorities(jwt: Jwt): Collection<GrantedAuthority> =
