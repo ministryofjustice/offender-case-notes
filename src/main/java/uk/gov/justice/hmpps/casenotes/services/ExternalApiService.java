@@ -51,8 +51,8 @@ public class ExternalApiService {
                 .block();
     }
 
-    List<BookingIdentifier> getIdentifiersByBookingId(final Long bookingId) {
-        return elite2ClientCredentialsWebClient.get().uri("/api/bookings/{bookingId}/identifiers", bookingId)
+    List<BookingIdentifier> getMergedIdentifiersByBookingId(final Long bookingId) {
+        return elite2ClientCredentialsWebClient.get().uri("/api/bookings/{bookingId}/identifiers?type={type}", bookingId, "MERGED")
                 .retrieve()
                 .bodyToMono(
                         new ParameterizedTypeReference<List<BookingIdentifier>>() {

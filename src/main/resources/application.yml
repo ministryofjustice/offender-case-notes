@@ -41,13 +41,13 @@ spring:
         registration:
           elite2-api:
             provider: hmpps-auth
-            client-id: ${oauth.client.id}
-            client-secret: ${oauth.client.secret}
+            client-id: ${offender.case.notes.client.id}
+            client-secret: ${offender.case.notes.client.secret}
             authorization-grant-type: client_credentials
             scope: read
         provider:
           hmpps-auth:
-            token-uri: ${oauth.endpoint.url}/oauth/token
+            token-uri: ${oauth.api.base.url}/oauth/token
   codec:
     max-in-memory-size: 10MB
 
@@ -85,15 +85,6 @@ azure:
   application-insights:
     web:
       enable-W3C: true
-
-
-offendercasenotes:
-  client:
-    client-id: ${offender.case.notes.client.id}
-    client-secret: ${offender.case.notes.client.secret}
-    access-token-uri: ${oauth.api.base.url}/oauth/token
-    authentication-scheme: header
-    client-authentication-scheme: header
 
 sns:
   endpoint.region: eu-west-2

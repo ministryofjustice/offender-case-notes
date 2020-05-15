@@ -11,7 +11,7 @@ import wiremock.org.eclipse.jetty.http.HttpHeader
 class TokenVerificationResourceTest : ResourceTest() {
   @Test
   fun `test jwt gets passed through to token verification`() {
-    val jwt = createJwt("API_TEST_USER")
+    val jwt = jwtHelper.createJwt("API_TEST_USER")
 
     elite2Api.subGetCaseNoteTypes()
     webTestClient.get().uri("/case-notes/types")
@@ -25,7 +25,7 @@ class TokenVerificationResourceTest : ResourceTest() {
 
   @Test
   fun `jwt token failure causes 401 failure to client`() {
-    val jwt = createJwt("API_TEST_USER")
+    val jwt = jwtHelper.createJwt("API_TEST_USER")
 
     tokenVerificationApi.stubVerifyRequest(false)
 

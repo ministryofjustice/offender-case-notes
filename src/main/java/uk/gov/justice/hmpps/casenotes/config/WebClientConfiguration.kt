@@ -89,10 +89,8 @@ class WebClientConfiguration(
   }
 
   @Bean
-  fun elite2ClientCredentialsWebClient(
-      @Qualifier(value = "authorizedClientManagerAppScope")
-      authorizedClientManager: OAuth2AuthorizedClientManager,
-      builder: Builder): WebClient =
+  fun elite2ClientCredentialsWebClient(@Qualifier(value = "authorizedClientManagerAppScope") authorizedClientManager: OAuth2AuthorizedClientManager,
+                                       builder: Builder): WebClient =
       getOAuthWebClient(authorizedClientManager, builder, elite2ApiBaseUrl)
 
   private fun getOAuthWebClient(authorizedClientManager: OAuth2AuthorizedClientManager, builder: Builder, rootUri: String): WebClient {

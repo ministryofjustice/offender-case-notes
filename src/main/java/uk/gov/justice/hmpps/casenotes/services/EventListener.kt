@@ -7,15 +7,15 @@ import org.springframework.stereotype.Service
 
 
 @Service
-open class EventListener(private val caseNoteService: CaseNoteService,
-                         private val mergeOffenderService: MergeOffenderService,
-                         private val gson: Gson) {
+class EventListener(private val caseNoteService: CaseNoteService,
+                    private val mergeOffenderService: MergeOffenderService,
+                    private val gson: Gson) {
   companion object {
     private val log = LoggerFactory.getLogger(this::class.java)
   }
 
   @JmsListener(destination = "\${sqs.queue.name}")
-  open fun handleEvents(requestJson: String?) {
+  fun handleEvents(requestJson: String?) {
     val (Message, MessageAttributes) = gson.fromJson(requestJson, Message::class.java)
     val (offenderIdDisplay, bookingId) = gson.fromJson(Message, EventMessage::class.java)
 

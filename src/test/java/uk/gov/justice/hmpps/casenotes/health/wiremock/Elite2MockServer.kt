@@ -2,6 +2,10 @@ package uk.gov.justice.hmpps.casenotes.health.wiremock
 
 import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.client.WireMock
+import com.github.tomakehurst.wiremock.client.WireMock.aResponse
+import com.github.tomakehurst.wiremock.client.WireMock.get
+import com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo
+import com.github.tomakehurst.wiremock.client.WireMock.urlPathMatching
 import com.google.gson.GsonBuilder
 import com.google.gson.JsonDeserializationContext
 import com.google.gson.JsonDeserializer
@@ -46,8 +50,8 @@ class Elite2MockServer : WireMockServer(WIREMOCK_PORT) {
   fun subGetCaseNoteTypes() {
     val getCaseNoteTypes = "$API_PREFIX/reference-domains/caseNoteTypes"
     stubFor(
-        WireMock.get(WireMock.urlPathEqualTo(getCaseNoteTypes))
-            .willReturn(WireMock.aResponse()
+        get(WireMock.urlPathEqualTo(getCaseNoteTypes))
+            .willReturn(aResponse()
                 .withHeader("Content-Type", "application/json")
                 .withBody(gson.toJson(listOf(
                     CaseNoteType.builder().code("KA").description("Key worker")
@@ -68,8 +72,8 @@ class Elite2MockServer : WireMockServer(WIREMOCK_PORT) {
   fun subUserCaseNoteTypes() {
     val getCaseNoteTypes = "$API_PREFIX/users/me/caseNoteTypes"
     stubFor(
-        WireMock.get(WireMock.urlPathEqualTo(getCaseNoteTypes))
-            .willReturn(WireMock.aResponse()
+        get(WireMock.urlPathEqualTo(getCaseNoteTypes))
+            .willReturn(aResponse()
                 .withHeader("Content-Type", "application/json")
                 .withBody(gson.toJson(listOf(
                     CaseNoteType.builder().code("KA").description("Key worker")
@@ -88,8 +92,8 @@ class Elite2MockServer : WireMockServer(WIREMOCK_PORT) {
   fun subGetOffender(offenderIdentifier: String) {
     val getCaseNoteTypes = "$API_PREFIX/bookings/offenderNo/$offenderIdentifier"
     stubFor(
-        WireMock.get(WireMock.urlPathMatching(getCaseNoteTypes))
-            .willReturn(WireMock.aResponse()
+        get(urlPathMatching(getCaseNoteTypes))
+            .willReturn(aResponse()
                 .withHeader("Content-Type", "application/json")
                 .withBody("{\n" +
                     "  \"bookingId\": 1,\n" +
@@ -100,12 +104,58 @@ class Elite2MockServer : WireMockServer(WIREMOCK_PORT) {
             ))
   }
 
+  fun stubGetBookingIdentifiers(bookingIdentifier: Long) {
+    val getBookingIdentifiers = "$API_PREFIX/bookings/${bookingIdentifier}/identifiers"
+    stubFor(
+        get(urlPathMatching(getBookingIdentifiers))
+            .willReturn(aResponse()
+                .withHeader("Content-Type", "application/json")
+                .withBody("""[
+                    {
+                      "type": "MERGED",
+                      "value": "A2345CD",
+                      "offenderNo": "A5156DY",
+                      "bookingId": $bookingIdentifier,
+                      "caseloadType": "INST"
+                    },
+                    {
+                      "type": "MERGED",
+                      "value": "A1234BC",
+                      "offenderNo": "A1234BC",
+                      "bookingId": $bookingIdentifier,
+                      "caseloadType": "INST"
+                    }
+                  ]""")
+                .withStatus(200)
+            ))
+  }
+
+  fun stubGetBookingBasicInfo(bookingIdentifier: Long) {
+    val getBookingBasicInfo = "$API_PREFIX/bookings/${bookingIdentifier}?basicInfo=true"
+    stubFor(
+        get(urlEqualTo(getBookingBasicInfo))
+            .willReturn(aResponse()
+                .withHeader("Content-Type", "application/json")
+                .withBody("""{
+                    "bookingId": $bookingIdentifier,
+                    "bookingNo": "38408A",
+                    "offenderNo": "A5156DY",
+                    "firstName": "ROGER",
+                    "lastName": "QUILTER",
+                    "agencyId": "OUT",
+                    "activeFlag": false,
+                    "dateOfBirth": "1932-05-04"
+                  }""".trimIndent())
+                .withStatus(200)
+            ))
+  }
+
   fun subGetCaseNotesForOffender(offenderIdentifier: String) {
     val getCaseNotes = "$API_PREFIX/offenders/$offenderIdentifier/case-notes"
     val body = gson.toJson(listOf(createNomisCaseNote()))
     stubFor(
-        WireMock.get(WireMock.urlPathMatching(getCaseNotes))
-            .willReturn(WireMock.aResponse()
+        get(urlPathMatching(getCaseNotes))
+            .willReturn(aResponse()
                 .withHeader("Content-Type", "application/json")
                 .withHeader("Total-Records", "1")
                 .withHeader("Page-Offset", "0")
@@ -118,8 +168,8 @@ class Elite2MockServer : WireMockServer(WIREMOCK_PORT) {
   fun subGetCaseNotesForOffenderNotFound(offenderIdentifier: String) {
     val getCaseNotes = "$API_PREFIX/offenders/$offenderIdentifier/case-notes"
     stubFor(
-        WireMock.get(WireMock.urlPathMatching(getCaseNotes))
-            .willReturn(WireMock.aResponse()
+        get(urlPathMatching(getCaseNotes))
+            .willReturn(aResponse()
                 .withHeader("Content-Type", "application/json")
                 .withHeader("Total-Records", "1")
                 .withHeader("Page-Offset", "0")
@@ -139,8 +189,8 @@ class Elite2MockServer : WireMockServer(WIREMOCK_PORT) {
     val getCaseNote = String.format("%s/offenders/%s/case-notes/%s", API_PREFIX, offenderIdentifier, caseNoteIdentifier)
     val body = gson.toJson(createNomisCaseNote())
     stubFor(
-        WireMock.get(WireMock.urlPathMatching(getCaseNote))
-            .willReturn(WireMock.aResponse()
+        get(urlPathMatching(getCaseNote))
+            .willReturn(aResponse()
                 .withHeader("Content-Type", "application/json")
                 .withBody(body)
                 .withStatus(200)
@@ -167,8 +217,8 @@ class Elite2MockServer : WireMockServer(WIREMOCK_PORT) {
 
   fun subCreateCaseNote(offenderIdentifier: String?) {
     val body = gson.toJson(createNomisCaseNote())
-    stubFor(WireMock.post(WireMock.urlPathMatching(String.format("%s/offenders/%s/case-notes", API_PREFIX, offenderIdentifier)))
-        .willReturn(WireMock.aResponse()
+    stubFor(WireMock.post(urlPathMatching(String.format("%s/offenders/%s/case-notes", API_PREFIX, offenderIdentifier)))
+        .willReturn(aResponse()
             .withHeader("Content-Type", "application/json")
             .withBody(body)
             .withStatus(201)
@@ -177,8 +227,8 @@ class Elite2MockServer : WireMockServer(WIREMOCK_PORT) {
 
   fun subAmendCaseNote(offenderIdentifier: String?, caseNoteIdentifier: String?) {
     val body = gson.toJson(createNomisCaseNote())
-    stubFor(WireMock.put(WireMock.urlPathMatching(String.format("%s/offenders/%s/case-notes/%s", API_PREFIX, offenderIdentifier, caseNoteIdentifier)))
-        .willReturn(WireMock.aResponse()
+    stubFor(WireMock.put(urlPathMatching(String.format("%s/offenders/%s/case-notes/%s", API_PREFIX, offenderIdentifier, caseNoteIdentifier)))
+        .willReturn(aResponse()
             .withHeader("Content-Type", "application/json")
             .withBody(body)
             .withStatus(200)

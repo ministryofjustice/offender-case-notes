@@ -20,10 +20,9 @@ public class MergeOffenderService {
     public int checkAndMerge(final Long bookingId) {
         final var rowsUpdated = new AtomicInteger();
         log.debug("Check for merged booking for ID {}", bookingId);
-        externalApiService.getIdentifiersByBookingId(bookingId).stream()
-                .filter(id -> "MERGED".equals(id.getType()))
+        final var booking = externalApiService.getBooking(bookingId);
+        externalApiService.getMergedIdentifiersByBookingId(bookingId)
                 .forEach(id -> {
-                    final var booking = externalApiService.getBooking(bookingId);
                     rowsUpdated.addAndGet(repository.updateOffenderIdentifier(id.getValue(), booking.getOffenderNo()));
                     if (rowsUpdated.get() > 0) {
                         log.info("{} case notes were merged from offender identifier {} to {}", rowsUpdated, id.getValue(), booking.getOffenderNo());

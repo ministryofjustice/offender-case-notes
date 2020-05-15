@@ -29,7 +29,7 @@ abstract class ResourceTest {
   internal lateinit var jwtHelper: JwtAuthHelper
 
   fun addBearerAuthorisation(user: String, roles: List<String> = listOf()): Consumer<HttpHeaders> {
-    val jwt = createJwt(user, roles)
+    val jwt = jwtHelper.createJwt(user, roles = roles)
     return addBearerToken(jwt)
   }
 
@@ -38,8 +38,6 @@ abstract class ResourceTest {
     headers.add(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON_VALUE)
     headers.add(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
   }
-
-  fun createJwt(user: String, roles: List<String>? = listOf()): String = jwtHelper.createJwt(user, roles = roles)
 
   fun readFile(file: String): String = this.javaClass.getResource(file).readText()
 }
