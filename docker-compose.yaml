@@ -24,7 +24,7 @@ services:
       - SQS_ENDPOINT_URL=http://localstack:4576
 
   elite2-api:
-    image: mojdigitalstudio/elite2-api:latest
+    image: quay.io/hmpps/elite2-api:latest
     networks:
       - hmpps
     container_name: elite2-api
@@ -39,7 +39,7 @@ services:
       - SPRING_PROFILES_ACTIVE=nomis-hsqldb
 
   oauth:
-    image: mojdigitalstudio/nomis-oauth2-server:latest
+    image: quay.io/hmpps/nomis-oauth2-server:latest
     networks:
       - hmpps
     container_name: oauth
