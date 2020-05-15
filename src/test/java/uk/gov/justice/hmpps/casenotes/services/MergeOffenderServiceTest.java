@@ -63,7 +63,32 @@ public class MergeOffenderServiceTest {
         verify(externalApiService).getMergedIdentifiersByBookingId(BOOKING_ID);
         verify(externalApiService).getBooking(BOOKING_ID);
         verify(repository).updateOffenderIdentifier(MERGED_OFFENDER_NO, OFFENDER_NO);
+    }
 
+    @Test
+    public void testCountingOfMultipleRows() {
+        when(externalApiService.getMergedIdentifiersByBookingId(BOOKING_ID))
+                .thenReturn(List.of(
+                        BookingIdentifier.builder().type("MERGED").value(MERGED_OFFENDER_NO).build(),
+                        BookingIdentifier.builder().type("MERGED").value("C1234CC").build()
+                ));
+
+        when(externalApiService.getBooking(BOOKING_ID))
+                .thenReturn(OffenderBooking.builder()
+                        .bookingId(BOOKING_ID)
+                        .offenderNo(OFFENDER_NO)
+                        .build());
+
+        when(repository.updateOffenderIdentifier(MERGED_OFFENDER_NO, OFFENDER_NO)).thenReturn(2);
+        when(repository.updateOffenderIdentifier("C1234CC", OFFENDER_NO)).thenReturn(3);
+
+        final var rowsUpdated = service.checkAndMerge(BOOKING_ID);
+
+        assertThat(rowsUpdated).isEqualTo(5);
+        verify(externalApiService).getMergedIdentifiersByBookingId(BOOKING_ID);
+        verify(externalApiService).getBooking(BOOKING_ID);
+        verify(repository).updateOffenderIdentifier(MERGED_OFFENDER_NO, OFFENDER_NO);
+        verify(repository).updateOffenderIdentifier("C1234CC", OFFENDER_NO);
     }
 
     @Test
