@@ -23,8 +23,8 @@ spring:
         jwt:
           public-key-location: classpath:local-public-key.pub
 
-graceful:
-  shutdown.enabled: false
+server:
+  shutdown: immediate
 
 management.endpoint:
   health.cache.time-to-live: 0
