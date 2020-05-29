@@ -14,9 +14,8 @@ spring:
   jpa:
     show-sql: true
 
-graceful:
-  shutdown:
-    enabled: false
+server:
+  shutdown: immediate
 
 elite2:
   api.base.url: http://localhost:8080
