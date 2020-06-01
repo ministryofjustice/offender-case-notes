@@ -58,13 +58,13 @@ class Elite2MockServer : WireMockServer(WIREMOCK_PORT) {
                         .subCodes(listOf(
                             CaseNoteType.builder().code("KS").description("Key worker Session").build(),
                             CaseNoteType.builder().code("KE").description("Key worker Entry").build()
-                        )),
+                        )).build(),
                     CaseNoteType.builder().code("OBS").description("Observation")
                         .subCodes(listOf(
                             CaseNoteType.builder().code("GEN").description("General").build(),
                             CaseNoteType.builder().code("SPECIAL").description("Special").build()
-                        )
-                        ))))
+                        )).build()
+                )))
                 .withStatus(200)
             ))
   }
@@ -79,12 +79,12 @@ class Elite2MockServer : WireMockServer(WIREMOCK_PORT) {
                     CaseNoteType.builder().code("KA").description("Key worker")
                         .subCodes(listOf(
                             CaseNoteType.builder().code("KS").description("Key worker Session").build()
-                        )),
+                        )).build(),
                     CaseNoteType.builder().code("OBS").description("Observation")
                         .subCodes(listOf(
                             CaseNoteType.builder().code("GEN").description("General").build()
-                        )
-                        ))))
+                        )).build()
+                        )))
                 .withStatus(200)
             ))
   }
