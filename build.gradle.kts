@@ -11,10 +11,9 @@ extra["spring-security.version"] = "5.3.2.RELEASE"
 
 dependencies {
 
-   // Lombok version >= 1.18.10 is incompatible with jackson-databind <= 2.11.0 due to a change on Builder.Default's internal property naming.  This breaks CaseNoteResourceTest.
-  annotationProcessor("org.projectlombok:lombok:1.18.8")
+  annotationProcessor("org.projectlombok:lombok:1.18.12")
 
-  compileOnly("org.projectlombok:lombok:1.18.8")
+  compileOnly("org.projectlombok:lombok:1.18.12")
 
   runtimeOnly("com.h2database:h2:1.4.200")
   runtimeOnly("org.flywaydb:flyway-core:6.4.3")
