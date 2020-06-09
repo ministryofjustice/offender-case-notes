@@ -12,4 +12,5 @@ import lombok.NoArgsConstructor;
 public class OffenderBooking {
     private Long bookingId;
     private String offenderNo;
+    private String agencyId;
 }

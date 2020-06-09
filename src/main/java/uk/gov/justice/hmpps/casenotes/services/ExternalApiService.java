@@ -79,11 +79,9 @@ public class ExternalApiService {
     String getOffenderLocation(final String offenderIdentifier) {
         return elite2ApiWebClient.get().uri("/api/bookings/offenderNo/{offenderNo}", offenderIdentifier)
                 .retrieve()
-                .bodyToMono(
-                        new ParameterizedTypeReference<Map<String, String>>() {
-                        })
-                .block()
-                .get("agencyId");
+                .bodyToMono(OffenderBooking.class)
+                .map(OffenderBooking::getAgencyId)
+                .block();
     }
 
     Page<NomisCaseNote> getOffenderCaseNotes(final String offenderIdentifier, final CaseNoteFilter filter, final int pageLimit, final int pageNumber, final String sortFields, final Sort.Direction direction) {
