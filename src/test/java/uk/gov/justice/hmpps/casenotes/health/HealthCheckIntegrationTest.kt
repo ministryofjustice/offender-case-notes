@@ -54,7 +54,7 @@ class HealthCheckIntegrationTest : IntegrationTest() {
         .expectBody()
         .jsonPath("components.OAuthApiHealth.details.HttpStatus").isEqualTo("OK")
         .jsonPath("components.elite2ApiHealth.details.HttpStatus").isEqualTo("OK")
-        .jsonPath("components.tokenVerificationApiHealth.details.HttpStatus").isEqualTo("OK")
+        .jsonPath("components.tokenVerificationApiHealth.details.TokenVerification").isEqualTo("Disabled")
         .jsonPath("status").isEqualTo("UP")
   }
 
@@ -81,9 +81,7 @@ class HealthCheckIntegrationTest : IntegrationTest() {
         .jsonPath("components.elite2ApiHealth.details.error").value<String> {
           assertThat(it).contains("WebClientResponseException\$NotFound: 404 Not Found")
         }
-        .jsonPath("components.tokenVerificationApiHealth.details.error").value<String> {
-          assertThat(it).contains("WebClientResponseException\$NotFound: 404 Not Found")
-        }
+        .jsonPath("components.tokenVerificationApiHealth.details.TokenVerification").isEqualTo("Disabled")
         .jsonPath("status").isEqualTo("DOWN")
   }
 
@@ -100,9 +98,7 @@ class HealthCheckIntegrationTest : IntegrationTest() {
         .jsonPath("components.elite2ApiHealth.details.error").value<String> {
           assertThat(it).contains("WebClientResponseException: 418 I'm a teapot")
         }
-        .jsonPath("components.tokenVerificationApiHealth.details.error").value<String> {
-          assertThat(it).contains("WebClientResponseException: 418 I'm a teapot")
-        }
+        .jsonPath("components.tokenVerificationApiHealth.details.TokenVerification").isEqualTo("Disabled")
         .jsonPath("status").isEqualTo("DOWN")
   }
 

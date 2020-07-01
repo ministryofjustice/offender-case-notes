@@ -1,6 +1,7 @@
 package uk.gov.justice.hmpps.casenotes.health
 
 import org.springframework.beans.factory.annotation.Qualifier
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.actuate.health.Health
 import org.springframework.boot.actuate.health.HealthIndicator
 import org.springframework.stereotype.Component
@@ -30,5 +31,13 @@ constructor(@Qualifier("oauthApiHealthWebClient") webClient: WebClient) : Health
 
 @Component
 class TokenVerificationApiHealth
-constructor(@Qualifier("tokenVerificationApiHealthWebClient") webClient: WebClient) : HealthCheck(webClient)
+constructor(@Qualifier("tokenVerificationApiHealthWebClient") webClient: WebClient,
+            @Value("\${tokenverification.enabled:false}") private val tokenVerificationEnabled: Boolean) : HealthCheck(webClient) {
+  override fun health(): Health? =
+      if (tokenVerificationEnabled) {
+        super.health()
+      } else {
+        Health.up().withDetail("TokenVerification", "Disabled").build()
+      }
+}
 
