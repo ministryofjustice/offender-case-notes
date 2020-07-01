@@ -13,7 +13,7 @@ dependencies {
   compileOnly("org.projectlombok:lombok:1.18.12")
 
   runtimeOnly("com.h2database:h2:1.4.200")
-  runtimeOnly("org.flywaydb:flyway-core:6.4.4")
+  runtimeOnly("org.flywaydb:flyway-core:6.5.0")
   runtimeOnly("org.postgresql:postgresql:42.2.14")
 
   implementation("org.springframework.boot:spring-boot-starter-data-jpa")
@@ -40,20 +40,20 @@ dependencies {
 
   implementation("net.sf.ehcache:ehcache:2.10.6")
   implementation("org.apache.commons:commons-text:1.8")
-  implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.11.0")
-  implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.11.0")
+  implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.11.1")
+  implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.11.1")
   implementation("com.pauldijou:jwt-core_2.11:4.3.0")
   implementation("com.google.code.gson:gson:2.8.6")
 
-  implementation("software.amazon.awssdk:sns:2.13.38")
+  implementation("software.amazon.awssdk:sns:2.13.48")
 
   testAnnotationProcessor("org.projectlombok:lombok:1.18.12")
   testCompileOnly("org.projectlombok:lombok:1.18.12")
   testImplementation("org.springframework.security:spring-security-test")
   testImplementation("com.tngtech.java:junit-dataprovider:1.13.1")
-  testImplementation("net.javacrumbs.json-unit:json-unit-assertj:2.18.0")
+  testImplementation("net.javacrumbs.json-unit:json-unit-assertj:2.18.1")
   testImplementation("io.github.http-builder-ng:http-builder-ng-apache:1.0.4")
-  testImplementation("com.github.tomakehurst:wiremock-standalone:2.26.3")
+  testImplementation("com.github.tomakehurst:wiremock-standalone:2.27.0")
   testImplementation("org.testcontainers:localstack:1.14.3")
   testImplementation("org.awaitility:awaitility-kotlin:4.0.3")
   testImplementation("io.jsonwebtoken:jjwt:0.9.1")
