@@ -24,7 +24,7 @@ services:
       - SQS_ENDPOINT_URL=http://localstack:4576
 
   elite2-api:
-    image: quay.io/hmpps/elite2-api:latest
+    image: quay.io/hmpps/prison-api:latest
     networks:
       - hmpps
     container_name: elite2-api
