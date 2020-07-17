@@ -20,7 +20,7 @@ ingress:
 
 env:
   JAVA_OPTS: "-Xmx512m"
-  ELITE2_API_BASE_URL: "https://api-dev.prison.service.justice.gov.uk/"
+  ELITE2_API_BASE_URL: "https://api-dev.prison.service.justice.gov.uk"
   OAUTH_API_BASE_URL: "https://sign-in-dev.hmpps.service.justice.gov.uk/auth"
   TOKENVERIFICATION_API_BASE_URL: "https://token-verification-api-dev.prison.service.justice.gov.uk"
   TOKENVERIFICATION_ENABLED: "false"
