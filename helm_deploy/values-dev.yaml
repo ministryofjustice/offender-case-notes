@@ -20,11 +20,11 @@ ingress:
 
 env:
   JAVA_OPTS: "-Xmx512m"
-  ELITE2_API_BASE_URL: "https://gateway.t3.nomis-api.hmpps.dsd.io/elite2api"
-  OAUTH_API_BASE_URL: "https://gateway.t3.nomis-api.hmpps.dsd.io/auth"
+  ELITE2_API_BASE_URL: "https://api-dev.prison.service.justice.gov.uk"
+  OAUTH_API_BASE_URL: "https://sign-in-dev.hmpps.service.justice.gov.uk/auth"
   TOKENVERIFICATION_API_BASE_URL: "https://token-verification-api-dev.prison.service.justice.gov.uk"
   TOKENVERIFICATION_ENABLED: "false"
-  SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_JWK_SET_URI: "https://gateway.t3.nomis-api.hmpps.dsd.io/auth/.well-known/jwks.json"
+  SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_JWK_SET_URI: "https://sign-in-dev.hmpps.service.justice.gov.uk/auth/.well-known/jwks.json"
 
 whitelist:
   office: "217.33.148.210/32"
