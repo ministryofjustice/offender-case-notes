@@ -1,5 +1,5 @@
 plugins {
-  id("uk.gov.justice.hmpps.gradle-spring-boot") version "0.4.3"
+  id("uk.gov.justice.hmpps.gradle-spring-boot") version "0.4.5"
   kotlin("plugin.spring") version "1.3.72"
 }
 
@@ -13,7 +13,7 @@ dependencies {
   compileOnly("org.projectlombok:lombok:1.18.12")
 
   runtimeOnly("com.h2database:h2:1.4.200")
-  runtimeOnly("org.flywaydb:flyway-core:6.5.0")
+  runtimeOnly("org.flywaydb:flyway-core:6.5.1")
   runtimeOnly("org.postgresql:postgresql:42.2.14")
 
   implementation("org.springframework.boot:spring-boot-starter-data-jpa")
@@ -36,7 +36,7 @@ dependencies {
 
   implementation("io.springfox:springfox-swagger2:2.9.2")
   implementation("io.springfox:springfox-swagger-ui:2.9.2")
-  implementation("io.swagger:swagger-core:1.6.1")
+  implementation("io.swagger:swagger-core:1.6.2")
 
   implementation("net.sf.ehcache:ehcache:2.10.6")
   implementation("org.apache.commons:commons-text:1.8")
@@ -45,7 +45,7 @@ dependencies {
   implementation("com.pauldijou:jwt-core_2.11:4.3.0")
   implementation("com.google.code.gson:gson:2.8.6")
 
-  implementation("software.amazon.awssdk:sns:2.13.48")
+  implementation("software.amazon.awssdk:sns:2.13.55")
 
   testAnnotationProcessor("org.projectlombok:lombok:1.18.12")
   testCompileOnly("org.projectlombok:lombok:1.18.12")
@@ -53,7 +53,7 @@ dependencies {
   testImplementation("com.tngtech.java:junit-dataprovider:1.13.1")
   testImplementation("net.javacrumbs.json-unit:json-unit-assertj:2.18.1")
   testImplementation("io.github.http-builder-ng:http-builder-ng-apache:1.0.4")
-  testImplementation("com.github.tomakehurst:wiremock-standalone:2.27.0")
+  testImplementation("com.github.tomakehurst:wiremock-standalone:2.27.1")
   testImplementation("org.testcontainers:localstack:1.14.3")
   testImplementation("org.awaitility:awaitility-kotlin:4.0.3")
   testImplementation("io.jsonwebtoken:jjwt:0.9.1")
