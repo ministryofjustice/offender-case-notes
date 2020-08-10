@@ -286,6 +286,26 @@ public class OffenderCaseNoteRepositoryTest {
         assertThat(modifiedIdentity.getOffenderIdentifier()).isEqualTo(OFFENDER_IDENTIFIER);
     }
 
+    @Test
+    public void testOffenderCaseNoteSoftDeleted() {
+        final var entity = OffenderCaseNote.builder()
+                .occurrenceDateTime(now())
+                .locationId("GHO")
+                .authorUsername("SOFT")
+                .authorUserId("ann_id")
+                .authorName("Ann Id")
+                .offenderIdentifier(OFFENDER_IDENTIFIER)
+                .sensitiveCaseNoteType(genType)
+                .noteText("Im going to be soft deleted")
+                .build();
+        var offenderCaseNote = repository.save(entity);
+
+        offenderCaseNote.setDeleted(Boolean.TRUE);
+        repository.save(offenderCaseNote);
+        final var allCaseNotes = repository.findAll();
+        assertThat(allCaseNotes).hasSize(0);
+    }
+
     private OffenderCaseNote transientEntity(final String offenderIdentifier) {
         return transientEntityBuilder(offenderIdentifier).build();
     }
@@ -300,5 +320,6 @@ public class OffenderCaseNoteRepositoryTest {
                 .offenderIdentifier(offenderIdentifier)
                 .sensitiveCaseNoteType(genType)
                 .noteText("HELLO");
+
     }
 }

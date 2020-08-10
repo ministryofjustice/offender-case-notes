@@ -1,17 +1,32 @@
 package uk.gov.justice.hmpps.casenotes.model;
 
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.ToString;
+import org.hibernate.annotations.Where;
 import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedBy;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
-import javax.persistence.*;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.EntityListeners;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.Table;
 import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "OFFENDER_CASE_NOTE_AMENDMENT")
+@Where(clause = "not deleted")
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
@@ -58,5 +73,9 @@ public class OffenderCaseNoteAmendment {
 
     @LastModifiedBy
     private String modifyUserId;
+
+    @Builder.Default
+    @Column(nullable = false)
+    private Boolean deleted = Boolean.FALSE;
 
 }
