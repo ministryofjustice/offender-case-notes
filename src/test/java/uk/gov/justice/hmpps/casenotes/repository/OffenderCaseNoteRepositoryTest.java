@@ -300,7 +300,7 @@ public class OffenderCaseNoteRepositoryTest {
                 .build();
         var offenderCaseNote = repository.save(entity);
 
-        offenderCaseNote.setDeleted(Boolean.TRUE);
+        offenderCaseNote.setDeleted(true);
         repository.save(offenderCaseNote);
         final var allCaseNotes = repository.findAll();
         assertThat(allCaseNotes).hasSize(0);

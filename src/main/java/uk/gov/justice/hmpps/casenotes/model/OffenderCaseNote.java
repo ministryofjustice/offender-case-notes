@@ -96,10 +96,9 @@ public class OffenderCaseNote {
     private Integer eventId;
 
     @Builder.Default
-    @Column(nullable = false)
-    private Boolean deleted = Boolean.FALSE;
+    private boolean deleted = false;
 
-    public void setDeleted(final Boolean deleted) {
+    public void setDeleted(final boolean deleted) {
         this.deleted = deleted;
     }
 

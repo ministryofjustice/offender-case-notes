@@ -75,7 +75,6 @@ public class OffenderCaseNoteAmendment {
     private String modifyUserId;
 
     @Builder.Default
-    @Column(nullable = false)
-    private Boolean deleted = Boolean.FALSE;
+    private boolean deleted = false;
 
 }
