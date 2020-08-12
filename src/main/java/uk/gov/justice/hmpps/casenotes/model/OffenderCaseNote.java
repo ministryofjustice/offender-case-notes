@@ -34,7 +34,7 @@ import java.util.UUID;
 
 @Entity
 @Table(name = "OFFENDER_CASE_NOTE")
-@Where(clause = "not deleted")
+@Where(clause = "not SOFT_DELETED")
 @NoArgsConstructor
 @AllArgsConstructor
 @EntityListeners(AuditingEntityListener.class)
@@ -96,10 +96,10 @@ public class OffenderCaseNote {
     private Integer eventId;
 
     @Builder.Default
-    private boolean deleted = false;
+    private boolean softDeleted = false;
 
-    public void setDeleted(final boolean deleted) {
-        this.deleted = deleted;
+    public void setSoftDeleted(final boolean softDeleted) {
+        this.softDeleted = softDeleted;
     }
 
     public void addAmendment(final String noteText, final String authorUsername, final String authorName, final String authorUserId) {

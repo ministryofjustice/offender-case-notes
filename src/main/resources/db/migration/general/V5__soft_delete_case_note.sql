@@ -1,5 +1,5 @@
 alter table offender_case_note_amendment
-    add deleted BOOLEAN default FALSE;
+    add SOFT_DELETED BOOLEAN default FALSE;
 
 alter table offender_case_note
-    add deleted BOOLEAN default FALSE;
+    add SOFT_DELETED BOOLEAN default FALSE;

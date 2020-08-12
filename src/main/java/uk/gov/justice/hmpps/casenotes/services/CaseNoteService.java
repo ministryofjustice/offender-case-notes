@@ -14,7 +14,15 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 import uk.gov.justice.hmpps.casenotes.config.SecurityUserContext;
-import uk.gov.justice.hmpps.casenotes.dto.*;
+import uk.gov.justice.hmpps.casenotes.dto.CaseNote;
+import uk.gov.justice.hmpps.casenotes.dto.CaseNoteAmendment;
+import uk.gov.justice.hmpps.casenotes.dto.CaseNoteFilter;
+import uk.gov.justice.hmpps.casenotes.dto.CaseNoteType;
+import uk.gov.justice.hmpps.casenotes.dto.NewCaseNote;
+import uk.gov.justice.hmpps.casenotes.dto.NewCaseNoteType;
+import uk.gov.justice.hmpps.casenotes.dto.NomisCaseNote;
+import uk.gov.justice.hmpps.casenotes.dto.UpdateCaseNote;
+import uk.gov.justice.hmpps.casenotes.dto.UpdateCaseNoteType;
 import uk.gov.justice.hmpps.casenotes.filters.OffenderCaseNoteFilter;
 import uk.gov.justice.hmpps.casenotes.model.OffenderCaseNote;
 import uk.gov.justice.hmpps.casenotes.model.ParentNoteType;
@@ -370,10 +378,10 @@ public class CaseNoteService {
 
     @Transactional
     public int deleteCaseNotesForOffender(final String offenderIdentifier) {
-        final var deletedCaseNotes = repository.deleteOffenderCaseNoteByOffenderIdentifier(offenderIdentifier);
-        final var count = deletedCaseNotes.size();
-        log.info("Deleted {} case notes for offender identifier {}", count, offenderIdentifier);
-        telemetryClient.trackEvent("OffenderDelete", Map.of("offenderNo", offenderIdentifier, "count", String.valueOf(count)), null);
-        return count;
+        repository.deleteOffenderCaseNoteAmendmentsByOffenderIdentifier(offenderIdentifier);
+        final var deletedCaseNotesCount = repository.deleteOffenderCaseNoteByOffenderIdentifier(offenderIdentifier);
+        log.info("Deleted {} case notes for offender identifier {}", deletedCaseNotesCount, offenderIdentifier);
+        telemetryClient.trackEvent("OffenderDelete", Map.of("offenderNo", offenderIdentifier, "count", String.valueOf(deletedCaseNotesCount)), null);
+        return deletedCaseNotesCount;
     }
 }

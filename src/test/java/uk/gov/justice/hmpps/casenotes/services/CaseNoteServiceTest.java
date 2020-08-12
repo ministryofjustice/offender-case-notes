@@ -21,7 +21,6 @@ import uk.gov.justice.hmpps.casenotes.repository.OffenderCaseNoteRepository;
 import uk.gov.justice.hmpps.casenotes.repository.ParentCaseNoteTypeRepository;
 
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
@@ -189,22 +188,14 @@ public class CaseNoteServiceTest {
 
     @Test
     public void deleteOffenderTest() {
-        when(repository.deleteOffenderCaseNoteByOffenderIdentifier(eq("A1234AC"))).thenReturn(List.of(
-                OffenderCaseNote.builder().offenderIdentifier("A1234AC").noteText("Test 1").build(),
-                OffenderCaseNote.builder().offenderIdentifier("A1234AC").noteText("Test 2").build(),
-                OffenderCaseNote.builder().offenderIdentifier("A1234AC").noteText("Test 3").build()
-        ));
+        when(repository.deleteOffenderCaseNoteByOffenderIdentifier(eq("A1234AC"))).thenReturn(3);
         final var offendersDeleted = caseNoteService.deleteCaseNotesForOffender("A1234AC");
         assertThat(offendersDeleted).isEqualTo(3);
     }
 
     @Test
     public void deleteOffenderTest_telemetry() {
-        when(repository.deleteOffenderCaseNoteByOffenderIdentifier(eq("A1234AC"))).thenReturn(List.of(
-                OffenderCaseNote.builder().offenderIdentifier("A1234AC").noteText("Test 1").build(),
-                OffenderCaseNote.builder().offenderIdentifier("A1234AC").noteText("Test 2").build(),
-                OffenderCaseNote.builder().offenderIdentifier("A1234AC").noteText("Test 3").build()
-        ));
+        when(repository.deleteOffenderCaseNoteByOffenderIdentifier(eq("A1234AC"))).thenReturn(3);
         caseNoteService.deleteCaseNotesForOffender("A1234AC");
         verify(telemetryClient).trackEvent("OffenderDelete", Map.of("offenderNo", "A1234AC", "count", "3"), null);
     }

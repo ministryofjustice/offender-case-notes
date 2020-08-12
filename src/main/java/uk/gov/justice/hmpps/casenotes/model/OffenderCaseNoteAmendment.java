@@ -5,6 +5,7 @@ import lombok.Builder;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import lombok.ToString;
 import org.hibernate.annotations.Where;
 import org.springframework.data.annotation.CreatedBy;
@@ -26,7 +27,7 @@ import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "OFFENDER_CASE_NOTE_AMENDMENT")
-@Where(clause = "not deleted")
+@Where(clause = "not SOFT_DELETED")
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
@@ -75,6 +76,7 @@ public class OffenderCaseNoteAmendment {
     private String modifyUserId;
 
     @Builder.Default
-    private boolean deleted = false;
+    @Setter
+    private boolean softDeleted = false;
 
 }
