@@ -229,7 +229,10 @@ public class OffenderCaseNoteRepositoryTest {
         TestTransaction.flagForCommit();
         TestTransaction.end();
         assertThat(repository.findById(persistedEntity.getId()).isEmpty());
-        assertThat(repository.findByIdIgnoreSoftDelete(persistedEntity.getId()).isEmpty());
+
+        var sql = String.format("SELECT COUNT(*) FROM offender_case_note Where offender_case_note_id = '%s'", persistedEntity.getId().toString());
+        final var caseNoteCountAfter = jdbcTemplate.queryForObject(sql, Integer.class);
+        assertThat(caseNoteCountAfter).isEqualTo(0);
     }
 
     @Test
@@ -246,11 +249,15 @@ public class OffenderCaseNoteRepositoryTest {
 
         TestTransaction.flagForCommit();
         TestTransaction.end();
-        assertThat(repository.findById(persistedEntity.getId()).isEmpty()).isTrue();
+        TestTransaction.start();
 
-        assertThat(repository.findByIdIgnoreSoftDelete(persistedEntity.getId()).isEmpty());
+        assertThat(repository.findById(persistedEntity.getId()).isEmpty());
+        TestTransaction.end();
+
+        var sql = String.format("SELECT COUNT(*) FROM offender_case_note Where offender_case_note_id = '%s'", persistedEntity.getId().toString());
+        final var caseNoteCountAfter = jdbcTemplate.queryForObject(sql, Integer.class);
+        assertThat(caseNoteCountAfter).isEqualTo(0);
     }
-
 
     @Test
     public void testDeleteOfSoftDeletedCaseNotesAndAmendments() {
@@ -263,20 +270,20 @@ public class OffenderCaseNoteRepositoryTest {
         repository.save(persistedEntity);
         TestTransaction.flagForCommit();
         TestTransaction.end();
-        TestTransaction.start();
 
         final var caseNoteCountBefore = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM offender_case_note_amendment", Integer.class);
         assertThat(caseNoteCountBefore).isEqualTo(1);
 
+        TestTransaction.start();
         repository.deleteOffenderCaseNoteAmendmentsByOffenderIdentifier("X2111XX");
         final var deletedCaseNotes = repository.deleteOffenderCaseNoteByOffenderIdentifier("X2111XX");
         assertThat(deletedCaseNotes).isEqualTo(1);
 
         TestTransaction.flagForCommit();
         TestTransaction.end();
-        assertThat(repository.findById(persistedEntity.getId()).isEmpty()).isTrue();
-
-        assertThat(repository.findByIdIgnoreSoftDelete(persistedEntity.getId()).isEmpty());
+        TestTransaction.start();
+        assertThat(repository.findById(persistedEntity.getId()).isEmpty());
+        TestTransaction.end();
 
         final var caseNoteCountAfter = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM offender_case_note_amendment", Integer.class);
         assertThat(caseNoteCountAfter).isEqualTo(0);
@@ -327,6 +334,9 @@ public class OffenderCaseNoteRepositoryTest {
         final var retrievedCaseNote = repository.findById(persistedEntity.getId()).orElseThrow();
         assertThat(retrievedCaseNote.getOffenderIdentifier()).isEqualTo("A1234ZZ");
 
+        TestTransaction.end();
+        TestTransaction.start();
+
         final var rows = repository.updateOffenderIdentifier("A1234ZZ", OFFENDER_IDENTIFIER);
 
         assertThat(rows).isEqualTo(1);
@@ -365,10 +375,10 @@ public class OffenderCaseNoteRepositoryTest {
         assertThat(rows).isEqualTo(1);
         TestTransaction.flagForCommit();
         TestTransaction.end();
-        TestTransaction.start();
 
-        final var modifiedIdentity = repository.findByIdIgnoreSoftDelete(persistedEntity.getId());
-        assertThat(modifiedIdentity.get().getOffenderIdentifier()).isEqualTo(OFFENDER_IDENTIFIER);
+        var sql = String.format("SELECT offender_identifier FROM offender_case_note Where offender_case_note_id = '%s'", persistedEntity.getId().toString());
+        final var caseNoteOffenderIdentifierIgnoreSoftDelete = jdbcTemplate.queryForObject(sql, String.class);
+        assertThat(caseNoteOffenderIdentifierIgnoreSoftDelete).isEqualTo(OFFENDER_IDENTIFIER);
     }
 
     @Test
@@ -387,7 +397,6 @@ public class OffenderCaseNoteRepositoryTest {
         TestTransaction.start();
 
         final var retrievedSoftDeleteCaseNote = repository.findById(persistedEntity.getId());
-
         assertThat(retrievedSoftDeleteCaseNote).isEmpty();
     }
 
@@ -429,8 +438,11 @@ public class OffenderCaseNoteRepositoryTest {
         final var caseNote = repository.findById(caseNoteId).orElseThrow();
         assertThat(caseNote.getOffenderIdentifier()).isEqualTo("X2111XX");
 
-        final var caseNoteIgnoreSoftDelete = repository.findByIdIgnoreSoftDelete(caseNoteId);
-        assertThat(caseNoteIgnoreSoftDelete.get().getOffenderIdentifier()).isEqualTo("X2111XX");
+        TestTransaction.end();
+
+        var sql = String.format("SELECT offender_identifier FROM offender_case_note Where offender_case_note_id = '%s'", persistedEntity.getId().toString());
+        final var caseNoteOffenderIdentifierIgnoreSoftDelete = jdbcTemplate.queryForObject(sql, String.class);
+        assertThat(caseNoteOffenderIdentifierIgnoreSoftDelete).isEqualTo("X2111XX");
     }
 
     @Test
@@ -447,8 +459,11 @@ public class OffenderCaseNoteRepositoryTest {
         final var caseNote = repository.findById(caseNoteId);
         assertThat(caseNote).isEmpty();
 
-        final var caseNoteIgnoreSoftDelete = repository.findByIdIgnoreSoftDelete(caseNoteId);
-        assertThat(caseNoteIgnoreSoftDelete.get().getOffenderIdentifier()).isEqualTo("X3111XX");
+        TestTransaction.end();
+
+        var sql = String.format("SELECT offender_identifier FROM offender_case_note Where offender_case_note_id = '%s'", persistedEntity.getId().toString());
+        final var caseNoteOffenderIdentifierIgnoreSoftDelete = jdbcTemplate.queryForObject(sql, String.class);
+        assertThat(caseNoteOffenderIdentifierIgnoreSoftDelete).isEqualTo("X3111XX");
     }
 
 

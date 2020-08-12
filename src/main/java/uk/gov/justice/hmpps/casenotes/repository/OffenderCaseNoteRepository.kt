@@ -5,7 +5,6 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor
 import org.springframework.data.jpa.repository.Modifying
 import org.springframework.data.jpa.repository.Query
 import org.springframework.data.repository.PagingAndSortingRepository
-import org.springframework.data.repository.query.Param
 import org.springframework.stereotype.Repository
 import uk.gov.justice.hmpps.casenotes.model.OffenderCaseNote
 import java.time.LocalDateTime
@@ -19,12 +18,9 @@ interface OffenderCaseNoteRepository : PagingAndSortingRepository<OffenderCaseNo
 
   fun findByModifyDateTimeBetweenOrderByModifyDateTime(fromDateTime: LocalDateTime, toDateTime: LocalDateTime): List<OffenderCaseNote>
 
-  @Query(value = "SELECT ocn.* FROM OFFENDER_CASE_NOTE ocn WHERE ocn.offender_case_note_id = ?1", nativeQuery = true)
-  fun findByIdIgnoreSoftDelete(offenderCaseNoteId: UUID): Optional<OffenderCaseNote>
-
   @Modifying
-  @Query("UPDATE OffenderCaseNote ocn SET ocn.offenderIdentifier = :newOffenderIdentifier WHERE ocn.offenderIdentifier = :oldOffenderIdentifier")
-  fun updateOffenderIdentifier(@Param("oldOffenderIdentifier") oldOffenderIdentifier: String?, @Param("newOffenderIdentifier") newOffenderIdentifier: String?): Int
+  @Query("UPDATE OFFENDER_CASE_NOTE ocn SET offender_identifier = ?2 WHERE ocn.offender_identifier = ?1", nativeQuery = true)
+  fun updateOffenderIdentifier(oldOffenderIdentifier: String, newOffenderIdentifier: String): Int
 
   @Modifying
   @Query(value = "DELETE FROM OFFENDER_CASE_NOTE ocn WHERE ocn.offender_identifier = ?1", nativeQuery = true)
