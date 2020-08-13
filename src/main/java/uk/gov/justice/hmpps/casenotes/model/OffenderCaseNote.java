@@ -6,6 +6,8 @@ import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.annotations.ResultCheckStyle;
+import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.SortComparator;
 import org.hibernate.annotations.Where;
 import org.springframework.data.annotation.CreatedBy;
@@ -35,6 +37,7 @@ import java.util.UUID;
 @Entity
 @Table(name = "OFFENDER_CASE_NOTE")
 @Where(clause = "not SOFT_DELETED")
+@SQLDelete(sql = "UPDATE offender_case_note SET soft_deleted = 1 WHERE offender_case_note_id = ?", check = ResultCheckStyle.COUNT)
 @NoArgsConstructor
 @AllArgsConstructor
 @EntityListeners(AuditingEntityListener.class)
@@ -97,10 +100,6 @@ public class OffenderCaseNote {
 
     @Builder.Default
     private boolean softDeleted = false;
-
-    public void setSoftDeleted(final boolean softDeleted) {
-        this.softDeleted = softDeleted;
-    }
 
     public void addAmendment(final String noteText, final String authorUsername, final String authorName, final String authorUserId) {
 
