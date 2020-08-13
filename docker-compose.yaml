@@ -65,18 +65,21 @@ services:
       - POSTGRES_DB=offender-case-notes
 
   localstack:
-    image: localstack/localstack:0.10.4
+    image: localstack/localstack:0.10.5
     networks:
       - hmpps
     container_name: localstack
     ports:
-      - "4567-4597:4567-4597"
-      - 9001:8080
+      - "4566-4597:4566-4597"
     environment:
-      HOSTNAME_EXTERNAL: localstack
-      SERVICES: sns,sqs
-      AWS_EXECUTION_ENV: "true"
-      DEFAULT_REGION: eu-west-2
+      - SERVICES=sqs,sns
+      - DATA_DIR=/tmp/localstack/data
+      - DOCKER_HOST=unix:///var/run/docker.sock
+      - DEFAULT_REGION=eu-west-2
+    volumes:
+      - "${TMPDIR:-/tmp/localstack}:/tmp/localstack"
+      - "/var/run/docker.sock:/var/run/docker.sock"
+      - $PWD/src/test/resources/localstack:/docker-entrypoint-initaws.d
 
 networks:
   hmpps:
