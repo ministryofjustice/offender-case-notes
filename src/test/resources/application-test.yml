@@ -41,7 +41,7 @@ api:
   health-timeout: 400ms
 
 sqs:
-  provider: embedded-localstack
+  provider: localstack
   endpoint.url: http://localhost:4576
   queue.name: offender_case_notes_queue
   dlq.name: offender_case_notes_dlq

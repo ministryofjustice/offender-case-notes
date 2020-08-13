@@ -1,5 +1,5 @@
 plugins {
-  id("uk.gov.justice.hmpps.gradle-spring-boot") version "0.4.7"
+  id("uk.gov.justice.hmpps.gradle-spring-boot") version "0.4.8"
   kotlin("plugin.spring") version "1.3.72"
 }
 
@@ -13,7 +13,7 @@ dependencies {
   compileOnly("org.projectlombok:lombok:1.18.12")
 
   runtimeOnly("com.h2database:h2:1.4.200")
-  runtimeOnly("org.flywaydb:flyway-core:6.5.3")
+  runtimeOnly("org.flywaydb:flyway-core:6.5.4")
   runtimeOnly("org.postgresql:postgresql:42.2.14")
 
   implementation("org.springframework.boot:spring-boot-starter-data-jpa")
@@ -45,7 +45,7 @@ dependencies {
   implementation("com.pauldijou:jwt-core_2.11:4.3.0")
   implementation("com.google.code.gson:gson:2.8.6")
 
-  implementation("software.amazon.awssdk:sns:2.13.71")
+  implementation("software.amazon.awssdk:sns:2.13.74")
 
   testAnnotationProcessor("org.projectlombok:lombok:1.18.12")
   testCompileOnly("org.projectlombok:lombok:1.18.12")
@@ -54,8 +54,6 @@ dependencies {
   testImplementation("net.javacrumbs.json-unit:json-unit-assertj:2.18.1")
   testImplementation("io.github.http-builder-ng:http-builder-ng-apache:1.0.4")
   testImplementation("com.github.tomakehurst:wiremock-standalone:2.27.1")
-  testImplementation("org.testcontainers:localstack:1.14.3")
-  testImplementation("org.awaitility:awaitility-kotlin:4.0.3")
   testImplementation("io.jsonwebtoken:jjwt:0.9.1")
 
   testImplementation("org.springframework.security.oauth:spring-security-oauth2:2.5.0.RELEASE")
