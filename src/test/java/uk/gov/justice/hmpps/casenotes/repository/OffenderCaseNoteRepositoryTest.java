@@ -217,18 +217,76 @@ public class OffenderCaseNoteRepositoryTest {
     @Test
     public void testDeleteCaseNotes() {
 
-        repository.save(transientEntityBuilder("X1111XX").noteText("note to delete").build());
+        final var persistedEntity = repository.save(transientEntityBuilder("X1111XX").noteText("note to delete").build());
 
         TestTransaction.flagForCommit();
         TestTransaction.end();
         TestTransaction.start();
 
         final var deletedCaseNotes = repository.deleteOffenderCaseNoteByOffenderIdentifier("X1111XX");
-        assertThat(deletedCaseNotes).hasSize(1);
+        assertThat(deletedCaseNotes).isEqualTo(1);
 
         TestTransaction.flagForCommit();
         TestTransaction.end();
-        assertThat(repository.findById(deletedCaseNotes.get(0).getId()).isEmpty()).isTrue();
+        assertThat(repository.findById(persistedEntity.getId()).isEmpty());
+
+        var sql = String.format("SELECT COUNT(*) FROM offender_case_note Where offender_case_note_id = '%s'", persistedEntity.getId().toString());
+        final var caseNoteCountAfter = jdbcTemplate.queryForObject(sql, Integer.class);
+        assertThat(caseNoteCountAfter).isEqualTo(0);
+    }
+
+    @Test
+    public void testDeleteOfSoftDeletedCaseNotes() {
+
+        final var persistedEntity = repository.save(transientEntityBuilder("X2111XX").noteText("note to delete").softDeleted(true).build());
+
+        TestTransaction.flagForCommit();
+        TestTransaction.end();
+        TestTransaction.start();
+
+        final var deletedCaseNotes = repository.deleteOffenderCaseNoteByOffenderIdentifier("X2111XX");
+        assertThat(deletedCaseNotes).isEqualTo(1);
+
+        TestTransaction.flagForCommit();
+        TestTransaction.end();
+        TestTransaction.start();
+
+        assertThat(repository.findById(persistedEntity.getId()).isEmpty());
+        TestTransaction.end();
+
+        var sql = String.format("SELECT COUNT(*) FROM offender_case_note Where offender_case_note_id = '%s'", persistedEntity.getId().toString());
+        final var caseNoteCountAfter = jdbcTemplate.queryForObject(sql, Integer.class);
+        assertThat(caseNoteCountAfter).isEqualTo(0);
+    }
+
+    @Test
+    public void testDeleteOfSoftDeletedCaseNotesAndAmendments() {
+
+        final var persistedEntity = repository.save(transientEntityBuilder("X2111XX")
+                .noteText("note to delete")
+                .softDeleted(true)
+                .build());
+        persistedEntity.addAmendment("Another Note 0", "someuser", "Some User", "user id");
+        repository.save(persistedEntity);
+        TestTransaction.flagForCommit();
+        TestTransaction.end();
+
+        final var caseNoteCountBefore = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM offender_case_note_amendment", Integer.class);
+        assertThat(caseNoteCountBefore).isEqualTo(1);
+
+        TestTransaction.start();
+        repository.deleteOffenderCaseNoteAmendmentsByOffenderIdentifier("X2111XX");
+        final var deletedCaseNotes = repository.deleteOffenderCaseNoteByOffenderIdentifier("X2111XX");
+        assertThat(deletedCaseNotes).isEqualTo(1);
+
+        TestTransaction.flagForCommit();
+        TestTransaction.end();
+        TestTransaction.start();
+        assertThat(repository.findById(persistedEntity.getId()).isEmpty());
+        TestTransaction.end();
+
+        final var caseNoteCountAfter = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM offender_case_note_amendment", Integer.class);
+        assertThat(caseNoteCountAfter).isEqualTo(0);
 
     }
 
@@ -251,9 +309,10 @@ public class OffenderCaseNoteRepositoryTest {
         TestTransaction.end();
         TestTransaction.start();
 
+        repository.deleteOffenderCaseNoteAmendmentsByOffenderIdentifier(caseNote.getOffenderIdentifier());
         final var deletedEntities = repository.deleteOffenderCaseNoteByOffenderIdentifier(caseNote.getOffenderIdentifier());
 
-        assertThat(deletedEntities).hasSize(1);
+        assertThat(deletedEntities).isEqualTo(1);
         TestTransaction.flagForCommit();
         TestTransaction.end();
         TestTransaction.start();
@@ -275,6 +334,9 @@ public class OffenderCaseNoteRepositoryTest {
         final var retrievedCaseNote = repository.findById(persistedEntity.getId()).orElseThrow();
         assertThat(retrievedCaseNote.getOffenderIdentifier()).isEqualTo("A1234ZZ");
 
+        TestTransaction.end();
+        TestTransaction.start();
+
         final var rows = repository.updateOffenderIdentifier("A1234ZZ", OFFENDER_IDENTIFIER);
 
         assertThat(rows).isEqualTo(1);
@@ -285,6 +347,125 @@ public class OffenderCaseNoteRepositoryTest {
         final var modifiedIdentity = repository.findById(persistedEntity.getId()).orElseThrow();
         assertThat(modifiedIdentity.getOffenderIdentifier()).isEqualTo(OFFENDER_IDENTIFIER);
     }
+
+    @Test
+    @WithAnonymousUser
+    public void testModifyOffenderIdentifierWhenACaseNoteIsSoftDeleted() {
+        final var caseNote = transientEntity("A2234ZZ");
+        caseNote.addAmendment("Another Note 0", "someuser", "Some User", "user id");
+        final var persistedEntity = repository.save(caseNote);
+        TestTransaction.flagForCommit();
+        TestTransaction.end();
+        TestTransaction.start();
+
+        final var retrievedCaseNote = repository.findById(persistedEntity.getId()).orElseThrow();
+        assertThat(retrievedCaseNote.getOffenderIdentifier()).isEqualTo("A2234ZZ");
+
+        retrievedCaseNote.setSoftDeleted(true);
+        final var persistedEntity2 = repository.save(retrievedCaseNote);
+        TestTransaction.flagForCommit();
+        TestTransaction.end();
+        TestTransaction.start();
+
+        final var retrievedCaseNote2 = repository.findById(persistedEntity.getId());
+        assertThat(retrievedCaseNote2).isEmpty();
+
+        final var rows = repository.updateOffenderIdentifier("A2234ZZ", OFFENDER_IDENTIFIER);
+
+        assertThat(rows).isEqualTo(1);
+        TestTransaction.flagForCommit();
+        TestTransaction.end();
+
+        var sql = String.format("SELECT offender_identifier FROM offender_case_note Where offender_case_note_id = '%s'", persistedEntity.getId().toString());
+        final var caseNoteOffenderIdentifierIgnoreSoftDelete = jdbcTemplate.queryForObject(sql, String.class);
+        assertThat(caseNoteOffenderIdentifierIgnoreSoftDelete).isEqualTo(OFFENDER_IDENTIFIER);
+    }
+
+    @Test
+    public void testOffenderCaseNoteSoftDeleted() {
+        final var caseNote = transientEntity("A2345AB");
+        final var persistedEntity = repository.save(caseNote);
+        TestTransaction.flagForCommit();
+        TestTransaction.end();
+        TestTransaction.start();
+
+        final var retrievedCaseNote = repository.findById(persistedEntity.getId()).orElseThrow();
+        retrievedCaseNote.setSoftDeleted(true);
+        repository.save(retrievedCaseNote);
+        TestTransaction.flagForCommit();
+        TestTransaction.end();
+        TestTransaction.start();
+
+        final var retrievedSoftDeleteCaseNote = repository.findById(persistedEntity.getId());
+        assertThat(retrievedSoftDeleteCaseNote).isEmpty();
+    }
+
+    @Test
+    @WithAnonymousUser
+    public void testOffenderCaseNoteAmendmentSoftDeleted() {
+        final var caseNote = transientEntity("A2345BB");
+        caseNote.addAmendment("Another Note 0", "someuser", "Some User", "user id");
+        final var persistedEntity = repository.save(caseNote);
+        TestTransaction.flagForCommit();
+        TestTransaction.end();
+        TestTransaction.start();
+
+        final var retrievedCaseNote = repository.findById(persistedEntity.getId()).orElseThrow();
+        retrievedCaseNote.getAmendment(1).get().setSoftDeleted(true);
+        repository.save(retrievedCaseNote);
+        TestTransaction.flagForCommit();
+        TestTransaction.end();
+        TestTransaction.start();
+
+        final var retrievedSoftDeleteCaseNote = repository.findById(persistedEntity.getId()).orElseThrow();
+
+        assertThat(retrievedSoftDeleteCaseNote.getAmendments()).isEmpty();
+
+    }
+
+    @Test
+    @WithAnonymousUser
+    public void testRetrieveASoftDeletedFalseCaseNote() {
+
+        final var persistedEntity = repository.save(transientEntityBuilder("X2111XX").noteText("note to retrieve").softDeleted(false).build());
+
+        TestTransaction.flagForCommit();
+        TestTransaction.end();
+        TestTransaction.start();
+
+        final var caseNoteId = persistedEntity.getId();
+
+        final var caseNote = repository.findById(caseNoteId).orElseThrow();
+        assertThat(caseNote.getOffenderIdentifier()).isEqualTo("X2111XX");
+
+        TestTransaction.end();
+
+        var sql = String.format("SELECT offender_identifier FROM offender_case_note Where offender_case_note_id = '%s'", persistedEntity.getId().toString());
+        final var caseNoteOffenderIdentifierIgnoreSoftDelete = jdbcTemplate.queryForObject(sql, String.class);
+        assertThat(caseNoteOffenderIdentifierIgnoreSoftDelete).isEqualTo("X2111XX");
+    }
+
+    @Test
+    @WithAnonymousUser
+    public void testRetrieveASoftDeletedTrueCaseNote() {
+
+        final var persistedEntity = repository.save(transientEntityBuilder("X3111XX").noteText("note to retrieve").softDeleted(true).build());
+
+        TestTransaction.flagForCommit();
+        TestTransaction.end();
+        TestTransaction.start();
+
+        final var caseNoteId = persistedEntity.getId();
+        final var caseNote = repository.findById(caseNoteId);
+        assertThat(caseNote).isEmpty();
+
+        TestTransaction.end();
+
+        var sql = String.format("SELECT offender_identifier FROM offender_case_note Where offender_case_note_id = '%s'", persistedEntity.getId().toString());
+        final var caseNoteOffenderIdentifierIgnoreSoftDelete = jdbcTemplate.queryForObject(sql, String.class);
+        assertThat(caseNoteOffenderIdentifierIgnoreSoftDelete).isEqualTo("X3111XX");
+    }
+
 
     private OffenderCaseNote transientEntity(final String offenderIdentifier) {
         return transientEntityBuilder(offenderIdentifier).build();
@@ -300,5 +481,6 @@ public class OffenderCaseNoteRepositoryTest {
                 .offenderIdentifier(offenderIdentifier)
                 .sensitiveCaseNoteType(genType)
                 .noteText("HELLO");
+
     }
 }

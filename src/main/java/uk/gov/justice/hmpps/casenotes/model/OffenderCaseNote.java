@@ -1,21 +1,40 @@
 package uk.gov.justice.hmpps.casenotes.model;
 
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
+import lombok.ToString;
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.SortComparator;
+import org.hibernate.annotations.Where;
 import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedBy;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
-import javax.persistence.*;
+import javax.persistence.CascadeType;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.EntityListeners;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
+import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 
 @Entity
 @Table(name = "OFFENDER_CASE_NOTE")
+@Where(clause = "not SOFT_DELETED")
 @NoArgsConstructor
 @AllArgsConstructor
 @EntityListeners(AuditingEntityListener.class)
@@ -75,6 +94,13 @@ public class OffenderCaseNote {
 
     @Column(columnDefinition = "serial", insertable = false, updatable = false)
     private Integer eventId;
+
+    @Builder.Default
+    private boolean softDeleted = false;
+
+    public void setSoftDeleted(final boolean softDeleted) {
+        this.softDeleted = softDeleted;
+    }
 
     public void addAmendment(final String noteText, final String authorUsername, final String authorName, final String authorUserId) {
 
