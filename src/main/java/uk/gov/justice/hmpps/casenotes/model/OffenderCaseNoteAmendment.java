@@ -7,6 +7,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
+import org.hibernate.annotations.ResultCheckStyle;
+import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.Where;
 import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.CreatedDate;
@@ -28,6 +30,7 @@ import java.time.LocalDateTime;
 @Entity
 @Table(name = "OFFENDER_CASE_NOTE_AMENDMENT")
 @Where(clause = "not SOFT_DELETED")
+@SQLDelete(sql = "UPDATE offender_case_note_amendment SET soft_deleted = TRUE WHERE offender_case_note_amendment_id = ?", check = ResultCheckStyle.COUNT)
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor

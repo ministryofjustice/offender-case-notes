@@ -28,6 +28,7 @@ import uk.gov.justice.hmpps.casenotes.model.OffenderCaseNote;
 import uk.gov.justice.hmpps.casenotes.model.ParentNoteType;
 import uk.gov.justice.hmpps.casenotes.model.SensitiveCaseNoteType;
 import uk.gov.justice.hmpps.casenotes.repository.CaseNoteTypeRepository;
+import uk.gov.justice.hmpps.casenotes.repository.OffenderCaseNoteAmendmentRepository;
 import uk.gov.justice.hmpps.casenotes.repository.OffenderCaseNoteRepository;
 import uk.gov.justice.hmpps.casenotes.repository.ParentCaseNoteTypeRepository;
 
@@ -42,6 +43,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 import static java.lang.String.format;
+import static java.lang.String.valueOf;
 import static org.springframework.data.domain.Sort.Direction.ASC;
 
 @Service
@@ -53,6 +55,7 @@ public class CaseNoteService {
 
     private static final String SERVICE_NAME = "OCNS";
     private final OffenderCaseNoteRepository repository;
+    private final OffenderCaseNoteAmendmentRepository amendmentRepository;
     private final CaseNoteTypeRepository caseNoteTypeRepository;
     private final ParentCaseNoteTypeRepository parentCaseNoteTypeRepository;
     private final SecurityUserContext securityUserContext;
@@ -181,7 +184,7 @@ public class CaseNoteService {
                 .offenderIdentifier(offenderIdentifier)
                 .occurrenceDateTime(cn.getOccurrenceDateTime())
                 .authorName(cn.getAuthorName())
-                .authorUserId(String.valueOf(cn.getStaffId()))
+                .authorUserId(valueOf(cn.getStaffId()))
                 .type(cn.getType())
                 .typeDescription(cn.getTypeDescription())
                 .subType(cn.getSubType())
@@ -381,7 +384,39 @@ public class CaseNoteService {
         repository.deleteOffenderCaseNoteAmendmentsByOffenderIdentifier(offenderIdentifier);
         final var deletedCaseNotesCount = repository.deleteOffenderCaseNoteByOffenderIdentifier(offenderIdentifier);
         log.info("Deleted {} case notes for offender identifier {}", deletedCaseNotesCount, offenderIdentifier);
-        telemetryClient.trackEvent("OffenderDelete", Map.of("offenderNo", offenderIdentifier, "count", String.valueOf(deletedCaseNotesCount)), null);
+        telemetryClient.trackEvent("OffenderDelete", Map.of("offenderNo", offenderIdentifier, "count", valueOf(deletedCaseNotesCount)), null);
         return deletedCaseNotesCount;
+    }
+
+    @Transactional
+    @PreAuthorize("hasAnyRole('ROLE_DELETE_CASE_NOTE')")
+    public void softDeleteCaseNote(final String offenderIdentifier, final UUID caseNoteId) {
+        final var caseNote = repository.findById(caseNoteId).orElseThrow(() -> new EntityNotFoundException("Case note not found"));
+        if (!caseNote.getOffenderIdentifier().equalsIgnoreCase(offenderIdentifier)) {
+            throw new EntityNotFoundException("case note id not connected with offenderIdentifier");
+        }
+        repository.deleteById(caseNoteId);
+        telemetryClient.trackEvent("CaseNoteSoftDelete",
+                Map.of("userName", securityUserContext.getCurrentUser().getUsername(),
+                        "offenderId", offenderIdentifier,
+                        "case note id", valueOf(caseNoteId)),
+                null);
+    }
+
+    @Transactional
+    @PreAuthorize("hasAnyRole('ROLE_DELETE_CASE_NOTE')")
+    public void softDeleteCaseNoteAmendment(final String offenderIdentifier, final Long caseNoteAmendmentId) {
+        final var caseNoteAmendment = amendmentRepository.findById(caseNoteAmendmentId).orElseThrow(() -> new EntityNotFoundException("Case note amendment not found"));
+
+        if (!caseNoteAmendment.getCaseNote().getOffenderIdentifier().equalsIgnoreCase(offenderIdentifier)) {
+            throw new EntityNotFoundException("case note amendment id not connected with offenderIdentifier");
+        }
+        amendmentRepository.deleteById(caseNoteAmendmentId);
+
+        telemetryClient.trackEvent("CaseNoteAmendmentSoftDelete",
+                Map.of("userName", securityUserContext.getCurrentUser().getUsername(),
+                        "offenderId", offenderIdentifier,
+                        "case note amendment id", valueOf(caseNoteAmendmentId)),
+                null);
     }
 }

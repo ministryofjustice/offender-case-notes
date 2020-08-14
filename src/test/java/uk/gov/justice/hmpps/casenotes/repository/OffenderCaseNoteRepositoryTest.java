@@ -398,28 +398,6 @@ public class OffenderCaseNoteRepositoryTest {
         assertThat(retrievedSoftDeleteCaseNote).isEmpty();
     }
 
-    @Test
-    @WithAnonymousUser
-    public void testOffenderCaseNoteAmendmentSoftDeleted() {
-        final var caseNote = transientEntity("A2345BB");
-        caseNote.addAmendment("Another Note 0", "someuser", "Some User", "user id");
-        final var persistedEntity = repository.save(caseNote);
-        TestTransaction.flagForCommit();
-        TestTransaction.end();
-        TestTransaction.start();
-
-        final var retrievedCaseNote = repository.findById(persistedEntity.getId()).orElseThrow();
-        retrievedCaseNote.getAmendment(1).orElseThrow().setSoftDeleted(true);
-        repository.save(retrievedCaseNote);
-        TestTransaction.flagForCommit();
-        TestTransaction.end();
-        TestTransaction.start();
-
-        final var retrievedSoftDeleteCaseNote = repository.findById(persistedEntity.getId()).orElseThrow();
-
-        assertThat(retrievedSoftDeleteCaseNote.getAmendments()).isEmpty();
-
-    }
 
     @Test
     @WithAnonymousUser
