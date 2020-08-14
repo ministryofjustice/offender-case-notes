@@ -448,14 +448,15 @@ class CaseNoteResourceTest : ResourceTest() {
         .exchange()
         .expectStatus().isOk
 
-    val notFoundBody = String.format("{\"status\":404,\"developerMessage\":\"Resource with id [%s] not found.\"}", id);
-
     webTestClient.get().uri("/case-notes/{offenderIdentifier}/{caseNoteIdentifier}", "A1234BA", id)
         .headers(addBearerToken(token))
         .exchange()
         .expectStatus().isNotFound
         .expectBody()
-        .json(notFoundBody)
+        .json("{" +
+            "'status':404," +
+            "'developerMessage':'Resource with id [$id] not found." +
+            "'}")
   }
 
   @Test
@@ -479,7 +480,10 @@ class CaseNoteResourceTest : ResourceTest() {
         .exchange()
         .expectStatus().isNotFound
         .expectBody()
-        .json("{\"status\":404,\"developerMessage\":\"Case note not found\"}")
+        .json("{" +
+            "'status':404," +
+            "'developerMessage':'Case note not found'" +
+            "}")
 
   }
 
@@ -502,7 +506,10 @@ class CaseNoteResourceTest : ResourceTest() {
         .exchange()
         .expectStatus().isBadRequest
         .expectBody()
-        .json("{\"status\":400,\"developerMessage\":\"case note id not connected with offenderIdentifier\"}")
+        .json("{" +
+            "'status\':400," +
+            "'developerMessage':'case note id not connected with offenderIdentifier'" +
+            "}")
   }
 
   @Test
@@ -567,7 +574,10 @@ class CaseNoteResourceTest : ResourceTest() {
         .exchange()
         .expectStatus().isNotFound
         .expectBody()
-        .json("{\"status\":404,\"developerMessage\":\"Case note amendment not found\"}")
+        .json("{" +
+            "'status':404," +
+            "'developerMessage':'Case note amendment not found'" +
+            "}")
   }
 
   @Test
@@ -602,9 +612,11 @@ class CaseNoteResourceTest : ResourceTest() {
         .exchange()
         .expectStatus().isBadRequest
         .expectBody()
-        .json("{\"status\":400,\"developerMessage\":\"case note amendment id not connected with offenderIdentifier\"}")
+        .json("{" +
+            "'status':400," +
+            "'developerMessage':'case note amendment id not connected with offenderIdentifier'" +
+            "}")
   }
-
 
   companion object {
     private const val CREATE_CASE_NOTE = """{"locationId": "%s", "type": "POM", "subType": "GEN", "text": "%s"}"""
@@ -614,6 +626,6 @@ class CaseNoteResourceTest : ResourceTest() {
     private val POM_ROLE = listOf("ROLE_POM")
     private val CASENOTES_ROLES = listOf("ROLE_VIEW_SENSITIVE_CASE_NOTES", "ROLE_ADD_SENSITIVE_CASE_NOTES")
     private val SYSTEM_ROLES = listOf("ROLE_SYSTEM_USER")
-    private val DELETE_CASENOTE_ROLES = listOf("ROLE_DELETE_CASE_NOTE", "ROLE_SYSTEM_USER", "ROLE_VIEW_SENSITIVE_CASE_NOTES", "ROLE_ADD_SENSITIVE_CASE_NOTES")
+    private val DELETE_CASENOTE_ROLES = listOf("ROLE_DELETE_SENSITIVE_CASE_NOTES", "ROLE_SYSTEM_USER", "ROLE_VIEW_SENSITIVE_CASE_NOTES", "ROLE_ADD_SENSITIVE_CASE_NOTES")
   }
 }

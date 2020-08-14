@@ -389,14 +389,14 @@ public class CaseNoteService {
     }
 
     @Transactional
-    @PreAuthorize("hasAnyRole('ROLE_DELETE_CASE_NOTE')")
+    @PreAuthorize("hasAnyRole('ROLE_DELETE_SENSITIVE_CASE_NOTES')")
     public void softDeleteCaseNote(final String offenderIdentifier, final UUID caseNoteId) {
         final var caseNote = repository.findById(caseNoteId).orElseThrow(() -> new EntityNotFoundException("Case note not found"));
         if (!caseNote.getOffenderIdentifier().equalsIgnoreCase(offenderIdentifier)) {
             throw new ValidationException("case note id not connected with offenderIdentifier");
         }
         repository.deleteById(caseNoteId);
-        telemetryClient.trackEvent("CaseNoteSoftDelete",
+        telemetryClient.trackEvent("SecureCaseNoteSoftDelete",
                 Map.of("userName", securityUserContext.getCurrentUser().getUsername(),
                         "offenderId", offenderIdentifier,
                         "case note id", valueOf(caseNoteId)),
@@ -404,7 +404,7 @@ public class CaseNoteService {
     }
 
     @Transactional
-    @PreAuthorize("hasAnyRole('ROLE_DELETE_CASE_NOTE')")
+    @PreAuthorize("hasAnyRole('ROLE_DELETE_SENSITIVE_CASE_NOTES')")
     public void softDeleteCaseNoteAmendment(final String offenderIdentifier, final Long caseNoteAmendmentId) {
         final var caseNoteAmendment = amendmentRepository.findById(caseNoteAmendmentId).orElseThrow(() -> new EntityNotFoundException("Case note amendment not found"));
 
@@ -413,7 +413,7 @@ public class CaseNoteService {
         }
         amendmentRepository.deleteById(caseNoteAmendmentId);
 
-        telemetryClient.trackEvent("CaseNoteAmendmentSoftDelete",
+        telemetryClient.trackEvent("SecureCaseNoteAmendmentSoftDelete",
                 Map.of("userName", securityUserContext.getCurrentUser().getUsername(),
                         "offenderId", offenderIdentifier,
                         "case note amendment id", valueOf(caseNoteAmendmentId)),

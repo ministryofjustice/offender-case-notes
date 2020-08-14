@@ -1,91 +1,85 @@
-package uk.gov.justice.hmpps.casenotes.repository;
+package uk.gov.justice.hmpps.casenotes.repository
 
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.oauth2.jwt.Jwt;
-import org.springframework.security.test.context.support.WithAnonymousUser;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.transaction.TestTransaction;
-import org.springframework.transaction.annotation.Transactional;
-import uk.gov.justice.hmpps.casenotes.config.AuthAwareAuthenticationToken;
-import uk.gov.justice.hmpps.casenotes.model.OffenderCaseNote;
-import uk.gov.justice.hmpps.casenotes.model.OffenderCaseNote.OffenderCaseNoteBuilder;
-import uk.gov.justice.hmpps.casenotes.model.SensitiveCaseNoteType;
-
-import java.util.Collections;
-
-import static java.time.LocalDateTime.now;
-import static org.assertj.core.api.Assertions.assertThat;
+import org.assertj.core.api.Assertions
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.security.core.context.SecurityContextHolder
+import org.springframework.security.oauth2.jwt.Jwt
+import org.springframework.security.test.context.support.WithAnonymousUser
+import org.springframework.test.context.ActiveProfiles
+import org.springframework.test.context.transaction.TestTransaction
+import org.springframework.transaction.annotation.Transactional
+import uk.gov.justice.hmpps.casenotes.config.AuthAwareAuthenticationToken
+import uk.gov.justice.hmpps.casenotes.model.OffenderCaseNote
+import uk.gov.justice.hmpps.casenotes.model.SensitiveCaseNoteType
+import java.time.LocalDateTime
 
 @ActiveProfiles("test")
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK)
 @Transactional
-public class OffenderCaseNoteAmendmentRepositoryTest {
+class OffenderCaseNoteAmendmentRepositoryTest {
+  @Autowired
+  private lateinit var repository: OffenderCaseNoteRepository
 
-    private static final String PARENT_TYPE = "POM";
-    private static final String SUB_TYPE = "GEN";
-    public static final String OFFENDER_IDENTIFIER = "A1234BD";
+  @Autowired
+  private lateinit var amendmentRepository: OffenderCaseNoteAmendmentRepository
 
-    @Autowired
-    private OffenderCaseNoteRepository repository;
+  @Autowired
+  private lateinit var caseNoteTypeRepository: CaseNoteTypeRepository
+  private lateinit var genType: SensitiveCaseNoteType
 
-    @Autowired
-    private OffenderCaseNoteAmendmentRepository amendmentRepository;
+  @BeforeEach
+  fun setUp() {
+    val jwt = Jwt.withTokenValue("some").subject("anonymous").header("head", "something").build()
+    SecurityContextHolder.getContext().authentication = AuthAwareAuthenticationToken(jwt, "userId", emptyList())
+    genType = caseNoteTypeRepository.findSensitiveCaseNoteTypeByParentType_TypeAndType(PARENT_TYPE, SUB_TYPE)
+  }
 
-    @Autowired
-    private CaseNoteTypeRepository caseNoteTypeRepository;
+  @Test
+  @WithAnonymousUser
+  fun testOffenderCaseNoteAmendmentSoftDeleted() {
+    val caseNote = transientEntity("A2345BB")
+    caseNote.addAmendment("Another Note 0", "someuser", "Some User", "user id")
+    val persistedEntity = repository.save(caseNote)
+    TestTransaction.flagForCommit()
+    TestTransaction.end()
+    TestTransaction.start()
 
-    private SensitiveCaseNoteType genType;
+    val amendmentId = repository.findById(persistedEntity.id).orElseThrow().getAmendment(1).get().id
 
-    @BeforeEach
-    public void setUp() {
-        final var jwt = Jwt.withTokenValue("some").subject("anonymous").header("head", "something").build();
-        SecurityContextHolder.getContext().setAuthentication(
-                new AuthAwareAuthenticationToken(jwt, "userId", Collections.emptyList()));
-        genType = caseNoteTypeRepository.findSensitiveCaseNoteTypeByParentType_TypeAndType(PARENT_TYPE, SUB_TYPE);
-    }
+    TestTransaction.end()
+    TestTransaction.start()
 
-    @Test
-    @WithAnonymousUser
-    public void testOffenderCaseNoteAmendmentSoftDeleted() {
-        final var caseNote = transientEntity("A2345BB");
-        caseNote.addAmendment("Another Note 0", "someuser", "Some User", "user id");
-        final var persistedEntity = repository.save(caseNote);
-        TestTransaction.flagForCommit();
-        TestTransaction.end();
-        TestTransaction.start();
-        final var amendmentId = repository.findById(persistedEntity.getId()).orElseThrow().getAmendment(1).get().getId();
+    amendmentRepository.deleteById(amendmentId)
 
-        TestTransaction.end();
-        TestTransaction.start();
-        amendmentRepository.deleteById(amendmentId);
-        TestTransaction.flagForCommit();
-        TestTransaction.end();
-        TestTransaction.start();
+    TestTransaction.flagForCommit()
+    TestTransaction.end()
+    TestTransaction.start()
 
-        final var retrievedCaseNote = repository.findById(persistedEntity.getId()).orElseThrow();
+    val retrievedCaseNote = repository.findById(persistedEntity.id).orElseThrow()
+    Assertions.assertThat(retrievedCaseNote.amendments).isEmpty()
+  }
 
-        assertThat(retrievedCaseNote.getAmendments()).isEmpty();
+  private fun transientEntity(offenderIdentifier: String): OffenderCaseNote {
+    return transientEntityBuilder(offenderIdentifier).build()
+  }
 
-    }
+  private fun transientEntityBuilder(offenderIdentifier: String): OffenderCaseNote.OffenderCaseNoteBuilder {
+    return OffenderCaseNote.builder()
+        .occurrenceDateTime(LocalDateTime.now())
+        .locationId("MDI")
+        .authorUsername("USER2")
+        .authorUserId("some id")
+        .authorName("Mickey Mouse")
+        .offenderIdentifier(offenderIdentifier)
+        .sensitiveCaseNoteType(genType)
+        .noteText("HELLO")
+  }
 
-    private OffenderCaseNote transientEntity(final String offenderIdentifier) {
-        return transientEntityBuilder(offenderIdentifier).build();
-    }
-
-    private OffenderCaseNoteBuilder transientEntityBuilder(final String offenderIdentifier) {
-        return OffenderCaseNote.builder()
-                .occurrenceDateTime(now())
-                .locationId("MDI")
-                .authorUsername("USER2")
-                .authorUserId("some id")
-                .authorName("Mickey Mouse")
-                .offenderIdentifier(offenderIdentifier)
-                .sensitiveCaseNoteType(genType)
-                .noteText("HELLO");
-
-    }
+  companion object {
+    private const val PARENT_TYPE = "POM"
+    private const val SUB_TYPE = "GEN"
+  }
 }

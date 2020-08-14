@@ -207,7 +207,7 @@ public class CaseNoteController {
 
     @DeleteMapping("/{offenderIdentifier}/{caseNoteId}")
     @ResponseStatus(HttpStatus.OK)
-    @ApiOperation(value = "Soft Deletes a case note", nickname = "soft delete case note")
+    @ApiOperation(value = "Deletes a case note", nickname = "delete case note")
     @ApiResponses({
             @ApiResponse(code = 404, message = "Offender or case note not found")})
     public void softDeleteCaseNote(
@@ -218,7 +218,7 @@ public class CaseNoteController {
 
     @DeleteMapping("/amendment/{offenderIdentifier}/{caseNoteAmendmentId}")
     @ResponseStatus(HttpStatus.OK)
-    @ApiOperation(value = "Soft Deletes a case note amendment", nickname = "soft delete case note amendment")
+    @ApiOperation(value = "Deletes a case note amendment", nickname = "sdelete case note amendment")
     @ApiResponses({
             @ApiResponse(code = 404, message = "Offender or case note not found")})
     public void softDeleteCaseNoteAmendment(

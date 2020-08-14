@@ -82,6 +82,8 @@ public class OffenderCaseNote {
 
     @Builder.Default
     @SortComparator(AmendmentComparator.class)
+    // cascade All not used as we don't want the soft delete to cascade to the case note amendments in case we need to
+    // restore the case note with previously soft deleted amendment
     @OneToMany(cascade = {PERSIST, MERGE, REFRESH, DETACH}, mappedBy = "caseNote")
     private final List<OffenderCaseNoteAmendment> amendments = new ArrayList<>();
 

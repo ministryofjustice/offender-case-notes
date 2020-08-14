@@ -248,7 +248,7 @@ public class CaseNoteServiceTest {
 
         caseNoteService.softDeleteCaseNote("A1234AC", offenderCaseNoteId);
 
-        verify(telemetryClient).trackEvent("CaseNoteSoftDelete", Map.of("userName", "user", "offenderId", "A1234AC", "case note id", offenderCaseNoteId.toString()), null);
+        verify(telemetryClient).trackEvent("SecureCaseNoteSoftDelete", Map.of("userName", "user", "offenderId", "A1234AC", "case note id", offenderCaseNoteId.toString()), null);
     }
 
     @Test
@@ -289,7 +289,7 @@ public class CaseNoteServiceTest {
 
         caseNoteService.softDeleteCaseNoteAmendment("A1234AC", 1L);
 
-        verify(telemetryClient).trackEvent("CaseNoteAmendmentSoftDelete", Map.of("userName", "user", "offenderId", "A1234AC", "case note amendment id", "1"), null);
+        verify(telemetryClient).trackEvent("SecureCaseNoteAmendmentSoftDelete", Map.of("userName", "user", "offenderId", "A1234AC", "case note amendment id", "1"), null);
     }
 
     @Test

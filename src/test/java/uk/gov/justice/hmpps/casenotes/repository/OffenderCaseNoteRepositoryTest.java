@@ -260,7 +260,7 @@ public class OffenderCaseNoteRepositoryTest {
     }
 
     @Test
-    public void testDeleteOfSoftDeletedCaseNotesAndAmendments() {
+    public void testDeleteOfSoftDeletedCaseNotesAmendments() {
 
         final var persistedEntity = repository.save(transientEntityBuilder("X3111XX")
                 .noteText("note to delete")
@@ -272,7 +272,7 @@ public class OffenderCaseNoteRepositoryTest {
         TestTransaction.end();
 
         final var caseNoteCountBefore = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM offender_case_note_amendment", Integer.class);
-        assertThat(caseNoteCountBefore).isEqualTo(1);
+        assertThat(caseNoteCountBefore).isEqualTo(3);
 
         TestTransaction.start();
         repository.deleteOffenderCaseNoteAmendmentsByOffenderIdentifier("X3111XX");
@@ -286,7 +286,7 @@ public class OffenderCaseNoteRepositoryTest {
         TestTransaction.end();
 
         final var caseNoteCountAfter = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM offender_case_note_amendment", Integer.class);
-        assertThat(caseNoteCountAfter).isEqualTo(0);
+        assertThat(caseNoteCountAfter).isEqualTo(2);
 
     }
 
@@ -440,6 +440,32 @@ public class OffenderCaseNoteRepositoryTest {
         final var sql = String.format("SELECT offender_identifier FROM offender_case_note Where offender_case_note_id = '%s'", persistedEntity.getId().toString());
         final var caseNoteOffenderIdentifierIgnoreSoftDelete = jdbcTemplate.queryForObject(sql, String.class);
         assertThat(caseNoteOffenderIdentifierIgnoreSoftDelete).isEqualTo("X5111XX");
+    }
+
+    @Test
+    @WithAnonymousUser
+    public void testThatSoftDeleteDoesntCascadeFromCaseNoteToAmendments() {
+        final var persistedEntity = repository.save(transientEntityBuilder("X9111XX")
+                .noteText("note to delete")
+                .build());
+        persistedEntity.addAmendment("Another Note 0", "someuser", "Some User", "user id");
+        persistedEntity.addAmendment("Another Note 1", "someuser", "Some User", "user id");
+        repository.save(persistedEntity);
+
+        TestTransaction.flagForCommit();
+        TestTransaction.end();
+        TestTransaction.start();
+        final var retrievedEntity = repository.findById(persistedEntity.getId()).orElseThrow();
+        TestTransaction.end();
+        TestTransaction.start();
+        repository.deleteById(retrievedEntity.getId());
+        TestTransaction.flagForCommit();
+        TestTransaction.end();
+
+        final var sql = String.format("SELECT soft_deleted FROM offender_case_note_amendment Where offender_case_note_amendment_id = '%s'", persistedEntity.getAmendment(1).get().getId());
+        assertThat(jdbcTemplate.queryForObject(sql, Boolean.class)).isFalse();
+
+
     }
 
 
