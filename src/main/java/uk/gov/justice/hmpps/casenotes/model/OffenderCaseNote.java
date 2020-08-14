@@ -16,7 +16,6 @@ import org.springframework.data.annotation.LastModifiedBy;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
-import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EntityListeners;
@@ -34,10 +33,15 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import static javax.persistence.CascadeType.DETACH;
+import static javax.persistence.CascadeType.MERGE;
+import static javax.persistence.CascadeType.PERSIST;
+import static javax.persistence.CascadeType.REFRESH;
+
 @Entity
 @Table(name = "OFFENDER_CASE_NOTE")
 @Where(clause = "not SOFT_DELETED")
-@SQLDelete(sql = "UPDATE offender_case_note SET soft_deleted = 1 WHERE offender_case_note_id = ?", check = ResultCheckStyle.COUNT)
+@SQLDelete(sql = "UPDATE offender_case_note SET soft_deleted = TRUE WHERE offender_case_note_id = ?", check = ResultCheckStyle.COUNT)
 @NoArgsConstructor
 @AllArgsConstructor
 @EntityListeners(AuditingEntityListener.class)
@@ -78,7 +82,9 @@ public class OffenderCaseNote {
 
     @Builder.Default
     @SortComparator(AmendmentComparator.class)
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "caseNote")
+    // cascade All not used as we don't want the soft delete to cascade to the case note amendments in case we need to
+    // restore the case note with previously soft deleted amendment
+    @OneToMany(cascade = {PERSIST, MERGE, REFRESH, DETACH}, mappedBy = "caseNote")
     private final List<OffenderCaseNoteAmendment> amendments = new ArrayList<>();
 
     @CreatedDate

@@ -1,7 +1,13 @@
 package uk.gov.justice.hmpps.casenotes.controllers;
 
 import com.microsoft.applicationinsights.TelemetryClient;
-import io.swagger.annotations.*;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiImplicitParams;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
+import io.swagger.annotations.ApiResponse;
+import io.swagger.annotations.ApiResponses;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -9,15 +15,32 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.bind.annotation.RestController;
 import uk.gov.justice.hmpps.casenotes.config.SecurityUserContext;
-import uk.gov.justice.hmpps.casenotes.dto.*;
+import uk.gov.justice.hmpps.casenotes.dto.CaseNote;
+import uk.gov.justice.hmpps.casenotes.dto.CaseNoteFilter;
+import uk.gov.justice.hmpps.casenotes.dto.CaseNoteType;
+import uk.gov.justice.hmpps.casenotes.dto.ErrorResponse;
+import uk.gov.justice.hmpps.casenotes.dto.NewCaseNote;
+import uk.gov.justice.hmpps.casenotes.dto.NewCaseNoteType;
+import uk.gov.justice.hmpps.casenotes.dto.UpdateCaseNote;
+import uk.gov.justice.hmpps.casenotes.dto.UpdateCaseNoteType;
 import uk.gov.justice.hmpps.casenotes.services.CaseNoteEventPusher;
 import uk.gov.justice.hmpps.casenotes.services.CaseNoteService;
 
 import javax.validation.constraints.NotNull;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
@@ -44,7 +67,7 @@ public class CaseNoteController {
             @ApiResponse(code = 200, message = "OK", response = CaseNote.class, responseContainer = "List")})
     public CaseNote getCaseNote(
             @ApiParam(value = "Offender Identifier", required = true, example = "A1234AA") @PathVariable("offenderIdentifier") final String offenderIdentifier,
-            @ApiParam(value = "Case Note Id", required = true, example = "A1234AA") @PathVariable("caseNoteIdentifier") final String caseNoteIdentifier) {
+            @ApiParam(value = "Case Note Id", required = true, example = "518b2200-6489-4c77-8514-10cf80ccd488") @PathVariable("caseNoteIdentifier") final String caseNoteIdentifier) {
         return caseNoteService.getCaseNote(offenderIdentifier, caseNoteIdentifier);
     }
 
@@ -97,7 +120,7 @@ public class CaseNoteController {
             @ApiResponse(code = 404, message = "No case notes where found for this offender and case note id", response = ErrorResponse.class)})
     public CaseNote amendCaseNote(
             @ApiParam(value = "Offender Identifier", required = true, example = "A1234AA") @PathVariable("offenderIdentifier") final String offenderIdentifier,
-            @ApiParam(value = "Case Note Id", required = true, example = "A1234AA") @PathVariable("caseNoteIdentifier") final String caseNoteIdentifier,
+            @ApiParam(value = "Case Note Id", required = true, example = "518b2200-6489-4c77-8514-10cf80ccd488") @PathVariable("caseNoteIdentifier") final String caseNoteIdentifier,
             @RequestBody @NotNull final UpdateCaseNote amendedText) {
         final var amendCaseNote = caseNoteService.amendCaseNote(offenderIdentifier, caseNoteIdentifier, amendedText);
 
@@ -180,6 +203,28 @@ public class CaseNoteController {
             @ApiParam(value = "Sub Case Note Type", required = true, example = "GEN") @PathVariable("subType") final String subType,
             @RequestBody @NotNull final UpdateCaseNoteType body) {
         return caseNoteService.updateCaseNoteSubType(parentType, subType, body);
+    }
+
+    @DeleteMapping("/{offenderIdentifier}/{caseNoteId}")
+    @ResponseStatus(HttpStatus.OK)
+    @ApiOperation(value = "Deletes a case note", nickname = "delete case note")
+    @ApiResponses({
+            @ApiResponse(code = 404, message = "Offender or case note not found")})
+    public void softDeleteCaseNote(
+            @ApiParam(value = "Offender Identifier", required = true, example = "A1234AA") @PathVariable("offenderIdentifier") final String offenderIdentifier,
+            @ApiParam(value = "Case Note Id", required = true, example = "518b2200-6489-4c77-8514-10cf80ccd488") @PathVariable("caseNoteId") final UUID caseNoteId) {
+        caseNoteService.softDeleteCaseNote(offenderIdentifier, caseNoteId);
+    }
+
+    @DeleteMapping("/amendment/{offenderIdentifier}/{caseNoteAmendmentId}")
+    @ResponseStatus(HttpStatus.OK)
+    @ApiOperation(value = "Deletes a case note amendment", nickname = "sdelete case note amendment")
+    @ApiResponses({
+            @ApiResponse(code = 404, message = "Offender or case note not found")})
+    public void softDeleteCaseNoteAmendment(
+            @ApiParam(value = "Offender Identifier", required = true, example = "A1234AA") @PathVariable("offenderIdentifier") final String offenderIdentifier,
+            @ApiParam(value = "Case Note Amendment Id", required = true, example = "1") @PathVariable("caseNoteAmendmentId") final Long caseNoteAmendmentId) {
+        caseNoteService.softDeleteCaseNoteAmendment(offenderIdentifier, caseNoteAmendmentId);
     }
 
     private Map<String, String> createEventProperties(final CaseNote caseNote) {

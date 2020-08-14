@@ -1,0 +1,12 @@
+{
+  "offenderIdentifier": "A1234BA",
+  "type": "POM",
+  "typeDescription": "POM Notes",
+  "subType": "GEN",
+  "subTypeDescription": "General POM Note",
+  "authorUserId": "DELETE_CASE_NOTE_USER_ID",
+  "authorName": "Mikey Mouse",
+  "text": "This is a case note",
+  "locationId": "LEI",
+  "amendments": []
+}
