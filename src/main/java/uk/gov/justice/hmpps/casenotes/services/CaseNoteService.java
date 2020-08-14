@@ -393,7 +393,7 @@ public class CaseNoteService {
     public void softDeleteCaseNote(final String offenderIdentifier, final UUID caseNoteId) {
         final var caseNote = repository.findById(caseNoteId).orElseThrow(() -> new EntityNotFoundException("Case note not found"));
         if (!caseNote.getOffenderIdentifier().equalsIgnoreCase(offenderIdentifier)) {
-            throw new EntityNotFoundException("case note id not connected with offenderIdentifier");
+            throw new ValidationException("case note id not connected with offenderIdentifier");
         }
         repository.deleteById(caseNoteId);
         telemetryClient.trackEvent("CaseNoteSoftDelete",
@@ -409,7 +409,7 @@ public class CaseNoteService {
         final var caseNoteAmendment = amendmentRepository.findById(caseNoteAmendmentId).orElseThrow(() -> new EntityNotFoundException("Case note amendment not found"));
 
         if (!caseNoteAmendment.getCaseNote().getOffenderIdentifier().equalsIgnoreCase(offenderIdentifier)) {
-            throw new EntityNotFoundException("case note amendment id not connected with offenderIdentifier");
+            throw new ValidationException("case note amendment id not connected with offenderIdentifier");
         }
         amendmentRepository.deleteById(caseNoteAmendmentId);
 
