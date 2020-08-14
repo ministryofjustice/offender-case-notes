@@ -22,6 +22,7 @@ import uk.gov.justice.hmpps.casenotes.repository.OffenderCaseNoteAmendmentReposi
 import uk.gov.justice.hmpps.casenotes.repository.OffenderCaseNoteRepository;
 import uk.gov.justice.hmpps.casenotes.repository.ParentCaseNoteTypeRepository;
 
+import javax.validation.ValidationException;
 import java.time.LocalDateTime;
 import java.util.Map;
 import java.util.Optional;
@@ -264,7 +265,7 @@ public class CaseNoteServiceTest {
         final var offenderCaseNoteId = offenderCaseNote.getId();
         when(repository.findById(any())).thenReturn(Optional.of(offenderCaseNote));
 
-        assertThatThrownBy(() -> caseNoteService.softDeleteCaseNote("Z9999ZZ", offenderCaseNoteId)).isInstanceOf(EntityNotFoundException.class);
+        assertThatThrownBy(() -> caseNoteService.softDeleteCaseNote("Z9999ZZ", offenderCaseNoteId)).isInstanceOf(ValidationException.class);
     }
 
     @Test
@@ -304,7 +305,7 @@ public class CaseNoteServiceTest {
         final var offenderCaseNoteAmendment = createOffenderCaseNoteAmendment(noteType);
         when(amendmentRepository.findById(any())).thenReturn(offenderCaseNoteAmendment);
 
-        assertThatThrownBy(() -> caseNoteService.softDeleteCaseNoteAmendment("Z9999ZZ", 1L)).isInstanceOf(EntityNotFoundException.class);
+        assertThatThrownBy(() -> caseNoteService.softDeleteCaseNoteAmendment("Z9999ZZ", 1L)).isInstanceOf(ValidationException.class);
     }
 
 
