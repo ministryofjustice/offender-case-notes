@@ -40,7 +40,6 @@ import uk.gov.justice.hmpps.casenotes.services.CaseNoteService;
 import javax.validation.constraints.NotNull;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
@@ -212,7 +211,7 @@ public class CaseNoteController {
             @ApiResponse(code = 404, message = "Offender or case note not found")})
     public void softDeleteCaseNote(
             @ApiParam(value = "Offender Identifier", required = true, example = "A1234AA") @PathVariable("offenderIdentifier") final String offenderIdentifier,
-            @ApiParam(value = "Case Note Id", required = true, example = "518b2200-6489-4c77-8514-10cf80ccd488") @PathVariable("caseNoteId") final UUID caseNoteId) {
+            @ApiParam(value = "Case Note Id", required = true, example = "518b2200-6489-4c77-8514-10cf80ccd488") @PathVariable("caseNoteId") final String caseNoteId) {
         caseNoteService.softDeleteCaseNote(offenderIdentifier, caseNoteId);
     }
 

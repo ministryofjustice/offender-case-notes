@@ -389,13 +389,16 @@ public class CaseNoteService {
     }
 
     @Transactional
-    @PreAuthorize("hasAnyRole('ROLE_DELETE_SENSITIVE_CASE_NOTES')")
-    public void softDeleteCaseNote(final String offenderIdentifier, final UUID caseNoteId) {
-        final var caseNote = repository.findById(caseNoteId).orElseThrow(() -> new EntityNotFoundException("Case note not found"));
+    @PreAuthorize("hasAnyRole('DELETE_SENSITIVE_CASE_NOTES')")
+    public void softDeleteCaseNote(final String offenderIdentifier, final String caseNoteId) {
+        if (isNotSensitiveCaseNote(caseNoteId)) {
+            throw new ValidationException("Case note id not a sensitive case note, please delete through NOMIS");
+        }
+        final var caseNote = repository.findById(UUID.fromString(caseNoteId)).orElseThrow(() -> new EntityNotFoundException("Case note not found"));
         if (!caseNote.getOffenderIdentifier().equalsIgnoreCase(offenderIdentifier)) {
             throw new ValidationException("case note id not connected with offenderIdentifier");
         }
-        repository.deleteById(caseNoteId);
+        repository.deleteById(UUID.fromString(caseNoteId));
         telemetryClient.trackEvent("SecureCaseNoteSoftDelete",
                 Map.of("userName", securityUserContext.getCurrentUser().getUsername(),
                         "offenderId", offenderIdentifier,
@@ -404,7 +407,7 @@ public class CaseNoteService {
     }
 
     @Transactional
-    @PreAuthorize("hasAnyRole('ROLE_DELETE_SENSITIVE_CASE_NOTES')")
+    @PreAuthorize("hasAnyRole('DELETE_SENSITIVE_CASE_NOTES')")
     public void softDeleteCaseNoteAmendment(final String offenderIdentifier, final Long caseNoteAmendmentId) {
         final var caseNoteAmendment = amendmentRepository.findById(caseNoteAmendmentId).orElseThrow(() -> new EntityNotFoundException("Case note amendment not found"));
 

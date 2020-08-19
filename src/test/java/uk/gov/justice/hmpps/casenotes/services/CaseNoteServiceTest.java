@@ -233,7 +233,7 @@ public class CaseNoteServiceTest {
         when(repository.findById(any())).thenReturn(Optional.of(offenderCaseNote));
         when(securityUserContext.getCurrentUser()).thenReturn(new UserIdUser("user", "userId"));
 
-        caseNoteService.softDeleteCaseNote("A1234AC", offenderCaseNoteId);
+        caseNoteService.softDeleteCaseNote("A1234AC", offenderCaseNoteId.toString());
 
         verify(repository).deleteById(offenderCaseNoteId);
     }
@@ -246,7 +246,7 @@ public class CaseNoteServiceTest {
         when(repository.findById(any())).thenReturn(Optional.of(offenderCaseNote));
         when(securityUserContext.getCurrentUser()).thenReturn(new UserIdUser("user", "userId"));
 
-        caseNoteService.softDeleteCaseNote("A1234AC", offenderCaseNoteId);
+        caseNoteService.softDeleteCaseNote("A1234AC", offenderCaseNoteId.toString());
 
         verify(telemetryClient).trackEvent("SecureCaseNoteSoftDelete", Map.of("userName", "user", "offenderId", "A1234AC", "case note id", offenderCaseNoteId.toString()), null);
     }
@@ -254,7 +254,7 @@ public class CaseNoteServiceTest {
     @Test
     public void softDeleteCaseNoteEntityNotFoundExceptionThrownWhenCaseNoteNotFound() {
 
-        assertThatThrownBy(() -> caseNoteService.softDeleteCaseNote("A1234AC", UUID.randomUUID())).isInstanceOf(EntityNotFoundException.class);
+        assertThatThrownBy(() -> caseNoteService.softDeleteCaseNote("A1234AC", UUID.randomUUID().toString())).isInstanceOf(EntityNotFoundException.class);
 
     }
 
@@ -265,7 +265,7 @@ public class CaseNoteServiceTest {
         final var offenderCaseNoteId = offenderCaseNote.getId();
         when(repository.findById(any())).thenReturn(Optional.of(offenderCaseNote));
 
-        assertThatThrownBy(() -> caseNoteService.softDeleteCaseNote("Z9999ZZ", offenderCaseNoteId)).isInstanceOf(ValidationException.class);
+        assertThatThrownBy(() -> caseNoteService.softDeleteCaseNote("Z9999ZZ", offenderCaseNoteId.toString())).isInstanceOf(ValidationException.class);
     }
 
     @Test

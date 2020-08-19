@@ -471,6 +471,22 @@ class CaseNoteResourceTest : ResourceTest() {
   }
 
   @Test
+  fun testDeleteNOMISCaseNoteNotFound() {
+    oAuthApi.subGetUserDetails("DELETE_CASE_NOTE_USER")
+    val token = jwtHelper.createJwt("DELETE_CASE_NOTE_USER", roles = DELETE_CASENOTE_ROLES)
+
+    webTestClient.delete().uri("/case-notes/{offenderIdentifier}/{caseNoteId}", "Z1234ZZ", "12345678")
+        .headers(addBearerToken(token))
+        .exchange()
+        .expectStatus().isBadRequest
+        .expectBody()
+        .json("{" +
+            "'status':400," +
+            "'developerMessage':'Case note id not a sensitive case note, please delete through NOMIS'" +
+            "}")
+  }
+
+  @Test
   fun testSoftDeleteCaseNoteNotFound() {
     oAuthApi.subGetUserDetails("DELETE_CASE_NOTE_USER")
     val token = jwtHelper.createJwt("DELETE_CASE_NOTE_USER", roles = DELETE_CASENOTE_ROLES)
@@ -484,7 +500,6 @@ class CaseNoteResourceTest : ResourceTest() {
             "'status':404," +
             "'developerMessage':'Case note not found'" +
             "}")
-
   }
 
   @Test
