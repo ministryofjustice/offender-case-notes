@@ -389,7 +389,7 @@ public class CaseNoteService {
     }
 
     @Transactional
-    @PreAuthorize("hasAnyRole('DELETE_SENSITIVE_CASE_NOTES')")
+    @PreAuthorize("hasRole('DELETE_SENSITIVE_CASE_NOTES')")
     public void softDeleteCaseNote(final String offenderIdentifier, final String caseNoteId) {
         if (isNotSensitiveCaseNote(caseNoteId)) {
             throw new ValidationException("Case note id not a sensitive case note, please delete through NOMIS");
@@ -407,7 +407,7 @@ public class CaseNoteService {
     }
 
     @Transactional
-    @PreAuthorize("hasAnyRole('DELETE_SENSITIVE_CASE_NOTES')")
+    @PreAuthorize("hasRole('DELETE_SENSITIVE_CASE_NOTES')")
     public void softDeleteCaseNoteAmendment(final String offenderIdentifier, final Long caseNoteAmendmentId) {
         final var caseNoteAmendment = amendmentRepository.findById(caseNoteAmendmentId).orElseThrow(() -> new EntityNotFoundException("Case note amendment not found"));
 

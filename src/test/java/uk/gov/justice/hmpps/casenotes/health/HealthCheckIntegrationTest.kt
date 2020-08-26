@@ -192,6 +192,22 @@ class HealthCheckIntegrationTest : IntegrationTest() {
         .jsonPath("components.queueHealth.details.dlqStatus").isEqualTo(DlqStatus.NOT_FOUND.description)
   }
 
+  @Test
+  fun `Health liveness page is accessible`() {
+    webTestClient.get().uri("/health/liveness")
+        .exchange()
+        .expectStatus().isOk
+        .expectBody().jsonPath("status").isEqualTo("UP")
+  }
+
+  @Test
+  fun `Health readiness page is accessible`() {
+    webTestClient.get().uri("/health/readiness")
+        .exchange()
+        .expectStatus().isOk
+        .expectBody().jsonPath("status").isEqualTo("UP")
+  }
+
   private fun subPing(status: Int) {
     oAuthApi.stubFor(get("/auth/health/ping").willReturn(aResponse()
         .withHeader("Content-Type", "application/json")
