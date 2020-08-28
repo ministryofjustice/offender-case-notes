@@ -1,20 +1,12 @@
-package uk.gov.justice.hmpps.casenotes.dto;
+package uk.gov.justice.hmpps.casenotes.dto
 
-import com.fasterxml.jackson.annotation.JsonInclude;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import com.fasterxml.jackson.annotation.JsonCreator
+import com.fasterxml.jackson.annotation.JsonInclude
 
-@Data
-@Builder
-@NoArgsConstructor
-@AllArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class ErrorResponse {
-    private Integer status;
-    private Integer errorCode;
-    private String userMessage;
-    private String developerMessage;
-    private String moreInfo;
-}
+data class ErrorResponse @JsonCreator constructor(
+    val status: Int,
+    val errorCode: Int? = null,
+    val userMessage: String? = null,
+    val developerMessage: String? = null,
+    val moreInfo: String? = null)

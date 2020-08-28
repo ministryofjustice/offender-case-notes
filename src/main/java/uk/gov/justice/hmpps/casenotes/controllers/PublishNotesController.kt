@@ -1,6 +1,10 @@
 package uk.gov.justice.hmpps.casenotes.controllers
 
-import io.swagger.annotations.*
+import io.swagger.annotations.Api
+import io.swagger.annotations.ApiOperation
+import io.swagger.annotations.ApiParam
+import io.swagger.annotations.ApiResponse
+import io.swagger.annotations.ApiResponses
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.format.annotation.DateTimeFormat
@@ -18,7 +22,7 @@ import javax.validation.constraints.NotNull
 @Api(tags = ["publish-notes"])
 @RestController
 @RequestMapping(value = ["publish-notes"], produces = [APPLICATION_JSON_VALUE])
-open class PublishNotesController(private val publishNoteService: PublishNoteService) {
+class PublishNotesController(private val publishNoteService: PublishNoteService) {
   companion object {
     val log: Logger = LoggerFactory.getLogger(this::class.java)
   }
@@ -26,7 +30,7 @@ open class PublishNotesController(private val publishNoteService: PublishNoteSer
   @PostMapping
   @ApiOperation(value = "Publish sensitive case notes", nickname = "publish sensitive case notes")
   @ApiResponses(ApiResponse(code = 200, message = "Number of notes to be published (asynchronously)"))
-  open fun publishCaseNotes(
+  fun publishCaseNotes(
       @ApiParam(value = "A timestamp that indicates the earliest record required")
       @RequestParam("fromDateTime", required = false) @DateTimeFormat(iso = ISO.DATE_TIME) fromDateTime: LocalDateTime?,
       @ApiParam(value = "A timestamp that indicates the latest record required", required = true)

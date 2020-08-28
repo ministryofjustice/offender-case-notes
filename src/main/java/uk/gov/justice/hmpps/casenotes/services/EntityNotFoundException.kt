@@ -1,37 +1,23 @@
-package uk.gov.justice.hmpps.casenotes.services;
+package uk.gov.justice.hmpps.casenotes.services
 
-import java.util.function.Supplier;
+import java.util.function.Supplier
 
-public class EntityNotFoundException extends RuntimeException implements Supplier<EntityNotFoundException> {
-    private static final String DEFAULT_MESSAGE_FOR_ID_FORMAT = "Resource with id [%s] not found.";
+class EntityNotFoundException(message: String?) : RuntimeException(message), Supplier<EntityNotFoundException> {
+  override fun get(): EntityNotFoundException = EntityNotFoundException(message)
 
-    public EntityNotFoundException(final String message) {
-        super(message);
-    }
+  @Synchronized
+  override fun fillInStackTrace(): Throwable = this
 
-    public static EntityNotFoundException withId(final long id) {
-        return withId(String.valueOf(id));
-    }
+  companion object {
+    private const val DEFAULT_MESSAGE_FOR_ID_FORMAT = "Resource with id [%s] not found."
+    fun withId(id: Long): EntityNotFoundException = withId(id.toString())
 
-    public static EntityNotFoundException withId(final String id) {
-        return new EntityNotFoundException(String.format(DEFAULT_MESSAGE_FOR_ID_FORMAT, id));
-    }
+    @JvmStatic
+    fun withId(id: String?): EntityNotFoundException = EntityNotFoundException(String.format(DEFAULT_MESSAGE_FOR_ID_FORMAT, id))
 
-    public static EntityNotFoundException withMessage(final String message) {
-        return new EntityNotFoundException(message);
-    }
+    fun withMessage(message: String?): EntityNotFoundException = EntityNotFoundException(message)
 
-    public static EntityNotFoundException withMessage(final String message, final Object... args) {
-        return new EntityNotFoundException(String.format(message, args));
-    }
+    fun withMessage(message: String?, vararg args: Any?): EntityNotFoundException = EntityNotFoundException(String.format(message!!, *args))
 
-    @Override
-    public EntityNotFoundException get() {
-        return new EntityNotFoundException(getMessage());
-    }
-
-    @Override
-    public synchronized Throwable fillInStackTrace() {
-        return this;
-    }
+  }
 }
