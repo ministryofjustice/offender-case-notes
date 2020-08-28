@@ -1,354 +1,298 @@
-package uk.gov.justice.hmpps.casenotes.services;
+package uk.gov.justice.hmpps.casenotes.services
 
-import com.microsoft.applicationinsights.TelemetryClient;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.security.access.AccessDeniedException;
-import uk.gov.justice.hmpps.casenotes.config.SecurityUserContext;
-import uk.gov.justice.hmpps.casenotes.config.SecurityUserContext.UserIdUser;
-import uk.gov.justice.hmpps.casenotes.dto.CaseNoteAmendment;
-import uk.gov.justice.hmpps.casenotes.dto.NewCaseNote;
-import uk.gov.justice.hmpps.casenotes.dto.NomisCaseNote;
-import uk.gov.justice.hmpps.casenotes.dto.UpdateCaseNote;
-import uk.gov.justice.hmpps.casenotes.model.OffenderCaseNote;
-import uk.gov.justice.hmpps.casenotes.model.OffenderCaseNoteAmendment;
-import uk.gov.justice.hmpps.casenotes.model.ParentNoteType;
-import uk.gov.justice.hmpps.casenotes.model.SensitiveCaseNoteType;
-import uk.gov.justice.hmpps.casenotes.repository.CaseNoteTypeRepository;
-import uk.gov.justice.hmpps.casenotes.repository.OffenderCaseNoteAmendmentRepository;
-import uk.gov.justice.hmpps.casenotes.repository.OffenderCaseNoteRepository;
-import uk.gov.justice.hmpps.casenotes.repository.ParentCaseNoteTypeRepository;
+import com.microsoft.applicationinsights.TelemetryClient
+import com.nhaarman.mockitokotlin2.any
+import com.nhaarman.mockitokotlin2.eq
+import com.nhaarman.mockitokotlin2.mock
+import com.nhaarman.mockitokotlin2.verify
+import com.nhaarman.mockitokotlin2.whenever
+import org.assertj.core.api.Assertions.assertThat
+import org.assertj.core.api.Assertions.assertThatThrownBy
+import org.junit.jupiter.api.Test
+import org.mockito.ArgumentMatchers
+import org.springframework.security.access.AccessDeniedException
+import uk.gov.justice.hmpps.casenotes.config.SecurityUserContext
+import uk.gov.justice.hmpps.casenotes.config.SecurityUserContext.UserIdUser
+import uk.gov.justice.hmpps.casenotes.dto.CaseNoteAmendment
+import uk.gov.justice.hmpps.casenotes.dto.NewCaseNote
+import uk.gov.justice.hmpps.casenotes.dto.NomisCaseNote
+import uk.gov.justice.hmpps.casenotes.dto.UpdateCaseNote
+import uk.gov.justice.hmpps.casenotes.model.OffenderCaseNote
+import uk.gov.justice.hmpps.casenotes.model.OffenderCaseNoteAmendment
+import uk.gov.justice.hmpps.casenotes.model.ParentNoteType
+import uk.gov.justice.hmpps.casenotes.model.SensitiveCaseNoteType
+import uk.gov.justice.hmpps.casenotes.repository.CaseNoteTypeRepository
+import uk.gov.justice.hmpps.casenotes.repository.OffenderCaseNoteAmendmentRepository
+import uk.gov.justice.hmpps.casenotes.repository.OffenderCaseNoteRepository
+import uk.gov.justice.hmpps.casenotes.repository.ParentCaseNoteTypeRepository
+import java.time.LocalDateTime
+import java.util.*
+import javax.validation.ValidationException
 
-import javax.validation.ValidationException;
-import java.time.LocalDateTime;
-import java.util.Map;
-import java.util.Optional;
-import java.util.UUID;
+class CaseNoteServiceTest {
 
-import static java.time.LocalDateTime.now;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+  private val repository: OffenderCaseNoteRepository = mock()
+  private val amendmentRepository: OffenderCaseNoteAmendmentRepository = mock()
+  private val caseNoteTypeRepository: CaseNoteTypeRepository = mock()
+  private val parentCaseNoteTypeRepository: ParentCaseNoteTypeRepository = mock()
+  private val securityUserContext: SecurityUserContext = mock()
+  private val externalApiService: ExternalApiService = mock()
+  private val caseNoteTypeMerger: CaseNoteTypeMerger = mock()
+  private val telemetryClient: TelemetryClient = mock()
 
-@ExtendWith(MockitoExtension.class)
-public class CaseNoteServiceTest {
-    @Mock
-    private OffenderCaseNoteRepository repository;
-    @Mock
-    private OffenderCaseNoteAmendmentRepository amendmentRepository;
-    @Mock
-    private CaseNoteTypeRepository caseNoteTypeRepository;
-    @Mock
-    private ParentCaseNoteTypeRepository parentCaseNoteTypeRepository;
-    @Mock
-    private SecurityUserContext securityUserContext;
-    @Mock
-    private ExternalApiService externalApiService;
-    @Mock
-    private CaseNoteTypeMerger caseNoteTypeMerger;
-    @Mock
-    private TelemetryClient telemetryClient;
+  private val caseNoteService = CaseNoteService(repository, amendmentRepository, caseNoteTypeRepository, parentCaseNoteTypeRepository, securityUserContext, externalApiService, caseNoteTypeMerger, telemetryClient)
 
-    private CaseNoteService caseNoteService;
+  @Test
+  fun createCaseNote_callElite2() {
+    whenever(caseNoteTypeRepository.findSensitiveCaseNoteTypeByParentType_TypeAndType(any(), any())).thenReturn(null)
+    val nomisCaseNote = createNomisCaseNote()
+    whenever(externalApiService.createCaseNote(any(), any())).thenReturn(nomisCaseNote)
+    val caseNote = caseNoteService.createCaseNote("12345", NewCaseNote.builder().type("type").subType("SUB").build())
+    assertThat(caseNote).isEqualToIgnoringGivenFields(nomisCaseNote, "authorUsername", "locationId", "text", "caseNoteId", "authorUserId", "eventId")
+    assertThat(caseNote.text).isEqualTo("original")
+    assertThat(caseNote.authorUserId).isEqualTo("23456")
+    assertThat(caseNote.locationId).isEqualTo("agency")
+    assertThat(caseNote.caseNoteId).isEqualTo("12345")
+    assertThat(caseNote.eventId).isEqualTo(12345)
+    verify(caseNoteTypeRepository).findSensitiveCaseNoteTypeByParentType_TypeAndType("type", "SUB")
+  }
 
-    @BeforeEach
-    public void setUp() {
-        caseNoteService = new CaseNoteService(repository, amendmentRepository, caseNoteTypeRepository, parentCaseNoteTypeRepository, securityUserContext, externalApiService, caseNoteTypeMerger, telemetryClient);
-    }
+  @Test
+  fun createCaseNote_noAddRole() {
+    whenever(caseNoteTypeRepository.findSensitiveCaseNoteTypeByParentType_TypeAndType(any(), any())).thenReturn(SensitiveCaseNoteType.builder().build())
+    whenever(securityUserContext.isOverrideRole(any(), any())).thenReturn(false)
+    assertThatThrownBy { caseNoteService.createCaseNote("12345", NewCaseNote.builder().type("type").subType("SUB").build()) }.isInstanceOf(AccessDeniedException::class.java)
+    verify(securityUserContext).isOverrideRole("POM", "ADD_SENSITIVE_CASE_NOTES")
+  }
 
-    @Test
-    public void createCaseNote_callElite2() {
-        when(caseNoteTypeRepository.findSensitiveCaseNoteTypeByParentType_TypeAndType(anyString(), anyString())).thenReturn(null);
+  @Test
+  fun createCaseNote() {
+    val noteType = SensitiveCaseNoteType.builder().type("sometype").parentType(ParentNoteType.builder().build()).build()
+    whenever(caseNoteTypeRepository.findSensitiveCaseNoteTypeByParentType_TypeAndType(any(), any())).thenReturn(noteType)
+    whenever(securityUserContext.isOverrideRole(any(), any())).thenReturn(true)
+    whenever(securityUserContext.getCurrentUser()).thenReturn(UserIdUser("someuser", "userId"))
+    val offenderCaseNote = createOffenderCaseNote(noteType)
+    whenever(repository.save(any())).thenReturn(offenderCaseNote)
+    val createdNote = caseNoteService.createCaseNote("12345", NewCaseNote.builder().type("type").subType("sub").build())
+    assertThat(createdNote).isEqualToIgnoringGivenFields(offenderCaseNote,
+        "caseNoteId", "type", "typeDescription", "subType", "subTypeDescription", "source", "creationDateTime", "text")
+    assertThat(createdNote.text).isEqualTo("HELLO")
+  }
 
-        final var nomisCaseNote = createNomisCaseNote();
-        when(externalApiService.createCaseNote(anyString(), any())).thenReturn(nomisCaseNote);
+  @Test
+  fun getCaseNote_noAddRole() {
+    assertThatThrownBy { caseNoteService.getCaseNote("12345", UUID.randomUUID().toString()) }.isInstanceOf(AccessDeniedException::class.java)
+    verify(securityUserContext).isOverrideRole("POM", "VIEW_SENSITIVE_CASE_NOTES", "ADD_SENSITIVE_CASE_NOTES")
+  }
 
-        final var caseNote = caseNoteService.createCaseNote("12345", NewCaseNote.builder().type("type").subType("SUB").build());
+  @Test
+  fun getCaseNote_notFound() {
+    whenever(securityUserContext.isOverrideRole(any(), any(), any())).thenReturn(true)
+    assertThatThrownBy { caseNoteService.getCaseNote("12345", UUID.randomUUID().toString()) }.isInstanceOf(EntityNotFoundException::class.java)
+  }
 
-        assertThat(caseNote).isEqualToIgnoringGivenFields(nomisCaseNote, "authorUsername", "locationId", "text", "caseNoteId", "authorUserId", "eventId");
-        assertThat(caseNote.getText()).isEqualTo("original");
-        assertThat(caseNote.getAuthorUserId()).isEqualTo("23456");
-        assertThat(caseNote.getLocationId()).isEqualTo("agency");
-        assertThat(caseNote.getCaseNoteId()).isEqualTo("12345");
-        assertThat(caseNote.getEventId()).isEqualTo(12345);
-        verify(caseNoteTypeRepository).findSensitiveCaseNoteTypeByParentType_TypeAndType("type", "SUB");
-    }
+  @Test
+  fun getCaseNote() {
+    val noteType = SensitiveCaseNoteType.builder().type("sometype").parentType(ParentNoteType.builder().build()).build()
+    val offenderCaseNote = createOffenderCaseNote(noteType)
+    whenever(repository.findById(ArgumentMatchers.any())).thenReturn(Optional.of(offenderCaseNote))
+    whenever(securityUserContext.isOverrideRole(any(), any(), any())).thenReturn(true)
+    val caseNote = caseNoteService.getCaseNote("12345", UUID.randomUUID().toString())
+    assertThat(caseNote).isEqualToIgnoringGivenFields(offenderCaseNote,
+        "caseNoteId", "type", "typeDescription", "subType", "subTypeDescription", "source", "creationDateTime", "authorUsername", "authorName", "text")
+    assertThat(caseNote.text).isEqualTo("HELLO")
+  }
 
-    @Test
-    public void createCaseNote_noAddRole() {
-        when(caseNoteTypeRepository.findSensitiveCaseNoteTypeByParentType_TypeAndType(anyString(), anyString())).thenReturn(SensitiveCaseNoteType.builder().build());
-        when(securityUserContext.isOverrideRole(anyString(), anyString())).thenReturn(Boolean.FALSE);
+  @Test
+  fun caseNote_callElite2() {
+    val nomisCaseNote = createNomisCaseNote()
+    whenever(externalApiService.getOffenderCaseNote(any(), ArgumentMatchers.anyLong())).thenReturn(nomisCaseNote)
+    val caseNote = caseNoteService.getCaseNote("12345", "21455")
+    assertThat(caseNote).isEqualToIgnoringGivenFields(nomisCaseNote, "authorUsername", "locationId", "text", "caseNoteId", "authorUserId", "eventId")
+    assertThat(caseNote.text).isEqualTo("original")
+    assertThat(caseNote.authorUserId).isEqualTo("23456")
+    assertThat(caseNote.locationId).isEqualTo("agency")
+    assertThat(caseNote.caseNoteId).isEqualTo("12345")
+    assertThat(caseNote.eventId).isEqualTo(12345)
+  }
 
-        assertThatThrownBy(() -> caseNoteService.createCaseNote("12345", NewCaseNote.builder().type("type").subType("SUB").build())).isInstanceOf(AccessDeniedException.class);
+  @Test
+  fun amendCaseNote_callElite2() {
+    val nomisCaseNote = createNomisCaseNote()
+    whenever(externalApiService.amendOffenderCaseNote(any(), ArgumentMatchers.anyLong(), ArgumentMatchers.any())).thenReturn(nomisCaseNote)
+    val caseNote = caseNoteService.amendCaseNote("12345", "21455", UpdateCaseNote("text"))
+    assertThat(caseNote).isEqualToIgnoringGivenFields(nomisCaseNote, "authorUsername", "locationId", "text", "caseNoteId", "authorUserId", "eventId")
+    assertThat(caseNote.text).isEqualTo("original")
+    assertThat(caseNote.authorUserId).isEqualTo("23456")
+    assertThat(caseNote.locationId).isEqualTo("agency")
+    assertThat(caseNote.caseNoteId).isEqualTo("12345")
+    assertThat(caseNote.eventId).isEqualTo(12345)
+  }
 
-        verify(securityUserContext).isOverrideRole("POM", "ADD_SENSITIVE_CASE_NOTES");
-    }
+  @Test
+  fun amendCaseNote_noAddRole() {
+    assertThatThrownBy { caseNoteService.amendCaseNote("12345", UUID.randomUUID().toString(), UpdateCaseNote("text")) }.isInstanceOf(AccessDeniedException::class.java)
+    verify(securityUserContext).isOverrideRole("POM", "ADD_SENSITIVE_CASE_NOTES")
+  }
 
-    @Test
-    public void createCaseNote() {
-        final var noteType = SensitiveCaseNoteType.builder().type("sometype").parentType(ParentNoteType.builder().build()).build();
-        when(caseNoteTypeRepository.findSensitiveCaseNoteTypeByParentType_TypeAndType(anyString(), anyString())).thenReturn(noteType);
-        when(securityUserContext.isOverrideRole(anyString(), anyString())).thenReturn(Boolean.TRUE);
-        when(securityUserContext.getCurrentUser()).thenReturn(new UserIdUser("someuser", "userId"));
-        final var offenderCaseNote = createOffenderCaseNote(noteType);
-        when(repository.save(any())).thenReturn(offenderCaseNote);
+  @Test
+  fun amendCaseNote_notFound() {
+    whenever(securityUserContext.isOverrideRole(any(), any())).thenReturn(true)
+    val caseNoteIdentifier = UUID.randomUUID().toString()
+    assertThatThrownBy { caseNoteService.amendCaseNote("12345", caseNoteIdentifier, UpdateCaseNote("text")) }
+        .isInstanceOf(EntityNotFoundException::class.java).hasMessage(String.format("Resource with id [%s] not found.", caseNoteIdentifier))
+  }
 
-        final var createdNote = caseNoteService.createCaseNote("12345", NewCaseNote.builder().type("type").subType("sub").build());
-        assertThat(createdNote).isEqualToIgnoringGivenFields(offenderCaseNote,
-                "caseNoteId", "type", "typeDescription", "subType", "subTypeDescription", "source", "creationDateTime", "text");
-        assertThat(createdNote.getText()).isEqualTo("HELLO");
-    }
+  @Test
+  fun amendCaseNote_wrongOffender() {
+    val noteType = SensitiveCaseNoteType.builder().type("sometype").parentType(ParentNoteType.builder().build()).build()
+    val offenderCaseNote = createOffenderCaseNote(noteType)
+    whenever(repository.findById(any())).thenReturn(Optional.of(offenderCaseNote))
+    whenever(securityUserContext.isOverrideRole(any(), any())).thenReturn(true)
+    assertThatThrownBy { caseNoteService.amendCaseNote("12345", UUID.randomUUID().toString(), UpdateCaseNote("text")) }
+        .isInstanceOf(EntityNotFoundException::class.java).hasMessage("Resource with id [12345] not found.")
+  }
 
-    @Test
-    public void getCaseNote_noAddRole() {
-        assertThatThrownBy(() -> caseNoteService.getCaseNote("12345", UUID.randomUUID().toString())).isInstanceOf(AccessDeniedException.class);
+  @Test
+  fun deleteOffenderTest() {
+    whenever(repository.deleteOffenderCaseNoteByOffenderIdentifier(eq("A1234AC"))).thenReturn(3)
+    val offendersDeleted = caseNoteService.deleteCaseNotesForOffender("A1234AC")
+    assertThat(offendersDeleted).isEqualTo(3)
+  }
 
-        verify(securityUserContext).isOverrideRole("POM", "VIEW_SENSITIVE_CASE_NOTES", "ADD_SENSITIVE_CASE_NOTES");
-    }
+  @Test
+  fun deleteOffenderTest_telemetry() {
+    whenever(repository.deleteOffenderCaseNoteByOffenderIdentifier(eq("A1234AC"))).thenReturn(3)
+    caseNoteService.deleteCaseNotesForOffender("A1234AC")
+    verify(telemetryClient).trackEvent("OffenderDelete", mapOf("offenderNo" to "A1234AC", "count" to "3"), null)
+  }
 
-    @Test
-    public void getCaseNote_notFound() {
-        when(securityUserContext.isOverrideRole(anyString(), anyString(), anyString())).thenReturn(Boolean.TRUE);
+  @Test
+  fun amendCaseNote() {
+    val noteType = SensitiveCaseNoteType.builder().type("sometype").parentType(ParentNoteType.builder().build()).build()
+    val offenderCaseNote = createOffenderCaseNote(noteType)
+    whenever(repository.findById(ArgumentMatchers.any())).thenReturn(Optional.of(offenderCaseNote))
+    whenever(securityUserContext.isOverrideRole(any(), any())).thenReturn(true)
+    whenever(securityUserContext.getCurrentUser()).thenReturn(UserIdUser("user", "userId"))
+    whenever(externalApiService.getUserFullName(any())).thenReturn("author")
+    val caseNote = caseNoteService.amendCaseNote("A1234AC", UUID.randomUUID().toString(), UpdateCaseNote("text"))
+    assertThat(caseNote.amendments).hasSize(1)
+    val expected = CaseNoteAmendment.builder()
+        .additionalNoteText("text")
+        .authorName("author")
+        .authorUserId("some id")
+        .authorUserName("user")
+        .sequence(1).build()
+    assertThat(caseNote.amendments[0]).isEqualToComparingOnlyGivenFields(expected, "additionalNoteText", "authorName", "authorUserName", "sequence")
+  }
 
-        assertThatThrownBy(() -> caseNoteService.getCaseNote("12345", UUID.randomUUID().toString())).isInstanceOf(EntityNotFoundException.class);
-    }
+  @Test
+  fun softDeleteCaseNote() {
+    val noteType = SensitiveCaseNoteType.builder().type("sometype").parentType(ParentNoteType.builder().build()).build()
+    val offenderCaseNote = createOffenderCaseNote(noteType)
+    val offenderCaseNoteId = offenderCaseNote.id
+    whenever(repository.findById(ArgumentMatchers.any())).thenReturn(Optional.of(offenderCaseNote))
+    whenever(securityUserContext.getCurrentUser()).thenReturn(UserIdUser("user", "userId"))
+    caseNoteService.softDeleteCaseNote("A1234AC", offenderCaseNoteId.toString())
+    verify(repository).deleteById(offenderCaseNoteId)
+  }
 
-    @Test
-    public void getCaseNote() {
-        final var noteType = SensitiveCaseNoteType.builder().type("sometype").parentType(ParentNoteType.builder().build()).build();
-        final var offenderCaseNote = createOffenderCaseNote(noteType);
-        when(repository.findById(any())).thenReturn(Optional.of(offenderCaseNote));
-        when(securityUserContext.isOverrideRole(anyString(), anyString(), anyString())).thenReturn(Boolean.TRUE);
+  @Test
+  fun softDeleteCaseNote_telemetry() {
+    val noteType = SensitiveCaseNoteType.builder().type("sometype").parentType(ParentNoteType.builder().build()).build()
+    val offenderCaseNote = createOffenderCaseNote(noteType)
+    val offenderCaseNoteId = offenderCaseNote.id
+    whenever(repository.findById(ArgumentMatchers.any())).thenReturn(Optional.of(offenderCaseNote))
+    whenever(securityUserContext.getCurrentUser()).thenReturn(UserIdUser("user", "userId"))
+    caseNoteService.softDeleteCaseNote("A1234AC", offenderCaseNoteId.toString())
+    verify(telemetryClient).trackEvent("SecureCaseNoteSoftDelete", mapOf("userName" to "user", "offenderId" to "A1234AC", "case note id" to offenderCaseNoteId.toString()), null)
+  }
 
-        final var caseNote = caseNoteService.getCaseNote("12345", UUID.randomUUID().toString());
-        assertThat(caseNote).isEqualToIgnoringGivenFields(offenderCaseNote,
-                "caseNoteId", "type", "typeDescription", "subType", "subTypeDescription", "source", "creationDateTime", "authorUsername", "authorName", "text");
-        assertThat(caseNote.getText()).isEqualTo("HELLO");
-    }
+  @Test
+  fun softDeleteCaseNoteEntityNotFoundExceptionThrownWhenCaseNoteNotFound() {
+    assertThatThrownBy { caseNoteService.softDeleteCaseNote("A1234AC", UUID.randomUUID().toString()) }.isInstanceOf(EntityNotFoundException::class.java)
+  }
 
-    @Test
-    public void getCaseNote_callElite2() {
-        final var nomisCaseNote = createNomisCaseNote();
-        when(externalApiService.getOffenderCaseNote(anyString(), anyLong())).thenReturn(nomisCaseNote);
+  @Test
+  fun softDeleteCaseNoteEntityNotFoundExceptionThrownWhenCaseNoteDoesntBelongToOffender() {
+    val noteType = SensitiveCaseNoteType.builder().type("sometype").parentType(ParentNoteType.builder().build()).build()
+    val offenderCaseNote = createOffenderCaseNote(noteType)
+    val offenderCaseNoteId = offenderCaseNote.id
+    whenever(repository.findById(ArgumentMatchers.any())).thenReturn(Optional.of(offenderCaseNote))
+    assertThatThrownBy { caseNoteService.softDeleteCaseNote("Z9999ZZ", offenderCaseNoteId.toString()) }.isInstanceOf(ValidationException::class.java)
+  }
 
-        final var caseNote = caseNoteService.getCaseNote("12345", "21455");
+  @Test
+  fun softDeleteCaseNoteAmendment() {
+    val noteType = SensitiveCaseNoteType.builder().type("sometype").parentType(ParentNoteType.builder().build()).build()
+    val offenderCaseNoteAmendment = createOffenderCaseNoteAmendment(noteType)
+    whenever(amendmentRepository.findById(1L)).thenReturn(Optional.of(offenderCaseNoteAmendment))
+    whenever(securityUserContext.getCurrentUser()).thenReturn(UserIdUser("user", "userId"))
+    caseNoteService.softDeleteCaseNoteAmendment("A1234AC", 1L)
+    verify(amendmentRepository).deleteById(1L)
+  }
 
-        assertThat(caseNote).isEqualToIgnoringGivenFields(nomisCaseNote, "authorUsername", "locationId", "text", "caseNoteId", "authorUserId", "eventId");
-        assertThat(caseNote.getText()).isEqualTo("original");
-        assertThat(caseNote.getAuthorUserId()).isEqualTo("23456");
-        assertThat(caseNote.getLocationId()).isEqualTo("agency");
-        assertThat(caseNote.getCaseNoteId()).isEqualTo("12345");
-        assertThat(caseNote.getEventId()).isEqualTo(12345);
-    }
+  @Test
+  fun softDeleteCaseNoteAmendment_telemetry() {
+    val noteType = SensitiveCaseNoteType.builder().type("sometype").parentType(ParentNoteType.builder().build()).build()
+    val offenderCaseNoteAmendment = createOffenderCaseNoteAmendment(noteType)
+    whenever(amendmentRepository.findById(1L)).thenReturn(Optional.of(offenderCaseNoteAmendment))
+    whenever(securityUserContext.getCurrentUser()).thenReturn(UserIdUser("user", "userId"))
+    caseNoteService.softDeleteCaseNoteAmendment("A1234AC", 1L)
+    verify(telemetryClient).trackEvent("SecureCaseNoteAmendmentSoftDelete", mapOf("userName" to "user", "offenderId" to "A1234AC", "case note amendment id" to "1"), null)
+  }
 
-    @Test
-    public void amendCaseNote_callElite2() {
-        final var nomisCaseNote = createNomisCaseNote();
-        when(externalApiService.amendOffenderCaseNote(anyString(), anyLong(), any())).thenReturn(nomisCaseNote);
+  @Test
+  fun softDeleteCaseNoteAmendmentEntityNotFoundExceptionThrownWhenCaseNoteNotFound() {
+    assertThatThrownBy { caseNoteService.softDeleteCaseNoteAmendment("A1234AC", 1L) }.isInstanceOf(EntityNotFoundException::class.java)
+  }
 
-        final var caseNote = caseNoteService.amendCaseNote("12345", "21455", new UpdateCaseNote("text"));
+  @Test
+  fun softDeleteCaseNoteAmendmentEntityNotFoundExceptionThrownWhenCaseNoteDoesntBelongToOffender() {
+    val noteType = SensitiveCaseNoteType.builder().type("sometype").parentType(ParentNoteType.builder().build()).build()
+    val offenderCaseNoteAmendment = createOffenderCaseNoteAmendment(noteType)
+    whenever(amendmentRepository.findById(any())).thenReturn(Optional.of(offenderCaseNoteAmendment))
+    assertThatThrownBy { caseNoteService.softDeleteCaseNoteAmendment("Z9999ZZ", 1L) }.isInstanceOf(ValidationException::class.java)
+  }
 
-        assertThat(caseNote).isEqualToIgnoringGivenFields(nomisCaseNote, "authorUsername", "locationId", "text", "caseNoteId", "authorUserId", "eventId");
-        assertThat(caseNote.getText()).isEqualTo("original");
-        assertThat(caseNote.getAuthorUserId()).isEqualTo("23456");
-        assertThat(caseNote.getLocationId()).isEqualTo("agency");
-        assertThat(caseNote.getCaseNoteId()).isEqualTo("12345");
-        assertThat(caseNote.getEventId()).isEqualTo(12345);
-    }
-
-    @Test
-    public void amendCaseNote_noAddRole() {
-        assertThatThrownBy(() -> caseNoteService.amendCaseNote("12345", UUID.randomUUID().toString(), new UpdateCaseNote("text"))).isInstanceOf(AccessDeniedException.class);
-
-        verify(securityUserContext).isOverrideRole("POM", "ADD_SENSITIVE_CASE_NOTES");
-    }
-
-    @Test
-    public void amendCaseNote_notFound() {
-        when(securityUserContext.isOverrideRole(anyString(), anyString())).thenReturn(Boolean.TRUE);
-        final var caseNoteIdentifier = UUID.randomUUID().toString();
-
-        assertThatThrownBy(() -> caseNoteService.amendCaseNote("12345", caseNoteIdentifier, new UpdateCaseNote("text")))
-                .isInstanceOf(EntityNotFoundException.class).hasMessage(String.format("Resource with id [%s] not found.", caseNoteIdentifier));
-    }
-
-    @Test
-    public void amendCaseNote_wrongOffender() {
-        final var noteType = SensitiveCaseNoteType.builder().type("sometype").parentType(ParentNoteType.builder().build()).build();
-        final var offenderCaseNote = createOffenderCaseNote(noteType);
-        when(repository.findById(any())).thenReturn(Optional.of(offenderCaseNote));
-        when(securityUserContext.isOverrideRole(anyString(), anyString())).thenReturn(Boolean.TRUE);
-
-        assertThatThrownBy(() -> caseNoteService.amendCaseNote("12345", UUID.randomUUID().toString(), new UpdateCaseNote("text")))
-                .isInstanceOf(EntityNotFoundException.class).hasMessage("Resource with id [12345] not found.");
-    }
-
-    @Test
-    public void deleteOffenderTest() {
-        when(repository.deleteOffenderCaseNoteByOffenderIdentifier(eq("A1234AC"))).thenReturn(3);
-        final var offendersDeleted = caseNoteService.deleteCaseNotesForOffender("A1234AC");
-        assertThat(offendersDeleted).isEqualTo(3);
-    }
-
-    @Test
-    public void deleteOffenderTest_telemetry() {
-        when(repository.deleteOffenderCaseNoteByOffenderIdentifier(eq("A1234AC"))).thenReturn(3);
-        caseNoteService.deleteCaseNotesForOffender("A1234AC");
-        verify(telemetryClient).trackEvent("OffenderDelete", Map.of("offenderNo", "A1234AC", "count", "3"), null);
-    }
-
-    @Test
-    public void amendCaseNote() {
-        final var noteType = SensitiveCaseNoteType.builder().type("sometype").parentType(ParentNoteType.builder().build()).build();
-        final var offenderCaseNote = createOffenderCaseNote(noteType);
-        when(repository.findById(any())).thenReturn(Optional.of(offenderCaseNote));
-        when(securityUserContext.isOverrideRole(anyString(), anyString())).thenReturn(Boolean.TRUE);
-        when(securityUserContext.getCurrentUser()).thenReturn(new UserIdUser("user", "userId"));
-        when(externalApiService.getUserFullName(anyString())).thenReturn("author");
-
-        final var caseNote = caseNoteService.amendCaseNote("A1234AC", UUID.randomUUID().toString(), new UpdateCaseNote("text"));
-        assertThat(caseNote.getAmendments()).hasSize(1);
-        final var expected = CaseNoteAmendment.builder()
-                .additionalNoteText("text")
-                .authorName("author")
-                .authorUserId("some id")
-                .authorUserName("user")
-                .sequence(1).build();
-        assertThat(caseNote.getAmendments().get(0)).isEqualToComparingOnlyGivenFields(expected, "additionalNoteText", "authorName", "authorUserName", "sequence");
-    }
-
-    @Test
-    public void softDeleteCaseNote() {
-        final var noteType = SensitiveCaseNoteType.builder().type("sometype").parentType(ParentNoteType.builder().build()).build();
-        final var offenderCaseNote = createOffenderCaseNote(noteType);
-        final var offenderCaseNoteId = offenderCaseNote.getId();
-        when(repository.findById(any())).thenReturn(Optional.of(offenderCaseNote));
-        when(securityUserContext.getCurrentUser()).thenReturn(new UserIdUser("user", "userId"));
-
-        caseNoteService.softDeleteCaseNote("A1234AC", offenderCaseNoteId.toString());
-
-        verify(repository).deleteById(offenderCaseNoteId);
-    }
-
-    @Test
-    public void softDeleteCaseNote_telemetry() {
-        final var noteType = SensitiveCaseNoteType.builder().type("sometype").parentType(ParentNoteType.builder().build()).build();
-        final var offenderCaseNote = createOffenderCaseNote(noteType);
-        final var offenderCaseNoteId = offenderCaseNote.getId();
-        when(repository.findById(any())).thenReturn(Optional.of(offenderCaseNote));
-        when(securityUserContext.getCurrentUser()).thenReturn(new UserIdUser("user", "userId"));
-
-        caseNoteService.softDeleteCaseNote("A1234AC", offenderCaseNoteId.toString());
-
-        verify(telemetryClient).trackEvent("SecureCaseNoteSoftDelete", Map.of("userName", "user", "offenderId", "A1234AC", "case note id", offenderCaseNoteId.toString()), null);
-    }
-
-    @Test
-    public void softDeleteCaseNoteEntityNotFoundExceptionThrownWhenCaseNoteNotFound() {
-
-        assertThatThrownBy(() -> caseNoteService.softDeleteCaseNote("A1234AC", UUID.randomUUID().toString())).isInstanceOf(EntityNotFoundException.class);
-
-    }
-
-    @Test
-    public void softDeleteCaseNoteEntityNotFoundExceptionThrownWhenCaseNoteDoesntBelongToOffender() {
-        final var noteType = SensitiveCaseNoteType.builder().type("sometype").parentType(ParentNoteType.builder().build()).build();
-        final var offenderCaseNote = createOffenderCaseNote(noteType);
-        final var offenderCaseNoteId = offenderCaseNote.getId();
-        when(repository.findById(any())).thenReturn(Optional.of(offenderCaseNote));
-
-        assertThatThrownBy(() -> caseNoteService.softDeleteCaseNote("Z9999ZZ", offenderCaseNoteId.toString())).isInstanceOf(ValidationException.class);
-    }
-
-    @Test
-    public void softDeleteCaseNoteAmendment() {
-        final var noteType = SensitiveCaseNoteType.builder().type("sometype").parentType(ParentNoteType.builder().build()).build();
-        final var offenderCaseNoteAmendment = createOffenderCaseNoteAmendment(noteType);
-        when(amendmentRepository.findById(1L)).thenReturn(offenderCaseNoteAmendment);
-        when(securityUserContext.getCurrentUser()).thenReturn(new UserIdUser("user", "userId"));
-
-        caseNoteService.softDeleteCaseNoteAmendment("A1234AC", 1L);
-
-        verify(amendmentRepository).deleteById(1L);
-    }
-
-    @Test
-    public void softDeleteCaseNoteAmendment_telemetry() {
-        final var noteType = SensitiveCaseNoteType.builder().type("sometype").parentType(ParentNoteType.builder().build()).build();
-        final var offenderCaseNoteAmendment = createOffenderCaseNoteAmendment(noteType);
-        when(amendmentRepository.findById(1L)).thenReturn(offenderCaseNoteAmendment);
-        when(securityUserContext.getCurrentUser()).thenReturn(new UserIdUser("user", "userId"));
-
-        caseNoteService.softDeleteCaseNoteAmendment("A1234AC", 1L);
-
-        verify(telemetryClient).trackEvent("SecureCaseNoteAmendmentSoftDelete", Map.of("userName", "user", "offenderId", "A1234AC", "case note amendment id", "1"), null);
-    }
-
-    @Test
-    public void softDeleteCaseNoteAmendmentEntityNotFoundExceptionThrownWhenCaseNoteNotFound() {
-
-        assertThatThrownBy(() -> caseNoteService.softDeleteCaseNoteAmendment("A1234AC", 1L)).isInstanceOf(EntityNotFoundException.class);
-
-    }
-
-    @Test
-    public void softDeleteCaseNoteAmendmentEntityNotFoundExceptionThrownWhenCaseNoteDoesntBelongToOffender() {
-        final var noteType = SensitiveCaseNoteType.builder().type("sometype").parentType(ParentNoteType.builder().build()).build();
-        final var offenderCaseNoteAmendment = createOffenderCaseNoteAmendment(noteType);
-        when(amendmentRepository.findById(any())).thenReturn(offenderCaseNoteAmendment);
-
-        assertThatThrownBy(() -> caseNoteService.softDeleteCaseNoteAmendment("Z9999ZZ", 1L)).isInstanceOf(ValidationException.class);
-    }
+  private fun createNomisCaseNote() = NomisCaseNote.builder()
+      .agencyId("agency")
+      .authorName("somebody")
+      .caseNoteId(12345)
+      .creationDateTime(LocalDateTime.parse("2019-03-23T11:22"))
+      .occurrenceDateTime(LocalDateTime.parse("2019-04-16T10:42"))
+      .originalNoteText("original")
+      .source("WHERE")
+      .staffId(23456L)
+      .subType("SUB")
+      .subTypeDescription("Sub desc")
+      .text("new text")
+      .type("type")
+      .typeDescription("Type desc")
+      .offenderIdentifier("12345")
+      .build()
 
 
-    private NomisCaseNote createNomisCaseNote() {
-        return NomisCaseNote.builder()
-                .agencyId("agency")
-                .authorName("somebody")
-                .caseNoteId(12345)
-                .creationDateTime(LocalDateTime.parse("2019-03-23T11:22"))
-                .occurrenceDateTime(LocalDateTime.parse("2019-04-16T10:42"))
-                .originalNoteText("original")
-                .source("WHERE")
-                .staffId(23456L)
-                .subType("SUB")
-                .subTypeDescription("Sub desc")
-                .text("new text")
-                .type("type")
-                .typeDescription("Type desc")
-                .offenderIdentifier("12345")
-                .build();
-    }
+  private fun createOffenderCaseNote(caseNoteType: SensitiveCaseNoteType) = OffenderCaseNote.builder()
+      .id(UUID.randomUUID())
+      .occurrenceDateTime(LocalDateTime.now())
+      .locationId("MDI")
+      .authorUsername("USER2")
+      .authorUserId("some user")
+      .authorName("Mickey Mouse")
+      .offenderIdentifier("A1234AC")
+      .sensitiveCaseNoteType(caseNoteType)
+      .noteText("HELLO")
+      .build()
 
-    private OffenderCaseNote createOffenderCaseNote(final SensitiveCaseNoteType caseNoteType) {
-        return OffenderCaseNote.builder()
-                .id(UUID.randomUUID())
-                .occurrenceDateTime(now())
-                .locationId("MDI")
-                .authorUsername("USER2")
-                .authorUserId("some user")
-                .authorName("Mickey Mouse")
-                .offenderIdentifier("A1234AC")
-                .sensitiveCaseNoteType(caseNoteType)
-                .noteText("HELLO")
-                .build();
-    }
 
-    private Optional<OffenderCaseNoteAmendment> createOffenderCaseNoteAmendment(final SensitiveCaseNoteType caseNoteType) {
-        return Optional.of(OffenderCaseNoteAmendment
-                .builder()
-                .caseNote(createOffenderCaseNote(caseNoteType))
-                .id(1L)
-                .noteText("A")
-                .authorName("some user")
-                .build());
-    }
+  private fun createOffenderCaseNoteAmendment(caseNoteType: SensitiveCaseNoteType) =
+      OffenderCaseNoteAmendment
+          .builder()
+          .caseNote(createOffenderCaseNote(caseNoteType))
+          .id(1L)
+          .noteText("A")
+          .authorName("some user")
+          .build()
+
 }

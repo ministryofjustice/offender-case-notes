@@ -1,114 +1,98 @@
-package uk.gov.justice.hmpps.casenotes.services;
+package uk.gov.justice.hmpps.casenotes.services
 
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
-import org.springframework.web.client.HttpClientErrorException;
-import org.springframework.web.client.RestClientException;
-import uk.gov.justice.hmpps.casenotes.dto.BookingIdentifier;
-import uk.gov.justice.hmpps.casenotes.dto.OffenderBooking;
-import uk.gov.justice.hmpps.casenotes.repository.OffenderCaseNoteRepository;
+import com.nhaarman.mockitokotlin2.mock
+import com.nhaarman.mockitokotlin2.verify
+import com.nhaarman.mockitokotlin2.whenever
+import org.assertj.core.api.Assertions
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.extension.ExtendWith
+import org.mockito.junit.jupiter.MockitoExtension
+import org.springframework.http.HttpHeaders
+import org.springframework.http.HttpStatus
+import org.springframework.web.client.HttpClientErrorException
+import org.springframework.web.client.RestClientException
+import uk.gov.justice.hmpps.casenotes.dto.BookingIdentifier
+import uk.gov.justice.hmpps.casenotes.dto.OffenderBooking
+import uk.gov.justice.hmpps.casenotes.repository.OffenderCaseNoteRepository
 
-import java.util.List;
+@ExtendWith(MockitoExtension::class)
+class MergeOffenderServiceTest {
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+  private val externalApiService: ExternalApiService = mock()
 
-@ExtendWith(MockitoExtension.class)
-public class MergeOffenderServiceTest {
+  private val repository: OffenderCaseNoteRepository = mock()
 
-    private static final String OFFENDER_NO = "A1234AA";
-    private static final String MERGED_OFFENDER_NO = "B1234BB";
-    public static final long BOOKING_ID = -1L;
+  private lateinit var service: MergeOffenderService
 
-    @Mock
-    private ExternalApiService externalApiService;
+  @BeforeEach
+  fun setUp() {
+    service = MergeOffenderService(externalApiService, repository)
+  }
 
-    @Mock
-    private OffenderCaseNoteRepository repository;
+  @Test
+  fun testCheckForExistingCaseNotesThatNeedMerging() {
+    whenever(externalApiService.getMergedIdentifiersByBookingId(BOOKING_ID))
+        .thenReturn(listOf(
+            BookingIdentifier("MERGED", MERGED_OFFENDER_NO)
+        ))
+    whenever(externalApiService.getBooking(BOOKING_ID))
+        .thenReturn(OffenderBooking.builder()
+            .bookingId(BOOKING_ID)
+            .offenderNo(OFFENDER_NO)
+            .build())
+    val numRows = 5
+    whenever(repository.updateOffenderIdentifier(MERGED_OFFENDER_NO, OFFENDER_NO))
+        .thenReturn(numRows)
+    val rowsUpdated = service.checkAndMerge(BOOKING_ID)
+    Assertions.assertThat(rowsUpdated).isEqualTo(numRows)
+    verify(externalApiService).getMergedIdentifiersByBookingId(BOOKING_ID)
+    verify(externalApiService).getBooking(BOOKING_ID)
+    verify(repository).updateOffenderIdentifier(MERGED_OFFENDER_NO, OFFENDER_NO)
+  }
 
-    private MergeOffenderService service;
+  @Test
+  fun testCountingOfMultipleRows() {
+    whenever(externalApiService.getMergedIdentifiersByBookingId(BOOKING_ID))
+        .thenReturn(listOf(
+            BookingIdentifier("MERGED", MERGED_OFFENDER_NO),
+            BookingIdentifier("MERGED", "C1234CC")
+        ))
+    whenever(externalApiService.getBooking(BOOKING_ID))
+        .thenReturn(OffenderBooking.builder()
+            .bookingId(BOOKING_ID)
+            .offenderNo(OFFENDER_NO)
+            .build())
+    whenever(repository.updateOffenderIdentifier(MERGED_OFFENDER_NO, OFFENDER_NO)).thenReturn(2)
+    whenever(repository.updateOffenderIdentifier("C1234CC", OFFENDER_NO)).thenReturn(3)
+    val rowsUpdated = service.checkAndMerge(BOOKING_ID)
+    Assertions.assertThat(rowsUpdated).isEqualTo(5)
+    verify(externalApiService).getMergedIdentifiersByBookingId(BOOKING_ID)
+    verify(externalApiService).getBooking(BOOKING_ID)
+    verify(repository).updateOffenderIdentifier(MERGED_OFFENDER_NO, OFFENDER_NO)
+    verify(repository).updateOffenderIdentifier("C1234CC", OFFENDER_NO)
+  }
 
-    @BeforeEach
-    public void setUp() {
-        service = new MergeOffenderService(externalApiService, repository);
-    }
+  @Test
+  fun testCheckForExistingCaseNotesThatNeedMergingNoMergeFound() {
+    whenever(externalApiService.getMergedIdentifiersByBookingId(BOOKING_ID))
+        .thenReturn(listOf())
+    val rowsUpdated = service.checkAndMerge(BOOKING_ID)
+    Assertions.assertThat(rowsUpdated).isEqualTo(0)
+    verify(externalApiService).getMergedIdentifiersByBookingId(BOOKING_ID)
+  }
 
-    @Test
-    public void testCheckForExistingCaseNotesThatNeedMerging() {
-        when(externalApiService.getMergedIdentifiersByBookingId(BOOKING_ID))
-                .thenReturn(List.of(
-                        BookingIdentifier.builder().type("MERGED").value(MERGED_OFFENDER_NO).build()
-                ));
+  @Test
+  fun testCheckForExistingCaseNotesThatNeedMergingNoBookingFound() {
+    whenever(externalApiService.getBooking(BOOKING_ID))
+        .thenThrow(HttpClientErrorException.create(HttpStatus.NOT_FOUND, "Not Found", HttpHeaders(), null, null))
+    Assertions.assertThatThrownBy { service.checkAndMerge(BOOKING_ID) }
+        .isInstanceOf(RestClientException::class.java)
+  }
 
-        when(externalApiService.getBooking(BOOKING_ID))
-                .thenReturn(OffenderBooking.builder()
-                        .bookingId(BOOKING_ID)
-                        .offenderNo(OFFENDER_NO)
-                        .build());
-
-        final var numRows = 5;
-        when(repository.updateOffenderIdentifier(MERGED_OFFENDER_NO, OFFENDER_NO))
-                .thenReturn(numRows);
-
-        final var rowsUpdated = service.checkAndMerge(BOOKING_ID);
-
-        assertThat(rowsUpdated).isEqualTo(numRows);
-        verify(externalApiService).getMergedIdentifiersByBookingId(BOOKING_ID);
-        verify(externalApiService).getBooking(BOOKING_ID);
-        verify(repository).updateOffenderIdentifier(MERGED_OFFENDER_NO, OFFENDER_NO);
-    }
-
-    @Test
-    public void testCountingOfMultipleRows() {
-        when(externalApiService.getMergedIdentifiersByBookingId(BOOKING_ID))
-                .thenReturn(List.of(
-                        BookingIdentifier.builder().type("MERGED").value(MERGED_OFFENDER_NO).build(),
-                        BookingIdentifier.builder().type("MERGED").value("C1234CC").build()
-                ));
-
-        when(externalApiService.getBooking(BOOKING_ID))
-                .thenReturn(OffenderBooking.builder()
-                        .bookingId(BOOKING_ID)
-                        .offenderNo(OFFENDER_NO)
-                        .build());
-
-        when(repository.updateOffenderIdentifier(MERGED_OFFENDER_NO, OFFENDER_NO)).thenReturn(2);
-        when(repository.updateOffenderIdentifier("C1234CC", OFFENDER_NO)).thenReturn(3);
-
-        final var rowsUpdated = service.checkAndMerge(BOOKING_ID);
-
-        assertThat(rowsUpdated).isEqualTo(5);
-        verify(externalApiService).getMergedIdentifiersByBookingId(BOOKING_ID);
-        verify(externalApiService).getBooking(BOOKING_ID);
-        verify(repository).updateOffenderIdentifier(MERGED_OFFENDER_NO, OFFENDER_NO);
-        verify(repository).updateOffenderIdentifier("C1234CC", OFFENDER_NO);
-    }
-
-    @Test
-    public void testCheckForExistingCaseNotesThatNeedMergingNoMergeFound() {
-        when(externalApiService.getMergedIdentifiersByBookingId(BOOKING_ID))
-                .thenReturn(List.of());
-
-        final var rowsUpdated = service.checkAndMerge(BOOKING_ID);
-
-        assertThat(rowsUpdated).isEqualTo(0);
-        verify(externalApiService).getMergedIdentifiersByBookingId(BOOKING_ID);
-    }
-
-    @Test
-    public void testCheckForExistingCaseNotesThatNeedMergingNoBookingFound() {
-        when(externalApiService.getBooking(BOOKING_ID))
-                .thenThrow(HttpClientErrorException.create(HttpStatus.NOT_FOUND, "Not Found", new HttpHeaders(), null, null));
-
-        assertThatThrownBy(() -> service.checkAndMerge(BOOKING_ID))
-                .isInstanceOf(RestClientException.class);
-    }
-
+  companion object {
+    private const val OFFENDER_NO = "A1234AA"
+    private const val MERGED_OFFENDER_NO = "B1234BB"
+    const val BOOKING_ID = -1L
+  }
 }

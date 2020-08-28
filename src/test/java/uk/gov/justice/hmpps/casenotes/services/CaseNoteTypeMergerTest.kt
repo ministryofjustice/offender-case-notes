@@ -1,102 +1,88 @@
-package uk.gov.justice.hmpps.casenotes.services;
+package uk.gov.justice.hmpps.casenotes.services
 
-import org.junit.jupiter.api.Test;
-import uk.gov.justice.hmpps.casenotes.dto.CaseNoteType;
+import org.assertj.core.api.Assertions
+import org.junit.jupiter.api.Test
+import uk.gov.justice.hmpps.casenotes.dto.CaseNoteType
 
-import java.util.List;
+class CaseNoteTypeMergerTest {
+  private val merger = CaseNoteTypeMerger()
 
-import static org.assertj.core.api.Assertions.assertThat;
+  @Test
+  fun testSimpleMerge() {
+    val list1 = listOf(
+        createBuilder("OBS", "Observation").subCodes(
+            listOf(create("GEN", "General"), create("SP", "Special"))
+        ).build(),
+        createBuilder("KA", "Key worker").subCodes(
+            listOf(create("KS", "Session"), create("KE", "Entry"))
+        ).build()
+    )
+    val list2 = listOf(
+        createBuilder("OBS", "Observation").subCodes(
+            listOf(create("NEW", "New Stuff"), create("GEN", "Different Gen"))
+        ).build(),
+        createBuilder("POM", "POM Stuff").subCodes(
+            listOf(create("SPC", "Special"), create("GEN", "General"))
+        ).build()
+    )
+    val resultantList = merger.mergeAndSortList(list1, list2)
+    Assertions.assertThat(resultantList).containsExactly(
+        createBuilder("KA", "Key worker").subCodes(
+            listOf(create("KE", "Entry"), create("KS", "Session"))
+        ).build(),
+        createBuilder("OBS", "Observation").subCodes(
+            listOf(create("GEN", "Different Gen"), create("NEW", "New Stuff"), create("SP", "Special"))
+        ).build(),
+        createBuilder("POM", "POM Stuff").subCodes(
+            listOf(create("GEN", "General"), create("SPC", "Special"))
+        ).build()
+    )
+  }
 
-public class CaseNoteTypeMergerTest {
+  @Test
+  fun testActiveFlagUpdatedWhenParentInactiveDuringMerge() {
+    val list1 = listOf(
+        createBuilder("OBS", "Observation").subCodes(
+            listOf(create("GEN", "General"), createInactive("SP", "Special"))
+        ).build(),
+        createBuilder("DRR", "Drug Rehabilitation Requirement").activeFlag("N").subCodes(
+            listOf(create("DCOUN", "Drug Counselling Session"), createInactive("DTEST", "Drug Test"))
+        ).build()
+    )
+    val list2 = listOf(
+        createBuilder("OBS", "Observation").subCodes(
+            listOf(create("NEW", "New Stuff"), create("GEN", "Different Gen"))
+        ).build(),
+        createBuilder("POM", "POM Stuff").subCodes(
+            listOf(create("SPC", "Special"), create("GEN", "General"))
+        ).build(),
+        createBuilder("DRR", "Drug Rehabilitation Requirement").subCodes(
+            listOf(create("DCOUN", "Drug Counselling Session"))
+        ).build()
+    )
+    val resultantList = merger.mergeAndSortList(list1, list2)
+    Assertions.assertThat(resultantList).containsExactly(
+        createBuilder("DRR", "Drug Rehabilitation Requirement").subCodes(
+            listOf(create("DCOUN", "Drug Counselling Session"), createInactive("DTEST", "Drug Test"))
+        ).build(),
+        createBuilder("OBS", "Observation").subCodes(
+            listOf(create("GEN", "Different Gen"), create("NEW", "New Stuff"), createInactive("SP", "Special"))
+        ).build(),
+        createBuilder("POM", "POM Stuff").subCodes(
+            listOf(create("GEN", "General"), create("SPC", "Special"))
+        ).build()
+    )
+  }
 
-    private final CaseNoteTypeMerger merger = new CaseNoteTypeMerger();
+  private fun createBuilder(obs: String, observation: String): CaseNoteType.CaseNoteTypeBuilder {
+    return CaseNoteType.builder().code(obs).description(observation)
+  }
 
-    @Test
-    public void testSimpleMerge() {
+  private fun createInactive(sp: String, special: String): CaseNoteType {
+    return createBuilder(sp, special).activeFlag("N").build()
+  }
 
-        final var list1 = List.of(
-                createBuilder("OBS", "Observation").subCodes(
-                        List.of(create("GEN", "General"), create("SP", "Special"))
-                ).build(),
-                createBuilder("KA", "Key worker").subCodes(
-                        List.of(create("KS", "Session"), create("KE", "Entry"))
-                ).build()
-        );
-
-        final var list2 = List.of(
-                createBuilder("OBS", "Observation").subCodes(
-                        List.of(create("NEW", "New Stuff"), create("GEN", "Different Gen"))
-                ).build(),
-                createBuilder("POM", "POM Stuff").subCodes(
-                        List.of(create("SPC", "Special"), create("GEN", "General"))
-                ).build()
-        );
-
-        List<CaseNoteType> resultantList = merger.mergeAndSortList(list1, list2);
-
-        assertThat(resultantList).containsExactly(
-                createBuilder("KA", "Key worker").subCodes(
-                        List.of(create("KE", "Entry"), create("KS", "Session"))
-                ).build(),
-                createBuilder("OBS", "Observation").subCodes(
-                        List.of(create("GEN", "Different Gen"), create("NEW", "New Stuff"), create("SP", "Special"))
-                ).build(),
-                createBuilder("POM", "POM Stuff").subCodes(
-                        List.of(create("GEN", "General"), create("SPC", "Special"))
-                ).build()
-
-        );
-    }
-
-    @Test
-    public void testActiveFlagUpdatedWhenParentInactiveDuringMerge() {
-
-        final var list1 = List.of(
-                createBuilder("OBS", "Observation").subCodes(
-                        List.of(create("GEN", "General"), createInactive("SP", "Special"))
-                ).build(),
-                createBuilder("DRR", "Drug Rehabilitation Requirement").activeFlag("N").subCodes(
-                        List.of(create("DCOUN", "Drug Counselling Session"), createInactive("DTEST", "Drug Test"))
-                ).build()
-        );
-
-        final var list2 = List.of(
-                createBuilder("OBS", "Observation").subCodes(
-                        List.of(create("NEW", "New Stuff"), create("GEN", "Different Gen"))
-                ).build(),
-                createBuilder("POM", "POM Stuff").subCodes(
-                        List.of(create("SPC", "Special"), create("GEN", "General"))
-                ).build(),
-                createBuilder("DRR", "Drug Rehabilitation Requirement").subCodes(
-                        List.of(create("DCOUN", "Drug Counselling Session"))
-                ).build()
-        );
-
-        List<CaseNoteType> resultantList = merger.mergeAndSortList(list1, list2);
-
-        assertThat(resultantList).containsExactly(
-
-                createBuilder("DRR", "Drug Rehabilitation Requirement").subCodes(
-                        List.of(create("DCOUN", "Drug Counselling Session"), createInactive("DTEST", "Drug Test"))
-                ).build(),
-                createBuilder("OBS", "Observation").subCodes(
-                        List.of(create("GEN", "Different Gen"), create("NEW", "New Stuff"), createInactive("SP", "Special"))
-                ).build(),
-                createBuilder("POM", "POM Stuff").subCodes(
-                        List.of(create("GEN", "General"), create("SPC", "Special"))
-                ).build()
-        );
-    }
-
-    private CaseNoteType.CaseNoteTypeBuilder createBuilder(final String obs, final String observation) {
-        return CaseNoteType.builder().code(obs).description(observation);
-    }
-
-    private CaseNoteType createInactive(final String sp, final String special) {
-        return createBuilder(sp, special).activeFlag("N").build();
-    }
-
-    private CaseNoteType create(final String gen, final String general) {
-        return createBuilder(gen, general).build();
-    }
+  private fun create(gen: String, general: String): CaseNoteType {
+    return createBuilder(gen, general).build()
+  }
 }
