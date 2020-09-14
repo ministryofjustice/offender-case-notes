@@ -1,7 +1,6 @@
 package uk.gov.justice.hmpps.casenotes.controllers
 
 import lombok.extern.slf4j.Slf4j
-import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
@@ -21,13 +20,13 @@ import javax.validation.ValidationException
 class ControllerAdvice {
 
   companion object {
-    val log: Logger = LoggerFactory.getLogger(this::class.java)
+    private val log = LoggerFactory.getLogger(this::class.java)
   }
 
   @ExceptionHandler(WebClientResponseException::class)
   fun handleWebClientResponseException(e: WebClientResponseException): ResponseEntity<ByteArray> {
     if (e.statusCode.is4xxClientError) {
-      log.info("Unexpected client exception", e)
+      log.info("Unexpected client exception with message {}", e.message)
     } else {
       log.error("Unexpected server exception", e)
     }
@@ -45,8 +44,8 @@ class ControllerAdvice {
   }
 
   @ExceptionHandler(AccessDeniedException::class)
-  fun handleAccessDeniedException(e: AccessDeniedException?): ResponseEntity<ErrorResponse> {
-    log.debug("Forbidden (403) returned", e)
+  fun handleAccessDeniedException(e: AccessDeniedException): ResponseEntity<ErrorResponse> {
+    log.debug("Forbidden (403) returned with message {}", e.message)
     return ResponseEntity
         .status(HttpStatus.FORBIDDEN)
         .body(ErrorResponse(status = (HttpStatus.FORBIDDEN.value())))
@@ -54,7 +53,7 @@ class ControllerAdvice {
 
   @ExceptionHandler(ValidationException::class)
   fun handleValidationException(e: ValidationException): ResponseEntity<ErrorResponse> {
-    log.debug("Bad Request (400) returned", e)
+    log.debug("Bad Request (400) returned with message {}", e.message)
     return ResponseEntity
         .status(HttpStatus.BAD_REQUEST)
         .body(ErrorResponse(status = (HttpStatus.BAD_REQUEST.value()), developerMessage = (e.message)))
