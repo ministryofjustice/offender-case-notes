@@ -31,13 +31,17 @@ class PublishNotesController(private val publishNoteService: PublishNoteService)
   @ApiOperation(value = "Publish sensitive case notes", nickname = "publish sensitive case notes")
   @ApiResponses(ApiResponse(code = 200, message = "Number of notes to be published (asynchronously)"))
   fun publishCaseNotes(
-      @ApiParam(value = "A timestamp that indicates the earliest record required")
-      @RequestParam("fromDateTime", required = false) @DateTimeFormat(iso = ISO.DATE_TIME) fromDateTime: LocalDateTime?,
-      @ApiParam(value = "A timestamp that indicates the latest record required", required = true)
-      @NotNull @RequestParam("toDateTime") @DateTimeFormat(iso = ISO.DATE_TIME) toDateTime: LocalDateTime): Int {
+    @ApiParam(value = "A timestamp that indicates the earliest record required")
+    @RequestParam("fromDateTime", required = false) @DateTimeFormat(iso = ISO.DATE_TIME) fromDateTime: LocalDateTime?,
+    @ApiParam(value = "A timestamp that indicates the latest record required", required = true)
+    @NotNull @RequestParam("toDateTime") @DateTimeFormat(iso = ISO.DATE_TIME) toDateTime: LocalDateTime
+  ): Int {
 
-    val caseNotes: List<CaseNote> = publishNoteService.findCaseNotes(fromDateTime
-        ?: LocalDateTime.parse("2019-01-01T00:00:00"), toDateTime)
+    val caseNotes: List<CaseNote> = publishNoteService.findCaseNotes(
+      fromDateTime
+        ?: LocalDateTime.parse("2019-01-01T00:00:00"),
+      toDateTime
+    )
     log.info("Found {} notes to publish", caseNotes.size)
     publishNoteService.pushCaseNotes(caseNotes)
 

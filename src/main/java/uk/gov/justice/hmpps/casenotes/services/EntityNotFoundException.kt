@@ -18,6 +18,5 @@ class EntityNotFoundException(message: String?) : RuntimeException(message), Sup
     fun withMessage(message: String?): EntityNotFoundException = EntityNotFoundException(message)
 
     fun withMessage(message: String?, vararg args: Any?): EntityNotFoundException = EntityNotFoundException(String.format(message!!, *args))
-
   }
 }

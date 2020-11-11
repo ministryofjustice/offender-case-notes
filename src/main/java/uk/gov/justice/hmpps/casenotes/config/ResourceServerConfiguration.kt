@@ -30,7 +30,8 @@ import springfox.documentation.spring.web.plugins.Docket
 import springfox.documentation.swagger2.annotations.EnableSwagger2
 import java.time.LocalDateTime
 import java.time.ZonedDateTime
-import java.util.*
+import java.util.Date
+import java.util.Optional
 
 @Configuration
 @EnableSwagger2
@@ -43,39 +44,40 @@ class ResourceServerConfiguration(private val tokenVerifyingAuthManager: TokenVe
   @Throws(Exception::class)
   public override fun configure(http: HttpSecurity) {
     http.headers().frameOptions().sameOrigin().and()
-        .sessionManagement()
-        .sessionCreationPolicy(SessionCreationPolicy.STATELESS) // Can't have CSRF protection as requires session
-        .and().csrf().disable()
-        .authorizeRequests { auth ->
-          auth
-              .antMatchers(
-                  "/webjars/**",
-                  "/favicon.ico",
-                  "/csrf",
-                  "/health/**",
-                  "/info",
-                  "/ping",
-                  "/h2-console/**",
-                  "/v2/api-docs",
-                  "/swagger-ui.html", "/swagger-resources", "/swagger-resources/configuration/ui",
-                  "/swagger-resources/configuration/security")
-              .permitAll()
-              .anyRequest()
-              .authenticated()
-        }
-        .oauth2ResourceServer().jwt().authenticationManager(tokenVerifyingAuthManager)
+      .sessionManagement()
+      .sessionCreationPolicy(SessionCreationPolicy.STATELESS) // Can't have CSRF protection as requires session
+      .and().csrf().disable()
+      .authorizeRequests { auth ->
+        auth
+          .antMatchers(
+            "/webjars/**",
+            "/favicon.ico",
+            "/csrf",
+            "/health/**",
+            "/info",
+            "/ping",
+            "/h2-console/**",
+            "/v2/api-docs",
+            "/swagger-ui.html", "/swagger-resources", "/swagger-resources/configuration/ui",
+            "/swagger-resources/configuration/security"
+          )
+          .permitAll()
+          .anyRequest()
+          .authenticated()
+      }
+      .oauth2ResourceServer().jwt().authenticationManager(tokenVerifyingAuthManager)
   }
 
   @Bean
   fun api(): Docket {
     val docket = Docket(DocumentationType.SWAGGER_2)
-        .select()
-        .apis(RequestHandlerSelectors.basePackage("uk.gov.justice.hmpps.casenotes.controllers"))
-        .paths(PathSelectors.any())
-        .build()
-        .securitySchemes(listOf(securityScheme()))
-        .securityContexts(listOf(securityContext()))
-        .apiInfo(apiInfo())
+      .select()
+      .apis(RequestHandlerSelectors.basePackage("uk.gov.justice.hmpps.casenotes.controllers"))
+      .paths(PathSelectors.any())
+      .build()
+      .securitySchemes(listOf(securityScheme()))
+      .securityContexts(listOf(securityContext()))
+      .apiInfo(apiInfo())
     docket.genericModelSubstitutes(Optional::class.java)
     docket.directModelSubstitute(ZonedDateTime::class.java, Date::class.java)
     docket.directModelSubstitute(LocalDateTime::class.java, Date::class.java)
@@ -84,46 +86,48 @@ class ResourceServerConfiguration(private val tokenVerifyingAuthManager: TokenVe
 
   private fun securityScheme(): SecurityScheme {
     val grantType = AuthorizationCodeGrantBuilder()
-        .tokenEndpoint(TokenEndpoint("http://localhost:9090/auth/oauth" + "/token", "oauthtoken"))
-        .tokenRequestEndpoint(
-            TokenRequestEndpoint("http://localhost:9090/auth/oauth" + "/authorize", "swagger-client", "clientsecret"))
-        .build()
+      .tokenEndpoint(TokenEndpoint("http://localhost:9090/auth/oauth" + "/token", "oauthtoken"))
+      .tokenRequestEndpoint(
+        TokenRequestEndpoint("http://localhost:9090/auth/oauth" + "/authorize", "swagger-client", "clientsecret")
+      )
+      .build()
     return OAuthBuilder().name("spring_oauth")
-        .grantTypes(mutableListOf(grantType) as List<GrantType>?)
-        .scopes(listOf(*scopes()))
-        .build()
+      .grantTypes(mutableListOf(grantType) as List<GrantType>?)
+      .scopes(listOf(*scopes()))
+      .build()
   }
 
   private fun scopes() = arrayOf(
-      AuthorizationScope("read", "for read operations"),
-      AuthorizationScope("write", "for write operations")
+    AuthorizationScope("read", "for read operations"),
+    AuthorizationScope("write", "for write operations")
   )
 
   private fun securityContext() =
-      SecurityContext.builder()
-          .securityReferences(listOf(SecurityReference("spring_oauth", scopes())))
-          .forPaths(PathSelectors.regex("/.*"))
-          .build()
+    SecurityContext.builder()
+      .securityReferences(listOf(SecurityReference("spring_oauth", scopes())))
+      .forPaths(PathSelectors.regex("/.*"))
+      .build()
 
   private val version: String
     get() = if (buildProperties == null) "version not available" else buildProperties.version
 
   private fun contactInfo() = Contact(
-      "HMPPS Digital Studio",
-      "",
-      "feedback@digital.justice.gov.uk")
-
+    "HMPPS Digital Studio",
+    "",
+    "feedback@digital.justice.gov.uk"
+  )
 
   private fun apiInfo() = ApiInfo(
-      "HMPPS Offender Case Note Documentation",
-      "API for Case note details for offenders.",
-      this.version,
-      "https://gateway.nomis-api.service.justice.gov.uk/auth/terms",
-      contactInfo(),
-      "Open Government Licence v3.0", "https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/", emptyList())
-
+    "HMPPS Offender Case Note Documentation",
+    "API for Case note details for offenders.",
+    this.version,
+    "https://gateway.nomis-api.service.justice.gov.uk/auth/terms",
+    contactInfo(),
+    "Open Government Licence v3.0",
+    "https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/",
+    emptyList()
+  )
 
   @Bean
   fun swaggerJacksonModuleRegistrar() = JacksonModuleRegistrar { mapper: ObjectMapper? -> ReferenceSerializationConfigurer.serializeAsComputedRef(mapper) }
-
 }

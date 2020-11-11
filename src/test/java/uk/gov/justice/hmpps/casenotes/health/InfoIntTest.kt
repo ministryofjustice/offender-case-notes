@@ -15,6 +15,6 @@ class InfoIntTest : IntegrationTest() {
   @Test
   fun `Info page reports version`() {
     webTestClient.get().uri("/info").exchange()
-        .expectBody().jsonPath("build.version").isEqualTo(LocalDateTime.now().format(ISO_DATE))
+      .expectBody().jsonPath("build.version").isEqualTo(LocalDateTime.now().format(ISO_DATE))
   }
 }

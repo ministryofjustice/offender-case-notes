@@ -5,11 +5,12 @@ import org.slf4j.LoggerFactory
 import org.springframework.jms.annotation.JmsListener
 import org.springframework.stereotype.Service
 
-
 @Service
-class EventListener(private val caseNoteService: CaseNoteService,
-                    private val mergeOffenderService: MergeOffenderService,
-                    private val gson: Gson) {
+class EventListener(
+  private val caseNoteService: CaseNoteService,
+  private val mergeOffenderService: MergeOffenderService,
+  private val gson: Gson
+) {
   companion object {
     private val log = LoggerFactory.getLogger(this::class.java)
   }
@@ -33,4 +34,3 @@ data class Attribute(val Type: String, val Value: String)
 data class MessageAttributes(val eventType: Attribute)
 data class EventMessage(val offenderIdDisplay: String, val bookingId: Long)
 data class Message(val Message: String, val MessageAttributes: MessageAttributes)
-

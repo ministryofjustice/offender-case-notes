@@ -14,20 +14,22 @@ import java.util.stream.Collectors
 @Service
 @Transactional(readOnly = true)
 @Validated
-open class PublishNoteService(private val repository: OffenderCaseNoteRepository,
-                              private val caseNoteEventPusher: CaseNoteEventPusher) {
+open class PublishNoteService(
+  private val repository: OffenderCaseNoteRepository,
+  private val caseNoteEventPusher: CaseNoteEventPusher
+) {
 
   @PreAuthorize("hasAnyRole('PUBLISH_SENSITIVE_CASE_NOTES')")
   open fun findCaseNotes(fromDateTime: LocalDateTime = LocalDateTime.MIN, toDateTime: LocalDateTime): List<CaseNote> {
     return repository.findByModifyDateTimeBetweenOrderByModifyDateTime(fromDateTime, toDateTime).stream().map {
       CaseNote.builder()
-          .caseNoteId(it.id.toString())
-          .offenderIdentifier(it.offenderIdentifier)
-          .type(it.sensitiveCaseNoteType.parentType.type)
-          .subType(it.sensitiveCaseNoteType.type)
-          .creationDateTime(it.createDateTime)
-          .locationId(it.locationId)
-          .build()
+        .caseNoteId(it.id.toString())
+        .offenderIdentifier(it.offenderIdentifier)
+        .type(it.sensitiveCaseNoteType.parentType.type)
+        .subType(it.sensitiveCaseNoteType.type)
+        .creationDateTime(it.createDateTime)
+        .locationId(it.locationId)
+        .build()
     }.collect(Collectors.toList<CaseNote>())
   }
 

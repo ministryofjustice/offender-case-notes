@@ -5,4 +5,4 @@ import org.springframework.stereotype.Repository
 import uk.gov.justice.hmpps.casenotes.model.OffenderCaseNoteAmendment
 
 @Repository
-interface OffenderCaseNoteAmendmentRepository : JpaRepository<OffenderCaseNoteAmendment?, Long?> 
+interface OffenderCaseNoteAmendmentRepository : JpaRepository<OffenderCaseNoteAmendment?, Long?>

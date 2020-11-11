@@ -7,12 +7,11 @@ import org.springframework.security.core.Authentication
 import org.springframework.security.core.GrantedAuthority
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.stereotype.Component
-import java.util.*
+import java.util.Optional
 
 @Slf4j
 @Component
 class SecurityUserContext {
-
 
   fun getAuthentication(): Authentication = SecurityContextHolder.getContext().authentication
 
@@ -29,12 +28,11 @@ class SecurityUserContext {
   @Data
   class UserIdUser(val username: String, val userId: String)
 
-
   companion object {
     private fun hasMatchingRole(roles: List<String>, authentication: Authentication?): Boolean {
       return authentication != null &&
-          authentication.authorities.stream()
-              .anyMatch { a: GrantedAuthority? -> roles.contains(RegExUtils.replaceFirst(a!!.authority, "ROLE_", "")) }
+        authentication.authorities.stream()
+          .anyMatch { a: GrantedAuthority? -> roles.contains(RegExUtils.replaceFirst(a!!.authority, "ROLE_", "")) }
     }
 
     fun getOptionalCurrentUser(securityUserContext: SecurityUserContext): Optional<UserIdUser> {

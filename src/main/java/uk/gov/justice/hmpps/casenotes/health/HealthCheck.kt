@@ -11,14 +11,14 @@ import reactor.core.publisher.Mono
 
 abstract class HealthCheck(private val webClient: WebClient) : HealthIndicator {
   override fun health(): Health? =
-      webClient.get()
-          .uri("/health/ping")
-          .retrieve()
-          .toEntity(String::class.java)
-          .flatMap { Mono.just(Health.up().withDetail("HttpStatus", it?.statusCode).build()) }
-          .onErrorResume(WebClientResponseException::class.java) { Mono.just(Health.down(it).withDetail("body", it.responseBodyAsString).withDetail("HttpStatus", it.statusCode).build()) }
-          .onErrorResume(Exception::class.java) { Mono.just(Health.down(it).build()) }
-          .block()
+    webClient.get()
+      .uri("/health/ping")
+      .retrieve()
+      .toEntity(String::class.java)
+      .flatMap { Mono.just(Health.up().withDetail("HttpStatus", it?.statusCode).build()) }
+      .onErrorResume(WebClientResponseException::class.java) { Mono.just(Health.down(it).withDetail("body", it.responseBodyAsString).withDetail("HttpStatus", it.statusCode).build()) }
+      .onErrorResume(Exception::class.java) { Mono.just(Health.down(it).build()) }
+      .block()
 }
 
 @Component
@@ -31,13 +31,14 @@ constructor(@Qualifier("oauthApiHealthWebClient") webClient: WebClient) : Health
 
 @Component
 class TokenVerificationApiHealth
-constructor(@Qualifier("tokenVerificationApiHealthWebClient") webClient: WebClient,
-            @Value("\${tokenverification.enabled:false}") private val tokenVerificationEnabled: Boolean) : HealthCheck(webClient) {
+constructor(
+  @Qualifier("tokenVerificationApiHealthWebClient") webClient: WebClient,
+  @Value("\${tokenverification.enabled:false}") private val tokenVerificationEnabled: Boolean
+) : HealthCheck(webClient) {
   override fun health(): Health? =
-      if (tokenVerificationEnabled) {
-        super.health()
-      } else {
-        Health.up().withDetail("TokenVerification", "Disabled").build()
-      }
+    if (tokenVerificationEnabled) {
+      super.health()
+    } else {
+      Health.up().withDetail("TokenVerification", "Disabled").build()
+    }
 }
-

@@ -12,6 +12,6 @@ import org.springframework.stereotype.Component
 @Component
 class HealthInfo(@Autowired(required = false) private val buildProperties: BuildProperties?) : HealthIndicator {
   override fun health(): Health = Health.up()
-      .withDetail("version", buildProperties?.version ?: "version not available")
-      .build()
+    .withDetail("version", buildProperties?.version ?: "version not available")
+    .build()
 }
