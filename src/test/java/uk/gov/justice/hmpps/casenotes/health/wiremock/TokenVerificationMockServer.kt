@@ -33,10 +33,12 @@ class TokenVerificationMockServer : WireMockServer(9100) {
 
   fun stubVerifyRequest(active: Boolean = true) {
     stubFor(
-        WireMock.post(WireMock.urlEqualTo("/token/verify"))
-            .willReturn(WireMock.aResponse()
-                .withHeaders(HttpHeaders(HttpHeader("Content-Type", "application/json")))
-                .withBody(""" {"active": "$active"} """))
+      WireMock.post(WireMock.urlEqualTo("/token/verify"))
+        .willReturn(
+          WireMock.aResponse()
+            .withHeaders(HttpHeaders(HttpHeader("Content-Type", "application/json")))
+            .withBody(""" {"active": "$active"} """)
+        )
     )
   }
 }

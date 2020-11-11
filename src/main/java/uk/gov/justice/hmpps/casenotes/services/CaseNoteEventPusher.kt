@@ -24,9 +24,11 @@ interface CaseNoteEventPusher {
 @Suppress("SpringJavaInjectionPointsAutowiringInspection")
 @Component
 @ConditionalOnProperty(name = ["sns.provider"])
-open class CaseNoteAwsEventPusher(private val snsClient: SnsAsyncClient,
-                                  @Value("\${sns.topic.arn}") private val topicArn: String,
-                                  private val objectMapper: ObjectMapper) : CaseNoteEventPusher {
+open class CaseNoteAwsEventPusher(
+  private val snsClient: SnsAsyncClient,
+  @Value("\${sns.topic.arn}") private val topicArn: String,
+  private val objectMapper: ObjectMapper
+) : CaseNoteEventPusher {
   companion object {
     val log: Logger = LoggerFactory.getLogger(this::class.java)
   }
@@ -36,18 +38,20 @@ open class CaseNoteAwsEventPusher(private val snsClient: SnsAsyncClient,
       val cne = CaseNoteEvent(caseNote)
       log.info("Pushing case note {} to event topic with event type of {}", cne.caseNoteId, cne.eventType)
       val publishRequest = PublishRequest.builder()
-          .topicArn(topicArn)
-          .messageAttributes(mapOf(
-              "eventType" to MessageAttributeValue.builder().dataType("String").stringValue(cne.eventType).build(),
-              "contentType" to MessageAttributeValue.builder().dataType("String").stringValue("text/plain;charset=UTF-8").build()
-          ))
-          .message(objectMapper.writeValueAsString(cne))
-          .build()
+        .topicArn(topicArn)
+        .messageAttributes(
+          mapOf(
+            "eventType" to MessageAttributeValue.builder().dataType("String").stringValue(cne.eventType).build(),
+            "contentType" to MessageAttributeValue.builder().dataType("String").stringValue("text/plain;charset=UTF-8").build()
+          )
+        )
+        .message(objectMapper.writeValueAsString(cne))
+        .build()
       snsClient.publish(publishRequest)
-          .whenComplete { publishResponse, throwable ->
-            publishResponse?.run { log.debug("Sent case note with message id {}", publishResponse.messageId()) }
-            throwable?.run { log.error("Failed to send case note", throwable) }
-          }
+        .whenComplete { publishResponse, throwable ->
+          publishResponse?.run { log.debug("Sent case note with message id {}", publishResponse.messageId()) }
+          throwable?.run { log.error("Failed to send case note", throwable) }
+        }
     }
   }
 }
@@ -67,12 +71,18 @@ open class CaseNoteNoOpEventPusher : CaseNoteEventPusher {
   }
 }
 
-data class CaseNoteEvent(val eventType: String, val eventDatetime: LocalDateTime,
-                         val offenderIdDisplay: String, val agencyLocationId: String, val caseNoteId: String) {
+data class CaseNoteEvent(
+  val eventType: String,
+  val eventDatetime: LocalDateTime,
+  val offenderIdDisplay: String,
+  val agencyLocationId: String,
+  val caseNoteId: String
+) {
   constructor(cn: CaseNote) : this(
-      eventType = "${cn.type}-${cn.subType}",
-      eventDatetime = cn.creationDateTime,
-      offenderIdDisplay = cn.offenderIdentifier,
-      agencyLocationId = cn.locationId,
-      caseNoteId = cn.caseNoteId)
+    eventType = "${cn.type}-${cn.subType}",
+    eventDatetime = cn.creationDateTime,
+    offenderIdDisplay = cn.offenderIdentifier,
+    agencyLocationId = cn.locationId,
+    caseNoteId = cn.caseNoteId
+  )
 }

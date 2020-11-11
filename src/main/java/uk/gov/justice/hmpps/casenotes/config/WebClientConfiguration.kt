@@ -28,13 +28,14 @@ import java.time.Duration
 
 @Configuration
 class WebClientConfiguration(
-    /** Elite2 API Base URL endpoint ("http://localhost:8080") */
-    @Value("\${elite2.api.base.url}") private val elite2ApiBaseUrl: @URL String,
-    /**  OAUTH2 API Rest URL endpoint ("http://localhost:9090/auth/api") */
-    @Value("\${oauth.api.base.url}") private val oauthApiBaseUrl: @URL String,
-    /** OAUTH2 API Rest URL endpoint ("http://localhost:8100") */
-    @Value("\${tokenverification.api.base.url}") private val tokenVerificationApiBaseUrl: @URL String,
-    @Value("\${api.health-timeout:1s}") private val healthTimeout: Duration) {
+  /** Elite2 API Base URL endpoint ("http://localhost:8080") */
+  @Value("\${elite2.api.base.url}") private val elite2ApiBaseUrl: @URL String,
+  /**  OAUTH2 API Rest URL endpoint ("http://localhost:9090/auth/api") */
+  @Value("\${oauth.api.base.url}") private val oauthApiBaseUrl: @URL String,
+  /** OAUTH2 API Rest URL endpoint ("http://localhost:8100") */
+  @Value("\${tokenverification.api.base.url}") private val tokenVerificationApiBaseUrl: @URL String,
+  @Value("\${api.health-timeout:1s}") private val healthTimeout: Duration
+) {
 
   @Bean
   fun elite2ApiWebClient(builder: Builder): WebClient = createForwardAuthWebClient(builder, elite2ApiBaseUrl)
@@ -55,33 +56,35 @@ class WebClientConfiguration(
   fun tokenVerificationApiHealthWebClient(builder: Builder): WebClient = createHealthClient(builder, tokenVerificationApiBaseUrl)
 
   private fun createForwardAuthWebClient(builder: Builder, url: @URL String) =
-      builder.baseUrl(url)
-          .filter(addAuthHeaderFilterFunction())
-          .build()
+    builder.baseUrl(url)
+      .filter(addAuthHeaderFilterFunction())
+      .build()
 
   private fun createHealthClient(builder: Builder, url: @URL String): WebClient {
     val timeout = healthTimeout
     val tcpClient = TcpClient.create()
-        .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, timeout.toMillis().toInt())
-        .doOnConnected { connection ->
-          connection.addHandlerLast(ReadTimeoutHandler(timeout.toSeconds().toInt()))
-              .addHandlerLast(WriteTimeoutHandler(timeout.toSeconds().toInt()))
-        }
+      .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, timeout.toMillis().toInt())
+      .doOnConnected { connection ->
+        connection.addHandlerLast(ReadTimeoutHandler(timeout.toSeconds().toInt()))
+          .addHandlerLast(WriteTimeoutHandler(timeout.toSeconds().toInt()))
+      }
     return builder.clientConnector(ReactorClientHttpConnector(HttpClient.from(tcpClient)))
-        .baseUrl(url).build()
+      .baseUrl(url).build()
   }
 
   private fun addAuthHeaderFilterFunction(): ExchangeFilterFunction =
-      ExchangeFilterFunction { request: ClientRequest, next: ExchangeFunction ->
-        val filtered = ClientRequest.from(request)
-            .header(HttpHeaders.AUTHORIZATION, UserContext.getAuthToken())
-            .build()
-        next.exchange(filtered)
-      }
+    ExchangeFilterFunction { request: ClientRequest, next: ExchangeFunction ->
+      val filtered = ClientRequest.from(request)
+        .header(HttpHeaders.AUTHORIZATION, UserContext.getAuthToken())
+        .build()
+      next.exchange(filtered)
+    }
 
   @Bean
-  fun authorizedClientManagerAppScope(clientRegistrationRepository: ClientRegistrationRepository?,
-                                      oAuth2AuthorizedClientService: OAuth2AuthorizedClientService?): OAuth2AuthorizedClientManager {
+  fun authorizedClientManagerAppScope(
+    clientRegistrationRepository: ClientRegistrationRepository?,
+    oAuth2AuthorizedClientService: OAuth2AuthorizedClientService?
+  ): OAuth2AuthorizedClientManager {
     val authorizedClientProvider = OAuth2AuthorizedClientProviderBuilder.builder().clientCredentials().build()
     val authorizedClientManager = AuthorizedClientServiceOAuth2AuthorizedClientManager(clientRegistrationRepository, oAuth2AuthorizedClientService)
     authorizedClientManager.setAuthorizedClientProvider(authorizedClientProvider)
@@ -89,15 +92,17 @@ class WebClientConfiguration(
   }
 
   @Bean
-  fun elite2ClientCredentialsWebClient(@Qualifier(value = "authorizedClientManagerAppScope") authorizedClientManager: OAuth2AuthorizedClientManager,
-                                       builder: Builder): WebClient =
-      getOAuthWebClient(authorizedClientManager, builder, elite2ApiBaseUrl)
+  fun elite2ClientCredentialsWebClient(
+    @Qualifier(value = "authorizedClientManagerAppScope") authorizedClientManager: OAuth2AuthorizedClientManager,
+    builder: Builder
+  ): WebClient =
+    getOAuthWebClient(authorizedClientManager, builder, elite2ApiBaseUrl)
 
   private fun getOAuthWebClient(authorizedClientManager: OAuth2AuthorizedClientManager, builder: Builder, rootUri: String): WebClient {
     val oauth2Client = ServletOAuth2AuthorizedClientExchangeFilterFunction(authorizedClientManager)
     oauth2Client.setDefaultClientRegistrationId("elite2-api")
     return builder.baseUrl(rootUri)
-        .apply(oauth2Client.oauth2Configuration())
-        .build()
+      .apply(oauth2Client.oauth2Configuration())
+      .build()
   }
 }

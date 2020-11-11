@@ -9,8 +9,10 @@ import uk.gov.justice.hmpps.casenotes.health.wiremock.Elite2Extension.Companion.
 import uk.gov.justice.hmpps.casenotes.health.wiremock.OAuthExtension.Companion.oAuthApi
 import uk.gov.justice.hmpps.casenotes.health.wiremock.TokenVerificationExtension.Companion.tokenVerificationApi
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
-    properties = ["tokenverification.enabled=true", "sqs.provider=false"])
+@SpringBootTest(
+  webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
+  properties = ["tokenverification.enabled=true", "sqs.provider=false"]
+)
 class HealthCheckIntegrationTokenVerificationTest : IntegrationTest() {
 
   @Test
@@ -18,12 +20,12 @@ class HealthCheckIntegrationTokenVerificationTest : IntegrationTest() {
     subPing(200)
 
     webTestClient.get().uri("/health").exchange()
-        .expectStatus().isOk
-        .expectBody()
-        .jsonPath("components.OAuthApiHealth.details.HttpStatus").isEqualTo("OK")
-        .jsonPath("components.elite2ApiHealth.details.HttpStatus").isEqualTo("OK")
-        .jsonPath("components.tokenVerificationApiHealth.details.HttpStatus").isEqualTo("OK")
-        .jsonPath("status").isEqualTo("UP")
+      .expectStatus().isOk
+      .expectBody()
+      .jsonPath("components.OAuthApiHealth.details.HttpStatus").isEqualTo("OK")
+      .jsonPath("components.elite2ApiHealth.details.HttpStatus").isEqualTo("OK")
+      .jsonPath("components.tokenVerificationApiHealth.details.HttpStatus").isEqualTo("OK")
+      .jsonPath("status").isEqualTo("UP")
   }
 
   @Test
@@ -31,9 +33,9 @@ class HealthCheckIntegrationTokenVerificationTest : IntegrationTest() {
     subPing(200)
 
     webTestClient.get().uri("/health/ping").exchange()
-        .expectStatus().isOk
-        .expectBody()
-        .jsonPath("status").isEqualTo("UP")
+      .expectStatus().isOk
+      .expectBody()
+      .jsonPath("status").isEqualTo("UP")
   }
 
   @Test
@@ -41,18 +43,18 @@ class HealthCheckIntegrationTokenVerificationTest : IntegrationTest() {
     subPing(404)
 
     webTestClient.get().uri("/health").exchange()
-        .expectStatus().is5xxServerError
-        .expectBody()
-        .jsonPath("components.OAuthApiHealth.details.error").value<String> {
-          assertThat(it).contains("WebClientResponseException\$NotFound: 404 Not Found")
-        }
-        .jsonPath("components.elite2ApiHealth.details.error").value<String> {
-          assertThat(it).contains("WebClientResponseException\$NotFound: 404 Not Found")
-        }
-        .jsonPath("components.tokenVerificationApiHealth.details.error").value<String> {
-          assertThat(it).contains("WebClientResponseException\$NotFound: 404 Not Found")
-        }
-        .jsonPath("status").isEqualTo("DOWN")
+      .expectStatus().is5xxServerError
+      .expectBody()
+      .jsonPath("components.OAuthApiHealth.details.error").value<String> {
+        assertThat(it).contains("WebClientResponseException\$NotFound: 404 Not Found")
+      }
+      .jsonPath("components.elite2ApiHealth.details.error").value<String> {
+        assertThat(it).contains("WebClientResponseException\$NotFound: 404 Not Found")
+      }
+      .jsonPath("components.tokenVerificationApiHealth.details.error").value<String> {
+        assertThat(it).contains("WebClientResponseException\$NotFound: 404 Not Found")
+      }
+      .jsonPath("status").isEqualTo("DOWN")
   }
 
   @Test
@@ -60,35 +62,46 @@ class HealthCheckIntegrationTokenVerificationTest : IntegrationTest() {
     subPing(418)
 
     webTestClient.get().uri("/health").exchange()
-        .expectStatus().is5xxServerError
-        .expectBody()
-        .jsonPath("components.OAuthApiHealth.details.error").value<String> {
-          assertThat(it).contains("WebClientResponseException: 418 I'm a teapot")
-        }
-        .jsonPath("components.elite2ApiHealth.details.error").value<String> {
-          assertThat(it).contains("WebClientResponseException: 418 I'm a teapot")
-        }
-        .jsonPath("components.tokenVerificationApiHealth.details.error").value<String> {
-          assertThat(it).contains("WebClientResponseException: 418 I'm a teapot")
-        }
-        .jsonPath("status").isEqualTo("DOWN")
+      .expectStatus().is5xxServerError
+      .expectBody()
+      .jsonPath("components.OAuthApiHealth.details.error").value<String> {
+        assertThat(it).contains("WebClientResponseException: 418 I'm a teapot")
+      }
+      .jsonPath("components.elite2ApiHealth.details.error").value<String> {
+        assertThat(it).contains("WebClientResponseException: 418 I'm a teapot")
+      }
+      .jsonPath("components.tokenVerificationApiHealth.details.error").value<String> {
+        assertThat(it).contains("WebClientResponseException: 418 I'm a teapot")
+      }
+      .jsonPath("status").isEqualTo("DOWN")
   }
 
-
   private fun subPing(status: Int) {
-    oAuthApi.stubFor(get("/auth/health/ping").willReturn(aResponse()
-        .withHeader("Content-Type", "application/json")
-        .withBody(if (status == 200) "{\"status\":\"UP\"}" else "some error")
-        .withStatus(status)))
+    oAuthApi.stubFor(
+      get("/auth/health/ping").willReturn(
+        aResponse()
+          .withHeader("Content-Type", "application/json")
+          .withBody(if (status == 200) "{\"status\":\"UP\"}" else "some error")
+          .withStatus(status)
+      )
+    )
 
-    elite2Api.stubFor(get("/health/ping").willReturn(aResponse()
-        .withHeader("Content-Type", "application/json")
-        .withBody(if (status == 200) "{\"status\":\"UP\"}" else "some error")
-        .withStatus(status)))
+    elite2Api.stubFor(
+      get("/health/ping").willReturn(
+        aResponse()
+          .withHeader("Content-Type", "application/json")
+          .withBody(if (status == 200) "{\"status\":\"UP\"}" else "some error")
+          .withStatus(status)
+      )
+    )
 
-    tokenVerificationApi.stubFor(get("/health/ping").willReturn(aResponse()
-        .withHeader("Content-Type", "application/json")
-        .withBody(if (status == 200) "{\"status\":\"UP\"}" else "some error")
-        .withStatus(status)))
+    tokenVerificationApi.stubFor(
+      get("/health/ping").willReturn(
+        aResponse()
+          .withHeader("Content-Type", "application/json")
+          .withBody(if (status == 200) "{\"status\":\"UP\"}" else "some error")
+          .withStatus(status)
+      )
+    )
   }
 }

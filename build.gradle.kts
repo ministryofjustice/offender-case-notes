@@ -59,4 +59,3 @@ dependencies {
   testImplementation("org.springframework.security.oauth:spring-security-oauth2:2.5.0.RELEASE")
   testImplementation("org.springframework.security:spring-security-jwt:1.1.1.RELEASE")
 }
-

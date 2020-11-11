@@ -68,14 +68,14 @@ class OffenderCaseNoteAmendmentRepositoryTest {
 
   private fun transientEntityBuilder(offenderIdentifier: String): OffenderCaseNote.OffenderCaseNoteBuilder {
     return OffenderCaseNote.builder()
-        .occurrenceDateTime(LocalDateTime.now())
-        .locationId("MDI")
-        .authorUsername("USER2")
-        .authorUserId("some id")
-        .authorName("Mickey Mouse")
-        .offenderIdentifier(offenderIdentifier)
-        .sensitiveCaseNoteType(genType)
-        .noteText("HELLO")
+      .occurrenceDateTime(LocalDateTime.now())
+      .locationId("MDI")
+      .authorUsername("USER2")
+      .authorUserId("some id")
+      .authorName("Mickey Mouse")
+      .offenderIdentifier(offenderIdentifier)
+      .sensitiveCaseNoteType(genType)
+      .noteText("HELLO")
   }
 
   companion object {

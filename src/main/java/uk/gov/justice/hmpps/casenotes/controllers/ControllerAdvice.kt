@@ -31,63 +31,62 @@ class ControllerAdvice {
       log.error("Unexpected server exception", e)
     }
     return ResponseEntity
-        .status(e.rawStatusCode)
-        .body(e.responseBodyAsByteArray)
+      .status(e.rawStatusCode)
+      .body(e.responseBodyAsByteArray)
   }
 
   @ExceptionHandler(WebClientException::class)
   fun handleWebClientException(e: WebClientException): ResponseEntity<ErrorResponse> {
     log.error("Unexpected exception", e)
     return ResponseEntity
-        .status(HttpStatus.INTERNAL_SERVER_ERROR)
-        .body(ErrorResponse(status = (HttpStatus.INTERNAL_SERVER_ERROR.value()), developerMessage = (e.message)))
+      .status(HttpStatus.INTERNAL_SERVER_ERROR)
+      .body(ErrorResponse(status = (HttpStatus.INTERNAL_SERVER_ERROR.value()), developerMessage = (e.message)))
   }
 
   @ExceptionHandler(AccessDeniedException::class)
   fun handleAccessDeniedException(e: AccessDeniedException): ResponseEntity<ErrorResponse> {
     log.debug("Forbidden (403) returned with message {}", e.message)
     return ResponseEntity
-        .status(HttpStatus.FORBIDDEN)
-        .body(ErrorResponse(status = (HttpStatus.FORBIDDEN.value())))
+      .status(HttpStatus.FORBIDDEN)
+      .body(ErrorResponse(status = (HttpStatus.FORBIDDEN.value())))
   }
 
   @ExceptionHandler(ValidationException::class)
   fun handleValidationException(e: ValidationException): ResponseEntity<ErrorResponse> {
     log.debug("Bad Request (400) returned with message {}", e.message)
     return ResponseEntity
-        .status(HttpStatus.BAD_REQUEST)
-        .body(ErrorResponse(status = (HttpStatus.BAD_REQUEST.value()), developerMessage = (e.message)))
-
+      .status(HttpStatus.BAD_REQUEST)
+      .body(ErrorResponse(status = (HttpStatus.BAD_REQUEST.value()), developerMessage = (e.message)))
   }
 
   @ExceptionHandler(MissingServletRequestParameterException::class)
   fun handleValidationException(e: MissingServletRequestParameterException): ResponseEntity<ErrorResponse> {
     log.debug("Bad Request (400) returned", e)
     return ResponseEntity
-        .status(HttpStatus.BAD_REQUEST)
-        .body(ErrorResponse(status = (HttpStatus.BAD_REQUEST.value()), developerMessage = (e.message)))
+      .status(HttpStatus.BAD_REQUEST)
+      .body(ErrorResponse(status = (HttpStatus.BAD_REQUEST.value()), developerMessage = (e.message)))
   }
 
   @ExceptionHandler(Exception::class)
   fun handleException(e: Exception): ResponseEntity<ErrorResponse> {
     log.error("Unexpected exception", e)
     return ResponseEntity
-        .status(HttpStatus.INTERNAL_SERVER_ERROR)
+      .status(HttpStatus.INTERNAL_SERVER_ERROR)
 
-        .body(ErrorResponse(status = (HttpStatus.INTERNAL_SERVER_ERROR.value()), developerMessage = (e.message)))
+      .body(ErrorResponse(status = (HttpStatus.INTERNAL_SERVER_ERROR.value()), developerMessage = (e.message)))
   }
 
   @ExceptionHandler(EntityNotFoundException::class)
   fun handleEntityNotFoundException(e: Exception): ResponseEntity<ErrorResponse> {
     return ResponseEntity
-        .status(HttpStatus.NOT_FOUND)
-        .body(ErrorResponse(status = (HttpStatus.NOT_FOUND.value()), developerMessage = (e.message)))
+      .status(HttpStatus.NOT_FOUND)
+      .body(ErrorResponse(status = (HttpStatus.NOT_FOUND.value()), developerMessage = (e.message)))
   }
 
   @ExceptionHandler(EntityExistsException::class)
   fun handleEntityExistsException(e: Exception): ResponseEntity<ErrorResponse> {
     return ResponseEntity
-        .status(HttpStatus.CONFLICT)
-        .body(ErrorResponse(status = (HttpStatus.CONFLICT.value()), developerMessage = (e.message)))
+      .status(HttpStatus.CONFLICT)
+      .body(ErrorResponse(status = (HttpStatus.CONFLICT.value()), developerMessage = (e.message)))
   }
 }

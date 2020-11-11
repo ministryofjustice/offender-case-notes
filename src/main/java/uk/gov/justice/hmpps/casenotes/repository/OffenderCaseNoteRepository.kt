@@ -8,8 +8,7 @@ import org.springframework.data.repository.PagingAndSortingRepository
 import org.springframework.stereotype.Repository
 import uk.gov.justice.hmpps.casenotes.model.OffenderCaseNote
 import java.time.LocalDateTime
-import java.util.*
-
+import java.util.UUID
 
 @Repository
 interface OffenderCaseNoteRepository : PagingAndSortingRepository<OffenderCaseNote, UUID>, JpaSpecificationExecutor<OffenderCaseNote> {
@@ -29,5 +28,4 @@ interface OffenderCaseNoteRepository : PagingAndSortingRepository<OffenderCaseNo
   @Modifying
   @Query(value = "DELETE FROM offender_case_note_amendment ocna where offender_case_note_id in (select offender_case_note_id from offender_case_note where offender_identifier = ?1)", nativeQuery = true)
   fun deleteOffenderCaseNoteAmendmentsByOffenderIdentifier(offenderIdentifier: String): Int
-
 }

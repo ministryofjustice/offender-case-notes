@@ -15,10 +15,12 @@ import org.springframework.web.reactive.function.client.WebClient
 
 @Suppress("SpringJavaInjectionPointsAutowiringInspection")
 @Component
-class TokenVerifyingAuthManager(jwtDecoder: JwtDecoder,
-                                private val tokenVerificationApiWebClient: WebClient,
-                                @Value("\${tokenverification.enabled:false}") private val tokenVerificationEnabled: Boolean) :
-    AuthenticationManager {
+class TokenVerifyingAuthManager(
+  jwtDecoder: JwtDecoder,
+  private val tokenVerificationApiWebClient: WebClient,
+  @Value("\${tokenverification.enabled:false}") private val tokenVerificationEnabled: Boolean
+) :
+  AuthenticationManager {
 
   private val jwtAuthenticationProvider = JwtAuthenticationProvider(jwtDecoder)
 
@@ -33,10 +35,10 @@ class TokenVerifyingAuthManager(jwtDecoder: JwtDecoder,
 
       // firstly check the jwt is still valid
       val tokenDto = tokenVerificationApiWebClient.post().uri("/token/verify")
-          .header(HttpHeaders.AUTHORIZATION, "Bearer ${bearer.token}")
-          .retrieve()
-          .bodyToMono(TokenDto::class.java)
-          .blockOptional()
+        .header(HttpHeaders.AUTHORIZATION, "Bearer ${bearer.token}")
+        .retrieve()
+        .bodyToMono(TokenDto::class.java)
+        .blockOptional()
       val tokenActive = tokenDto.map { it.active }.orElse(false)
 
       // can't proceed if the token is then not active

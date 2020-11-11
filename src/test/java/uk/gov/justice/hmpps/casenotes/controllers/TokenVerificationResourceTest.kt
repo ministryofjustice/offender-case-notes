@@ -15,12 +15,14 @@ class TokenVerificationResourceTest : ResourceTest() {
 
     elite2Api.subGetCaseNoteTypes()
     webTestClient.get().uri("/case-notes/types")
-        .headers(addBearerToken(jwt))
-        .exchange()
-        .expectStatus().isOk
+      .headers(addBearerToken(jwt))
+      .exchange()
+      .expectStatus().isOk
 
-    tokenVerificationApi.verify(postRequestedFor(urlEqualTo("/token/verify"))
-        .withHeader(HttpHeader.AUTHORIZATION.asString(), equalTo("Bearer $jwt")))
+    tokenVerificationApi.verify(
+      postRequestedFor(urlEqualTo("/token/verify"))
+        .withHeader(HttpHeader.AUTHORIZATION.asString(), equalTo("Bearer $jwt"))
+    )
   }
 
   @Test
@@ -31,11 +33,13 @@ class TokenVerificationResourceTest : ResourceTest() {
 
     elite2Api.subGetCaseNoteTypes()
     webTestClient.get().uri("/case-notes/types")
-        .headers(addBearerToken(jwt))
-        .exchange()
-        .expectStatus().isUnauthorized
+      .headers(addBearerToken(jwt))
+      .exchange()
+      .expectStatus().isUnauthorized
 
-    tokenVerificationApi.verify(postRequestedFor(urlEqualTo("/token/verify"))
-        .withHeader(HttpHeader.AUTHORIZATION.asString(), equalTo("Bearer $jwt")))
+    tokenVerificationApi.verify(
+      postRequestedFor(urlEqualTo("/token/verify"))
+        .withHeader(HttpHeader.AUTHORIZATION.asString(), equalTo("Bearer $jwt"))
+    )
   }
 }
