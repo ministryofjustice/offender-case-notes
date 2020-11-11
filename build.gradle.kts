@@ -1,5 +1,5 @@
 plugins {
-  id("uk.gov.justice.hmpps.gradle-spring-boot") version "1.0.6"
+  id("uk.gov.justice.hmpps.gradle-spring-boot") version "1.1.0"
   kotlin("plugin.spring") version "1.4.10"
 }
 
@@ -8,13 +8,13 @@ configurations {
 }
 
 dependencies {
-  annotationProcessor("org.projectlombok:lombok:1.18.12")
+  annotationProcessor("org.projectlombok:lombok:1.18.16")
 
-  compileOnly("org.projectlombok:lombok:1.18.12")
+  compileOnly("org.projectlombok:lombok:1.18.16")
 
   runtimeOnly("com.h2database:h2:1.4.200")
-  runtimeOnly("org.flywaydb:flyway-core:6.5.5")
-  runtimeOnly("org.postgresql:postgresql:42.2.16")
+  runtimeOnly("org.flywaydb:flyway-core:6.5.6")
+  runtimeOnly("org.postgresql:postgresql:42.2.18")
 
   implementation("org.springframework.boot:spring-boot-starter-data-jpa")
   implementation("org.springframework.boot:spring-boot-starter-cache")
@@ -40,18 +40,18 @@ dependencies {
 
   implementation("net.sf.ehcache:ehcache:2.10.6")
   implementation("org.apache.commons:commons-text:1.9")
-  implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.11.2")
-  implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.11.2")
+  implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.11.3")
+  implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.11.3")
   implementation("com.pauldijou:jwt-core_2.11:4.3.0")
   implementation("com.google.code.gson:gson:2.8.6")
 
-  implementation("software.amazon.awssdk:sns:2.15.0")
+  implementation("software.amazon.awssdk:sns:2.15.25")
 
-  testAnnotationProcessor("org.projectlombok:lombok:1.18.12")
-  testCompileOnly("org.projectlombok:lombok:1.18.12")
+  testAnnotationProcessor("org.projectlombok:lombok:1.18.16")
+  testCompileOnly("org.projectlombok:lombok:1.18.16")
   testImplementation("org.springframework.security:spring-security-test")
   testImplementation("com.tngtech.java:junit-dataprovider:1.13.1")
-  testImplementation("net.javacrumbs.json-unit:json-unit-assertj:2.19.0")
+  testImplementation("net.javacrumbs.json-unit:json-unit-assertj:2.21.0")
   testImplementation("io.github.http-builder-ng:http-builder-ng-apache:1.0.4")
   testImplementation("com.github.tomakehurst:wiremock-standalone:2.27.2")
   testImplementation("io.jsonwebtoken:jjwt:0.9.1")
