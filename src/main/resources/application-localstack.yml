@@ -1,7 +1,3 @@
-spring:
-  profiles:
-    include: dev
-
 sns:
   provider: localstack
   endpoint.url: http://localhost:4575
