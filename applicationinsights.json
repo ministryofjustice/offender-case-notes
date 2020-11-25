@@ -1,0 +1,11 @@
+{
+  "role": {
+    "name": "offender-case-notes"
+  },
+  "customDimensions": {
+    "application_Version": "${BUILD_NUMBER}"
+  },
+  "selfDiagnostics": {
+    "destination": "console"
+  }
+}
