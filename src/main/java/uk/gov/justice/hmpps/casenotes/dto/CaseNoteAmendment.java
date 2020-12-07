@@ -29,10 +29,6 @@ public class CaseNoteAmendment {
     @NotNull
     private Long caseNoteAmendmentId;
 
-    @ApiModelProperty(required = true, value = "Sequence Number", example = "1", position = 2)
-    @NotNull
-    private Integer sequence;
-
     @ApiModelProperty(required = true, value = "Date and Time of Case Note creation", example = "2018-12-01T13:45:00", position = 3)
     @NotNull
     private LocalDateTime creationDateTime;
