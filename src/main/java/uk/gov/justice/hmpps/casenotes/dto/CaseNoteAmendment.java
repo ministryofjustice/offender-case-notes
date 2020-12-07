@@ -29,15 +29,15 @@ public class CaseNoteAmendment {
     @NotNull
     private Long caseNoteAmendmentId;
 
-    @ApiModelProperty(required = true, value = "Date and Time of Case Note creation", example = "2018-12-01T13:45:00", position = 3)
+    @ApiModelProperty(required = true, value = "Date and Time of Case Note creation", example = "2018-12-01T13:45:00", position = 2)
     @NotNull
     private LocalDateTime creationDateTime;
 
-    @ApiModelProperty(required = true, value = "Username of the user amending the case note", position = 4, example = "USER1")
+    @ApiModelProperty(required = true, value = "Username of the user amending the case note", position = 3, example = "USER1")
     @NotBlank
     private String authorUserName;
 
-    @ApiModelProperty(required = true, value = "Name of the user amending the case note", position = 5, example = "Mickey Mouse")
+    @ApiModelProperty(required = true, value = "Name of the user amending the case note", position = 4, example = "Mickey Mouse")
     @NotBlank
     private String authorName;
 
@@ -45,7 +45,7 @@ public class CaseNoteAmendment {
     @NotNull
     private String authorUserId;
 
-    @ApiModelProperty(required = true, value = "Additional Case Note Information", position = 6, example = "Some Additional Text")
+    @ApiModelProperty(required = true, value = "Additional Case Note Information", position = 5, example = "Some Additional Text")
     @NotBlank
     private String additionalNoteText;
 
