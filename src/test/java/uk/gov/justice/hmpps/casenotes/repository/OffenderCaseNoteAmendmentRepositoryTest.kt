@@ -63,7 +63,7 @@ class OffenderCaseNoteAmendmentRepositoryTest {
 
   @Test
   @WithAnonymousUser
-  fun `test adding a new offender case note amendment after deleting an amendment `(){
+  fun `test adding a new offender case note amendment after deleting an amendment `() {
     val caseNote = transientEntity("A2345BB")
     caseNote.addAmendment("Another Note 0", "someuser", "Some User", "user id")
     val persistedEntity = repository.save(caseNote)
