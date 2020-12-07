@@ -1,6 +1,6 @@
 package uk.gov.justice.hmpps.casenotes.repository
 
-import org.assertj.core.api.Assertions
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -47,11 +47,10 @@ class OffenderCaseNoteAmendmentRepositoryTest {
     TestTransaction.end()
     TestTransaction.start()
 
-    val amendmentId = repository.findById(persistedEntity.id).orElseThrow().getAmendment(1).get().id
+    val amendmentId = repository.findById(persistedEntity.id).orElseThrow().amendments.get(0).id
 
     TestTransaction.end()
     TestTransaction.start()
-
     amendmentRepository.deleteById(amendmentId)
 
     TestTransaction.flagForCommit()
@@ -59,9 +58,43 @@ class OffenderCaseNoteAmendmentRepositoryTest {
     TestTransaction.start()
 
     val retrievedCaseNote = repository.findById(persistedEntity.id).orElseThrow()
-    Assertions.assertThat(retrievedCaseNote.amendments).isEmpty()
+    assertThat(retrievedCaseNote.amendments).isEmpty()
   }
 
+  @Test
+  @WithAnonymousUser
+  fun `test adding a new offender case note amendment after deleting an amendment `(){
+    val caseNote = transientEntity("A2345BB")
+    caseNote.addAmendment("Another Note 0", "someuser", "Some User", "user id")
+    val persistedEntity = repository.save(caseNote)
+    TestTransaction.flagForCommit()
+    TestTransaction.end()
+
+    TestTransaction.start()
+    val amendmentId = repository.findById(persistedEntity.id).orElseThrow().amendments.get(0).id
+    TestTransaction.end()
+
+    TestTransaction.start()
+    amendmentRepository.deleteById(amendmentId)
+    TestTransaction.flagForCommit()
+    TestTransaction.end()
+
+    TestTransaction.start()
+    val retrievedCaseNote = repository.findById(persistedEntity.id).orElseThrow()
+    assertThat(retrievedCaseNote.amendments).isEmpty()
+    TestTransaction.end()
+
+    TestTransaction.start()
+    retrievedCaseNote.addAmendment("Another Note 1", "someuser", "Some User", "user id")
+    repository.save(retrievedCaseNote)
+    TestTransaction.flagForCommit()
+    TestTransaction.end()
+
+    TestTransaction.start()
+    val additionalAmendment = repository.findById(persistedEntity.id).orElseThrow().amendments.get(0)
+    assertThat(additionalAmendment.noteText).isEqualTo("Another Note 1")
+    TestTransaction.end()
+  }
   private fun transientEntity(offenderIdentifier: String): OffenderCaseNote {
     return transientEntityBuilder(offenderIdentifier).build()
   }

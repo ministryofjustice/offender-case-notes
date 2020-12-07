@@ -106,8 +106,8 @@ public class OffenderCaseNoteRepositoryTest {
 
         assertThat(retrievedEntity2.getAmendments()).hasSize(3);
 
-        assertThat(retrievedEntity2.getAmendment(1).orElseThrow().getNoteText()).isEqualTo("Another Note 0");
-        final var offenderCaseNoteAmendment3 = retrievedEntity2.getAmendment(3).orElseThrow();
+        assertThat(retrievedEntity2.getAmendments().get(0).getNoteText()).isEqualTo("Another Note 0");
+        final var offenderCaseNoteAmendment3 = retrievedEntity2.getAmendments().get(2);
         assertThat(offenderCaseNoteAmendment3.getNoteText()).isEqualTo("Another Note 2");
 
         retrievedEntity2.addAmendment("Another Note 3", "USER1", "Mickey Mouse", "user id");
@@ -121,7 +121,7 @@ public class OffenderCaseNoteRepositoryTest {
 
         assertThat(retrievedEntity3.getAmendments()).hasSize(4);
 
-        assertThat(retrievedEntity3.getAmendment(4).orElseThrow().getNoteText()).isEqualTo("Another Note 3");
+        assertThat(retrievedEntity3.getAmendments().get(3).getNoteText()).isEqualTo("Another Note 3");
     }
 
     @Test
@@ -462,7 +462,7 @@ public class OffenderCaseNoteRepositoryTest {
         TestTransaction.flagForCommit();
         TestTransaction.end();
 
-        final var sql = String.format("SELECT soft_deleted FROM offender_case_note_amendment Where offender_case_note_amendment_id = '%s'", persistedEntity.getAmendment(1).get().getId());
+        final var sql = String.format("SELECT soft_deleted FROM offender_case_note_amendment Where offender_case_note_amendment_id = '%s'", persistedEntity.getAmendments().get(0).getId());
         assertThat(jdbcTemplate.queryForObject(sql, Boolean.class)).isFalse();
 
 

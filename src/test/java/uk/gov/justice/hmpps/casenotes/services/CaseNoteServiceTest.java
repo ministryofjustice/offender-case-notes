@@ -221,8 +221,8 @@ public class CaseNoteServiceTest {
                 .authorName("author")
                 .authorUserId("some id")
                 .authorUserName("user")
-                .sequence(1).build();
-        assertThat(caseNote.getAmendments().get(0)).isEqualToComparingOnlyGivenFields(expected, "additionalNoteText", "authorName", "authorUserName", "sequence");
+                .build();
+        assertThat(caseNote.getAmendments().get(0)).isEqualToComparingOnlyGivenFields(expected, "additionalNoteText", "authorName", "authorUserName");
     }
 
     @Test

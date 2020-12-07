@@ -169,7 +169,6 @@ public class CaseNoteService {
                                 .authorName(a.getAuthorName())
                                 .additionalNoteText(a.getNoteText())
                                 .caseNoteAmendmentId(a.getId())
-                                .sequence(a.getAmendSequence())
                                 .creationDateTime(a.getCreateDateTime())
                                 .build()
                 ).collect(Collectors.toList()))

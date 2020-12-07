@@ -37,7 +37,7 @@ import java.time.LocalDateTime;
 @EntityListeners(AuditingEntityListener.class)
 @Builder(toBuilder = true)
 @EqualsAndHashCode
-@ToString(of = {"id", "amendSequence", "caseNote"})
+@ToString(of = {"id", "caseNote"})
 public class OffenderCaseNoteAmendment {
 
     @Id
@@ -48,9 +48,6 @@ public class OffenderCaseNoteAmendment {
     @ManyToOne
     @JoinColumn(name = "OFFENDER_CASE_NOTE_ID", nullable = false)
     private OffenderCaseNote caseNote;
-
-    @Column(nullable = false)
-    private int amendSequence;
 
     @Column(nullable = false)
     private String authorUsername;
