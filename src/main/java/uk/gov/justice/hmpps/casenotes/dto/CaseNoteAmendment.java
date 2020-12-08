@@ -41,7 +41,7 @@ public class CaseNoteAmendment {
     @NotBlank
     private String authorName;
 
-    @ApiModelProperty(required = true, value = "User Id of the user amending the case note - staffId for nomis users, userId for auth users", position = 11, example = "12345")
+    @ApiModelProperty(required = true, value = "User Id of the user amending the case note - staffId for nomis users, userId for auth users", position = 10, example = "12345")
     @NotNull
     private String authorUserId;
 
