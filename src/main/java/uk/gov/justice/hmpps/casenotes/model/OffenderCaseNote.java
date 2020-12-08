@@ -87,7 +87,7 @@ public class OffenderCaseNote {
     // cascade All not used as we don't want the soft delete to cascade to the case note amendments in case we need to
     // restore the case note with previously soft deleted amendment
     @OneToMany(cascade = {PERSIST, MERGE, REFRESH, DETACH}, mappedBy = "caseNote")
-    private final SortedSet<OffenderCaseNoteAmendment> amendments = new TreeSet<>();
+    private final SortedSet<OffenderCaseNoteAmendment> amendments = new TreeSet<>(Comparator.comparing(OffenderCaseNoteAmendment::getCreateDateTime));
 
     @CreatedDate
     @Column(nullable = false)
