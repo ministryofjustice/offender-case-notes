@@ -26,9 +26,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.List;
 import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.UUID;
@@ -87,7 +85,7 @@ public class OffenderCaseNote {
     // cascade All not used as we don't want the soft delete to cascade to the case note amendments in case we need to
     // restore the case note with previously soft deleted amendment
     @OneToMany(cascade = {PERSIST, MERGE, REFRESH, DETACH}, mappedBy = "caseNote")
-    private final SortedSet<OffenderCaseNoteAmendment> amendments = new TreeSet<>(Comparator.comparing(OffenderCaseNoteAmendment::getCreateDateTime));
+    private final SortedSet<OffenderCaseNoteAmendment> amendments = new TreeSet<>(new AmendmentComparator());
 
     @CreatedDate
     @Column(nullable = false)
@@ -162,8 +160,8 @@ public class OffenderCaseNote {
         return this.noteText;
     }
 
-    public List<OffenderCaseNoteAmendment> getAmendments() {
-        return new ArrayList<>(this.amendments);
+    public SortedSet<OffenderCaseNoteAmendment> getAmendments() {
+        return this.amendments;
     }
 
     public LocalDateTime getCreateDateTime() {

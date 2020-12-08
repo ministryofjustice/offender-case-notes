@@ -47,7 +47,7 @@ class OffenderCaseNoteAmendmentRepositoryTest {
     TestTransaction.end()
     TestTransaction.start()
 
-    val amendmentId = repository.findById(persistedEntity.id).orElseThrow().amendments.get(0).id
+    val amendmentId = repository.findById(persistedEntity.id).orElseThrow().amendments.first().id
 
     TestTransaction.end()
     TestTransaction.start()
@@ -71,7 +71,7 @@ class OffenderCaseNoteAmendmentRepositoryTest {
     TestTransaction.end()
 
     TestTransaction.start()
-    val amendmentId = repository.findById(persistedEntity.id).orElseThrow().amendments.get(0).id
+    val amendmentId = repository.findById(persistedEntity.id).orElseThrow().amendments.first().id
     TestTransaction.end()
 
     TestTransaction.start()
@@ -91,7 +91,7 @@ class OffenderCaseNoteAmendmentRepositoryTest {
     TestTransaction.end()
 
     TestTransaction.start()
-    val additionalAmendment = repository.findById(persistedEntity.id).orElseThrow().amendments.get(0)
+    val additionalAmendment = repository.findById(persistedEntity.id).orElseThrow().amendments.first()
     assertThat(additionalAmendment.noteText).isEqualTo("Another Note 1")
     TestTransaction.end()
   }

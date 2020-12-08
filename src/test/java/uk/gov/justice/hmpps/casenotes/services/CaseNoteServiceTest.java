@@ -103,7 +103,7 @@ public class CaseNoteServiceTest {
 
         final var createdNote = caseNoteService.createCaseNote("12345", NewCaseNote.builder().type("type").subType("sub").build());
         assertThat(createdNote).isEqualToIgnoringGivenFields(offenderCaseNote,
-                "caseNoteId", "type", "typeDescription", "subType", "subTypeDescription", "source", "creationDateTime", "text");
+                "caseNoteId", "type", "typeDescription", "subType", "subTypeDescription", "source", "creationDateTime", "text", "amendments");
         assertThat(createdNote.getText()).isEqualTo("HELLO");
     }
 
@@ -130,7 +130,7 @@ public class CaseNoteServiceTest {
 
         final var caseNote = caseNoteService.getCaseNote("12345", UUID.randomUUID().toString());
         assertThat(caseNote).isEqualToIgnoringGivenFields(offenderCaseNote,
-                "caseNoteId", "type", "typeDescription", "subType", "subTypeDescription", "source", "creationDateTime", "authorUsername", "authorName", "text");
+                "caseNoteId", "type", "typeDescription", "subType", "subTypeDescription", "source", "creationDateTime", "authorUsername", "authorName", "text", "amendments");
         assertThat(caseNote.getText()).isEqualTo("HELLO");
     }
 
