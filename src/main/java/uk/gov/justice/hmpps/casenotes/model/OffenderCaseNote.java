@@ -29,8 +29,12 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.SortedSet;
+import java.util.TreeSet;
 import java.util.UUID;
 
+
+import static java.time.LocalDateTime.now;
 import static javax.persistence.CascadeType.DETACH;
 import static javax.persistence.CascadeType.MERGE;
 import static javax.persistence.CascadeType.PERSIST;
@@ -83,7 +87,7 @@ public class OffenderCaseNote {
     // cascade All not used as we don't want the soft delete to cascade to the case note amendments in case we need to
     // restore the case note with previously soft deleted amendment
     @OneToMany(cascade = {PERSIST, MERGE, REFRESH, DETACH}, mappedBy = "caseNote")
-    private final List<OffenderCaseNoteAmendment> amendments = new ArrayList<>();
+    private final SortedSet<OffenderCaseNoteAmendment> amendments = new TreeSet<>();
 
     @CreatedDate
     @Column(nullable = false)
@@ -113,12 +117,13 @@ public class OffenderCaseNote {
                 .authorUsername(authorUsername)
                 .authorName(authorName)
                 .authorUserId(authorUserId)
+                .createDateTime(now())
                 .build();
 
         amendments.add(amendment);
 
         // force modification date change on adding amendment
-        modifyDateTime = LocalDateTime.now();
+        modifyDateTime = now();
     }
 
     public UUID getId() {
@@ -158,7 +163,7 @@ public class OffenderCaseNote {
     }
 
     public List<OffenderCaseNoteAmendment> getAmendments() {
-        return this.amendments;
+        return new ArrayList<>(this.amendments);
     }
 
     public LocalDateTime getCreateDateTime() {
