@@ -103,7 +103,7 @@ public class CaseNoteServiceTest {
 
         final var createdNote = caseNoteService.createCaseNote("12345", NewCaseNote.builder().type("type").subType("sub").build());
         assertThat(createdNote).isEqualToIgnoringGivenFields(offenderCaseNote,
-                "caseNoteId", "type", "typeDescription", "subType", "subTypeDescription", "source", "creationDateTime", "text");
+                "caseNoteId", "type", "typeDescription", "subType", "subTypeDescription", "source", "creationDateTime", "text", "amendments");
         assertThat(createdNote.getText()).isEqualTo("HELLO");
     }
 
@@ -130,7 +130,7 @@ public class CaseNoteServiceTest {
 
         final var caseNote = caseNoteService.getCaseNote("12345", UUID.randomUUID().toString());
         assertThat(caseNote).isEqualToIgnoringGivenFields(offenderCaseNote,
-                "caseNoteId", "type", "typeDescription", "subType", "subTypeDescription", "source", "creationDateTime", "authorUsername", "authorName", "text");
+                "caseNoteId", "type", "typeDescription", "subType", "subTypeDescription", "source", "creationDateTime", "authorUsername", "authorName", "text", "amendments");
         assertThat(caseNote.getText()).isEqualTo("HELLO");
     }
 
@@ -221,8 +221,8 @@ public class CaseNoteServiceTest {
                 .authorName("author")
                 .authorUserId("some id")
                 .authorUserName("user")
-                .sequence(1).build();
-        assertThat(caseNote.getAmendments().get(0)).isEqualToComparingOnlyGivenFields(expected, "additionalNoteText", "authorName", "authorUserName", "sequence");
+                .build();
+        assertThat(caseNote.getAmendments().get(0)).isEqualToComparingOnlyGivenFields(expected, "additionalNoteText", "authorName", "authorUserName");
     }
 
     @Test

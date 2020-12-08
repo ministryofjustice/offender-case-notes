@@ -10,7 +10,6 @@
   "locationId": "LEI",
   "amendments": [
     {
-      "sequence": 1,
       "authorUserName": "DELETE_CASE_NOTE_USER",
       "authorUserId": "DELETE_CASE_NOTE_USER_ID",
       "additionalNoteText": "Amended case note"

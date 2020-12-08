@@ -25,14 +25,14 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
-import javax.validation.constraints.NotNull;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.List;
-import java.util.Optional;
+import java.util.SortedSet;
+import java.util.TreeSet;
 import java.util.UUID;
 
+
+import static java.time.LocalDateTime.now;
 import static javax.persistence.CascadeType.DETACH;
 import static javax.persistence.CascadeType.MERGE;
 import static javax.persistence.CascadeType.PERSIST;
@@ -85,7 +85,7 @@ public class OffenderCaseNote {
     // cascade All not used as we don't want the soft delete to cascade to the case note amendments in case we need to
     // restore the case note with previously soft deleted amendment
     @OneToMany(cascade = {PERSIST, MERGE, REFRESH, DETACH}, mappedBy = "caseNote")
-    private final List<OffenderCaseNoteAmendment> amendments = new ArrayList<>();
+    private final SortedSet<OffenderCaseNoteAmendment> amendments = new TreeSet<>(new AmendmentComparator());
 
     @CreatedDate
     @Column(nullable = false)
@@ -115,24 +115,13 @@ public class OffenderCaseNote {
                 .authorUsername(authorUsername)
                 .authorName(authorName)
                 .authorUserId(authorUserId)
-                .amendSequence(getLatestSequence() + 1)
+                .createDateTime(now())
                 .build();
 
         amendments.add(amendment);
 
         // force modification date change on adding amendment
-        modifyDateTime = LocalDateTime.now();
-    }
-
-    @NotNull
-    private Integer getLatestSequence() {
-        return amendments.stream().max(Comparator.comparingInt(OffenderCaseNoteAmendment::getAmendSequence))
-                .map(OffenderCaseNoteAmendment::getAmendSequence)
-                .orElse(0);
-    }
-
-    public Optional<OffenderCaseNoteAmendment> getAmendment(final int sequence) {
-        return amendments.stream().filter(a -> a.getAmendSequence() == sequence).findFirst();
+        modifyDateTime = now();
     }
 
     public UUID getId() {
@@ -171,7 +160,7 @@ public class OffenderCaseNote {
         return this.noteText;
     }
 
-    public List<OffenderCaseNoteAmendment> getAmendments() {
+    public SortedSet<OffenderCaseNoteAmendment> getAmendments() {
         return this.amendments;
     }
 
@@ -198,7 +187,7 @@ public class OffenderCaseNote {
     public static class AmendmentComparator implements Comparator<OffenderCaseNoteAmendment> {
         @Override
         public int compare(final OffenderCaseNoteAmendment a1, final OffenderCaseNoteAmendment a2) {
-            return a1.getAmendSequence() - a2.getAmendSequence();
+            return a1.getCreateDateTime().compareTo(a2.getCreateDateTime());
         }
     }
 }
