@@ -1,7 +1,5 @@
 package uk.gov.justice.hmpps.casenotes.config
 
-import com.fasterxml.jackson.databind.ObjectMapper
-import io.swagger.util.ReferenceSerializationConfigurer
 import lombok.AllArgsConstructor
 import org.springframework.boot.info.BuildProperties
 import org.springframework.context.annotation.Bean
@@ -25,7 +23,6 @@ import springfox.documentation.service.TokenEndpoint
 import springfox.documentation.service.TokenRequestEndpoint
 import springfox.documentation.spi.DocumentationType
 import springfox.documentation.spi.service.contexts.SecurityContext
-import springfox.documentation.spring.web.json.JacksonModuleRegistrar
 import springfox.documentation.spring.web.plugins.Docket
 import springfox.documentation.swagger2.annotations.EnableSwagger2
 import java.time.LocalDateTime
@@ -58,7 +55,7 @@ class ResourceServerConfiguration(private val tokenVerifyingAuthManager: TokenVe
             "/ping",
             "/h2-console/**",
             "/v2/api-docs",
-            "/swagger-ui.html", "/swagger-resources", "/swagger-resources/configuration/ui",
+            "/swagger-ui/**", "/swagger-resources", "/swagger-resources/configuration/ui",
             "/swagger-resources/configuration/security"
           )
           .permitAll()
@@ -127,7 +124,4 @@ class ResourceServerConfiguration(private val tokenVerifyingAuthManager: TokenVe
     "https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/",
     emptyList()
   )
-
-  @Bean
-  fun swaggerJacksonModuleRegistrar() = JacksonModuleRegistrar { mapper: ObjectMapper? -> ReferenceSerializationConfigurer.serializeAsComputedRef(mapper) }
 }

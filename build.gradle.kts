@@ -26,17 +26,11 @@ dependencies {
   implementation("org.springframework:spring-jms")
   implementation("com.amazonaws:amazon-sqs-java-messaging-lib:1.0.8")
 
-  implementation("javax.annotation:javax.annotation-api:1.3.2")
-  implementation("javax.xml.bind:jaxb-api:2.3.1")
-  implementation("com.sun.xml.bind:jaxb-impl:3.0.0")
-  implementation("com.sun.xml.bind:jaxb-core:3.0.0")
   implementation("com.google.code.gson:gson:2.8.6")
   implementation("javax.activation:activation:1.1.1")
   implementation("javax.transaction:javax.transaction-api:1.3")
 
-  implementation("io.springfox:springfox-swagger2:3.0.0")
-  implementation("io.springfox:springfox-swagger-ui:3.0.0")
-  implementation("io.swagger:swagger-core:1.6.2")
+  implementation("io.springfox:springfox-boot-starter:3.0.0")
 
   implementation("net.sf.ehcache:ehcache:2.10.6")
   implementation("org.apache.commons:commons-text:1.9")
