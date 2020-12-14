@@ -97,8 +97,3 @@ sns:
 sqs:
   provider: aws
   endpoint.region: eu-west-2
-
-logging:
-  level:
-    org.springframework: DEBUG
-    org.apache: DEBUG
