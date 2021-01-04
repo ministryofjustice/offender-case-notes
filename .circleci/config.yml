@@ -2,7 +2,7 @@ version: 2.1
 
 orbs:
   owasp: entur/owasp@0.0.10
-  hmpps: ministryofjustice/hmpps@1.1.1
+  hmpps: ministryofjustice/hmpps@2.1.0
 
 executors:
   validator:
@@ -65,6 +65,7 @@ workflows:
       - hmpps/deploy_env:
           name: deploy_dev
           env: "dev"
+          context: hmpps-common-vars
           filters:
             branches:
               only:
@@ -80,7 +81,9 @@ workflows:
       - hmpps/deploy_env:
           name: deploy_preprod
           env: "preprod"
-          context: offender-case-notes-preprod
+          context:
+            - hmpps-common-vars
+            - offender-case-notes-preprod
           requires:
             - request-preprod-approval
       - request-prod-approval:
@@ -91,7 +94,9 @@ workflows:
           name: deploy_prod
           env: "prod"
           slack_notification: true
-          context: offender-case-notes-prod
+          context:
+            - hmpps-common-vars
+            - offender-case-notes-prod
           requires:
             - request-prod-approval
 
