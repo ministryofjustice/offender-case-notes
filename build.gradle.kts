@@ -52,6 +52,4 @@ dependencies {
 
   testImplementation("org.springframework.security.oauth:spring-security-oauth2:2.5.0.RELEASE")
   testImplementation("org.springframework.security:spring-security-jwt:1.1.1.RELEASE")
-
-  agentDeps("com.microsoft.azure:applicationinsights-agent:3.0.1-BETA.2")
 }
