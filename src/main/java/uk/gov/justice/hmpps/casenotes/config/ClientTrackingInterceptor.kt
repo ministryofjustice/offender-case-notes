@@ -1,28 +1,31 @@
 package uk.gov.justice.hmpps.casenotes.config
 
-import com.microsoft.applicationinsights.TelemetryConfiguration
-import com.microsoft.applicationinsights.extensibility.TelemetryModule
-import com.microsoft.applicationinsights.web.extensibility.modules.WebTelemetryModule
 import com.microsoft.applicationinsights.web.internal.ThreadContext
 import com.nimbusds.jwt.JWTClaimsSet
 import com.nimbusds.jwt.SignedJWT
-import lombok.extern.slf4j.Slf4j
 import org.apache.commons.lang3.StringUtils
 import org.slf4j.LoggerFactory
 import org.springframework.context.annotation.Configuration
 import org.springframework.http.HttpHeaders
+import org.springframework.web.servlet.HandlerInterceptor
+import org.springframework.web.servlet.config.annotation.InterceptorRegistry
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer
 import java.text.ParseException
 import java.util.Optional
-import javax.servlet.ServletRequest
-import javax.servlet.ServletResponse
 import javax.servlet.http.HttpServletRequest
+import javax.servlet.http.HttpServletResponse
 
-@Slf4j
 @Configuration
-class ClientTrackingTelemetryModule : WebTelemetryModule, TelemetryModule {
-  override fun onBeginRequest(req: ServletRequest, res: ServletResponse) {
-    val httpServletRequest = req as HttpServletRequest
-    val token = httpServletRequest.getHeader(HttpHeaders.AUTHORIZATION)
+class ClientTrackingConfiguration(private val clientTrackingInterceptor: ClientTrackingInterceptor) : WebMvcConfigurer {
+  override fun addInterceptors(registry: InterceptorRegistry) {
+    registry.addInterceptor(clientTrackingInterceptor).addPathPatterns("/**")
+  }
+}
+
+@Configuration
+class ClientTrackingInterceptor : HandlerInterceptor {
+  override fun preHandle(request: HttpServletRequest, response: HttpServletResponse, D: Any): Boolean {
+    val token = request.getHeader(HttpHeaders.AUTHORIZATION)
     val bearer = "Bearer "
     if (StringUtils.startsWithIgnoreCase(token, bearer)) {
       try {
@@ -35,18 +38,14 @@ class ClientTrackingTelemetryModule : WebTelemetryModule, TelemetryModule {
         log.warn("problem decoding jwt public key for application insights", e)
       }
     }
+    return true
   }
 
   @Throws(ParseException::class)
-  private fun getClaimsFromJWT(token: String): JWTClaimsSet {
-    val signedJWT = SignedJWT.parse(token.replace("Bearer ", ""))
-    return signedJWT.jwtClaimsSet
-  }
-
-  override fun onEndRequest(req: ServletRequest, res: ServletResponse) {}
-  override fun initialize(configuration: TelemetryConfiguration) {}
+  private fun getClaimsFromJWT(token: String): JWTClaimsSet =
+    SignedJWT.parse(token.replace("Bearer ", "")).jwtClaimsSet
 
   companion object {
-    val log = LoggerFactory.getLogger(ClientTrackingTelemetryModule::class.java)
+    private val log = LoggerFactory.getLogger(ClientTrackingInterceptor::class.java)
   }
 }
