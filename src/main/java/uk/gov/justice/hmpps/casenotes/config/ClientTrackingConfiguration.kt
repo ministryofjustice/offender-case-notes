@@ -35,7 +35,7 @@ class ClientTrackingInterceptor : HandlerInterceptor {
         val jwtBody = getClaimsFromJWT(token)
         val properties = ThreadContext.getRequestTelemetryContext().httpRequestTelemetry.properties
         val user = Optional.ofNullable(jwtBody.getClaim("user_name"))
-        user.map { value: Any -> value.toString() }.ifPresent { u: String -> properties["username"] = u }
+        user.map { it.toString() }.ifPresent { properties["username"] = it }
         properties["clientId"] = jwtBody.getClaim("client_id").toString()
       } catch (e: ParseException) {
         log.warn("problem decoding jwt public key for application insights", e)
