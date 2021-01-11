@@ -1,4 +1,5 @@
 {
+  "connectionString": "${APPLICATIONINSIGHTS_CONNECTION_STRING}",
   "role": {
     "name": "offender-case-notes"
   },
