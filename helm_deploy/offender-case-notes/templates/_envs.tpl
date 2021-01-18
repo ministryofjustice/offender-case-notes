@@ -35,6 +35,8 @@ env:
         name: {{ template "app.name" . }}
   - name: APPLICATIONINSIGHTS_CONNECTION_STRING
     value: "InstrumentationKey=$(APPINSIGHTS_INSTRUMENTATIONKEY)"
+  - name: APPLICATIONINSIGHTS_ROLE_NAME
+    value: "offender-case-notes"
 
   - name: DATABASE_USERNAME
     valueFrom:
