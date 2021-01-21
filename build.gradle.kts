@@ -1,5 +1,5 @@
 plugins {
-  id("uk.gov.justice.hmpps.gradle-spring-boot") version "3.0.0-BETA-2"
+  id("uk.gov.justice.hmpps.gradle-spring-boot") version "3.0.0-BETA-3"
   kotlin("plugin.spring") version "1.4.21"
 }
 
@@ -36,16 +36,16 @@ dependencies {
   implementation("org.apache.commons:commons-text:1.9")
   implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.12.1")
   implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.12.1")
-  implementation("com.pauldijou:jwt-core_2.11:4.3.0")
+  implementation("com.pauldijou:jwt-core_2.11:5.0.0")
   implementation("com.google.code.gson:gson:2.8.6")
 
-  implementation("software.amazon.awssdk:sns:2.15.65")
+  implementation("software.amazon.awssdk:sns:2.15.67")
 
   testAnnotationProcessor("org.projectlombok:lombok:1.18.16")
   testCompileOnly("org.projectlombok:lombok:1.18.16")
   testImplementation("org.springframework.security:spring-security-test")
   testImplementation("com.tngtech.java:junit-dataprovider:1.13.1")
-  testImplementation("net.javacrumbs.json-unit:json-unit-assertj:2.22.0")
+  testImplementation("net.javacrumbs.json-unit:json-unit-assertj:2.22.1")
   testImplementation("io.github.http-builder-ng:http-builder-ng-apache:1.0.4")
   testImplementation("com.github.tomakehurst:wiremock-standalone:2.27.2")
   testImplementation("io.jsonwebtoken:jjwt:0.9.1")
