@@ -37,7 +37,9 @@ import uk.gov.justice.hmpps.casenotes.dto.UpdateCaseNoteType;
 import uk.gov.justice.hmpps.casenotes.services.CaseNoteEventPusher;
 import uk.gov.justice.hmpps.casenotes.services.CaseNoteService;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.validation.constraints.NotNull;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -135,7 +137,10 @@ public class CaseNoteController {
     @ApiResponses({
             @ApiResponse(code = 404, message = "Case notes types not found"),
             @ApiResponse(code = 200, message = "OK", response = CaseNoteType.class, responseContainer = "List")})
-    public List<CaseNoteType> getCaseNoteTypes() {
+    public List<CaseNoteType> getCaseNoteTypes(final HttpServletRequest request) {
+        final var headers = new HashMap<String, String>();
+        request.getHeaderNames().asIterator().forEachRemaining(c -> headers.put(c, request.getHeader(c)));
+        log.info("Headers are: {}", headers);
         return caseNoteService.getCaseNoteTypes();
     }
 

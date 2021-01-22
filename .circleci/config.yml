@@ -62,6 +62,7 @@ workflows:
             branches:
               only:
                 - main
+                - pgp-DT-1442-insights-v3.0.2-bug-reproduction
       - hmpps/deploy_env:
           name: deploy_dev
           env: "dev"
@@ -70,6 +71,7 @@ workflows:
             branches:
               only:
                 - main
+                - pgp-DT-1442-insights-v3.0.2-bug-reproduction
           requires:
             - validate
             - helm_lint
