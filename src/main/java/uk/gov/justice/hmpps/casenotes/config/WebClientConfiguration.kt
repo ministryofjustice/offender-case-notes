@@ -4,6 +4,7 @@ import io.netty.channel.ChannelOption
 import io.netty.handler.timeout.ReadTimeoutHandler
 import io.netty.handler.timeout.WriteTimeoutHandler
 import org.hibernate.validator.constraints.URL
+import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
@@ -22,7 +23,6 @@ import org.springframework.web.reactive.function.client.ExchangeFunction
 import org.springframework.web.reactive.function.client.WebClient
 import org.springframework.web.reactive.function.client.WebClient.Builder
 import reactor.netty.http.client.HttpClient
-import reactor.netty.tcp.TcpClient
 import uk.gov.justice.hmpps.casenotes.utils.UserContext
 import java.time.Duration
 
@@ -50,26 +50,48 @@ class WebClientConfiguration(
   fun oauthApiHealthWebClient(builder: Builder): WebClient = createHealthClient(builder, oauthApiBaseUrl)
 
   @Bean
-  fun tokenVerificationApiWebClient(builder: Builder): WebClient = builder.baseUrl(tokenVerificationApiBaseUrl).build()
+  fun tokenVerificationApiWebClient(builder: Builder): WebClient {
+    val httpClient = HttpClient.create()
+    warmup(httpClient, tokenVerificationApiBaseUrl)
+    return builder.baseUrl(tokenVerificationApiBaseUrl)
+      .clientConnector(ReactorClientHttpConnector(httpClient))
+      .build()
+  }
 
   @Bean
-  fun tokenVerificationApiHealthWebClient(builder: Builder): WebClient = createHealthClient(builder, tokenVerificationApiBaseUrl)
+  fun tokenVerificationApiHealthWebClient(builder: Builder): WebClient =
+    createHealthClient(builder, tokenVerificationApiBaseUrl)
 
-  private fun createForwardAuthWebClient(builder: Builder, url: @URL String) =
-    builder.baseUrl(url)
+  private fun createForwardAuthWebClient(builder: Builder, url: @URL String): WebClient {
+    val httpClient = HttpClient.create()
+    warmup(httpClient, url)
+    return builder.baseUrl(url)
       .filter(addAuthHeaderFilterFunction())
+      .clientConnector(ReactorClientHttpConnector(httpClient))
       .build()
+  }
 
   private fun createHealthClient(builder: Builder, url: @URL String): WebClient {
-    val timeout = healthTimeout
-    val tcpClient = TcpClient.create()
-      .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, timeout.toMillis().toInt())
+    val httpClient = HttpClient.create()
+      .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, healthTimeout.toMillis().toInt())
       .doOnConnected { connection ->
-        connection.addHandlerLast(ReadTimeoutHandler(timeout.toSeconds().toInt()))
-          .addHandlerLast(WriteTimeoutHandler(timeout.toSeconds().toInt()))
+        connection.addHandlerLast(ReadTimeoutHandler(healthTimeout.toSeconds().toInt()))
+          .addHandlerLast(WriteTimeoutHandler(healthTimeout.toSeconds().toInt()))
       }
-    return builder.clientConnector(ReactorClientHttpConnector(HttpClient.from(tcpClient)))
-      .baseUrl(url).build()
+    warmup(httpClient, url)
+    return builder.clientConnector(ReactorClientHttpConnector(httpClient)).baseUrl(url).build()
+  }
+
+  private fun warmup(httpClient: HttpClient, baseUrl: String) {
+    log.info("Warming up web client for {}", baseUrl)
+    httpClient.warmup().block()
+    log.info("Warming up web client for {} halfway through, now calling health ping", baseUrl)
+    try {
+      httpClient.baseUrl("$baseUrl/health/ping").get().response().block(Duration.ofSeconds(30))
+    } catch (e: RuntimeException) {
+      log.error("Caught exception during warm up, carrying on regardless", e)
+    }
+    log.info("Warming up web client completed for {}", baseUrl)
   }
 
   private fun addAuthHeaderFilterFunction(): ExchangeFilterFunction =
@@ -86,7 +108,10 @@ class WebClientConfiguration(
     oAuth2AuthorizedClientService: OAuth2AuthorizedClientService?
   ): OAuth2AuthorizedClientManager {
     val authorizedClientProvider = OAuth2AuthorizedClientProviderBuilder.builder().clientCredentials().build()
-    val authorizedClientManager = AuthorizedClientServiceOAuth2AuthorizedClientManager(clientRegistrationRepository, oAuth2AuthorizedClientService)
+    val authorizedClientManager = AuthorizedClientServiceOAuth2AuthorizedClientManager(
+      clientRegistrationRepository,
+      oAuth2AuthorizedClientService
+    )
     authorizedClientManager.setAuthorizedClientProvider(authorizedClientProvider)
     return authorizedClientManager
   }
@@ -95,14 +120,21 @@ class WebClientConfiguration(
   fun elite2ClientCredentialsWebClient(
     @Qualifier(value = "authorizedClientManagerAppScope") authorizedClientManager: OAuth2AuthorizedClientManager,
     builder: Builder
-  ): WebClient =
-    getOAuthWebClient(authorizedClientManager, builder, elite2ApiBaseUrl)
+  ): WebClient = getOAuthWebClient(authorizedClientManager, builder, elite2ApiBaseUrl)
 
-  private fun getOAuthWebClient(authorizedClientManager: OAuth2AuthorizedClientManager, builder: Builder, rootUri: String): WebClient {
+  private fun getOAuthWebClient(
+    authorizedClientManager: OAuth2AuthorizedClientManager,
+    builder: Builder,
+    rootUri: String
+  ): WebClient {
     val oauth2Client = ServletOAuth2AuthorizedClientExchangeFilterFunction(authorizedClientManager)
     oauth2Client.setDefaultClientRegistrationId("elite2-api")
     return builder.baseUrl(rootUri)
       .apply(oauth2Client.oauth2Configuration())
       .build()
+  }
+
+  companion object {
+    private val log = LoggerFactory.getLogger(this::class.java)
   }
 }

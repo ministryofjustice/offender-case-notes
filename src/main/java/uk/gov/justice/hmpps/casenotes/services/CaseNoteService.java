@@ -33,12 +33,10 @@ import uk.gov.justice.hmpps.casenotes.repository.OffenderCaseNoteRepository;
 import uk.gov.justice.hmpps.casenotes.repository.ParentCaseNoteTypeRepository;
 
 import javax.persistence.EntityExistsException;
-import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import javax.validation.ValidationException;
 import javax.validation.constraints.NotNull;
 import java.time.LocalDateTime;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -72,19 +70,19 @@ public class CaseNoteService {
         if (securityUserContext.isOverrideRole("POM", "VIEW_SENSITIVE_CASE_NOTES", "ADD_SENSITIVE_CASE_NOTES")) {
 
             final var filter = OffenderCaseNoteFilter.builder()
-                .offenderIdentifier(offenderIdentifier)
-                .type(caseNoteFilter.getType())
-                .subType(caseNoteFilter.getSubType())
-                .locationId(caseNoteFilter.getLocationId())
-                .authorUsername(caseNoteFilter.getAuthorUsername())
-                .startDate(caseNoteFilter.getStartDate())
-                .endDate(caseNoteFilter.getEndDate())
-                .build();
+                    .offenderIdentifier(offenderIdentifier)
+                    .type(caseNoteFilter.getType())
+                    .subType(caseNoteFilter.getSubType())
+                    .locationId(caseNoteFilter.getLocationId())
+                    .authorUsername(caseNoteFilter.getAuthorUsername())
+                    .startDate(caseNoteFilter.getStartDate())
+                    .endDate(caseNoteFilter.getEndDate())
+                    .build();
 
             sensitiveCaseNotes = repository.findAll(filter)
-                .stream()
-                .map(this::mapper)
-                .collect(Collectors.toList());
+                    .stream()
+                    .map(this::mapper)
+                    .collect(Collectors.toList());
         } else {
             sensitiveCaseNotes = List.of();
         }
@@ -122,9 +120,9 @@ public class CaseNoteService {
 
     private List<CaseNote> translateToDto(final Page<NomisCaseNote> pagedNotes, final String offenderIdentifier) {
         return pagedNotes.getContent()
-            .stream()
-            .map(cn -> mapper(cn, offenderIdentifier))
-            .collect(Collectors.toList());
+                .stream()
+                .map(cn -> mapper(cn, offenderIdentifier))
+                .collect(Collectors.toList());
     }
 
     @SuppressWarnings("unchecked")
@@ -134,15 +132,15 @@ public class CaseNoteService {
             field.setAccessible(true);
 
             return list.stream()
-                .sorted((first, second) -> {
-                    try {
-                        return direction == ASC ? ((Comparable<Object>) field.get(first)).compareTo(field.get(second))
-                            : ((Comparable<Object>) field.get(second)).compareTo(field.get(first));
-                    } catch (IllegalAccessException e) {
-                        throw new RuntimeException("Error", e);
-                    }
-                })
-                .collect(Collectors.toList());
+                    .sorted((first, second) -> {
+                        try {
+                            return direction == ASC ? ((Comparable<Object>) field.get(first)).compareTo(field.get(second))
+                                    : ((Comparable<Object>) field.get(second)).compareTo(field.get(first));
+                        } catch (IllegalAccessException e) {
+                            throw new RuntimeException("Error", e);
+                        }
+                    })
+                    .collect(Collectors.toList());
         } catch (final NoSuchFieldException e) {
             return list;
         }
@@ -151,58 +149,58 @@ public class CaseNoteService {
     private CaseNote mapper(final OffenderCaseNote cn) {
         final var parentType = cn.getSensitiveCaseNoteType().getParentType();
         return CaseNote.builder()
-            .caseNoteId(cn.getId().toString())
-            .eventId(cn.getEventId())
-            .offenderIdentifier(cn.getOffenderIdentifier())
-            .occurrenceDateTime(cn.getOccurrenceDateTime())
-            .authorUserId(cn.getAuthorUserId())
-            .authorName(cn.getAuthorName())
-            .type(parentType.getType())
-            .typeDescription(parentType.getDescription())
-            .subType(cn.getSensitiveCaseNoteType().getType())
-            .subTypeDescription(cn.getSensitiveCaseNoteType().getDescription())
-            .source(SERVICE_NAME) // Indicates its a Offender Case Note Service Type
-            .text(cn.getNoteText())
-            .creationDateTime(cn.getCreateDateTime())
-            .amendments(cn.getAmendments().stream().map(
-                a -> CaseNoteAmendment.builder()
-                    .authorUserName(a.getAuthorUsername())
-                    .authorUserId(a.getAuthorUserId())
-                    .authorName(a.getAuthorName())
-                    .additionalNoteText(a.getNoteText())
-                    .caseNoteAmendmentId(a.getId())
-                    .creationDateTime(a.getCreateDateTime())
-                    .build()
-            ).collect(Collectors.toList()))
-            .locationId(cn.getLocationId())
-            .build();
+                .caseNoteId(cn.getId().toString())
+                .eventId(cn.getEventId())
+                .offenderIdentifier(cn.getOffenderIdentifier())
+                .occurrenceDateTime(cn.getOccurrenceDateTime())
+                .authorUserId(cn.getAuthorUserId())
+                .authorName(cn.getAuthorName())
+                .type(parentType.getType())
+                .typeDescription(parentType.getDescription())
+                .subType(cn.getSensitiveCaseNoteType().getType())
+                .subTypeDescription(cn.getSensitiveCaseNoteType().getDescription())
+                .source(SERVICE_NAME) // Indicates its a Offender Case Note Service Type
+                .text(cn.getNoteText())
+                .creationDateTime(cn.getCreateDateTime())
+                .amendments(cn.getAmendments().stream().map(
+                        a -> CaseNoteAmendment.builder()
+                                .authorUserName(a.getAuthorUsername())
+                                .authorUserId(a.getAuthorUserId())
+                                .authorName(a.getAuthorName())
+                                .additionalNoteText(a.getNoteText())
+                                .caseNoteAmendmentId(a.getId())
+                                .creationDateTime(a.getCreateDateTime())
+                                .build()
+                ).collect(Collectors.toList()))
+                .locationId(cn.getLocationId())
+                .build();
     }
 
     private CaseNote mapper(final NomisCaseNote cn, final String offenderIdentifier) {
         return CaseNote.builder()
-            .caseNoteId(cn.getCaseNoteId().toString())
-            .eventId(cn.getCaseNoteId())
-            .offenderIdentifier(offenderIdentifier)
-            .occurrenceDateTime(cn.getOccurrenceDateTime())
-            .authorName(cn.getAuthorName())
-            .authorUserId(valueOf(cn.getStaffId()))
-            .type(cn.getType())
-            .typeDescription(cn.getTypeDescription())
-            .subType(cn.getSubType())
-            .subTypeDescription(cn.getSubTypeDescription())
-            .source(cn.getSource())
-            .text(cn.getOriginalNoteText())
-            .creationDateTime(cn.getCreationDateTime())
-            .amendments(cn.getAmendments().stream().map(
-                a -> CaseNoteAmendment.builder()
-                    .authorName(a.getAuthorName())
-                    .authorUserId(a.getAuthorUserId())
-                    .additionalNoteText(a.getAdditionalNoteText())
-                    .creationDateTime(a.getCreationDateTime())
-                    .build()
-            ).collect(Collectors.toList()))
-            .locationId(cn.getAgencyId())
-            .build();
+                .caseNoteId(cn.getCaseNoteId().toString())
+                .eventId(cn.getCaseNoteId())
+                .offenderIdentifier(offenderIdentifier)
+                .occurrenceDateTime(cn.getOccurrenceDateTime())
+                .authorName(cn.getAuthorName())
+                .authorUserId(valueOf(cn.getStaffId()))
+                .type(cn.getType())
+                .typeDescription(cn.getTypeDescription())
+                .subType(cn.getSubType())
+                .subTypeDescription(cn.getSubTypeDescription())
+                .source(cn.getSource())
+                .text(cn.getOriginalNoteText())
+                .creationDateTime(cn.getCreationDateTime())
+                .amendments(cn.getAmendments().stream().map(
+                        a -> CaseNoteAmendment.builder()
+                                .authorName(a.getAuthorName())
+                                .authorUserId(a.getAuthorUserId())
+                                .additionalNoteText(a.getAdditionalNoteText())
+                                .creationDateTime(a.getCreationDateTime())
+                                .build()
+                ).collect(Collectors.toList()))
+                .locationId(cn.getAgencyId())
+                .build();
     }
 
     @Transactional
@@ -230,15 +228,15 @@ public class CaseNoteService {
         final var locationId = newCaseNote.getLocationId() == null ? externalApiService.getOffenderLocation(offenderIdentifier) : newCaseNote.getLocationId();
 
         final var caseNote = OffenderCaseNote.builder()
-            .noteText(newCaseNote.getText())
-            .authorUsername(author.getUsername())
-            .authorUserId(author.getUserId())
-            .authorName(staffName)
-            .occurrenceDateTime(newCaseNote.getOccurrenceDateTime() == null ? LocalDateTime.now() : newCaseNote.getOccurrenceDateTime())
-            .sensitiveCaseNoteType(type)
-            .offenderIdentifier(offenderIdentifier)
-            .locationId(locationId)
-            .build();
+                .noteText(newCaseNote.getText())
+                .authorUsername(author.getUsername())
+                .authorUserId(author.getUserId())
+                .authorName(staffName)
+                .occurrenceDateTime(newCaseNote.getOccurrenceDateTime() == null ? LocalDateTime.now() : newCaseNote.getOccurrenceDateTime())
+                .sensitiveCaseNoteType(type)
+                .offenderIdentifier(offenderIdentifier)
+                .locationId(locationId)
+                .build();
 
         return mapper(repository.save(caseNote));
     }
@@ -286,27 +284,27 @@ public class CaseNoteService {
 
     private List<CaseNoteType> getSensitiveCaseNoteTypes(final boolean allTypes) {
         return parentCaseNoteTypeRepository.findAll().stream()
-            .filter(t -> allTypes || t.isActive())
-            .map(st -> transform(st, allTypes))
-            .collect(Collectors.toList());
+                .filter(t -> allTypes || t.isActive())
+                .map(st -> transform(st, allTypes))
+                .collect(Collectors.toList());
     }
 
     private CaseNoteType transform(final ParentNoteType parentNoteType, final boolean allTypes) {
         return CaseNoteType.builder()
-            .code(parentNoteType.getType())
-            .description(parentNoteType.getDescription())
-            .activeFlag(parentNoteType.isActive() ? "Y" : "N")
-            .source(SERVICE_NAME)
-            .subCodes(parentNoteType.getSubTypes().stream()
-                .filter(t -> allTypes || t.isActive())
-                .map(st -> CaseNoteType.builder()
-                    .code(st.getType())
-                    .description(st.getDescription())
-                    .source(SERVICE_NAME)
-                    .activeFlag(st.isActive() ? "Y" : "N")
-                    .build())
-                .collect(Collectors.toList()))
-            .build();
+                .code(parentNoteType.getType())
+                .description(parentNoteType.getDescription())
+                .activeFlag(parentNoteType.isActive() ? "Y" : "N")
+                .source(SERVICE_NAME)
+                .subCodes(parentNoteType.getSubTypes().stream()
+                        .filter(t -> allTypes || t.isActive())
+                        .map(st -> CaseNoteType.builder()
+                                .code(st.getType())
+                                .description(st.getDescription())
+                                .source(SERVICE_NAME)
+                                .activeFlag(st.isActive() ? "Y" : "N")
+                                .build())
+                        .collect(Collectors.toList()))
+                .build();
     }
 
     public CaseNote getCaseNote(final String offenderIdentifier, final String caseNoteIdentifier) {
@@ -334,10 +332,10 @@ public class CaseNoteService {
         }
 
         final var parentNoteType = parentCaseNoteTypeRepository.save(ParentNoteType.builder()
-            .type(newCaseNoteType.getType())
-            .description(newCaseNoteType.getDescription())
-            .active(newCaseNoteType.isActive())
-            .build());
+                .type(newCaseNoteType.getType())
+                .description(newCaseNoteType.getDescription())
+                .active(newCaseNoteType.isActive())
+                .build());
 
         return transform(parentNoteType, true);
     }
@@ -351,12 +349,12 @@ public class CaseNoteService {
             throw new EntityExistsException(newCaseNoteType.getType());
         }
         parentNoteType.getSubTypes().add(
-            SensitiveCaseNoteType.builder()
-                .type(newCaseNoteType.getType())
-                .description(newCaseNoteType.getDescription())
-                .active(newCaseNoteType.isActive())
-                .parentType(parentNoteType)
-                .build()
+                SensitiveCaseNoteType.builder()
+                        .type(newCaseNoteType.getType())
+                        .description(newCaseNoteType.getDescription())
+                        .active(newCaseNoteType.isActive())
+                        .parentType(parentNoteType)
+                        .build()
         );
 
         return transform(parentNoteType, true);
@@ -401,10 +399,10 @@ public class CaseNoteService {
         }
         repository.deleteById(UUID.fromString(caseNoteId));
         telemetryClient.trackEvent("SecureCaseNoteSoftDelete",
-            Map.of("userName", securityUserContext.getCurrentUser().getUsername(),
-                "offenderId", offenderIdentifier,
-                "case note id", valueOf(caseNoteId)),
-            null);
+                Map.of("userName", securityUserContext.getCurrentUser().getUsername(),
+                        "offenderId", offenderIdentifier,
+                        "case note id", valueOf(caseNoteId)),
+                null);
     }
 
     @Transactional
@@ -418,9 +416,9 @@ public class CaseNoteService {
         amendmentRepository.deleteById(caseNoteAmendmentId);
 
         telemetryClient.trackEvent("SecureCaseNoteAmendmentSoftDelete",
-            Map.of("userName", securityUserContext.getCurrentUser().getUsername(),
-                "offenderId", offenderIdentifier,
-                "case note amendment id", valueOf(caseNoteAmendmentId)),
-            null);
+                Map.of("userName", securityUserContext.getCurrentUser().getUsername(),
+                        "offenderId", offenderIdentifier,
+                        "case note amendment id", valueOf(caseNoteAmendmentId)),
+                null);
     }
 }

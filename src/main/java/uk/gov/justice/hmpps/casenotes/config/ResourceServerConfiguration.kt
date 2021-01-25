@@ -54,7 +54,6 @@ class ResourceServerConfiguration(private val tokenVerifyingAuthManager: TokenVe
             "/info",
             "/ping",
             "/h2-console/**",
-            "/case-notes/types",
             "/v2/api-docs",
             "/swagger-ui/**", "/swagger-resources", "/swagger-resources/configuration/ui",
             "/swagger-resources/configuration/security"
