@@ -62,7 +62,6 @@ workflows:
             branches:
               only:
                 - main
-                - pgp-DT-1530-warmup-httpclient
       - hmpps/deploy_env:
           name: deploy_dev
           env: "dev"
@@ -71,7 +70,6 @@ workflows:
             branches:
               only:
                 - main
-                - pgp-DT-1530-warmup-httpclient
           requires:
             - validate
             - helm_lint

@@ -11,8 +11,8 @@ spec:
   strategy:
     type: RollingUpdate
     rollingUpdate:
-      maxSurge: 100%
-      maxUnavailable: 50%
+      maxSurge: 50%
+      maxUnavailable: 0
   selector:
     matchLabels:
       {{- include "app.selectorLabels" . | nindent 6 }}

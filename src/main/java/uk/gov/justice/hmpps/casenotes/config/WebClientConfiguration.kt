@@ -50,48 +50,32 @@ class WebClientConfiguration(
   fun oauthApiHealthWebClient(builder: Builder): WebClient = createHealthClient(builder, oauthApiBaseUrl)
 
   @Bean
-  fun tokenVerificationApiWebClient(builder: Builder): WebClient {
-    val httpClient = HttpClient.create()
-    warmup(httpClient, tokenVerificationApiBaseUrl)
-    return builder.baseUrl(tokenVerificationApiBaseUrl)
-      .clientConnector(ReactorClientHttpConnector(httpClient))
-      .build()
-  }
+  fun tokenVerificationApiWebClient(builder: Builder): WebClient = builder.baseUrl(tokenVerificationApiBaseUrl)
+    .clientConnector(
+      ReactorClientHttpConnector(HttpClient.create().warmupWithHealthPing(tokenVerificationApiBaseUrl))
+    )
+    .build()
 
   @Bean
   fun tokenVerificationApiHealthWebClient(builder: Builder): WebClient =
     createHealthClient(builder, tokenVerificationApiBaseUrl)
 
-  private fun createForwardAuthWebClient(builder: Builder, url: @URL String): WebClient {
-    val httpClient = HttpClient.create()
-    warmup(httpClient, url)
-    return builder.baseUrl(url)
-      .filter(addAuthHeaderFilterFunction())
-      .clientConnector(ReactorClientHttpConnector(httpClient))
-      .build()
-  }
+  private fun createForwardAuthWebClient(builder: Builder, url: @URL String): WebClient = builder.baseUrl(url)
+    .filter(addAuthHeaderFilterFunction())
+    .clientConnector(
+      ReactorClientHttpConnector(HttpClient.create().warmupWithHealthPing(tokenVerificationApiBaseUrl))
+    )
+    .build()
 
   private fun createHealthClient(builder: Builder, url: @URL String): WebClient {
     val httpClient = HttpClient.create()
+      .warmupWithHealthPing(url)
       .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, healthTimeout.toMillis().toInt())
       .doOnConnected { connection ->
         connection.addHandlerLast(ReadTimeoutHandler(healthTimeout.toSeconds().toInt()))
           .addHandlerLast(WriteTimeoutHandler(healthTimeout.toSeconds().toInt()))
       }
-    warmup(httpClient, url)
     return builder.clientConnector(ReactorClientHttpConnector(httpClient)).baseUrl(url).build()
-  }
-
-  private fun warmup(httpClient: HttpClient, baseUrl: String) {
-    log.info("Warming up web client for {}", baseUrl)
-    httpClient.warmup().block()
-    log.info("Warming up web client for {} halfway through, now calling health ping", baseUrl)
-    try {
-      httpClient.baseUrl("$baseUrl/health/ping").get().response().block(Duration.ofSeconds(30))
-    } catch (e: RuntimeException) {
-      log.error("Caught exception during warm up, carrying on regardless", e)
-    }
-    log.info("Warming up web client completed for {}", baseUrl)
   }
 
   private fun addAuthHeaderFilterFunction(): ExchangeFilterFunction =
@@ -136,5 +120,18 @@ class WebClientConfiguration(
 
   companion object {
     private val log = LoggerFactory.getLogger(this::class.java)
+  }
+
+  private fun HttpClient.warmupWithHealthPing(baseUrl: String): HttpClient {
+    log.info("Warming up web client for {}", baseUrl)
+    warmup().block()
+    log.info("Warming up web client for {} halfway through, now calling health ping", baseUrl)
+    try {
+      baseUrl("$baseUrl/health/ping").get().response().block(Duration.ofSeconds(30))
+    } catch (e: RuntimeException) {
+      log.error("Caught exception during warm up, carrying on regardless", e)
+    }
+    log.info("Warming up web client completed for {}", baseUrl)
+    return this
   }
 }
