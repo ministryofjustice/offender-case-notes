@@ -32,7 +32,7 @@ spring:
 
     hikari:
       pool-name: OffenderCaseNotes-CP
-      connectionTimeout: 1000
+      connectionTimeout: 5000
       validationTimeout:  500
 
   jackson:
@@ -85,11 +85,6 @@ management:
     info:
       cache:
         time-to-live: 2000ms
-
-azure:
-  application-insights:
-    web:
-      enable-W3C: true
 
 sns:
   endpoint.region: eu-west-2
