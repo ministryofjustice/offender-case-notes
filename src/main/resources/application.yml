@@ -32,7 +32,7 @@ spring:
 
     hikari:
       pool-name: OffenderCaseNotes-CP
-      connectionTimeout: 5000
+      connectionTimeout: 10000
       validationTimeout:  500
 
   jackson:
