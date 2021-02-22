@@ -1,5 +1,5 @@
 plugins {
-  id("uk.gov.justice.hmpps.gradle-spring-boot") version "3.1.0"
+  id("uk.gov.justice.hmpps.gradle-spring-boot") version "3.1.1"
   kotlin("plugin.spring") version "1.4.30"
 }
 
@@ -8,13 +8,13 @@ configurations {
 }
 
 dependencies {
-  annotationProcessor("org.projectlombok:lombok:1.18.16")
+  annotationProcessor("org.projectlombok:lombok:1.18.18")
 
-  compileOnly("org.projectlombok:lombok:1.18.16")
+  compileOnly("org.projectlombok:lombok:1.18.18")
 
   runtimeOnly("com.h2database:h2:1.4.200")
-  runtimeOnly("org.flywaydb:flyway-core:7.5.0")
-  runtimeOnly("org.postgresql:postgresql:42.2.18")
+  runtimeOnly("org.flywaydb:flyway-core:7.5.3")
+  runtimeOnly("org.postgresql:postgresql:42.2.19")
 
   implementation("org.springframework.boot:spring-boot-starter-data-jpa")
   implementation("org.springframework.boot:spring-boot-starter-cache")
@@ -39,13 +39,13 @@ dependencies {
   implementation("com.pauldijou:jwt-core_2.11:5.0.0")
   implementation("com.google.code.gson:gson:2.8.6")
 
-  implementation("software.amazon.awssdk:sns:2.15.67")
+  implementation("software.amazon.awssdk:sns:2.16.3")
 
-  testAnnotationProcessor("org.projectlombok:lombok:1.18.16")
-  testCompileOnly("org.projectlombok:lombok:1.18.16")
+  testAnnotationProcessor("org.projectlombok:lombok:1.18.18")
+  testCompileOnly("org.projectlombok:lombok:1.18.18")
   testImplementation("org.springframework.security:spring-security-test")
   testImplementation("com.tngtech.java:junit-dataprovider:1.13.1")
-  testImplementation("net.javacrumbs.json-unit:json-unit-assertj:2.22.1")
+  testImplementation("net.javacrumbs.json-unit:json-unit-assertj:2.24.0")
   testImplementation("io.github.http-builder-ng:http-builder-ng-apache:1.0.4")
   testImplementation("com.github.tomakehurst:wiremock-standalone:2.27.2")
   testImplementation("io.jsonwebtoken:jjwt:0.9.1")
