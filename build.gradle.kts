@@ -1,6 +1,6 @@
 plugins {
-  id("uk.gov.justice.hmpps.gradle-spring-boot") version "3.1.1"
-  kotlin("plugin.spring") version "1.4.30"
+  id("uk.gov.justice.hmpps.gradle-spring-boot") version "3.1.3"
+  kotlin("plugin.spring") version "1.4.32"
 }
 
 configurations {
@@ -13,7 +13,7 @@ dependencies {
   compileOnly("org.projectlombok:lombok:1.18.18")
 
   runtimeOnly("com.h2database:h2:1.4.200")
-  runtimeOnly("org.flywaydb:flyway-core:7.7.0")
+  runtimeOnly("org.flywaydb:flyway-core:7.7.1")
   runtimeOnly("org.postgresql:postgresql:42.2.19")
 
   implementation("org.springframework.boot:spring-boot-starter-data-jpa")
@@ -39,13 +39,13 @@ dependencies {
   implementation("com.pauldijou:jwt-core_2.11:5.0.0")
   implementation("com.google.code.gson:gson:2.8.6")
 
-  implementation("software.amazon.awssdk:sns:2.16.18")
+  implementation("software.amazon.awssdk:sns:2.16.29")
 
   testAnnotationProcessor("org.projectlombok:lombok:1.18.18")
   testCompileOnly("org.projectlombok:lombok:1.18.18")
   testImplementation("org.springframework.security:spring-security-test")
   testImplementation("com.tngtech.java:junit-dataprovider:1.13.1")
-  testImplementation("net.javacrumbs.json-unit:json-unit-assertj:2.24.0")
+  testImplementation("net.javacrumbs.json-unit:json-unit-assertj:2.25.0")
   testImplementation("io.github.http-builder-ng:http-builder-ng-apache:1.0.4")
   testImplementation("com.github.tomakehurst:wiremock-standalone:2.27.2")
   testImplementation("io.jsonwebtoken:jjwt:0.9.1")
@@ -53,5 +53,5 @@ dependencies {
   testImplementation("org.springframework.security.oauth:spring-security-oauth2:2.5.0.RELEASE")
   testImplementation("org.springframework.security:spring-security-jwt:1.1.1.RELEASE")
 
-  agentDeps("com.microsoft.azure:applicationinsights-agent:3.0.3-BETA")
+  agentDeps("com.microsoft.azure:applicationinsights-agent:3.0.3-BETA-3")
 }
