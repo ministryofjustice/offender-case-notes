@@ -69,9 +69,11 @@ public class OffenderCaseNoteRepositoryTest {
 
         final var retrievedEntity = repository.findById(persistedEntity.getId()).orElseThrow();
 
-        // equals only compares the business key columns
-        assertThat(retrievedEntity).isEqualTo(caseNote);
-
+        assertThat(retrievedEntity).usingRecursiveComparison().ignoringFields("occurrenceDateTime", "sensitiveCaseNoteType", "eventId", "createDateTime", "modifyDateTime").isEqualTo(caseNote);
+        assertThat(retrievedEntity.getCreateDateTime()).isEqualToIgnoringNanos(caseNote.getCreateDateTime());
+        assertThat(retrievedEntity.getModifyDateTime()).isEqualToIgnoringNanos(caseNote.getModifyDateTime());
+        assertThat(retrievedEntity.getOccurrenceDateTime()).isEqualToIgnoringNanos(caseNote.getOccurrenceDateTime());
+        assertThat(retrievedEntity.getSensitiveCaseNoteType()).isEqualTo(caseNote.getSensitiveCaseNoteType());
         assertThat(retrievedEntity.getCreateUserId()).isEqualTo("anonymous");
     }
 
