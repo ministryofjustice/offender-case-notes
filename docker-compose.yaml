@@ -21,7 +21,7 @@ services:
       - OAUTH_API_BASE_URL=http://oauth:8080/auth
       - SPRING_PROFILES_ACTIVE=stdout,localstack
       - JWT_PUBLIC_KEY=LS0tLS1CRUdJTiBQVUJMSUMgS0VZLS0tLS0NCk1JSUJJakFOQmdrcWhraUc5dzBCQVFFRkFBT0NBUThBTUlJQkNnS0NBUUVBc09QQXRzUUFEZGJSdS9FSDZMUDUNCkJNMS9tRjQwVkRCbjEyaEpTWFBQZDVXWUswSExZMjBWTTdBeHhSOW1uWUNGNlNvMVd0N2ZHTnFVeC9XeWVtQnANCklKTnJzLzdEendnM3V3aVF1Tmg0ektSK0VHeFdiTHdpM3l3N2xYUFV6eFV5QzV4dDg4ZS83dk8rbHoxb0NuaXoNCmpoNG14TkFtczZaWUY3cWZuaEpFOVd2V1B3TExrb2prWnUxSmR1c0xhVm93TjdHVEdOcE1FOGR6ZUprYW0wZ3ANCjRveEhRR2hNTjg3SzZqcVgzY0V3TzZEdmhlbWc4d2hzOTZuelFsOG4yTEZ2QUsydXA5UHJyOUdpMkxGZ1R0N0sNCnFYQTA2a0M0S2d3MklSMWVGZ3pjQmxUT0V3bXpqcmU2NUhvTmFKQnI5dU5aelY1c0lMUE1jenpoUWovZk1oejMNCi9RSURBUUFCDQotLS0tLUVORCBQVUJMSUMgS0VZLS0tLS0=
-      - SQS_ENDPOINT_URL=http://localstack:4576
+      - SQS_ENDPOINT_URL=http://localstack:4566
 
   elite2-api:
     image: quay.io/hmpps/prison-api:latest
@@ -65,7 +65,7 @@ services:
       - POSTGRES_DB=offender-case-notes
 
   localstack:
-    image: localstack/localstack:0.10.5
+    image: localstack/localstack:0.12.9.1
     networks:
       - hmpps
     container_name: localstack
