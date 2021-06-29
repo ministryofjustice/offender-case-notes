@@ -23,6 +23,7 @@ public class OffenderCaseNoteFilter implements Specification<OffenderCaseNote> {
     private final String authorUsername;
     private final String type;
     private final String subType;
+    private final Boolean nonSensitiveOnly;
     private final LocalDateTime startDate;
     private final LocalDateTime endDate;
 
@@ -47,6 +48,10 @@ public class OffenderCaseNoteFilter implements Specification<OffenderCaseNote> {
         if (StringUtils.isNotBlank(subType)) {
             final var caseNoteType = root.join("sensitiveCaseNoteType", JoinType.INNER);
             predicateBuilder.add(cb.equal(caseNoteType.get("type"), subType));
+        }
+        if (nonSensitiveOnly) {
+            final var caseNoteType = root.join("sensitiveCaseNoteType", JoinType.INNER);
+            predicateBuilder.add(cb.equal(caseNoteType.get("nonSensitive"), true));
         }
         if (startDate != null) {
             predicateBuilder.add(cb.greaterThanOrEqualTo(root.get("occurrenceDateTime"), startDate));
