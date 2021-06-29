@@ -84,7 +84,7 @@ public class CaseNote {
 
     @ApiModelProperty(required = true, value = "Ordered list of amendments to the case note (oldest first)", position = 17)
     @NotNull
-    private final List<CaseNoteAmendment> amendments = new ArrayList<>();
+    private List<CaseNoteAmendment> amendments = new ArrayList<>();
 
     public static CaseNoteBuilder builder() {
         return new CaseNoteBuilder();
