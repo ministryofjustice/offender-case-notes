@@ -7,7 +7,8 @@
       {
         "code": "KS",
         "description": "Key worker Session",
-        "activeFlag": "Y"
+        "activeFlag": "Y",
+        "sensitive": false
       }
     ]
   },
@@ -19,7 +20,23 @@
       {
         "code": "GEN",
         "description": "General",
-        "activeFlag": "Y"
+        "activeFlag": "Y",
+        "sensitive": false
+      }
+    ]
+  },
+  {
+    "code": "OMIC",
+    "description": "OMIC Type",
+    "activeFlag": "Y",
+    "source": "OCNS",
+    "subCodes": [
+      {
+        "code": "OMIC_OPEN",
+        "description": "Open Case Note",
+        "activeFlag": "Y",
+        "source": "OCNS",
+        "sensitive": false
       }
     ]
   }

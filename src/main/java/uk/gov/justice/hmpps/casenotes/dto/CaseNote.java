@@ -79,7 +79,10 @@ public class CaseNote {
     @NotNull
     private Integer eventId;
 
-    @ApiModelProperty(required = true, value = "Ordered list of amendments to the case note (oldest first)", position = 15)
+    @ApiModelProperty(required = true, value = "Sensitive Note", position = 16, example = "true")
+    private boolean sensitive;
+
+    @ApiModelProperty(required = true, value = "Ordered list of amendments to the case note (oldest first)", position = 17)
     @NotNull
     private List<CaseNoteAmendment> amendments = new ArrayList<>();
 
@@ -143,6 +146,10 @@ public class CaseNote {
         return eventId;
     }
 
+    public boolean getSensitive() {
+        return sensitive;
+    }
+
     public @NotNull List<CaseNoteAmendment> getAmendments() {
         return this.amendments;
     }
@@ -162,6 +169,7 @@ public class CaseNote {
         private @NotBlank String text;
         private String locationId;
         private @NotNull Integer eventId;
+        private boolean sensitive;
         private @NotNull List<CaseNoteAmendment> amendments;
 
         CaseNoteBuilder() {
@@ -237,17 +245,22 @@ public class CaseNote {
             return this;
         }
 
+        public CaseNoteBuilder sensitive(final boolean sensitive) {
+            this.sensitive = sensitive;
+            return this;
+        }
+
         public CaseNoteBuilder amendments(@NotNull final List<CaseNoteAmendment> amendments) {
             this.amendments = amendments;
             return this;
         }
 
         public CaseNote build() {
-            return new CaseNote(caseNoteId, offenderIdentifier, type, typeDescription, subType, subTypeDescription, source, creationDateTime, occurrenceDateTime, authorName, authorUserId, text, locationId, eventId, amendments);
+            return new CaseNote(caseNoteId, offenderIdentifier, type, typeDescription, subType, subTypeDescription, source, creationDateTime, occurrenceDateTime, authorName, authorUserId, text, locationId, eventId, sensitive, amendments);
         }
 
         public String toString() {
-            return "CaseNote.CaseNoteBuilder(caseNoteId=" + this.caseNoteId + ", offenderIdentifier=" + this.offenderIdentifier + ", type=" + this.type + ", typeDescription=" + this.typeDescription + ", subType=" + this.subType + ", subTypeDescription=" + this.subTypeDescription + ", source=" + this.source + ", creationDateTime=" + this.creationDateTime + ", occurrenceDateTime=" + this.occurrenceDateTime + ", authorName=" + this.authorName + ", authorUserId=" + this.authorUserId + ", text=" + this.text + ", locationId=" + this.locationId + ", eventId=" + this.eventId + ", amendments=" + this.amendments + ")";
+            return "CaseNote.CaseNoteBuilder(caseNoteId=" + this.caseNoteId + ", offenderIdentifier=" + this.offenderIdentifier + ", type=" + this.type + ", typeDescription=" + this.typeDescription + ", subType=" + this.subType + ", subTypeDescription=" + this.subTypeDescription + ", source=" + this.source + ", creationDateTime=" + this.creationDateTime + ", occurrenceDateTime=" + this.occurrenceDateTime + ", authorName=" + this.authorName + ", authorUserId=" + this.authorUserId + ", text=" + this.text + ", locationId=" + this.locationId + ", eventId=" + this.eventId + ", sensitive=" + this.sensitive + ", amendments=" + this.amendments + ")";
         }
     }
 }

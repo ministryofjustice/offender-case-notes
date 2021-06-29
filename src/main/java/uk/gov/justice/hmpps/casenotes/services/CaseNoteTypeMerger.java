@@ -21,6 +21,7 @@ public class CaseNoteTypeMerger {
                             .description(t.getDescription())
                             .activeFlag(t.getActiveFlag())
                             .source(t.getSource())
+                            .sensitive(t.isSensitive())
                             .subCodes(t.getSubCodes().stream().sorted().collect(Collectors.toList()))
                             .build())
                 .sorted()
@@ -46,6 +47,7 @@ public class CaseNoteTypeMerger {
                                 .code(v1.getCode())
                                 .description(v2.getDescription())
                                 .activeFlag(v2.getActiveFlag())
+                                .sensitive(v2.isSensitive())
                                 .subCodes(merge(v1.getSubCodes(), v2.getSubCodes()))
                                 .build())
                 );

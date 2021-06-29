@@ -7,7 +7,8 @@
       {
         "code": "KS",
         "description": "Key worker Session",
-        "activeFlag": "Y"
+        "activeFlag": "Y",
+        "sensitive": false
       }
     ]
   },
@@ -19,7 +20,8 @@
       {
         "code": "GEN",
         "description": "General",
-        "activeFlag": "Y"
+        "activeFlag": "Y",
+        "sensitive": false
       }
     ]
   },
@@ -33,13 +35,15 @@
         "code": "GEN",
         "description": "General POM Note",
         "activeFlag": "Y",
-        "source": "OCNS"
+        "source": "OCNS",
+        "sensitive": true
       },
       {
         "code": "SPECIAL",
         "description": "Special POM Note",
         "activeFlag": "Y",
-        "source": "OCNS"
+        "source": "OCNS",
+        "sensitive": true
       }
     ]
   },
@@ -53,13 +57,22 @@
         "code": "GEN",
         "description": "General OMIC Note",
         "activeFlag": "Y",
-        "source": "OCNS"
+        "source": "OCNS",
+        "sensitive": true
       },
       {
         "code": "SPECIAL",
         "description": "Special OMIC Note",
         "activeFlag": "Y",
-        "source": "OCNS"
+        "source": "OCNS",
+        "sensitive": true
+      },
+      {
+        "code": "OMIC_OPEN",
+        "description": "Open Case Note",
+        "activeFlag": "Y",
+        "source": "OCNS",
+        "sensitive": false
       }
     ]
   }

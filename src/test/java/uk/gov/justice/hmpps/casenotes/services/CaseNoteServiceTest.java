@@ -73,7 +73,7 @@ public class CaseNoteServiceTest {
 
         final var caseNote = caseNoteService.createCaseNote("12345", NewCaseNote.builder().type("type").subType("SUB").build());
 
-        assertThat(caseNote).isEqualToIgnoringGivenFields(nomisCaseNote, "authorUsername", "locationId", "text", "caseNoteId", "authorUserId", "eventId");
+        assertThat(caseNote).isEqualToIgnoringGivenFields(nomisCaseNote, "authorUsername", "locationId", "text", "caseNoteId", "authorUserId", "eventId", "sensitive");
         assertThat(caseNote.getText()).isEqualTo("original");
         assertThat(caseNote.getAuthorUserId()).isEqualTo("23456");
         assertThat(caseNote.getLocationId()).isEqualTo("agency");
@@ -103,12 +103,16 @@ public class CaseNoteServiceTest {
 
         final var createdNote = caseNoteService.createCaseNote("12345", NewCaseNote.builder().type("type").subType("sub").build());
         assertThat(createdNote).isEqualToIgnoringGivenFields(offenderCaseNote,
-                "caseNoteId", "type", "typeDescription", "subType", "subTypeDescription", "source", "creationDateTime", "text", "amendments");
+                "caseNoteId", "type", "typeDescription", "subType", "subTypeDescription", "source", "creationDateTime", "text", "amendments", "sensitive");
         assertThat(createdNote.getText()).isEqualTo("HELLO");
     }
 
     @Test
     public void getCaseNote_noAddRole() {
+        final var noteType = SensitiveCaseNoteType.builder().type("sometype").parentType(ParentNoteType.builder().build()).build();
+        final var offenderCaseNote = createOffenderCaseNote(noteType);
+        when(repository.findById(any())).thenReturn(Optional.of(offenderCaseNote));
+
         assertThatThrownBy(() -> caseNoteService.getCaseNote("12345", UUID.randomUUID().toString())).isInstanceOf(AccessDeniedException.class);
 
         verify(securityUserContext).isOverrideRole("POM", "VIEW_SENSITIVE_CASE_NOTES", "ADD_SENSITIVE_CASE_NOTES");
@@ -116,7 +120,7 @@ public class CaseNoteServiceTest {
 
     @Test
     public void getCaseNote_notFound() {
-        when(securityUserContext.isOverrideRole(anyString(), anyString(), anyString())).thenReturn(Boolean.TRUE);
+        when(repository.findById(any())).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> caseNoteService.getCaseNote("12345", UUID.randomUUID().toString())).isInstanceOf(EntityNotFoundException.class);
     }
@@ -130,7 +134,7 @@ public class CaseNoteServiceTest {
 
         final var caseNote = caseNoteService.getCaseNote("12345", UUID.randomUUID().toString());
         assertThat(caseNote).isEqualToIgnoringGivenFields(offenderCaseNote,
-                "caseNoteId", "type", "typeDescription", "subType", "subTypeDescription", "source", "creationDateTime", "authorUsername", "authorName", "text", "amendments");
+                "caseNoteId", "type", "typeDescription", "subType", "subTypeDescription", "source", "creationDateTime", "authorUsername", "authorName", "text", "amendments", "sensitive");
         assertThat(caseNote.getText()).isEqualTo("HELLO");
     }
 
@@ -141,7 +145,7 @@ public class CaseNoteServiceTest {
 
         final var caseNote = caseNoteService.getCaseNote("12345", "21455");
 
-        assertThat(caseNote).isEqualToIgnoringGivenFields(nomisCaseNote, "authorUsername", "locationId", "text", "caseNoteId", "authorUserId", "eventId");
+        assertThat(caseNote).isEqualToIgnoringGivenFields(nomisCaseNote, "authorUsername", "locationId", "text", "caseNoteId", "authorUserId", "eventId", "sensitive");
         assertThat(caseNote.getText()).isEqualTo("original");
         assertThat(caseNote.getAuthorUserId()).isEqualTo("23456");
         assertThat(caseNote.getLocationId()).isEqualTo("agency");
@@ -156,7 +160,7 @@ public class CaseNoteServiceTest {
 
         final var caseNote = caseNoteService.amendCaseNote("12345", "21455", new UpdateCaseNote("text"));
 
-        assertThat(caseNote).isEqualToIgnoringGivenFields(nomisCaseNote, "authorUsername", "locationId", "text", "caseNoteId", "authorUserId", "eventId");
+        assertThat(caseNote).isEqualToIgnoringGivenFields(nomisCaseNote, "authorUsername", "locationId", "text", "caseNoteId", "authorUserId", "eventId", "sensitive");
         assertThat(caseNote.getText()).isEqualTo("original");
         assertThat(caseNote.getAuthorUserId()).isEqualTo("23456");
         assertThat(caseNote.getLocationId()).isEqualTo("agency");

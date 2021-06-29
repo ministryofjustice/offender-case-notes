@@ -51,6 +51,10 @@ public class SensitiveCaseNoteType {
     @Builder.Default
     private boolean active = true;
 
+    @Column(name = "SENSITIVE", nullable = false)
+    @Builder.Default
+    private final boolean sensitive = true;
+
     @CreatedDate
     @Column(nullable = false)
     private LocalDateTime createDateTime;
@@ -88,6 +92,10 @@ public class SensitiveCaseNoteType {
 
     public boolean isActive() {
         return this.active;
+    }
+
+    public boolean isSensitive() {
+        return this.sensitive;
     }
 
     public LocalDateTime getCreateDateTime() {
