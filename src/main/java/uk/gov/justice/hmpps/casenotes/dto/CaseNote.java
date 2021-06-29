@@ -80,7 +80,6 @@ public class CaseNote {
     private Integer eventId;
 
     @ApiModelProperty(required = true, value = "Sensitive Note", position = 16, example = "true")
-    @NotBlank
     private boolean sensitive;
 
     @ApiModelProperty(required = true, value = "Ordered list of amendments to the case note (oldest first)", position = 17)
@@ -147,7 +146,7 @@ public class CaseNote {
         return eventId;
     }
 
-    public @NonNull boolean getSensitive() {
+    public boolean getSensitive() {
         return sensitive;
     }
 
@@ -170,7 +169,7 @@ public class CaseNote {
         private @NotBlank String text;
         private String locationId;
         private @NotNull Integer eventId;
-        private @NotBlank boolean sensitive;
+        private boolean sensitive;
         private @NotNull List<CaseNoteAmendment> amendments;
 
         CaseNoteBuilder() {
@@ -211,11 +210,6 @@ public class CaseNote {
             return this;
         }
 
-        public CaseNoteBuilder sensitive(@NotBlank final boolean sensitive) {
-            this.sensitive = sensitive;
-            return this;
-        }
-
         public CaseNoteBuilder creationDateTime(@NotNull final LocalDateTime creationDateTime) {
             this.creationDateTime = creationDateTime;
             return this;
@@ -251,6 +245,11 @@ public class CaseNote {
             return this;
         }
 
+        public CaseNoteBuilder sensitive(final boolean sensitive) {
+            this.sensitive = sensitive;
+            return this;
+        }
+
         public CaseNoteBuilder amendments(@NotNull final List<CaseNoteAmendment> amendments) {
             this.amendments = amendments;
             return this;
@@ -261,7 +260,7 @@ public class CaseNote {
         }
 
         public String toString() {
-            return "CaseNote.CaseNoteBuilder(caseNoteId=" + this.caseNoteId + ", offenderIdentifier=" + this.offenderIdentifier + ", type=" + this.type + ", typeDescription=" + this.typeDescription + ", subType=" + this.subType + ", subTypeDescription=" + this.subTypeDescription + ", source=" + this.source + ", creationDateTime=" + this.creationDateTime + ", occurrenceDateTime=" + this.occurrenceDateTime + ", authorName=" + this.authorName + ", authorUserId=" + this.authorUserId + ", text=" + this.text + ", locationId=" + this.locationId + ", eventId=" + this.eventId + ", amendments=" + this.amendments + ")";
+            return "CaseNote.CaseNoteBuilder(caseNoteId=" + this.caseNoteId + ", offenderIdentifier=" + this.offenderIdentifier + ", type=" + this.type + ", typeDescription=" + this.typeDescription + ", subType=" + this.subType + ", subTypeDescription=" + this.subTypeDescription + ", source=" + this.source + ", creationDateTime=" + this.creationDateTime + ", occurrenceDateTime=" + this.occurrenceDateTime + ", authorName=" + this.authorName + ", authorUserId=" + this.authorUserId + ", text=" + this.text + ", locationId=" + this.locationId + ", eventId=" + this.eventId + ", sensitive=" + this.sensitive + ", amendments=" + this.amendments + ")";
         }
     }
 }
