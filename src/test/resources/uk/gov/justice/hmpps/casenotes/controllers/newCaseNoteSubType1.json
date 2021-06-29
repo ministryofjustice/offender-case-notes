@@ -8,7 +8,8 @@
       "code": "NEWSUBTYPE1",
       "description": "A New Sub Type 1",
       "activeFlag": "N",
-      "source": "OCNS"
+      "source": "OCNS",
+      "sensitive": true
     }
   ]
 }

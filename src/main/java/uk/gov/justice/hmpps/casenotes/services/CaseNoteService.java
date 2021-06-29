@@ -76,7 +76,7 @@ public class CaseNoteService {
                     .authorUsername(caseNoteFilter.getAuthorUsername())
                     .startDate(caseNoteFilter.getStartDate())
                     .endDate(caseNoteFilter.getEndDate())
-                    .nonSensitiveOnly(isNotAllowedToViewOrAddSensitiveCaseNote())
+                    .excludeSensitive(!isAllowedToViewOrCreateSensitiveCaseNote())
                     .build();
 
             sensitiveCaseNotes = repository.findAll(filter)
@@ -157,6 +157,7 @@ public class CaseNoteService {
                 .subType(cn.getSensitiveCaseNoteType().getType())
                 .subTypeDescription(cn.getSensitiveCaseNoteType().getDescription())
                 .source(SERVICE_NAME) // Indicates its a Offender Case Note Service Type
+                .sensitive(cn.getSensitiveCaseNoteType().isSensitive())
                 .text(cn.getNoteText())
                 .creationDateTime(cn.getCreateDateTime())
                 .amendments(cn.getAmendments().stream().map(
@@ -186,6 +187,7 @@ public class CaseNoteService {
                 .subType(cn.getSubType())
                 .subTypeDescription(cn.getSubTypeDescription())
                 .source(cn.getSource())
+                .sensitive(false)
                 .text(cn.getOriginalNoteText())
                 .creationDateTime(cn.getCreationDateTime())
                 .amendments(cn.getAmendments().stream().map(
@@ -210,7 +212,7 @@ public class CaseNoteService {
         }
 
         // ensure that the user can then create a secure case note
-        if (isNotAllowedToCreateSensitiveCaseNote()) {
+        if (!isAllowedToCreateSensitiveCaseNote()) {
             throw new AccessDeniedException("User not allowed to create sensitive case notes");
         }
 
@@ -243,7 +245,7 @@ public class CaseNoteService {
         if (isNotSensitiveCaseNote(caseNoteIdentifier)) {
             return mapper(externalApiService.amendOffenderCaseNote(offenderIdentifier, NumberUtils.toLong(caseNoteIdentifier), amendCaseNote), offenderIdentifier);
         }
-        if (isNotAllowedToCreateSensitiveCaseNote()) {
+        if (!isAllowedToCreateSensitiveCaseNote()) {
             throw new AccessDeniedException("User not allowed to view sensitive case notes");
         }
 
@@ -262,24 +264,24 @@ public class CaseNoteService {
 
     public List<CaseNoteType> getCaseNoteTypes() {
         final var caseNoteTypes = externalApiService.getCaseNoteTypes();
-        return caseNoteTypeMerger.mergeAndSortList(caseNoteTypes, getSensitiveCaseNoteTypes(true, isNotAllowedToViewOrAddSensitiveCaseNote()));
+        return caseNoteTypeMerger.mergeAndSortList(caseNoteTypes, getSensitiveCaseNoteTypes(true, isAllowedToViewOrCreateSensitiveCaseNote()));
     }
 
     public List<CaseNoteType> getUserCaseNoteTypes() {
         final var userCaseNoteTypes = externalApiService.getUserCaseNoteTypes();
-        return caseNoteTypeMerger.mergeAndSortList(userCaseNoteTypes, getSensitiveCaseNoteTypes(false, isNotAllowedToCreateSensitiveCaseNote()));
+        return caseNoteTypeMerger.mergeAndSortList(userCaseNoteTypes, getSensitiveCaseNoteTypes(false, isAllowedToCreateSensitiveCaseNote()));
     }
 
 
-    private List<CaseNoteType> getSensitiveCaseNoteTypes(final boolean allTypes, final boolean nonSensitiveOnly) {
+    private List<CaseNoteType> getSensitiveCaseNoteTypes(final boolean allTypes, final boolean includeSensitive) {
         return parentCaseNoteTypeRepository.findAll().stream()
                 .filter(t -> allTypes || t.isActive())
-                .map(st -> transform(st, allTypes, nonSensitiveOnly))
+                .map(st -> transform(st, allTypes, includeSensitive))
                 .filter(pt -> pt.getSubCodes().size() > 0)
                 .collect(Collectors.toList());
     }
 
-    private CaseNoteType transform(final ParentNoteType parentNoteType, final boolean allTypes, final boolean nonSensitiveOnly) {
+    private CaseNoteType transform(final ParentNoteType parentNoteType, final boolean allTypes, final boolean includeSensitive) {
         return CaseNoteType.builder()
                 .code(parentNoteType.getType())
                 .description(parentNoteType.getDescription())
@@ -287,12 +289,13 @@ public class CaseNoteService {
                 .source(SERVICE_NAME)
                 .subCodes(parentNoteType.getSubTypes().stream()
                         .filter(t -> allTypes || t.isActive())
-                        .filter(t -> !nonSensitiveOnly || t.isNonSensitive())
+                        .filter(t -> includeSensitive || !t.isSensitive())
                         .map(st -> CaseNoteType.builder()
                                 .code(st.getType())
                                 .description(st.getDescription())
                                 .source(SERVICE_NAME)
                                 .activeFlag(st.isActive() ? "Y" : "N")
+                                .sensitive(st.isSensitive())
                                 .build())
                         .collect(Collectors.toList()))
                 .build();
@@ -305,7 +308,7 @@ public class CaseNoteService {
 
         final var caseNote = repository.findById(UUID.fromString(caseNoteIdentifier)).orElseThrow(() -> EntityNotFoundException.withId(caseNoteIdentifier));
 
-        if (!caseNote.getSensitiveCaseNoteType().isNonSensitive() && isNotAllowedToViewOrAddSensitiveCaseNote()) {
+        if (caseNote.getSensitiveCaseNoteType().isSensitive() && !isAllowedToViewOrCreateSensitiveCaseNote()) {
             throw new AccessDeniedException("User not allowed to view sensitive case notes");
         }
         return mapper(caseNote);
@@ -331,7 +334,7 @@ public class CaseNoteService {
                 .active(newCaseNoteType.isActive())
                 .build());
 
-        return transform(parentNoteType, true, false);
+        return transform(parentNoteType, true, true);
     }
 
     @Transactional
@@ -348,10 +351,11 @@ public class CaseNoteService {
                         .description(newCaseNoteType.getDescription())
                         .active(newCaseNoteType.isActive())
                         .parentType(parentNoteType)
+                        .sensitive(newCaseNoteType.isSensitive())
                         .build()
         );
 
-        return transform(parentNoteType, true, false);
+        return transform(parentNoteType, true, true);
     }
 
     @Transactional
@@ -359,7 +363,7 @@ public class CaseNoteService {
     public CaseNoteType updateCaseNoteType(final String parentType, @NotNull @Valid final UpdateCaseNoteType body) {
         final var parentNoteType = parentCaseNoteTypeRepository.findById(parentType).orElseThrow(EntityNotFoundException.withId(parentType));
         parentNoteType.update(body.getDescription(), body.isActive());
-        return transform(parentNoteType, true, false);
+        return transform(parentNoteType, true, true);
     }
 
     @Transactional
@@ -369,7 +373,7 @@ public class CaseNoteService {
         final var parentNoteType = parentCaseNoteTypeRepository.findById(parentType).orElseThrow(EntityNotFoundException.withId(parentType));
         final var existingSubType = parentNoteType.getSubType(subType).orElseThrow(EntityNotFoundException.withId(parentType + " " + subType));
         existingSubType.update(body.getDescription(), body.isActive());
-        return transform(parentNoteType, true, false);
+        return transform(parentNoteType, true, true);
     }
 
     @Transactional
@@ -416,12 +420,11 @@ public class CaseNoteService {
                 null);
     }
 
-
-    private boolean isNotAllowedToCreateSensitiveCaseNote() {
-        return !securityUserContext.isOverrideRole("POM", "ADD_SENSITIVE_CASE_NOTES");
+    private boolean isAllowedToCreateSensitiveCaseNote() {
+        return securityUserContext.isOverrideRole("POM", "ADD_SENSITIVE_CASE_NOTES");
     }
 
-    private boolean isNotAllowedToViewOrAddSensitiveCaseNote() {
-        return !securityUserContext.isOverrideRole("POM", "VIEW_SENSITIVE_CASE_NOTES", "ADD_SENSITIVE_CASE_NOTES");
+    private boolean isAllowedToViewOrCreateSensitiveCaseNote() {
+        return securityUserContext.isOverrideRole("POM", "VIEW_SENSITIVE_CASE_NOTES", "ADD_SENSITIVE_CASE_NOTES");
     }
 }

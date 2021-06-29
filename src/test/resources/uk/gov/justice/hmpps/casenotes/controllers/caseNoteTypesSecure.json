@@ -7,12 +7,14 @@
       {
         "code": "KS",
         "description": "Key worker Session",
-        "activeFlag": "Y"
+        "activeFlag": "Y",
+        "sensitive": false
       },
       {
         "code": "KE",
         "description": "Key worker Entry",
-        "activeFlag": "Y"
+        "activeFlag": "Y",
+        "sensitive": false
       }
     ]
   },
@@ -24,12 +26,14 @@
       {
         "code": "GEN",
         "description": "General",
-        "activeFlag": "Y"
+        "activeFlag": "Y",
+        "sensitive": false
       },
       {
         "code": "SPECIAL",
         "description": "Special",
-        "activeFlag": "Y"
+        "activeFlag": "Y",
+        "sensitive": false
       }
     ]
   },
@@ -43,13 +47,15 @@
         "code": "OLDONE",
         "description": "Active Old POM Note",
         "activeFlag": "Y",
-        "source": "OCNS"
+        "source": "OCNS",
+        "sensitive": true
       },
       {
         "code": "OLDTWO",
         "description": "Inactive Old POM Note",
         "activeFlag": "N",
-        "source": "OCNS"
+        "source": "OCNS",
+        "sensitive": true
       }
     ]
   },
@@ -63,19 +69,22 @@
         "code": "GEN",
         "description": "General POM Note",
         "activeFlag": "Y",
-        "source": "OCNS"
+        "source": "OCNS",
+        "sensitive": true
       },
       {
         "code": "OLD",
         "description": "Inactive POM Note",
         "activeFlag": "N",
-        "source": "OCNS"
+        "source": "OCNS",
+        "sensitive": true
       },
       {
         "code": "SPECIAL",
         "description": "Special POM Note",
         "activeFlag": "Y",
-        "source": "OCNS"
+        "source": "OCNS",
+        "sensitive": true
       }
     ]
   },
@@ -89,19 +98,22 @@
         "code": "GEN",
         "description": "General OMIC Note",
         "activeFlag": "Y",
-        "source": "OCNS"
+        "source": "OCNS",
+        "sensitive": true
       },
       {
         "code": "SPECIAL",
         "description": "Special OMIC Note",
         "activeFlag": "Y",
-        "source": "OCNS"
+        "source": "OCNS",
+        "sensitive": true
       },
       {
         "code": "OMIC_OPEN",
         "description": "Open Case Note",
         "activeFlag": "Y",
-        "source": "OCNS"
+        "source": "OCNS",
+        "sensitive": false
       }
     ]
   }

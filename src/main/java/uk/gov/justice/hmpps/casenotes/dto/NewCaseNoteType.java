@@ -31,8 +31,11 @@ public class NewCaseNoteType {
     @NotBlank
     private String description;
 
-    @ApiModelProperty(value = "Active Type", example = "true", position = 3)
+    @ApiModelProperty(value = "Active Type, default true", example = "true", position = 3)
     @Builder.Default
     private boolean active = true;
 
+    @ApiModelProperty(value = "Sensitive Case Note Type, default true", example = "true", position = 4)
+    @Builder.Default
+    private boolean sensitive = true;
 }

@@ -29,5 +29,4 @@ public class UpdateCaseNoteType {
     @ApiModelProperty(value = "Active Type", example = "true", position = 2)
     @Builder.Default
     private boolean active = true;
-
 }

@@ -79,9 +79,13 @@ public class CaseNote {
     @NotNull
     private Integer eventId;
 
-    @ApiModelProperty(required = true, value = "Ordered list of amendments to the case note (oldest first)", position = 15)
+    @ApiModelProperty(required = true, value = "Sensitive Note", position = 16, example = "true")
+    @NotBlank
+    private boolean sensitive;
+
+    @ApiModelProperty(required = true, value = "Ordered list of amendments to the case note (oldest first)", position = 17)
     @NotNull
-    private List<CaseNoteAmendment> amendments = new ArrayList<>();
+    private final List<CaseNoteAmendment> amendments = new ArrayList<>();
 
     public static CaseNoteBuilder builder() {
         return new CaseNoteBuilder();
@@ -143,6 +147,10 @@ public class CaseNote {
         return eventId;
     }
 
+    public @NonNull boolean getSensitive() {
+        return sensitive;
+    }
+
     public @NotNull List<CaseNoteAmendment> getAmendments() {
         return this.amendments;
     }
@@ -162,6 +170,7 @@ public class CaseNote {
         private @NotBlank String text;
         private String locationId;
         private @NotNull Integer eventId;
+        private @NotBlank boolean sensitive;
         private @NotNull List<CaseNoteAmendment> amendments;
 
         CaseNoteBuilder() {
@@ -199,6 +208,11 @@ public class CaseNote {
 
         public CaseNoteBuilder source(@NotBlank final String source) {
             this.source = source;
+            return this;
+        }
+
+        public CaseNoteBuilder sensitive(@NotBlank final boolean sensitive) {
+            this.sensitive = sensitive;
             return this;
         }
 
@@ -243,7 +257,7 @@ public class CaseNote {
         }
 
         public CaseNote build() {
-            return new CaseNote(caseNoteId, offenderIdentifier, type, typeDescription, subType, subTypeDescription, source, creationDateTime, occurrenceDateTime, authorName, authorUserId, text, locationId, eventId, amendments);
+            return new CaseNote(caseNoteId, offenderIdentifier, type, typeDescription, subType, subTypeDescription, source, creationDateTime, occurrenceDateTime, authorName, authorUserId, text, locationId, eventId, sensitive, amendments);
         }
 
         public String toString() {

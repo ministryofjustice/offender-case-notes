@@ -8,7 +8,8 @@
       "code": "NEWSUBTYPE1",
       "description": "Change The Desc",
       "activeFlag": "Y",
-      "source": "OCNS"
+      "source": "OCNS",
+      "sensitive": true
     }
   ]
 }
