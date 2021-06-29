@@ -23,7 +23,7 @@ public class OffenderCaseNoteFilter implements Specification<OffenderCaseNote> {
     private final String authorUsername;
     private final String type;
     private final String subType;
-    private final Boolean nonSensitiveOnly;
+    private final boolean nonSensitiveOnly;
     private final LocalDateTime startDate;
     private final LocalDateTime endDate;
 

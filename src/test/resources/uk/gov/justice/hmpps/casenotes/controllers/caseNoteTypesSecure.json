@@ -96,6 +96,12 @@
         "description": "Special OMIC Note",
         "activeFlag": "Y",
         "source": "OCNS"
+      },
+      {
+        "code": "OMIC_OPEN",
+        "description": "Open Case Note",
+        "activeFlag": "Y",
+        "source": "OCNS"
       }
     ]
   }

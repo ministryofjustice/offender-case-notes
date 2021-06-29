@@ -275,6 +275,7 @@ public class CaseNoteService {
         return parentCaseNoteTypeRepository.findAll().stream()
                 .filter(t -> allTypes || t.isActive())
                 .map(st -> transform(st, allTypes, nonSensitiveOnly))
+                .filter(pt -> pt.getSubCodes().size() > 0)
                 .collect(Collectors.toList());
     }
 

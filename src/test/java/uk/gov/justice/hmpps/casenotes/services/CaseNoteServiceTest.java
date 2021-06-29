@@ -109,6 +109,10 @@ public class CaseNoteServiceTest {
 
     @Test
     public void getCaseNote_noAddRole() {
+        final var noteType = SensitiveCaseNoteType.builder().type("sometype").parentType(ParentNoteType.builder().build()).build();
+        final var offenderCaseNote = createOffenderCaseNote(noteType);
+        when(repository.findById(any())).thenReturn(Optional.of(offenderCaseNote));
+
         assertThatThrownBy(() -> caseNoteService.getCaseNote("12345", UUID.randomUUID().toString())).isInstanceOf(AccessDeniedException.class);
 
         verify(securityUserContext).isOverrideRole("POM", "VIEW_SENSITIVE_CASE_NOTES", "ADD_SENSITIVE_CASE_NOTES");
@@ -116,7 +120,7 @@ public class CaseNoteServiceTest {
 
     @Test
     public void getCaseNote_notFound() {
-        when(securityUserContext.isOverrideRole(anyString(), anyString(), anyString())).thenReturn(Boolean.TRUE);
+        when(repository.findById(any())).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> caseNoteService.getCaseNote("12345", UUID.randomUUID().toString())).isInstanceOf(EntityNotFoundException.class);
     }
