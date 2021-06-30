@@ -5,9 +5,9 @@ import com.nhaarman.mockitokotlin2.verify
 import com.nhaarman.mockitokotlin2.whenever
 import org.junit.jupiter.api.Test
 import org.springframework.boot.test.mock.mockito.MockBean
+import uk.gov.justice.hmpps.casenotes.model.CaseNoteType
 import uk.gov.justice.hmpps.casenotes.model.OffenderCaseNote
 import uk.gov.justice.hmpps.casenotes.model.ParentNoteType
-import uk.gov.justice.hmpps.casenotes.model.SensitiveCaseNoteType
 import uk.gov.justice.hmpps.casenotes.repository.OffenderCaseNoteRepository
 import java.time.LocalDateTime
 import java.time.LocalDateTime.now
@@ -20,7 +20,7 @@ class PublishNoteResourceTest : ResourceTest() {
   @Test
   fun testPublishCaseNotes_AccessDenied() {
     whenever(repository.findByModifyDateTimeBetweenOrderByModifyDateTime(any(), any())).thenReturn(
-      listOf(createOffenderCaseNote(SensitiveCaseNoteType.builder().type("subtype").parentType(ParentNoteType.builder().type("parent").build()).build()))
+      listOf(createOffenderCaseNote(CaseNoteType.builder().type("subtype").parentType(ParentNoteType.builder().type("parent").build()).build()))
     )
     webTestClient.post().uri("/publish-notes?toDateTime={toDateTime}", now())
       .headers(addBearerAuthorisation("SECURE_CASENOTE_USER", CASENOTES_ROLES))
@@ -31,7 +31,7 @@ class PublishNoteResourceTest : ResourceTest() {
   @Test
   fun testPublishCaseNotesNoFrom() {
     whenever(repository.findByModifyDateTimeBetweenOrderByModifyDateTime(any(), any())).thenReturn(
-      listOf(createOffenderCaseNote(SensitiveCaseNoteType.builder().type("subtype").parentType(ParentNoteType.builder().type("parent").build()).build()))
+      listOf(createOffenderCaseNote(CaseNoteType.builder().type("subtype").parentType(ParentNoteType.builder().type("parent").build()).build()))
     )
     val toDate: LocalDateTime = now()
     webTestClient.post().uri("/publish-notes?toDateTime={toDateTime}", toDate)
@@ -46,7 +46,7 @@ class PublishNoteResourceTest : ResourceTest() {
   @Test
   fun testPublishCaseNotes_FromAndTo() {
     whenever(repository.findByModifyDateTimeBetweenOrderByModifyDateTime(any(), any())).thenReturn(
-      listOf(createOffenderCaseNote(SensitiveCaseNoteType.builder().type("subtype").parentType(ParentNoteType.builder().type("parent").build()).build()))
+      listOf(createOffenderCaseNote(CaseNoteType.builder().type("subtype").parentType(ParentNoteType.builder().type("parent").build()).build()))
     )
     val toDate: LocalDateTime = now()
     val fromDate: LocalDateTime = LocalDateTime.parse("2019-01-02T02:03:04")
@@ -59,13 +59,13 @@ class PublishNoteResourceTest : ResourceTest() {
     verify(repository).findByModifyDateTimeBetweenOrderByModifyDateTime(fromDate, toDate)
   }
 
-  private fun createOffenderCaseNote(caseNoteType: SensitiveCaseNoteType): OffenderCaseNote =
+  private fun createOffenderCaseNote(caseNoteType: CaseNoteType): OffenderCaseNote =
     OffenderCaseNote.builder()
       .id(UUID.randomUUID())
       .occurrenceDateTime(now())
       .locationId("MDI")
       .offenderIdentifier("A1234AC")
-      .sensitiveCaseNoteType(caseNoteType)
+      .caseNoteType(caseNoteType)
       .noteText("HELLO")
       .createDateTime(LocalDateTime.parse("2019-02-03T23:20:19"))
       .build()

@@ -18,7 +18,7 @@ import org.junit.jupiter.api.extension.AfterAllCallback
 import org.junit.jupiter.api.extension.BeforeAllCallback
 import org.junit.jupiter.api.extension.BeforeEachCallback
 import org.junit.jupiter.api.extension.ExtensionContext
-import uk.gov.justice.hmpps.casenotes.dto.CaseNoteType
+import uk.gov.justice.hmpps.casenotes.dto.CaseNoteTypeDto
 import uk.gov.justice.hmpps.casenotes.dto.NomisCaseNote
 import java.lang.reflect.Type
 import java.time.LocalDateTime
@@ -56,18 +56,18 @@ class Elite2MockServer : WireMockServer(WIREMOCK_PORT) {
             .withBody(
               gson.toJson(
                 listOf(
-                  CaseNoteType.builder().code("KA").description("Key worker")
+                  CaseNoteTypeDto.builder().code("KA").description("Key worker")
                     .subCodes(
                       listOf(
-                        CaseNoteType.builder().code("KS").description("Key worker Session").build(),
-                        CaseNoteType.builder().code("KE").description("Key worker Entry").build()
+                        CaseNoteTypeDto.builder().code("KS").description("Key worker Session").build(),
+                        CaseNoteTypeDto.builder().code("KE").description("Key worker Entry").build()
                       )
                     ).build(),
-                  CaseNoteType.builder().code("OBS").description("Observation")
+                  CaseNoteTypeDto.builder().code("OBS").description("Observation")
                     .subCodes(
                       listOf(
-                        CaseNoteType.builder().code("GEN").description("General").build(),
-                        CaseNoteType.builder().code("SPECIAL").description("Special").build()
+                        CaseNoteTypeDto.builder().code("GEN").description("General").build(),
+                        CaseNoteTypeDto.builder().code("SPECIAL").description("Special").build()
                       )
                     ).build()
                 )
@@ -88,16 +88,16 @@ class Elite2MockServer : WireMockServer(WIREMOCK_PORT) {
             .withBody(
               gson.toJson(
                 listOf(
-                  CaseNoteType.builder().code("KA").description("Key worker")
+                  CaseNoteTypeDto.builder().code("KA").description("Key worker")
                     .subCodes(
                       listOf(
-                        CaseNoteType.builder().code("KS").description("Key worker Session").build()
+                        CaseNoteTypeDto.builder().code("KS").description("Key worker Session").build()
                       )
                     ).build(),
-                  CaseNoteType.builder().code("OBS").description("Observation")
+                  CaseNoteTypeDto.builder().code("OBS").description("Observation")
                     .subCodes(
                       listOf(
-                        CaseNoteType.builder().code("GEN").description("General").build()
+                        CaseNoteTypeDto.builder().code("GEN").description("General").build()
                       )
                     ).build()
                 )

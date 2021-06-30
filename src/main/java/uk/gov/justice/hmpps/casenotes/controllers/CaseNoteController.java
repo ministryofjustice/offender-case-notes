@@ -28,7 +28,7 @@ import org.springframework.web.bind.annotation.RestController;
 import uk.gov.justice.hmpps.casenotes.config.SecurityUserContext;
 import uk.gov.justice.hmpps.casenotes.dto.CaseNote;
 import uk.gov.justice.hmpps.casenotes.dto.CaseNoteFilter;
-import uk.gov.justice.hmpps.casenotes.dto.CaseNoteType;
+import uk.gov.justice.hmpps.casenotes.dto.CaseNoteTypeDto;
 import uk.gov.justice.hmpps.casenotes.dto.ErrorResponse;
 import uk.gov.justice.hmpps.casenotes.dto.NewCaseNote;
 import uk.gov.justice.hmpps.casenotes.dto.NewCaseNoteType;
@@ -131,20 +131,20 @@ public class CaseNoteController {
     }
 
     @GetMapping(value = "/types")
-    @ApiOperation(value = "Retrieves a list of case note types", response = CaseNoteType.class)
+    @ApiOperation(value = "Retrieves a list of case note types", response = CaseNoteTypeDto.class)
     @ApiResponses({
             @ApiResponse(code = 404, message = "Case notes types not found"),
-            @ApiResponse(code = 200, message = "OK", response = CaseNoteType.class, responseContainer = "List")})
-    public List<CaseNoteType> getCaseNoteTypes() {
+            @ApiResponse(code = 200, message = "OK", response = CaseNoteTypeDto.class, responseContainer = "List")})
+    public List<CaseNoteTypeDto> getCaseNoteTypes() {
         return caseNoteService.getCaseNoteTypes();
     }
 
     @GetMapping("/types-for-user")
-    @ApiOperation(value = "Retrieves a list of case note types for this user", response = CaseNoteType.class)
+    @ApiOperation(value = "Retrieves a list of case note types for this user", response = CaseNoteTypeDto.class)
     @ApiResponses({
             @ApiResponse(code = 404, message = "Case notes types not found"),
-            @ApiResponse(code = 200, message = "OK", response = CaseNoteType.class, responseContainer = "List")})
-    public List<CaseNoteType> getUserCaseNoteTypes() {
+            @ApiResponse(code = 200, message = "OK", response = CaseNoteTypeDto.class, responseContainer = "List")})
+    public List<CaseNoteTypeDto> getUserCaseNoteTypes() {
         return caseNoteService.getUserCaseNoteTypes();
 
     }
@@ -155,9 +155,9 @@ public class CaseNoteController {
             response = NewCaseNoteType.class,
             notes = "Creates a new case note type")
     @ApiResponses(value = {
-            @ApiResponse(code = 201, message = "The Case Note Type has been recorded. The updated object is returned including the status.", response = CaseNoteType.class),
+            @ApiResponse(code = 201, message = "The Case Note Type has been recorded. The updated object is returned including the status.", response = CaseNoteTypeDto.class),
             @ApiResponse(code = 409, message = "The case note type has already been recorded. The current unmodified object (including status) is returned.", response = ErrorResponse.class)})
-    public CaseNoteType createCaseNoteType(@RequestBody @NotNull final NewCaseNoteType body) {
+    public CaseNoteTypeDto createCaseNoteType(@RequestBody @NotNull final NewCaseNoteType body) {
         return caseNoteService.createCaseNoteType(body);
     }
 
@@ -167,9 +167,9 @@ public class CaseNoteController {
             response = NewCaseNoteType.class,
             notes = "Creates a new case note sub type")
     @ApiResponses(value = {
-            @ApiResponse(code = 201, message = "The Case Note Sub Type has been recorded. The updated object is returned including the status.", response = CaseNoteType.class),
+            @ApiResponse(code = 201, message = "The Case Note Sub Type has been recorded. The updated object is returned including the status.", response = CaseNoteTypeDto.class),
             @ApiResponse(code = 409, message = "The case note sub type has already been recorded. The current unmodified object (including status) is returned.", response = ErrorResponse.class)})
-    public CaseNoteType createCaseNoteSubType(
+    public CaseNoteTypeDto createCaseNoteSubType(
             @ApiParam(value = "Parent Case Note Type", required = true, example = "GEN") @PathVariable("parentType") final String parentType,
             @RequestBody @NotNull final NewCaseNoteType body) {
         return caseNoteService.createCaseNoteSubType(parentType, body);
@@ -181,9 +181,9 @@ public class CaseNoteController {
             response = UpdateCaseNoteType.class,
             notes = "Creates a new case note type")
     @ApiResponses(value = {
-            @ApiResponse(code = 200, message = "The case note type has been updated. The updated object is returned.", response = CaseNoteType.class),
+            @ApiResponse(code = 200, message = "The case note type has been updated. The updated object is returned.", response = CaseNoteTypeDto.class),
             @ApiResponse(code = 404, message = "The case note type is not found", response = ErrorResponse.class)})
-    public CaseNoteType updateCaseNoteType(
+    public CaseNoteTypeDto updateCaseNoteType(
             @ApiParam(value = "Parent Case Note Type", required = true, example = "OBS") @PathVariable("parentType") final String parentType,
             @RequestBody @NotNull final UpdateCaseNoteType body) {
         return caseNoteService.updateCaseNoteType(parentType, body);
@@ -195,9 +195,9 @@ public class CaseNoteController {
             response = UpdateCaseNoteType.class,
             notes = "Creates a new case note sub type")
     @ApiResponses(value = {
-            @ApiResponse(code = 200, message = "The case note sub type update has been updated. The updated object is returned.", response = CaseNoteType.class),
+            @ApiResponse(code = 200, message = "The case note sub type update has been updated. The updated object is returned.", response = CaseNoteTypeDto.class),
             @ApiResponse(code = 404, message = "The case note sub type is not found", response = ErrorResponse.class)})
-    public CaseNoteType updateCaseNoteSubType(
+    public CaseNoteTypeDto updateCaseNoteSubType(
             @ApiParam(value = "Parent Case Note Type", required = true, example = "OBS") @PathVariable("parentType") final String parentType,
             @ApiParam(value = "Sub Case Note Type", required = true, example = "GEN") @PathVariable("subType") final String subType,
             @RequestBody @NotNull final UpdateCaseNoteType body) {

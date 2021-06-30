@@ -1,13 +1,13 @@
 package uk.gov.justice.hmpps.casenotes.services;
 
 import org.junit.jupiter.api.Test;
-import uk.gov.justice.hmpps.casenotes.dto.CaseNoteType;
+import uk.gov.justice.hmpps.casenotes.dto.CaseNoteTypeDto;
 
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class CaseNoteTypeMergerTest {
+public class CaseNoteTypeDtoMergerTest {
 
     private final CaseNoteTypeMerger merger = new CaseNoteTypeMerger();
 
@@ -32,7 +32,7 @@ public class CaseNoteTypeMergerTest {
                 ).build()
         );
 
-        List<CaseNoteType> resultantList = merger.mergeAndSortList(list1, list2);
+        List<CaseNoteTypeDto> resultantList = merger.mergeAndSortList(list1, list2);
 
         assertThat(resultantList).containsExactly(
                 createBuilder("KA", "Key worker").subCodes(
@@ -72,7 +72,7 @@ public class CaseNoteTypeMergerTest {
                 ).build()
         );
 
-        List<CaseNoteType> resultantList = merger.mergeAndSortList(list1, list2);
+        List<CaseNoteTypeDto> resultantList = merger.mergeAndSortList(list1, list2);
 
         assertThat(resultantList).containsExactly(
 
@@ -88,15 +88,15 @@ public class CaseNoteTypeMergerTest {
         );
     }
 
-    private CaseNoteType.CaseNoteTypeBuilder createBuilder(final String obs, final String observation) {
-        return CaseNoteType.builder().code(obs).description(observation);
+    private CaseNoteTypeDto.CaseNoteTypeDtoBuilder createBuilder(final String obs, final String observation) {
+        return CaseNoteTypeDto.builder().code(obs).description(observation);
     }
 
-    private CaseNoteType createInactive(final String sp, final String special) {
+    private CaseNoteTypeDto createInactive(final String sp, final String special) {
         return createBuilder(sp, special).activeFlag("N").build();
     }
 
-    private CaseNoteType create(final String gen, final String general) {
+    private CaseNoteTypeDto create(final String gen, final String general) {
         return createBuilder(gen, general).build();
     }
 }

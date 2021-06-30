@@ -14,9 +14,9 @@ import org.springframework.test.context.transaction.TestTransaction;
 import org.springframework.transaction.annotation.Transactional;
 import uk.gov.justice.hmpps.casenotes.config.AuthAwareAuthenticationToken;
 import uk.gov.justice.hmpps.casenotes.filters.OffenderCaseNoteFilter;
+import uk.gov.justice.hmpps.casenotes.model.CaseNoteType;
 import uk.gov.justice.hmpps.casenotes.model.OffenderCaseNote;
 import uk.gov.justice.hmpps.casenotes.model.OffenderCaseNote.OffenderCaseNoteBuilder;
-import uk.gov.justice.hmpps.casenotes.model.SensitiveCaseNoteType;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -43,14 +43,14 @@ public class OffenderCaseNoteRepositoryTest {
     @Autowired
     private JdbcTemplate jdbcTemplate;
 
-    private SensitiveCaseNoteType genType;
+    private CaseNoteType genType;
 
     @BeforeEach
     public void setUp() {
         final var jwt = Jwt.withTokenValue("some").subject("anonymous").header("head", "something").build();
         SecurityContextHolder.getContext().setAuthentication(
                 new AuthAwareAuthenticationToken(jwt, "userId", Collections.emptyList()));
-        genType = caseNoteTypeRepository.findSensitiveCaseNoteTypeByParentType_TypeAndType(PARENT_TYPE, SUB_TYPE);
+        genType = caseNoteTypeRepository.findCaseNoteTypeByParentType_TypeAndType(PARENT_TYPE, SUB_TYPE);
     }
 
     @Test
@@ -69,11 +69,11 @@ public class OffenderCaseNoteRepositoryTest {
 
         final var retrievedEntity = repository.findById(persistedEntity.getId()).orElseThrow();
 
-        assertThat(retrievedEntity).usingRecursiveComparison().ignoringFields("occurrenceDateTime", "sensitiveCaseNoteType", "eventId", "createDateTime", "modifyDateTime").isEqualTo(caseNote);
+        assertThat(retrievedEntity).usingRecursiveComparison().ignoringFields("occurrenceDateTime", "caseNoteType", "eventId", "createDateTime", "modifyDateTime").isEqualTo(caseNote);
         assertThat(retrievedEntity.getCreateDateTime()).isEqualToIgnoringNanos(caseNote.getCreateDateTime());
         assertThat(retrievedEntity.getModifyDateTime()).isEqualToIgnoringNanos(caseNote.getModifyDateTime());
         assertThat(retrievedEntity.getOccurrenceDateTime()).isEqualToIgnoringNanos(caseNote.getOccurrenceDateTime());
-        assertThat(retrievedEntity.getSensitiveCaseNoteType()).isEqualTo(caseNote.getSensitiveCaseNoteType());
+        assertThat(retrievedEntity.getCaseNoteType()).isEqualTo(caseNote.getCaseNoteType());
         assertThat(retrievedEntity.getCreateUserId()).isEqualTo("anonymous");
     }
 
@@ -136,7 +136,7 @@ public class OffenderCaseNoteRepositoryTest {
                 .authorUserId("some id")
                 .authorName("Mickey Mouse")
                 .offenderIdentifier(OFFENDER_IDENTIFIER)
-                .sensitiveCaseNoteType(genType)
+                .caseNoteType(genType)
                 .noteText("HELLO")
                 .build();
         repository.save(entity);
@@ -178,7 +178,7 @@ public class OffenderCaseNoteRepositoryTest {
         repository.save(retrievedOldNote);
 
         final var yesterday = now().minusDays(1);
-        final var rows = repository.findBySensitiveCaseNoteType_ParentType_TypeInAndModifyDateTimeAfterOrderByModifyDateTime(Set.of("POM"), yesterday, Pageable.unpaged());
+        final var rows = repository.findByCaseNoteType_ParentType_TypeInAndModifyDateTimeAfterOrderByModifyDateTime(Set.of("POM"), yesterday, Pageable.unpaged());
         assertThat(rows).extracting(OffenderCaseNote::getNoteText).contains(noteText).doesNotContain(noteTextWithAmendment);
     }
 
@@ -202,7 +202,7 @@ public class OffenderCaseNoteRepositoryTest {
         assertThat(update).isEqualTo(1);
 
         final var yesterday = now().minusDays(1);
-        final var rows = repository.findBySensitiveCaseNoteType_ParentType_TypeInAndModifyDateTimeAfterOrderByModifyDateTime(Set.of("POM", "BOB"), yesterday, Pageable.unpaged());
+        final var rows = repository.findByCaseNoteType_ParentType_TypeInAndModifyDateTimeAfterOrderByModifyDateTime(Set.of("POM", "BOB"), yesterday, Pageable.unpaged());
         assertThat(rows).extracting(OffenderCaseNote::getNoteText).contains(newNoteText).doesNotContain(oldNoteText);
     }
 
@@ -484,7 +484,7 @@ public class OffenderCaseNoteRepositoryTest {
                 .authorUserId("some id")
                 .authorName("Mickey Mouse")
                 .offenderIdentifier(offenderIdentifier)
-                .sensitiveCaseNoteType(genType)
+                .caseNoteType(genType)
                 .noteText("HELLO");
 
     }

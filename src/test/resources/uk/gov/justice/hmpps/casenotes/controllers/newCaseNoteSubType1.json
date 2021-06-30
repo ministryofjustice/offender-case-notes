@@ -9,7 +9,8 @@
       "description": "A New Sub Type 1",
       "activeFlag": "N",
       "source": "OCNS",
-      "sensitive": true
+      "sensitive": true,
+      "restrictedUse": true
     }
   ]
 }

@@ -30,7 +30,7 @@ import java.time.LocalDateTime;
 @Builder(toBuilder = true)
 @EqualsAndHashCode(of = {"parentType", "type"})
 @ToString(of = {"parentType", "type", "description", "active"})
-public class SensitiveCaseNoteType {
+public class CaseNoteType {
 
     @Id()
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -53,7 +53,11 @@ public class SensitiveCaseNoteType {
 
     @Column(name = "SENSITIVE", nullable = false)
     @Builder.Default
-    private final boolean sensitive = true;
+    private boolean sensitive = true;
+
+    @Column(name = "RESTRICTED_USE", nullable = false)
+    @Builder.Default
+    private boolean restrictedUse = true;
 
     @CreatedDate
     @Column(nullable = false)
@@ -69,9 +73,11 @@ public class SensitiveCaseNoteType {
     @LastModifiedBy
     private String modifyUserId;
 
-    public void update(final String description, final boolean active) {
+    public void update(final String description, final boolean active, final boolean sensitive, final boolean restrictedUse) {
         this.description = description;
         this.active = active;
+        this.sensitive = sensitive;
+        this.restrictedUse = restrictedUse;
     }
 
     public Long getId() {
@@ -96,6 +102,10 @@ public class SensitiveCaseNoteType {
 
     public boolean isSensitive() {
         return this.sensitive;
+    }
+
+    public boolean isRestrictedUse() {
+        return this.restrictedUse;
     }
 
     public LocalDateTime getCreateDateTime() {

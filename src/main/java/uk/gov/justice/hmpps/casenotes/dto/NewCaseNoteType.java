@@ -38,4 +38,8 @@ public class NewCaseNoteType {
     @ApiModelProperty(value = "Sensitive Case Note Type, default true", example = "true", position = 4)
     @Builder.Default
     private boolean sensitive = true;
+
+    @ApiModelProperty(value = "Restricted Use, default true", example = "true", position = 5)
+    @Builder.Default
+    private boolean restrictedUse = true;
 }
