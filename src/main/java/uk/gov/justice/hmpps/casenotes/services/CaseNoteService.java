@@ -269,7 +269,10 @@ public class CaseNoteService {
 
     public List<CaseNoteType> getUserCaseNoteTypes() {
         final var userCaseNoteTypes = externalApiService.getUserCaseNoteTypes();
-        return caseNoteTypeMerger.mergeAndSortList(userCaseNoteTypes, getSensitiveCaseNoteTypes(false, isAllowedToCreateSensitiveCaseNote()));
+        if (isAllowedToCreateSensitiveCaseNote()) {
+            return caseNoteTypeMerger.mergeAndSortList(userCaseNoteTypes, getSensitiveCaseNoteTypes(false, true));
+        }
+        return userCaseNoteTypes;
     }
 
 
