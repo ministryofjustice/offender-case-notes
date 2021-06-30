@@ -247,13 +247,14 @@ public class CaseNoteService {
         }
 
         final var offenderCaseNote = repository.findById(UUID.fromString(caseNoteIdentifier)).orElseThrow(() -> EntityNotFoundException.withId(caseNoteIdentifier));
+        if (offenderCaseNote.getCaseNoteType().isRestrictedUse() && !isAllowedToCreateRestrictedCaseNote()) {
+            throw new AccessDeniedException("User not allowed to amend this case note type [" + offenderCaseNote.getCaseNoteType() + "]");
+        }
+
         if (!offenderIdentifier.equals(offenderCaseNote.getOffenderIdentifier())) {
             throw EntityNotFoundException.withId(offenderIdentifier);
         }
 
-        if (offenderCaseNote.getCaseNoteType().isRestrictedUse() && !isAllowedToCreateRestrictedCaseNote()) {
-            throw new AccessDeniedException("User not allowed to amend this case note type [" + offenderCaseNote.getCaseNoteType() + "]");
-        }
         final var author = securityUserContext.getCurrentUser();
         final var authorFullName = externalApiService.getUserFullName(author.getUsername());
 
