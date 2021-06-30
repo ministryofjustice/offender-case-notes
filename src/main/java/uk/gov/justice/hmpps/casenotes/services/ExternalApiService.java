@@ -13,7 +13,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 import uk.gov.justice.hmpps.casenotes.dto.BookingIdentifier;
 import uk.gov.justice.hmpps.casenotes.dto.CaseNoteFilter;
-import uk.gov.justice.hmpps.casenotes.dto.CaseNoteType;
+import uk.gov.justice.hmpps.casenotes.dto.CaseNoteTypeDto;
 import uk.gov.justice.hmpps.casenotes.dto.NewCaseNote;
 import uk.gov.justice.hmpps.casenotes.dto.NomisCaseNote;
 import uk.gov.justice.hmpps.casenotes.dto.OffenderBooking;
@@ -34,19 +34,19 @@ public class ExternalApiService {
     private final WebClient oauthApiWebClient;
     private final WebClient elite2ClientCredentialsWebClient;
 
-    List<CaseNoteType> getCaseNoteTypes() {
+    List<CaseNoteTypeDto> getCaseNoteTypes() {
         return getCaseNoteTypes("/api/reference-domains/caseNoteTypes");
     }
 
-    List<CaseNoteType> getUserCaseNoteTypes() {
+    List<CaseNoteTypeDto> getUserCaseNoteTypes() {
         return getCaseNoteTypes("/api/users/me/caseNoteTypes");
     }
 
-    private List<CaseNoteType> getCaseNoteTypes(final String url) {
+    private List<CaseNoteTypeDto> getCaseNoteTypes(final String url) {
         return elite2ApiWebClient.get().uri(url)
                 .retrieve()
                 .bodyToMono(
-                        new ParameterizedTypeReference<List<CaseNoteType>>() {
+                        new ParameterizedTypeReference<List<CaseNoteTypeDto>>() {
                         })
                 .block();
     }

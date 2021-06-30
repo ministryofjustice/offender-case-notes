@@ -8,13 +8,15 @@
         "code": "KS",
         "description": "Key worker Session",
         "activeFlag": "Y",
-        "sensitive": false
+        "sensitive": false,
+        "restrictedUse": false
       },
       {
         "code": "KE",
         "description": "Key worker Entry",
         "activeFlag": "Y",
-        "sensitive": false
+        "sensitive": false,
+        "restrictedUse": false
       }
     ]
   },
@@ -27,13 +29,15 @@
         "code": "GEN",
         "description": "General",
         "activeFlag": "Y",
-        "sensitive": false
+        "sensitive": false,
+        "restrictedUse": false
       },
       {
         "code": "SPECIAL",
         "description": "Special",
         "activeFlag": "Y",
-        "sensitive": false
+        "sensitive": false,
+        "restrictedUse": false
       }
     ]
   },
@@ -48,14 +52,16 @@
         "description": "Active Old POM Note",
         "activeFlag": "Y",
         "source": "OCNS",
-        "sensitive": true
+        "sensitive": true,
+        "restrictedUse": true
       },
       {
         "code": "OLDTWO",
         "description": "Inactive Old POM Note",
         "activeFlag": "N",
         "source": "OCNS",
-        "sensitive": true
+        "sensitive": true,
+        "restrictedUse": true
       }
     ]
   },
@@ -70,21 +76,24 @@
         "description": "General POM Note",
         "activeFlag": "Y",
         "source": "OCNS",
-        "sensitive": true
+        "sensitive": true,
+        "restrictedUse": true
       },
       {
         "code": "OLD",
         "description": "Inactive POM Note",
         "activeFlag": "N",
         "source": "OCNS",
-        "sensitive": true
+        "sensitive": true,
+        "restrictedUse": true
       },
       {
         "code": "SPECIAL",
         "description": "Special POM Note",
         "activeFlag": "Y",
         "source": "OCNS",
-        "sensitive": true
+        "sensitive": true,
+        "restrictedUse": true
       }
     ]
   },
@@ -99,21 +108,24 @@
         "description": "General OMIC Note",
         "activeFlag": "Y",
         "source": "OCNS",
-        "sensitive": true
+        "sensitive": true,
+        "restrictedUse": true
       },
       {
         "code": "SPECIAL",
         "description": "Special OMIC Note",
         "activeFlag": "Y",
         "source": "OCNS",
-        "sensitive": true
+        "sensitive": true,
+        "restrictedUse": true
       },
       {
         "code": "OMIC_OPEN",
         "description": "Open Case Note",
         "activeFlag": "Y",
         "source": "OCNS",
-        "sensitive": false
+        "sensitive": false,
+        "restrictedUse": true
       }
     ]
   }

@@ -23,7 +23,7 @@ import java.util.List;
 @Data
 @ToString
 @Builder(toBuilder = true)
-public class CaseNoteType implements Comparable<CaseNoteType>{
+public class CaseNoteTypeDto implements Comparable<CaseNoteTypeDto>{
 
     @ApiModelProperty(required = true, value = "Case Note Code", position = 1, example = "OBSERVE")
     private String code;
@@ -41,12 +41,15 @@ public class CaseNoteType implements Comparable<CaseNoteType>{
     @ApiModelProperty(value = "Indicates the type of note is sensitive", example = "true", position = 5)
     private boolean sensitive;
 
-    @ApiModelProperty(value = "List of case note sub types", position = 6, allowEmptyValue = true)
+    @ApiModelProperty(value = "Indicates the type of note can only be created by a sub-set of users (e.g. POMs)", example = "true", position = 6)
+    private boolean restrictedUse;
+
+    @ApiModelProperty(value = "List of case note sub types", position = 7, allowEmptyValue = true)
     @Builder.Default
-    private List<CaseNoteType> subCodes = new ArrayList<>();
+    private List<CaseNoteTypeDto> subCodes = new ArrayList<>();
 
     @Override
-    public int compareTo(final CaseNoteType type) {
+    public int compareTo(final CaseNoteTypeDto type) {
         return getDescription().compareToIgnoreCase(type.getDescription());
     }
 }

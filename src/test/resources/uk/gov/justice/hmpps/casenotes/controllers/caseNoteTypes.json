@@ -8,13 +8,15 @@
         "code": "KS",
         "description": "Key worker Session",
         "activeFlag": "Y",
-        "sensitive": false
+        "sensitive": false,
+        "restrictedUse": false
       },
       {
         "code": "KE",
         "description": "Key worker Entry",
         "activeFlag": "Y",
-        "sensitive": false
+        "sensitive": false,
+        "restrictedUse": false
       }
     ]
   },
@@ -27,13 +29,15 @@
         "code": "GEN",
         "description": "General",
         "activeFlag": "Y",
-        "sensitive": false
+        "sensitive": false,
+        "restrictedUse": false
       },
       {
         "code": "SPECIAL",
         "description": "Special",
         "activeFlag": "Y",
-        "sensitive": false
+        "sensitive": false,
+        "restrictedUse": false
       }
     ]
   },
@@ -48,7 +52,8 @@
         "description": "Open Case Note",
         "activeFlag": "Y",
         "source": "OCNS",
-        "sensitive": false
+        "sensitive": false,
+        "restrictedUse": true
       }
     ]
   }

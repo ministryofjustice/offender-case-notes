@@ -31,7 +31,6 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.UUID;
 
-
 import static java.time.LocalDateTime.now;
 import static javax.persistence.CascadeType.DETACH;
 import static javax.persistence.CascadeType.MERGE;
@@ -46,8 +45,8 @@ import static javax.persistence.CascadeType.REFRESH;
 @AllArgsConstructor
 @EntityListeners(AuditingEntityListener.class)
 @Builder(toBuilder = true)
-@EqualsAndHashCode(of = {"offenderIdentifier", "occurrenceDateTime", "locationId", "authorUsername", "sensitiveCaseNoteType", "noteText"})
-@ToString(of = {"id", "offenderIdentifier", "occurrenceDateTime", "locationId", "authorUsername", "sensitiveCaseNoteType"})
+@EqualsAndHashCode(of = {"offenderIdentifier", "occurrenceDateTime", "locationId", "authorUsername", "caseNoteType", "noteText"})
+@ToString(of = {"id", "offenderIdentifier", "occurrenceDateTime", "locationId", "authorUsername", "caseNoteType"})
 public class OffenderCaseNote {
 
     @Id
@@ -76,7 +75,7 @@ public class OffenderCaseNote {
 
     @ManyToOne
     @JoinColumn(name = "CASE_NOTE_TYPE_ID", nullable = false)
-    private SensitiveCaseNoteType sensitiveCaseNoteType;
+    private CaseNoteType caseNoteType;
 
     private String noteText;
 
@@ -152,8 +151,8 @@ public class OffenderCaseNote {
         return this.authorName;
     }
 
-    public SensitiveCaseNoteType getSensitiveCaseNoteType() {
-        return this.sensitiveCaseNoteType;
+    public CaseNoteType getCaseNoteType() {
+        return this.caseNoteType;
     }
 
     public String getNoteText() {

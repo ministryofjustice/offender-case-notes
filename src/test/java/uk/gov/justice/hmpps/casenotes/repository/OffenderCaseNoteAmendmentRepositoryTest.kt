@@ -12,8 +12,8 @@ import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.transaction.TestTransaction
 import org.springframework.transaction.annotation.Transactional
 import uk.gov.justice.hmpps.casenotes.config.AuthAwareAuthenticationToken
+import uk.gov.justice.hmpps.casenotes.model.CaseNoteType
 import uk.gov.justice.hmpps.casenotes.model.OffenderCaseNote
-import uk.gov.justice.hmpps.casenotes.model.SensitiveCaseNoteType
 import java.time.LocalDateTime
 
 @ActiveProfiles("test")
@@ -28,13 +28,13 @@ class OffenderCaseNoteAmendmentRepositoryTest {
 
   @Autowired
   private lateinit var caseNoteTypeRepository: CaseNoteTypeRepository
-  private lateinit var genType: SensitiveCaseNoteType
+  private lateinit var genType: CaseNoteType
 
   @BeforeEach
   fun setUp() {
     val jwt = Jwt.withTokenValue("some").subject("anonymous").header("head", "something").build()
     SecurityContextHolder.getContext().authentication = AuthAwareAuthenticationToken(jwt, "userId", emptyList())
-    genType = caseNoteTypeRepository.findSensitiveCaseNoteTypeByParentType_TypeAndType(PARENT_TYPE, SUB_TYPE)!!
+    genType = caseNoteTypeRepository.findCaseNoteTypeByParentType_TypeAndType(PARENT_TYPE, SUB_TYPE)!!
   }
 
   @Test
@@ -107,7 +107,7 @@ class OffenderCaseNoteAmendmentRepositoryTest {
       .authorUserId("some id")
       .authorName("Mickey Mouse")
       .offenderIdentifier(offenderIdentifier)
-      .sensitiveCaseNoteType(genType)
+      .caseNoteType(genType)
       .noteText("HELLO")
   }
 

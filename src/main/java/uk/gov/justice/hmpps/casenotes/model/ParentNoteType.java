@@ -60,9 +60,9 @@ public class ParentNoteType {
 
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "parentType")
     @Builder.Default
-    private List<SensitiveCaseNoteType> subTypes = new ArrayList<>();
+    private List<CaseNoteType> subTypes = new ArrayList<>();
 
-    public Optional<SensitiveCaseNoteType> getSubType(final String subType) {
+    public Optional<CaseNoteType> getSubType(final String subType) {
         return getSubTypes().stream().filter(t -> t.getType().equalsIgnoreCase(subType)).findFirst();
     }
 
@@ -99,7 +99,7 @@ public class ParentNoteType {
         return this.modifyUserId;
     }
 
-    public List<SensitiveCaseNoteType> getSubTypes() {
+    public List<CaseNoteType> getSubTypes() {
         return this.subTypes;
     }
 }

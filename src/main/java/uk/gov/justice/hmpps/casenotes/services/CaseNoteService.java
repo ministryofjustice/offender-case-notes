@@ -17,16 +17,16 @@ import uk.gov.justice.hmpps.casenotes.config.SecurityUserContext;
 import uk.gov.justice.hmpps.casenotes.dto.CaseNote;
 import uk.gov.justice.hmpps.casenotes.dto.CaseNoteAmendment;
 import uk.gov.justice.hmpps.casenotes.dto.CaseNoteFilter;
-import uk.gov.justice.hmpps.casenotes.dto.CaseNoteType;
+import uk.gov.justice.hmpps.casenotes.dto.CaseNoteTypeDto;
 import uk.gov.justice.hmpps.casenotes.dto.NewCaseNote;
 import uk.gov.justice.hmpps.casenotes.dto.NewCaseNoteType;
 import uk.gov.justice.hmpps.casenotes.dto.NomisCaseNote;
 import uk.gov.justice.hmpps.casenotes.dto.UpdateCaseNote;
 import uk.gov.justice.hmpps.casenotes.dto.UpdateCaseNoteType;
 import uk.gov.justice.hmpps.casenotes.filters.OffenderCaseNoteFilter;
+import uk.gov.justice.hmpps.casenotes.model.CaseNoteType;
 import uk.gov.justice.hmpps.casenotes.model.OffenderCaseNote;
 import uk.gov.justice.hmpps.casenotes.model.ParentNoteType;
-import uk.gov.justice.hmpps.casenotes.model.SensitiveCaseNoteType;
 import uk.gov.justice.hmpps.casenotes.repository.CaseNoteTypeRepository;
 import uk.gov.justice.hmpps.casenotes.repository.OffenderCaseNoteAmendmentRepository;
 import uk.gov.justice.hmpps.casenotes.repository.OffenderCaseNoteRepository;
@@ -144,7 +144,7 @@ public class CaseNoteService {
     }
 
     private CaseNote mapper(final OffenderCaseNote cn) {
-        final var parentType = cn.getSensitiveCaseNoteType().getParentType();
+        final var parentType = cn.getCaseNoteType().getParentType();
         return CaseNote.builder()
                 .caseNoteId(cn.getId().toString())
                 .eventId(cn.getEventId())
@@ -154,10 +154,10 @@ public class CaseNoteService {
                 .authorName(cn.getAuthorName())
                 .type(parentType.getType())
                 .typeDescription(parentType.getDescription())
-                .subType(cn.getSensitiveCaseNoteType().getType())
-                .subTypeDescription(cn.getSensitiveCaseNoteType().getDescription())
+                .subType(cn.getCaseNoteType().getType())
+                .subTypeDescription(cn.getCaseNoteType().getDescription())
                 .source(SERVICE_NAME) // Indicates its a Offender Case Note Service Type
-                .sensitive(cn.getSensitiveCaseNoteType().isSensitive())
+                .sensitive(cn.getCaseNoteType().isSensitive())
                 .text(cn.getNoteText())
                 .creationDateTime(cn.getCreateDateTime())
                 .amendments(cn.getAmendments().stream().map(
@@ -204,16 +204,16 @@ public class CaseNoteService {
 
     @Transactional
     public CaseNote createCaseNote(@NotNull final String offenderIdentifier, @NotNull @Valid final NewCaseNote newCaseNote) {
-        final var type = caseNoteTypeRepository.findSensitiveCaseNoteTypeByParentType_TypeAndType(newCaseNote.getType(), newCaseNote.getSubType());
+        final var type = caseNoteTypeRepository.findCaseNoteTypeByParentType_TypeAndType(newCaseNote.getType(), newCaseNote.getSubType());
 
         // If we don't have the type locally then won't be secure, so delegate to prison-api
         if (type == null) {
             return mapper(externalApiService.createCaseNote(offenderIdentifier, newCaseNote), offenderIdentifier);
         }
 
-        // ensure that the user can then create a secure case note
-        if (!isAllowedToCreateSensitiveCaseNote()) {
-            throw new AccessDeniedException("User not allowed to create sensitive case notes");
+        // ensure that the user can then create a the case note
+        if (type.isRestrictedUse() && !isAllowedToCreateRestrictedCaseNote()) {
+            throw new AccessDeniedException("User not allowed to create this case note type [" + type + "]");
         }
 
         // ensure that the case note type is active
@@ -232,7 +232,7 @@ public class CaseNoteService {
                 .authorUserId(author.getUserId())
                 .authorName(staffName)
                 .occurrenceDateTime(newCaseNote.getOccurrenceDateTime() == null ? LocalDateTime.now() : newCaseNote.getOccurrenceDateTime())
-                .sensitiveCaseNoteType(type)
+                .caseNoteType(type)
                 .offenderIdentifier(offenderIdentifier)
                 .locationId(locationId)
                 .build();
@@ -245,15 +245,15 @@ public class CaseNoteService {
         if (isNotSensitiveCaseNote(caseNoteIdentifier)) {
             return mapper(externalApiService.amendOffenderCaseNote(offenderIdentifier, NumberUtils.toLong(caseNoteIdentifier), amendCaseNote), offenderIdentifier);
         }
-        if (!isAllowedToCreateSensitiveCaseNote()) {
-            throw new AccessDeniedException("User not allowed to view sensitive case notes");
-        }
 
         final var offenderCaseNote = repository.findById(UUID.fromString(caseNoteIdentifier)).orElseThrow(() -> EntityNotFoundException.withId(caseNoteIdentifier));
         if (!offenderIdentifier.equals(offenderCaseNote.getOffenderIdentifier())) {
             throw EntityNotFoundException.withId(offenderIdentifier);
         }
 
+        if (offenderCaseNote.getCaseNoteType().isRestrictedUse() && !isAllowedToCreateRestrictedCaseNote()) {
+            throw new AccessDeniedException("User not allowed to amend this case note type [" + offenderCaseNote.getCaseNoteType() + "]");
+        }
         final var author = securityUserContext.getCurrentUser();
         final var authorFullName = externalApiService.getUserFullName(author.getUsername());
 
@@ -262,43 +262,42 @@ public class CaseNoteService {
         return mapper(offenderCaseNote);
     }
 
-    public List<CaseNoteType> getCaseNoteTypes() {
+    public List<CaseNoteTypeDto> getCaseNoteTypes() {
         final var caseNoteTypes = externalApiService.getCaseNoteTypes();
-        return caseNoteTypeMerger.mergeAndSortList(caseNoteTypes, getSensitiveCaseNoteTypes(true, isAllowedToViewOrCreateSensitiveCaseNote()));
+        return caseNoteTypeMerger.mergeAndSortList(caseNoteTypes, getCaseNoteTypes(true, isAllowedToViewOrCreateSensitiveCaseNote(), null));
     }
 
-    public List<CaseNoteType> getUserCaseNoteTypes() {
+    public List<CaseNoteTypeDto> getUserCaseNoteTypes() {
         final var userCaseNoteTypes = externalApiService.getUserCaseNoteTypes();
-        if (isAllowedToCreateSensitiveCaseNote()) {
-            return caseNoteTypeMerger.mergeAndSortList(userCaseNoteTypes, getSensitiveCaseNoteTypes(false, true));
-        }
-        return userCaseNoteTypes;
+        return caseNoteTypeMerger.mergeAndSortList(userCaseNoteTypes, getCaseNoteTypes(false, null, isAllowedToCreateRestrictedCaseNote()));
     }
 
 
-    private List<CaseNoteType> getSensitiveCaseNoteTypes(final boolean allTypes, final boolean includeSensitive) {
+    private List<CaseNoteTypeDto> getCaseNoteTypes(final boolean allTypes, final Boolean sensitiveAllowed, final Boolean restrictedAllowed) {
         return parentCaseNoteTypeRepository.findAll().stream()
                 .filter(t -> allTypes || t.isActive())
-                .map(st -> transform(st, allTypes, includeSensitive))
+                .map(st -> transform(st, allTypes, sensitiveAllowed, restrictedAllowed))
                 .filter(pt -> pt.getSubCodes().size() > 0)
                 .collect(Collectors.toList());
     }
 
-    private CaseNoteType transform(final ParentNoteType parentNoteType, final boolean allTypes, final boolean includeSensitive) {
-        return CaseNoteType.builder()
+    private CaseNoteTypeDto transform(final ParentNoteType parentNoteType, final boolean allTypes, final Boolean sensitiveAllowed, final Boolean restrictedAllowed) {
+        return CaseNoteTypeDto.builder()
                 .code(parentNoteType.getType())
                 .description(parentNoteType.getDescription())
                 .activeFlag(parentNoteType.isActive() ? "Y" : "N")
                 .source(SERVICE_NAME)
                 .subCodes(parentNoteType.getSubTypes().stream()
                         .filter(t -> allTypes || t.isActive())
-                        .filter(t -> includeSensitive || !t.isSensitive())
-                        .map(st -> CaseNoteType.builder()
+                        .filter(t -> restrictedAllowed == null || (restrictedAllowed || !t.isRestrictedUse()))
+                        .filter(t -> sensitiveAllowed == null || (sensitiveAllowed || !t.isSensitive()))
+                        .map(st -> CaseNoteTypeDto.builder()
                                 .code(st.getType())
                                 .description(st.getDescription())
                                 .source(SERVICE_NAME)
                                 .activeFlag(st.isActive() ? "Y" : "N")
                                 .sensitive(st.isSensitive())
+                                .restrictedUse(st.isRestrictedUse())
                                 .build())
                         .collect(Collectors.toList()))
                 .build();
@@ -311,7 +310,7 @@ public class CaseNoteService {
 
         final var caseNote = repository.findById(UUID.fromString(caseNoteIdentifier)).orElseThrow(() -> EntityNotFoundException.withId(caseNoteIdentifier));
 
-        if (caseNote.getSensitiveCaseNoteType().isSensitive() && !isAllowedToViewOrCreateSensitiveCaseNote()) {
+        if (caseNote.getCaseNoteType().isSensitive() && !isAllowedToViewOrCreateSensitiveCaseNote()) {
             throw new AccessDeniedException("User not allowed to view sensitive case notes");
         }
         return mapper(caseNote);
@@ -323,7 +322,7 @@ public class CaseNoteService {
 
     @Transactional
     @PreAuthorize("hasAnyRole('MAINTAIN_REF_DATA', 'SYSTEM_USER')")
-    public CaseNoteType createCaseNoteType(@NotNull @Valid final NewCaseNoteType newCaseNoteType) {
+    public CaseNoteTypeDto createCaseNoteType(@NotNull @Valid final NewCaseNoteType newCaseNoteType) {
 
         final var parentNoteTypeOptional = parentCaseNoteTypeRepository.findById(newCaseNoteType.getType());
 
@@ -337,46 +336,47 @@ public class CaseNoteService {
                 .active(newCaseNoteType.isActive())
                 .build());
 
-        return transform(parentNoteType, true, true);
+        return transform(parentNoteType, true, true, true);
     }
 
     @Transactional
     @PreAuthorize("hasAnyRole('MAINTAIN_REF_DATA', 'SYSTEM_USER')")
-    public CaseNoteType createCaseNoteSubType(final String parentType, @NotNull @Valid final NewCaseNoteType newCaseNoteType) {
+    public CaseNoteTypeDto createCaseNoteSubType(final String parentType, @NotNull @Valid final NewCaseNoteType newCaseNoteType) {
         final var parentNoteType = parentCaseNoteTypeRepository.findById(parentType).orElseThrow(EntityNotFoundException.withId(parentType));
 
         if (parentNoteType.getSubType(newCaseNoteType.getType()).isPresent()) {
             throw new EntityExistsException(newCaseNoteType.getType());
         }
         parentNoteType.getSubTypes().add(
-                SensitiveCaseNoteType.builder()
+                CaseNoteType.builder()
                         .type(newCaseNoteType.getType())
                         .description(newCaseNoteType.getDescription())
                         .active(newCaseNoteType.isActive())
                         .parentType(parentNoteType)
                         .sensitive(newCaseNoteType.isSensitive())
+                        .restrictedUse(newCaseNoteType.isRestrictedUse())
                         .build()
         );
 
-        return transform(parentNoteType, true, true);
+        return transform(parentNoteType, true, true, true);
     }
 
     @Transactional
     @PreAuthorize("hasAnyRole('MAINTAIN_REF_DATA', 'SYSTEM_USER')")
-    public CaseNoteType updateCaseNoteType(final String parentType, @NotNull @Valid final UpdateCaseNoteType body) {
+    public CaseNoteTypeDto updateCaseNoteType(final String parentType, @NotNull @Valid final UpdateCaseNoteType body) {
         final var parentNoteType = parentCaseNoteTypeRepository.findById(parentType).orElseThrow(EntityNotFoundException.withId(parentType));
         parentNoteType.update(body.getDescription(), body.isActive());
-        return transform(parentNoteType, true, true);
+        return transform(parentNoteType, true, true, true);
     }
 
     @Transactional
     @PreAuthorize("hasAnyRole('MAINTAIN_REF_DATA', 'SYSTEM_USER')")
-    public CaseNoteType updateCaseNoteSubType(final String parentType, final String subType, @NotNull @Valid final UpdateCaseNoteType body) {
+    public CaseNoteTypeDto updateCaseNoteSubType(final String parentType, final String subType, @NotNull @Valid final UpdateCaseNoteType body) {
 
         final var parentNoteType = parentCaseNoteTypeRepository.findById(parentType).orElseThrow(EntityNotFoundException.withId(parentType));
         final var existingSubType = parentNoteType.getSubType(subType).orElseThrow(EntityNotFoundException.withId(parentType + " " + subType));
-        existingSubType.update(body.getDescription(), body.isActive());
-        return transform(parentNoteType, true, true);
+        existingSubType.update(body.getDescription(), body.isActive(), body.isSensitive(), body.isRestrictedUse());
+        return transform(parentNoteType, true, true, true);
     }
 
     @Transactional
@@ -423,7 +423,7 @@ public class CaseNoteService {
                 null);
     }
 
-    private boolean isAllowedToCreateSensitiveCaseNote() {
+    private boolean isAllowedToCreateRestrictedCaseNote() {
         return securityUserContext.isOverrideRole("POM", "ADD_SENSITIVE_CASE_NOTES");
     }
 

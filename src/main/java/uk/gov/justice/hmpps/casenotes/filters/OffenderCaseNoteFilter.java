@@ -41,16 +41,16 @@ public class OffenderCaseNoteFilter implements Specification<OffenderCaseNote> {
             predicateBuilder.add(cb.equal(root.get("authorUsername"), authorUsername));
         }
         if (StringUtils.isNotBlank(type)) {
-            final var caseNoteType = root.join("sensitiveCaseNoteType", JoinType.INNER);
+            final var caseNoteType = root.join("caseNoteType", JoinType.INNER);
             final var parentType = caseNoteType.join("parentType", JoinType.INNER);
             predicateBuilder.add(cb.equal(parentType.get("type"), type));
         }
         if (StringUtils.isNotBlank(subType)) {
-            final var caseNoteType = root.join("sensitiveCaseNoteType", JoinType.INNER);
+            final var caseNoteType = root.join("caseNoteType", JoinType.INNER);
             predicateBuilder.add(cb.equal(caseNoteType.get("type"), subType));
         }
         if (excludeSensitive) {
-            final var caseNoteType = root.join("sensitiveCaseNoteType", JoinType.INNER);
+            final var caseNoteType = root.join("caseNoteType", JoinType.INNER);
             predicateBuilder.add(cb.equal(caseNoteType.get("sensitive"), false));
         }
         if (startDate != null) {
