@@ -98,7 +98,7 @@ public class CaseNoteServiceTest {
         when(caseNoteTypeRepository.findCaseNoteTypeByParentType_TypeAndType(anyString(), anyString())).thenReturn(noteType);
         when(securityUserContext.isOverrideRole(anyString(), anyString())).thenReturn(Boolean.TRUE);
         when(securityUserContext.getCurrentUser()).thenReturn(new UserIdUser("someuser", "userId"));
-        final var offenderCaseNote = createOffenderCaseNote(noteType, null);
+        final var offenderCaseNote = createOffenderCaseNote(noteType);
         when(repository.save(any())).thenReturn(offenderCaseNote);
 
         final var createdNote = caseNoteService.createCaseNote("12345", NewCaseNote.builder().type("type").subType("sub").build());
@@ -110,7 +110,7 @@ public class CaseNoteServiceTest {
     @Test
     public void getCaseNote_noAddRole() {
         final var noteType = CaseNoteType.builder().type("sometype").parentType(ParentNoteType.builder().build()).build();
-        final var offenderCaseNote = createOffenderCaseNote(noteType, null);
+        final var offenderCaseNote = createOffenderCaseNote(noteType);
         when(repository.findById(any())).thenReturn(Optional.of(offenderCaseNote));
 
         assertThatThrownBy(() -> caseNoteService.getCaseNote("12345", UUID.randomUUID().toString())).isInstanceOf(AccessDeniedException.class);
@@ -128,7 +128,7 @@ public class CaseNoteServiceTest {
     @Test
     public void getCaseNote() {
         final var noteType = CaseNoteType.builder().type("sometype").parentType(ParentNoteType.builder().build()).build();
-        final var offenderCaseNote = createOffenderCaseNote(noteType, null);
+        final var offenderCaseNote = createOffenderCaseNote(noteType);
         when(repository.findById(any())).thenReturn(Optional.of(offenderCaseNote));
         when(securityUserContext.isOverrideRole(anyString(), anyString(), anyString())).thenReturn(Boolean.TRUE);
 
@@ -171,7 +171,7 @@ public class CaseNoteServiceTest {
     @Test
     public void amendCaseNote_noAddRole() {
         final var noteType = CaseNoteType.builder().type("sometype").parentType(ParentNoteType.builder().build()).build();
-        final var offenderCaseNote = createOffenderCaseNote(noteType, "12345");
+        final var offenderCaseNote = createOffenderCaseNote(noteType);
         when(repository.findById(any())).thenReturn(Optional.of(offenderCaseNote));
 
         assertThatThrownBy(() -> caseNoteService.amendCaseNote("12345", UUID.randomUUID().toString(), new UpdateCaseNote("text"))).isInstanceOf(AccessDeniedException.class);
@@ -189,8 +189,8 @@ public class CaseNoteServiceTest {
 
     @Test
     public void amendCaseNote_wrongOffender() {
-        final var noteType = CaseNoteType.builder().type("sometype").parentType(ParentNoteType.builder().build()).build();
-        final var offenderCaseNote = createOffenderCaseNote(noteType, null);
+        final var noteType = CaseNoteType.builder().type("sometype").restrictedUse(false).parentType(ParentNoteType.builder().build()).build();
+        final var offenderCaseNote = createOffenderCaseNote(noteType);
         when(repository.findById(any())).thenReturn(Optional.of(offenderCaseNote));
 
         assertThatThrownBy(() -> caseNoteService.amendCaseNote("12345", UUID.randomUUID().toString(), new UpdateCaseNote("text")))
@@ -214,7 +214,7 @@ public class CaseNoteServiceTest {
     @Test
     public void amendCaseNote() {
         final var noteType = CaseNoteType.builder().type("sometype").parentType(ParentNoteType.builder().build()).build();
-        final var offenderCaseNote = createOffenderCaseNote(noteType, null);
+        final var offenderCaseNote = createOffenderCaseNote(noteType);
         when(repository.findById(any())).thenReturn(Optional.of(offenderCaseNote));
         when(securityUserContext.isOverrideRole(anyString(), anyString())).thenReturn(Boolean.TRUE);
         when(securityUserContext.getCurrentUser()).thenReturn(new UserIdUser("user", "userId"));
@@ -234,7 +234,7 @@ public class CaseNoteServiceTest {
     @Test
     public void softDeleteCaseNote() {
         final var noteType = CaseNoteType.builder().type("sometype").parentType(ParentNoteType.builder().build()).build();
-        final var offenderCaseNote = createOffenderCaseNote(noteType, null);
+        final var offenderCaseNote = createOffenderCaseNote(noteType);
         final var offenderCaseNoteId = offenderCaseNote.getId();
         when(repository.findById(any())).thenReturn(Optional.of(offenderCaseNote));
         when(securityUserContext.getCurrentUser()).thenReturn(new UserIdUser("user", "userId"));
@@ -247,7 +247,7 @@ public class CaseNoteServiceTest {
     @Test
     public void softDeleteCaseNote_telemetry() {
         final var noteType = CaseNoteType.builder().type("sometype").parentType(ParentNoteType.builder().build()).build();
-        final var offenderCaseNote = createOffenderCaseNote(noteType, null);
+        final var offenderCaseNote = createOffenderCaseNote(noteType);
         final var offenderCaseNoteId = offenderCaseNote.getId();
         when(repository.findById(any())).thenReturn(Optional.of(offenderCaseNote));
         when(securityUserContext.getCurrentUser()).thenReturn(new UserIdUser("user", "userId"));
@@ -267,7 +267,7 @@ public class CaseNoteServiceTest {
     @Test
     public void softDeleteCaseNoteEntityNotFoundExceptionThrownWhenCaseNoteDoesntBelongToOffender() {
         final var noteType = CaseNoteType.builder().type("sometype").parentType(ParentNoteType.builder().build()).build();
-        final var offenderCaseNote = createOffenderCaseNote(noteType, null);
+        final var offenderCaseNote = createOffenderCaseNote(noteType);
         final var offenderCaseNoteId = offenderCaseNote.getId();
         when(repository.findById(any())).thenReturn(Optional.of(offenderCaseNote));
 
@@ -334,7 +334,7 @@ public class CaseNoteServiceTest {
                 .build();
     }
 
-    private OffenderCaseNote createOffenderCaseNote(final CaseNoteType caseNoteType, final String offenderId) {
+    private OffenderCaseNote createOffenderCaseNote(final CaseNoteType caseNoteType) {
         return OffenderCaseNote.builder()
                 .id(UUID.randomUUID())
                 .occurrenceDateTime(now())
@@ -342,7 +342,7 @@ public class CaseNoteServiceTest {
                 .authorUsername("USER2")
                 .authorUserId("some user")
                 .authorName("Mickey Mouse")
-                .offenderIdentifier(offenderId != null ? offenderId : "A1234AC")
+                .offenderIdentifier("A1234AC")
                 .caseNoteType(caseNoteType)
                 .noteText("HELLO")
                 .build();
@@ -351,7 +351,7 @@ public class CaseNoteServiceTest {
     private Optional<OffenderCaseNoteAmendment> createOffenderCaseNoteAmendment(final CaseNoteType caseNoteType) {
         return Optional.of(OffenderCaseNoteAmendment
                 .builder()
-                .caseNote(createOffenderCaseNote(caseNoteType, null))
+                .caseNote(createOffenderCaseNote(caseNoteType))
                 .id(1L)
                 .noteText("A")
                 .authorName("some user")
