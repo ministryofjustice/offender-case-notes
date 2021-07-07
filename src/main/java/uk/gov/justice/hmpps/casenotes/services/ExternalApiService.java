@@ -6,9 +6,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort;
-import org.springframework.http.HttpHeaders;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 import uk.gov.justice.hmpps.casenotes.dto.BookingIdentifier;
@@ -20,8 +18,6 @@ import uk.gov.justice.hmpps.casenotes.dto.OffenderBooking;
 import uk.gov.justice.hmpps.casenotes.dto.UpdateCaseNote;
 
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -84,65 +80,50 @@ public class ExternalApiService {
                 .block();
     }
 
-    Page<NomisCaseNote> getOffenderCaseNotes(final String offenderIdentifier, final CaseNoteFilter filter, final int pageLimit, final int pageNumber, final String sortFields, final Sort.Direction direction) {
+    Page<NomisCaseNote> getOffenderCaseNotes(final String offenderIdentifier, final CaseNoteFilter filter, final Pageable pageable) {
 
-        final var offset = pageLimit * pageNumber;
-        final var headerMap = Map.of("Page-Limit", String.valueOf(pageLimit),
-                "Page-Offset", String.valueOf(offset),
-                "Sort-Fields", sortFields,
-                "Sort-Order", direction.name());
-
-        final var queryFilter = getQueryFilter(filter);
-        final var url = "/api/offenders/{offenderIdentifier}/case-notes" + (queryFilter != null ? "?" + queryFilter : "");
+        final var paramFilter = getParamFilter(filter, pageable);
+        final var url = "/api/offenders/{offenderIdentifier}/case-notes/v2?" + paramFilter;
 
         return elite2ApiWebClient.get().uri(url, offenderIdentifier)
-                .headers(
-                        c -> {
-                            c.add("Page-Limit", String.valueOf(pageLimit));
-                            c.add("Page-Offset", String.valueOf(offset));
-                            c.add("Sort-Fields", sortFields);
-                            c.add("Sort-Order", direction.name());
-                        })
                 .retrieve()
-                .toEntityList(NomisCaseNote.class)
-                .map(e -> new PageImpl<>(e.getBody(), PageRequest.of(pageNumber, pageLimit), getHeader(e.getHeaders())))
+                .toEntity( new ParameterizedTypeReference<RestResponsePage<NomisCaseNote>>() {})
+                .map(e -> new PageImpl<NomisCaseNote>(e.getBody().getContent(), e.getBody().getPageable(), e.getBody().getNumberOfElements()))
                 .block();
     }
 
-    private int getHeader(final HttpHeaders responseHeaders) {
-        final var value = responseHeaders.getOrDefault("Total-Records", Collections.emptyList());
-        return !value.isEmpty() ? Integer.parseInt(value.get(0)) : 0;
-    }
-
-    private String getQueryFilter(final CaseNoteFilter filter) {
-        final var queryFilters = new ArrayList<String>();
+    private String getParamFilter(final CaseNoteFilter filter, final Pageable pageable) {
+        final var paramFilterMap = new HashMap<String, String>();
 
         if (StringUtils.isNotBlank(filter.getType())) {
-            queryFilters.add(String.format("type:in:'%s'", filter.getType()));
+            paramFilterMap.put("type", filter.getType());
         }
 
         if (StringUtils.isNotBlank(filter.getSubType())) {
-            queryFilters.add(String.format("subType:in:'%s'", filter.getSubType()));
+            paramFilterMap.put("subType", filter.getSubType());
         }
 
         if (filter.getLocationId() != null) {
-            queryFilters.add(String.format("agencyId:eq:'%s'", filter.getLocationId()));
-        }
-
-        final var queryParamsMap = new HashMap<String, String>();
-        if (!queryFilters.isEmpty()) {
-            queryParamsMap.put("query", StringUtils.join(queryFilters, ",and:"));
+            paramFilterMap.put("prisonId", filter.getLocationId());
         }
 
         if (filter.getStartDate() != null) {
-            queryParamsMap.put("from", filter.getStartDate().format(DateTimeFormatter.ISO_DATE));
+            paramFilterMap.put("from", filter.getStartDate().format(DateTimeFormatter.ISO_DATE));
         }
 
         if (filter.getEndDate() != null) {
-            queryParamsMap.put("to", filter.getEndDate().format(DateTimeFormatter.ISO_DATE));
+            paramFilterMap.put("to", filter.getEndDate().format(DateTimeFormatter.ISO_DATE));
         }
 
-        return queryParamsMap.isEmpty() ? null : Joiner.on("&").withKeyValueSeparator("=").join(queryParamsMap);
+        paramFilterMap.put("size", String.valueOf(pageable.getPageSize()));
+        paramFilterMap.put("page", String.valueOf(pageable.getPageNumber()));
+
+        final var params = paramFilterMap.isEmpty() ? null : Joiner.on("&").withKeyValueSeparator("=").join(paramFilterMap);
+
+        final var sortParams = new StringBuilder();
+        pageable.getSort().get().forEach(o -> sortParams.append("sort=").append(o.getProperty()).append(",").append(o.getDirection()));
+
+        return params+(sortParams.length() > 0 ? "&"+sortParams : "");
     }
 
     NomisCaseNote createCaseNote(final String offenderIdentifier, final NewCaseNote newCaseNote) {
