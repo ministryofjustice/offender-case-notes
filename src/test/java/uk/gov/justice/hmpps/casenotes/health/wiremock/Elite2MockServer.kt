@@ -18,10 +18,8 @@ import org.junit.jupiter.api.extension.AfterAllCallback
 import org.junit.jupiter.api.extension.BeforeAllCallback
 import org.junit.jupiter.api.extension.BeforeEachCallback
 import org.junit.jupiter.api.extension.ExtensionContext
-import org.springframework.data.domain.PageRequest
 import uk.gov.justice.hmpps.casenotes.dto.CaseNoteTypeDto
 import uk.gov.justice.hmpps.casenotes.dto.NomisCaseNote
-import uk.gov.justice.hmpps.casenotes.services.RestResponsePage
 import java.lang.reflect.Type
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
@@ -186,7 +184,53 @@ class Elite2MockServer : WireMockServer(WIREMOCK_PORT) {
 
   fun subGetCaseNotesForOffender(offenderIdentifier: String) {
     val getCaseNotes = "$API_PREFIX/offenders/$offenderIdentifier/case-notes/v2"
-    val body = gson.toJson(RestResponsePage(listOf(createNomisCaseNote()), PageRequest.of(0, 10), 1))
+    val body = """ 
+      {
+        "content": [
+          {
+            "caseNoteId": 131232,
+            "type": "OBS",
+            "typeDescription": "Observation",
+            "subType": "GEN",
+            "subTypeDescription": "General",
+            "source": "INST",
+            "creationDateTime": "2021-06-07T14:58:14.917306",
+            "occurrenceDateTime": "2021-06-07T14:58:14.917397",
+            "staffId": 1231232,
+            "authorName": "Mickey Mouse",
+            "text": "Some Text",
+            "originalNoteText": "Some Text",
+            "agencyId": "LEI",
+            "amendments": []
+          }
+        ],
+        "pageable": {
+          "sort": {
+            "sorted": true,
+            "unsorted": false,
+            "empty": false
+          },
+          "offset": 0,
+          "pageNumber": 0,
+          "pageSize": 10,
+          "paged": true,
+          "unpaged": false
+        },
+        "last": true,
+        "totalElements": 1,
+        "totalPages": 1,
+        "size": 10,
+        "number": 0,
+        "sort": {
+          "sorted": true,
+          "unsorted": false,
+          "empty": false
+        },
+        "first": true,
+        "numberOfElements": 1,
+        "empty": false
+      }
+    """.trimIndent()
     stubFor(
       get(urlPathMatching(getCaseNotes))
         .willReturn(
