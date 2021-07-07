@@ -183,16 +183,59 @@ class Elite2MockServer : WireMockServer(WIREMOCK_PORT) {
   }
 
   fun subGetCaseNotesForOffender(offenderIdentifier: String) {
-    val getCaseNotes = "$API_PREFIX/offenders/$offenderIdentifier/case-notes"
-    val body = gson.toJson(listOf(createNomisCaseNote()))
+    val getCaseNotes = "$API_PREFIX/offenders/$offenderIdentifier/case-notes/v2"
+    val body = """ 
+      {
+        "content": [
+          {
+            "caseNoteId": 131232,
+            "type": "OBS",
+            "typeDescription": "Observation",
+            "subType": "GEN",
+            "subTypeDescription": "General",
+            "source": "INST",
+            "creationDateTime": "2021-06-07T14:58:14.917306",
+            "occurrenceDateTime": "2021-06-07T14:58:14.917397",
+            "staffId": 1231232,
+            "authorName": "Mickey Mouse",
+            "text": "Some Text",
+            "originalNoteText": "Some Text",
+            "agencyId": "LEI",
+            "amendments": []
+          }
+        ],
+        "pageable": {
+          "sort": {
+            "sorted": true,
+            "unsorted": false,
+            "empty": false
+          },
+          "offset": 0,
+          "pageNumber": 0,
+          "pageSize": 10,
+          "paged": true,
+          "unpaged": false
+        },
+        "last": true,
+        "totalElements": 1,
+        "totalPages": 1,
+        "size": 10,
+        "number": 0,
+        "sort": {
+          "sorted": true,
+          "unsorted": false,
+          "empty": false
+        },
+        "first": true,
+        "numberOfElements": 1,
+        "empty": false
+      }
+    """.trimIndent()
     stubFor(
       get(urlPathMatching(getCaseNotes))
         .willReturn(
           aResponse()
             .withHeader("Content-Type", "application/json")
-            .withHeader("Total-Records", "1")
-            .withHeader("Page-Offset", "0")
-            .withHeader("Page-Limit", "10")
             .withBody(body)
             .withStatus(200)
         )
@@ -200,15 +243,12 @@ class Elite2MockServer : WireMockServer(WIREMOCK_PORT) {
   }
 
   fun subGetCaseNotesForOffenderNotFound(offenderIdentifier: String) {
-    val getCaseNotes = "$API_PREFIX/offenders/$offenderIdentifier/case-notes"
+    val getCaseNotes = "$API_PREFIX/offenders/$offenderIdentifier/case-notes/v2"
     stubFor(
       get(urlPathMatching(getCaseNotes))
         .willReturn(
           aResponse()
             .withHeader("Content-Type", "application/json")
-            .withHeader("Total-Records", "1")
-            .withHeader("Page-Offset", "0")
-            .withHeader("Page-Limit", "10")
             .withBody(
               """
                   {

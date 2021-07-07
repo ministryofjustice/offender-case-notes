@@ -6,8 +6,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Sort.Direction;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
@@ -68,41 +70,41 @@ public class CaseNoteService {
         final List<CaseNote> sensitiveCaseNotes;
 
 
-            final var filter = OffenderCaseNoteFilter.builder()
-                    .offenderIdentifier(offenderIdentifier)
-                    .type(caseNoteFilter.getType())
-                    .subType(caseNoteFilter.getSubType())
-                    .locationId(caseNoteFilter.getLocationId())
-                    .authorUsername(caseNoteFilter.getAuthorUsername())
-                    .startDate(caseNoteFilter.getStartDate())
-                    .endDate(caseNoteFilter.getEndDate())
-                    .excludeSensitive(!isAllowedToViewOrCreateSensitiveCaseNote())
-                    .build();
+        final var filter = OffenderCaseNoteFilter.builder()
+                .offenderIdentifier(offenderIdentifier)
+                .type(caseNoteFilter.getType())
+                .subType(caseNoteFilter.getSubType())
+                .locationId(caseNoteFilter.getLocationId())
+                .authorUsername(caseNoteFilter.getAuthorUsername())
+                .startDate(caseNoteFilter.getStartDate())
+                .endDate(caseNoteFilter.getEndDate())
+                .excludeSensitive(!isAllowedToViewOrCreateSensitiveCaseNote())
+                .build();
 
-            sensitiveCaseNotes = repository.findAll(filter)
-                    .stream()
-                    .map(this::mapper)
-                    .collect(Collectors.toList());
-
-        // only supports one field sort.
-        final var direction = pageable.getSort().isSorted() ? pageable.getSort().get().map(Sort.Order::getDirection).collect(Collectors.toList()).get(0) : Sort.Direction.DESC;
-        final var sortField = pageable.getSort().isSorted() ? pageable.getSort().get().map(Sort.Order::getProperty).collect(Collectors.toList()).get(0) : "occurrenceDateTime";
+        sensitiveCaseNotes = repository.findAll(filter)
+                .stream()
+                .map(this::mapper)
+                .collect(Collectors.toList());
 
         final Page<CaseNote> caseNotes;
         if (sensitiveCaseNotes.isEmpty()) {
             // Just delegate to prison api for data
-            final var pagedNotes = externalApiService.getOffenderCaseNotes(offenderIdentifier, caseNoteFilter, pageable.getPageSize(), pageable.getPageNumber(), sortField, direction);
+            final var pagedNotes = externalApiService.getOffenderCaseNotes(offenderIdentifier, caseNoteFilter, pageable);
 
             final var dtoNotes = translateToDto(pagedNotes, offenderIdentifier);
             caseNotes = new PageImpl<>(dtoNotes, pageable, pagedNotes.getTotalElements());
 
         } else {
             // There are both case note sources.  Combine
-            final var pagedNotes = externalApiService.getOffenderCaseNotes(offenderIdentifier, caseNoteFilter, 10000, 0, "caseNoteId", ASC);
+            final var pagedNotes = externalApiService.getOffenderCaseNotes(offenderIdentifier, caseNoteFilter, PageRequest.of(0, 10000, Sort.by(Direction.ASC, "caseNoteId")));
 
             final var dtoNotes = translateToDto(pagedNotes, offenderIdentifier);
 
             dtoNotes.addAll(sensitiveCaseNotes);
+
+            // only supports one field sort.
+            final var direction = pageable.getSort().isSorted() ? pageable.getSort().get().map(Sort.Order::getDirection).collect(Collectors.toList()).get(0) : Sort.Direction.DESC;
+            final var sortField = pageable.getSort().isSorted() ? pageable.getSort().get().map(Sort.Order::getProperty).collect(Collectors.toList()).get(0) : "occurrenceDateTime";
 
             final var sortedList = sortByFieldName(dtoNotes, sortField, direction);
 
