@@ -18,8 +18,10 @@ import org.junit.jupiter.api.extension.AfterAllCallback
 import org.junit.jupiter.api.extension.BeforeAllCallback
 import org.junit.jupiter.api.extension.BeforeEachCallback
 import org.junit.jupiter.api.extension.ExtensionContext
+import org.springframework.data.domain.PageRequest
 import uk.gov.justice.hmpps.casenotes.dto.CaseNoteTypeDto
 import uk.gov.justice.hmpps.casenotes.dto.NomisCaseNote
+import uk.gov.justice.hmpps.casenotes.services.RestResponsePage
 import java.lang.reflect.Type
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
@@ -183,16 +185,13 @@ class Elite2MockServer : WireMockServer(WIREMOCK_PORT) {
   }
 
   fun subGetCaseNotesForOffender(offenderIdentifier: String) {
-    val getCaseNotes = "$API_PREFIX/offenders/$offenderIdentifier/case-notes"
-    val body = gson.toJson(listOf(createNomisCaseNote()))
+    val getCaseNotes = "$API_PREFIX/offenders/$offenderIdentifier/case-notes/v2"
+    val body = gson.toJson(RestResponsePage(listOf(createNomisCaseNote()), PageRequest.of(0, 10), 1))
     stubFor(
       get(urlPathMatching(getCaseNotes))
         .willReturn(
           aResponse()
             .withHeader("Content-Type", "application/json")
-            .withHeader("Total-Records", "1")
-            .withHeader("Page-Offset", "0")
-            .withHeader("Page-Limit", "10")
             .withBody(body)
             .withStatus(200)
         )
@@ -200,15 +199,12 @@ class Elite2MockServer : WireMockServer(WIREMOCK_PORT) {
   }
 
   fun subGetCaseNotesForOffenderNotFound(offenderIdentifier: String) {
-    val getCaseNotes = "$API_PREFIX/offenders/$offenderIdentifier/case-notes"
+    val getCaseNotes = "$API_PREFIX/offenders/$offenderIdentifier/case-notes/v2"
     stubFor(
       get(urlPathMatching(getCaseNotes))
         .willReturn(
           aResponse()
             .withHeader("Content-Type", "application/json")
-            .withHeader("Total-Records", "1")
-            .withHeader("Page-Offset", "0")
-            .withHeader("Page-Limit", "10")
             .withBody(
               """
                   {
