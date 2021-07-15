@@ -88,7 +88,7 @@ public class ExternalApiService {
         return elite2ApiWebClient.get().uri(url, offenderIdentifier)
                 .retrieve()
                 .toEntity( new ParameterizedTypeReference<RestResponsePage<NomisCaseNote>>() {})
-                .map(e -> new PageImpl<NomisCaseNote>(e.getBody().getContent(), e.getBody().getPageable(), e.getBody().getNumberOfElements()))
+                .map(e -> new PageImpl<NomisCaseNote>(e.getBody().getContent(), e.getBody().getPageable(), e.getBody().getTotalElements()))
                 .block();
     }
 
