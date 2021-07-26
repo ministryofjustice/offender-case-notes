@@ -1,6 +1,6 @@
 plugins {
-  id("uk.gov.justice.hmpps.gradle-spring-boot") version "3.3.4"
-  kotlin("plugin.spring") version "1.5.20"
+  id("uk.gov.justice.hmpps.gradle-spring-boot") version "3.3.5-beta"
+  kotlin("plugin.spring") version "1.5.21"
 }
 
 configurations {
@@ -34,8 +34,8 @@ dependencies {
 
   implementation("net.sf.ehcache:ehcache:2.10.9.2")
   implementation("org.apache.commons:commons-text:1.9")
-  implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.12.3")
-  implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.12.3")
+  implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.12.4")
+  implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.12.4")
   implementation("com.pauldijou:jwt-core_2.11:5.0.0")
   implementation("com.google.code.gson:gson:2.8.6")
 
