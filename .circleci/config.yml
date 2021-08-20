@@ -1,14 +1,14 @@
 version: 2.1
 
 orbs:
-  hmpps: ministryofjustice/hmpps@3.8
+  hmpps: ministryofjustice/hmpps@3.10
 
 jobs:
   validate:
     executor:
       name: hmpps/localstack
       jdk_tag: "16.0"
-      localstack_tag: "0.12.9.1"
+      localstack_tag: "0.12.10"
       services: "sqs"
     steps:
       - checkout

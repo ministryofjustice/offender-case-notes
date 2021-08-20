@@ -23,10 +23,9 @@ dependencies {
   implementation("org.springframework.boot:spring-boot-starter-oauth2-client")
   implementation("org.springframework.boot:spring-boot-starter-webflux")
 
-  implementation("org.springframework:spring-jms")
-  implementation("com.amazonaws:amazon-sqs-java-messaging-lib:1.0.8")
+  implementation("uk.gov.justice.service.hmpps:hmpps-sqs-spring-boot-starter:1.0.0")
 
-  implementation("com.google.code.gson:gson:2.8.6")
+  implementation("com.google.code.gson:gson:2.8.7")
   implementation("javax.activation:activation:1.1.1")
   implementation("javax.transaction:javax.transaction-api:1.3")
 

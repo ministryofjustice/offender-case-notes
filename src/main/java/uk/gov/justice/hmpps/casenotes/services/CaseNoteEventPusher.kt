@@ -1,16 +1,18 @@
 package uk.gov.justice.hmpps.casenotes.services
 
+
+import com.amazonaws.services.sns.AmazonSNSAsync
+import com.amazonaws.services.sns.model.MessageAttributeValue
+import com.amazonaws.services.sns.model.PublishRequest
 import com.fasterxml.jackson.databind.ObjectMapper
 import org.apache.commons.lang3.math.NumberUtils
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.stereotype.Component
-import software.amazon.awssdk.services.sns.SnsAsyncClient
-import software.amazon.awssdk.services.sns.model.MessageAttributeValue
-import software.amazon.awssdk.services.sns.model.PublishRequest
 import uk.gov.justice.hmpps.casenotes.dto.CaseNote
+import uk.gov.justice.hmpps.sqs.HmppsQueueService
+import uk.gov.justice.hmpps.sqs.HmppsTopic
 import java.time.LocalDateTime
 
 interface CaseNoteEventPusher {
@@ -24,34 +26,38 @@ interface CaseNoteEventPusher {
 @Suppress("SpringJavaInjectionPointsAutowiringInspection")
 @Component
 @ConditionalOnProperty(name = ["sns.provider"])
-open class CaseNoteAwsEventPusher(
-  private val snsClient: SnsAsyncClient,
-  @Value("\${sns.topic.arn}") private val topicArn: String,
+class CaseNoteAwsEventPusher(
+  private val hmppsQueueService: HmppsQueueService,
   private val objectMapper: ObjectMapper
 ) : CaseNoteEventPusher {
   companion object {
     val log: Logger = LoggerFactory.getLogger(this::class.java)
   }
 
+  internal val eventTopic by lazy { hmppsQueueService.findByTopicId("offenderevents") as HmppsTopic }
+  internal val snsAsyncClient by lazy { eventTopic.snsClient as AmazonSNSAsync }
+  internal val topicArn by lazy { eventTopic.arn }
+
   override fun sendEvent(caseNote: CaseNote) {
     if (isSensitiveCaseNote(caseNote.caseNoteId)) {
       val cne = CaseNoteEvent(caseNote)
       log.info("Pushing case note {} to event topic with event type of {}", cne.caseNoteId, cne.eventType)
-      val publishRequest = PublishRequest.builder()
-        .topicArn(topicArn)
-        .messageAttributes(
-          mapOf(
-            "eventType" to MessageAttributeValue.builder().dataType("String").stringValue(cne.eventType).build(),
-            "contentType" to MessageAttributeValue.builder().dataType("String").stringValue("text/plain;charset=UTF-8").build()
-          )
+      val publishRequest = PublishRequest(
+        topicArn,
+        objectMapper.writeValueAsString(cne)
+      ).withMessageAttributes(
+        mapOf(
+          "eventType" to MessageAttributeValue().withDataType("String").withStringValue(cne.eventType),
+          "contentType" to MessageAttributeValue().withDataType("String").withStringValue("text/plain;charset=UTF-8")
         )
-        .message(objectMapper.writeValueAsString(cne))
-        .build()
-      snsClient.publish(publishRequest)
-        .whenComplete { publishResponse, throwable ->
-          publishResponse?.run { log.debug("Sent case note with message id {}", publishResponse.messageId()) }
-          throwable?.run { log.error("Failed to send case note", throwable) }
-        }
+      )
+
+      try {
+        val publishResponse = snsAsyncClient.publishAsync(publishRequest).get()
+        log.debug("Sent case note with message id {}", publishResponse.messageId)
+      } catch ( throwable : Throwable ) {
+        log.error("Failed to send case note", throwable)
+      }
     }
   }
 }
