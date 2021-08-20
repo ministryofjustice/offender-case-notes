@@ -1,6 +1,5 @@
 package uk.gov.justice.hmpps.casenotes.services
 
-
 import com.amazonaws.services.sns.AmazonSNSAsync
 import com.amazonaws.services.sns.model.MessageAttributeValue
 import com.amazonaws.services.sns.model.PublishRequest
@@ -55,7 +54,7 @@ class CaseNoteAwsEventPusher(
       try {
         val publishResponse = snsAsyncClient.publishAsync(publishRequest).get()
         log.debug("Sent case note with message id {}", publishResponse.messageId)
-      } catch ( throwable : Throwable ) {
+      } catch (throwable: Throwable) {
         log.error("Failed to send case note", throwable)
       }
     }
