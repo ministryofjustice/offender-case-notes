@@ -27,7 +27,7 @@ class CaseNoteAwsEventPusherTest {
   @Test
   fun `send event converts to case note event`() {
     whenever(objectMapper.writeValueAsString(any())).thenReturn("messageAsJson")
-    whenever( hmppsQueueService.findByTopicId("offenderevents")).thenReturn(HmppsTopic("id", "topicUrn", snsClient))
+    whenever(hmppsQueueService.findByTopicId("offenderevents")).thenReturn(HmppsTopic("id", "topicUrn", snsClient))
     whenever(snsClient.publish(any())).thenReturn(PublishResult().withMessageId("Hello"))
     service.sendEvent(caseCaseNote())
     verify(objectMapper).writeValueAsString(
@@ -48,7 +48,7 @@ class CaseNoteAwsEventPusherTest {
   @Test
   fun `send event sends to the sns client`() {
     whenever(objectMapper.writeValueAsString(any())).thenReturn("messageAsJson")
-    whenever( hmppsQueueService.findByTopicId("offenderevents")).thenReturn(HmppsTopic("id", "topicArn", snsClient))
+    whenever(hmppsQueueService.findByTopicId("offenderevents")).thenReturn(HmppsTopic("id", "topicArn", snsClient))
     whenever(snsClient.publish(any())).thenReturn(PublishResult().withMessageId("Hello"))
     service.sendEvent(caseCaseNote())
     verify(snsClient).publish(

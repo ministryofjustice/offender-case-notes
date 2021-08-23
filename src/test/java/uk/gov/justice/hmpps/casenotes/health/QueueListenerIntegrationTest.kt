@@ -22,7 +22,6 @@ abstract class QueueListenerIntegrationTest : IntegrationTest() {
   internal val eventDlqName by lazy { eventQueue.dlqName as String }
   internal val eventDlqUrl by lazy { eventQueue.dlqUrl as String }
 
-
   fun purgeQueues() {
     eventQueueSqsClient.purgeQueue(PurgeQueueRequest(eventQueueUrl))
     await.until { getNumberOfMessagesCurrentlyOnPrisonEventQueue() == 0 }

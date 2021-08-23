@@ -4,7 +4,6 @@ import com.github.tomakehurst.wiremock.client.WireMock.aResponse
 import com.github.tomakehurst.wiremock.client.WireMock.get
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
-
 import uk.gov.justice.hmpps.casenotes.health.wiremock.Elite2Extension.Companion.elite2Api
 import uk.gov.justice.hmpps.casenotes.health.wiremock.OAuthExtension.Companion.oAuthApi
 import uk.gov.justice.hmpps.casenotes.health.wiremock.TokenVerificationExtension.Companion.tokenVerificationApi
@@ -82,7 +81,6 @@ class HealthCheckIntegrationTest : QueueListenerIntegrationTest() {
       .jsonPath("status").isEqualTo("DOWN")
   }
 
-
   @Test
   fun `Health liveness page is accessible`() {
     webTestClient.get().uri("/health/liveness")
@@ -127,5 +125,4 @@ class HealthCheckIntegrationTest : QueueListenerIntegrationTest() {
       )
     )
   }
-
 }

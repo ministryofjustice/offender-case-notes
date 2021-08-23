@@ -6,7 +6,6 @@ import org.awaitility.kotlin.untilCallTo
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.http.MediaType
-
 import uk.gov.justice.hmpps.casenotes.health.QueueListenerIntegrationTest
 
 class HouseKeepingIntegrationTest : QueueListenerIntegrationTest() {
