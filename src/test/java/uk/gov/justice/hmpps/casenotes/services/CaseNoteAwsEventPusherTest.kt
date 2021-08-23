@@ -1,5 +1,9 @@
 package uk.gov.justice.hmpps.casenotes.services
 
+import com.amazonaws.services.sns.AmazonSNS
+import com.amazonaws.services.sns.model.MessageAttributeValue
+import com.amazonaws.services.sns.model.PublishRequest
+import com.amazonaws.services.sns.model.PublishResult
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.nhaarman.mockitokotlin2.any
 import com.nhaarman.mockitokotlin2.check
@@ -8,24 +12,23 @@ import com.nhaarman.mockitokotlin2.verify
 import com.nhaarman.mockitokotlin2.whenever
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
-import software.amazon.awssdk.services.sns.SnsAsyncClient
-import software.amazon.awssdk.services.sns.model.MessageAttributeValue
-import software.amazon.awssdk.services.sns.model.PublishRequest
-import software.amazon.awssdk.services.sns.model.PublishResponse
 import uk.gov.justice.hmpps.casenotes.dto.CaseNote
+import uk.gov.justice.hmpps.sqs.HmppsQueueService
+import uk.gov.justice.hmpps.sqs.HmppsTopic
 import java.time.LocalDateTime
-import java.util.concurrent.CompletableFuture
 
 class CaseNoteAwsEventPusherTest {
-  private val snsClient: SnsAsyncClient = mock()
+  private val hmppsQueueService: HmppsQueueService = mock()
+  private val snsClient: AmazonSNS = mock()
   private val objectMapper: ObjectMapper = mock()
 
-  private val service = CaseNoteAwsEventPusher(snsClient, "topicArn", objectMapper)
+  private val service = CaseNoteAwsEventPusher(hmppsQueueService, objectMapper)
 
   @Test
   fun `send event converts to case note event`() {
     whenever(objectMapper.writeValueAsString(any())).thenReturn("messageAsJson")
-    whenever(snsClient.publish(any<PublishRequest>())).thenReturn(CompletableFuture.completedFuture(PublishResponse.builder().messageId("Hello").build()))
+    whenever( hmppsQueueService.findByTopicId("offenderevents")).thenReturn(HmppsTopic("id", "topicUrn", snsClient))
+    whenever(snsClient.publish(any())).thenReturn(PublishResult().withMessageId("Hello"))
     service.sendEvent(caseCaseNote())
     verify(objectMapper).writeValueAsString(
       check<CaseNoteEvent> {
@@ -45,13 +48,14 @@ class CaseNoteAwsEventPusherTest {
   @Test
   fun `send event sends to the sns client`() {
     whenever(objectMapper.writeValueAsString(any())).thenReturn("messageAsJson")
-    whenever(snsClient.publish(any<PublishRequest>())).thenReturn(CompletableFuture.completedFuture(PublishResponse.builder().messageId("Hello").build()))
+    whenever( hmppsQueueService.findByTopicId("offenderevents")).thenReturn(HmppsTopic("id", "topicArn", snsClient))
+    whenever(snsClient.publish(any())).thenReturn(PublishResult().withMessageId("Hello"))
     service.sendEvent(caseCaseNote())
     verify(snsClient).publish(
       check<PublishRequest> {
-        assertThat(it.message()).isEqualTo("messageAsJson")
-        assertThat(it.topicArn()).isEqualTo("topicArn")
-        assertThat(it.messageAttributes()).containsEntry("eventType", MessageAttributeValue.builder().dataType("String").stringValue("GEN-OSE").build())
+        assertThat(it.message).isEqualTo("messageAsJson")
+        assertThat(it.topicArn).isEqualTo("topicArn")
+        assertThat(it.messageAttributes).containsEntry("eventType", MessageAttributeValue().withDataType("String").withStringValue("GEN-OSE"))
       }
     )
   }

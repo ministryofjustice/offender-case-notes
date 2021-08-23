@@ -86,8 +86,3 @@ management:
     info:
       cache:
         time-to-live: 2000ms
-
-hmpps.sqs:
-  topics:
-    offenderevents:
-      asyncClient: true
