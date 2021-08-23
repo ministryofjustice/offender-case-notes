@@ -56,7 +56,8 @@ class ResourceServerConfiguration(private val tokenVerifyingAuthManager: TokenVe
             "/h2-console/**",
             "/v2/api-docs",
             "/swagger-ui/**", "/swagger-resources", "/swagger-resources/configuration/ui",
-            "/swagger-resources/configuration/security"
+            "/swagger-resources/configuration/security",
+            "/queue-admin/retry-all-dlqs"
           )
           .permitAll()
           .anyRequest()

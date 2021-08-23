@@ -23,10 +23,9 @@ dependencies {
   implementation("org.springframework.boot:spring-boot-starter-oauth2-client")
   implementation("org.springframework.boot:spring-boot-starter-webflux")
 
-  implementation("org.springframework:spring-jms")
-  implementation("com.amazonaws:amazon-sqs-java-messaging-lib:1.0.8")
+  implementation("uk.gov.justice.service.hmpps:hmpps-sqs-spring-boot-starter:1.0.2")
 
-  implementation("com.google.code.gson:gson:2.8.6")
+  implementation("com.google.code.gson:gson:2.8.7")
   implementation("javax.activation:activation:1.1.1")
   implementation("javax.transaction:javax.transaction-api:1.3")
 
@@ -49,6 +48,8 @@ dependencies {
   testImplementation("io.github.http-builder-ng:http-builder-ng-apache:1.0.4")
   testImplementation("com.github.tomakehurst:wiremock-standalone:2.27.2")
   testImplementation("io.jsonwebtoken:jjwt:0.9.1")
+  testImplementation("org.awaitility:awaitility:4.1.0")
+  testImplementation("org.awaitility:awaitility-kotlin:4.1.0")
 
   testImplementation("org.springframework.security.oauth:spring-security-oauth2:2.5.1.RELEASE")
   testImplementation("org.springframework.security:spring-security-jwt:1.1.1.RELEASE")

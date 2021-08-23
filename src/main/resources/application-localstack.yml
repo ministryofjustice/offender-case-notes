@@ -1,10 +1,11 @@
-sns:
+hmpps.sqs:
   provider: localstack
-  endpoint.url: http://localhost:4566
-  topic.arn: arn:aws:sns:eu-west-2:000000000000:offender_events
-
-sqs:
-  provider: localstack
-  queue.name: offender_case_notes_queue
-  dlq.name: offender_case_notes_dlq
-  endpoint.url: http://localhost:4566
+  queues:
+    event:
+      queueName: offender_case_notes_queue
+      dlqName: offender_case_notes_dlq
+      subscribeTopicId: offenderevents
+      subscribeFilter: '{"eventType":[ "BOOKING_NUMBER-CHANGED", "DATA_COMPLIANCE_DELETE-OFFENDER"] }'
+  topics:
+    offenderevents:
+      arn: arn:aws:sns:eu-west-2:000000000000:offender_events

@@ -3,9 +3,10 @@ spring:
     name: offender-case-notes
   profiles:
     groups:
-      localstack:
-        - "dev"
+      dev:
+        - "localstack"
       test:
+        - "localstack"
         - "stdout"
   jpa:
     open-in-view: false
@@ -85,10 +86,3 @@ management:
     info:
       cache:
         time-to-live: 2000ms
-
-sns:
-  endpoint.region: eu-west-2
-
-sqs:
-  provider: aws
-  endpoint.region: eu-west-2
