@@ -25,6 +25,7 @@ class HealthCheckIntegrationTest : QueueListenerIntegrationTest() {
 
   @Test
   fun `Queue health reports queue details`() {
+    purgeQueues()
     webTestClient.get().uri("/health")
       .exchange()
       .expectStatus().isOk
