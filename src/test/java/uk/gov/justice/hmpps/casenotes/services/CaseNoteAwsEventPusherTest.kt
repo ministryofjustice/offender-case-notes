@@ -52,7 +52,7 @@ class CaseNoteAwsEventPusherTest {
     whenever(snsClient.publish(any())).thenReturn(PublishResult().withMessageId("Hello"))
     service.sendEvent(caseCaseNote())
     verify(snsClient).publish(
-      check<PublishRequest> {
+      check {
         assertThat(it.message).isEqualTo("messageAsJson")
         assertThat(it.topicArn).isEqualTo("topicArn")
         assertThat(it.messageAttributes).containsEntry("eventType", MessageAttributeValue().withDataType("String").withStringValue("GEN-OSE"))
