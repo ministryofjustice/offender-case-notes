@@ -1,4 +1,9 @@
 spring:
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          public-key-location: classpath:local-public-key.pub
   datasource:
     url: 'jdbc:h2:mem:offender-case-notes-db;MODE=PostgreSQL'
     username: sa

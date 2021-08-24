@@ -6,7 +6,6 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import org.apache.commons.lang3.math.NumberUtils
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.stereotype.Component
 import uk.gov.justice.hmpps.casenotes.dto.CaseNote
 import uk.gov.justice.hmpps.sqs.HmppsQueueService
@@ -23,7 +22,6 @@ interface CaseNoteEventPusher {
 
 @Suppress("SpringJavaInjectionPointsAutowiringInspection")
 @Component
-@ConditionalOnProperty(name = ["sns.provider"])
 class CaseNoteAwsEventPusher(
   private val hmppsQueueService: HmppsQueueService,
   private val objectMapper: ObjectMapper
@@ -56,21 +54,6 @@ class CaseNoteAwsEventPusher(
       } catch (throwable: Throwable) {
         log.error("Failed to send case note", throwable)
       }
-    }
-  }
-}
-
-@Component
-@ConditionalOnProperty("sns.provider", matchIfMissing = true, havingValue = "no value set")
-open class CaseNoteNoOpEventPusher : CaseNoteEventPusher {
-  companion object {
-    val log: Logger = LoggerFactory.getLogger(this::class.java)
-  }
-
-  override fun sendEvent(caseNote: CaseNote) {
-    if (isSensitiveCaseNote(caseNote.caseNoteId)) {
-      log.warn("Pretending to push case note {} to event topic", caseNote.caseNoteId)
-      log.debug("Case note not sent was {}", CaseNoteEvent(caseNote))
     }
   }
 }

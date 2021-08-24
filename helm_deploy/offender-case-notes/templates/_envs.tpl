@@ -7,9 +7,6 @@ env:
   - name: SERVER_PORT
     value: "{{ .Values.image.port }}"
 
-  - name: SPRING_PROFILES_ACTIVE
-    value: "sqs"
-
   - name: JAVA_OPTS
     value: "{{ .Values.env.JAVA_OPTS }}"
 
@@ -84,13 +81,13 @@ env:
         name: offender-events-topic
         key: topic_arn
 
-  - name: HMPPS_SQS_QUEUES_EVENT_ACCESS_KEY_ID
+  - name: HMPPS_SQS_QUEUES_EVENT_QUEUE_ACCESS_KEY_ID
     valueFrom:
       secretKeyRef:
         name: ocn-events-sqs-instance-output
         key: access_key_id
 
-  - name: HMPPS_SQS_QUEUES_EVENT_SECRET_ACCESS_KEY
+  - name: HMPPS_SQS_QUEUES_EVENT_QUEUE_SECRET_ACCESS_KEY
     valueFrom:
       secretKeyRef:
         name: ocn-events-sqs-instance-output
