@@ -55,8 +55,12 @@ dependencies {
   testImplementation("org.springframework.security:spring-security-jwt:1.1.1.RELEASE")
 }
 
+java {
+  toolchain.languageVersion.set(JavaLanguageVersion.of(16))
+}
+
 tasks {
-  compileKotlin {
+  withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
     kotlinOptions {
       jvmTarget = "16"
     }
