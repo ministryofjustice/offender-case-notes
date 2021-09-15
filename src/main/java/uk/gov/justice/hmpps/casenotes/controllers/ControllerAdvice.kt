@@ -72,7 +72,6 @@ class ControllerAdvice {
     log.error("Unexpected exception", e)
     return ResponseEntity
       .status(HttpStatus.INTERNAL_SERVER_ERROR)
-
       .body(ErrorResponse(status = (HttpStatus.INTERNAL_SERVER_ERROR.value()), developerMessage = (e.message)))
   }
 
