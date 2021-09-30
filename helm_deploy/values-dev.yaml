@@ -1,39 +1,17 @@
-# This is a YAML-formatted file.
-# Declare variables to be passed into your templates.
+---
+# Environment specific values, override helm_deploy/prison-to-probation-update/values.yaml
+generic-service:
+  replicaCount: 2
+  ingress:
+    host: dev.offender-case-notes.service.justice.gov.uk
 
-replicaCount: 2
-
-image:
-  repository: quay.io/hmpps/offender-case-notes
-  tag: latest
-  port: 8080
-
-ingress:
-  enabled: true
-  enable_whitelist: true
-  annotations:
-    kubernetes.io/ingress.class: "nginx"
-  hosts:
-    - host: dev.offender-case-notes.service.justice.gov.uk
-      cert_secret: offender-case-notes-cert
-  path: /
-
-env:
-  JAVA_OPTS: "-Xmx512m"
-  ELITE2_API_BASE_URL: "https://api-dev.prison.service.justice.gov.uk"
-  OAUTH_API_BASE_URL: "https://sign-in-dev.hmpps.service.justice.gov.uk/auth"
-  TOKENVERIFICATION_API_BASE_URL: "https://token-verification-api-dev.prison.service.justice.gov.uk"
-  TOKENVERIFICATION_ENABLED: "false"
-  SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_JWK_SET_URI: "https://sign-in-dev.hmpps.service.justice.gov.uk/auth/.well-known/jwks.json"
-  APPLICATIONINSIGHTS_CONFIGURATION_FILE: applicationinsights.dev.json
-
-whitelist:
-  office: "217.33.148.210/32"
-  health-kick: "35.177.252.195/32"
-  mojvpn: "81.134.202.29/32"
-  cloudplatform-live1-1: "35.178.209.113/32"
-  cloudplatform-live1-2: "3.8.51.207/32"
-  cloudplatform-live1-3: "35.177.252.54/32"
+  env:
+    ELITE2_API_BASE_URL: "https://api-dev.prison.service.justice.gov.uk"
+    OAUTH_API_BASE_URL: "https://sign-in-dev.hmpps.service.justice.gov.uk/auth"
+    TOKENVERIFICATION_API_BASE_URL: "https://token-verification-api-dev.prison.service.justice.gov.uk"
+    TOKENVERIFICATION_ENABLED: "false"
+    SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_JWK_SET_URI: "https://sign-in-dev.hmpps.service.justice.gov.uk/auth/.well-known/jwks.json"
+    APPLICATIONINSIGHTS_CONFIGURATION_FILE: applicationinsights.dev.json
 
 # CloudPlatform AlertManager receiver to route promethues alerts to slack
 generic-prometheus-alerts:

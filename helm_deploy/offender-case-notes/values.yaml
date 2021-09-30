@@ -1,5 +1,63 @@
 ---
 # Values here are the same across all environments
+generic-service:
+  nameOverride: offender-case-notes
+
+  image:
+    repository: quay.io/hmpps/offender-case-notes
+    tag: app_version    # override at deployment time
+    port: 8080
+
+  ingress:
+    enabled: true
+    annotations:
+      kubernetes.io/ingress.class: "nginx"
+      nginx.ingress.kubernetes.io/custom-http-errors: "418"
+    tlsSecretName: offender-case-notes-cert
+    path: /
+
+
+  env:
+    SERVER_PORT: 8080
+    JAVA_OPTS: "-Xmx512m"
+    APPLICATIONINSIGHTS_CONNECTION_STRING: "InstrumentationKey=$(APPINSIGHTS_INSTRUMENTATIONKEY)"
+    SNS_PROVIDER: "aws"
+
+  # Pre-existing kubernetes secrets to load as environment variables in the deployment.
+  # namespace_secrets:
+  #   [name of kubernetes secret]:
+  #     [name of environment variable as seen by app]: [key of kubernetes secret to load]
+
+  namespace_secrets:
+    offender-case-notes:
+      APPINSIGHTS_INSTRUMENTATIONKEY: "APPINSIGHTS_INSTRUMENTATIONKEY"
+      OFFENDER_CASE_NOTES_CLIENT_ID: "OFFENDER_CASE_NOTES_CLIENT_ID"
+      OFFENDER_CASE_NOTES_CLIENT_SECRET: "OFFENDER_CASE_NOTES_CLIENT_SECRET"
+    dps-rds-instance-output:
+      DATABASE_USERNAME: "database_username"
+      DATABASE_PASSWORD: "database_password"
+      DATABASE_NAME: "database_name"
+      DATABASE_ENDPOINT: "rds_instance_endpoint"
+    offender-events-topic:
+      HMPPS_SQS_TOPICS_OFFENDEREVENTS_ACCESS_KEY_ID: "access_key_id"
+      HMPPS_SQS_TOPICS_OFFENDEREVENTS_SECRET_ACCESS_KEY: "secret_access_key"
+      HMPPS_SQS_TOPICS_OFFENDEREVENTS_ARN: "topic_arn"
+    ocn-events-sqs-instance-output:
+      HMPPS_SQS_QUEUES_EVENT_QUEUE_ACCESS_KEY_ID: "access_key_id"
+      HMPPS_SQS_QUEUES_EVENT_QUEUE_SECRET_ACCESS_KEY: "secret_access_key"
+      HMPPS_SQS_QUEUES_EVENT_QUEUE_NAME: "sqs_ocne_name"
+    ocn-events-sqs-dl-instance-output:
+      HMPPS_SQS_QUEUES_EVENT_DLQ_ACCESS_KEY_ID: "access_key_id"
+      HMPPS_SQS_QUEUES_EVENT_DLQ_SECRET_ACCESS_KEY: "secret_access_key"
+      HMPPS_SQS_QUEUES_EVENT_DLQ_NAME: "sqs_ocne_name"
+
+  allowlist:
+    office: "217.33.148.210/32"
+    health-kick: "35.177.252.195/32"
+    mojvpn: "81.134.202.29/32"
+    cloudplatform-live1-1: "35.178.209.113/32"
+    cloudplatform-live1-2: "3.8.51.207/32"
+    cloudplatform-live1-3: "35.177.252.54/32"
 
 generic-prometheus-alerts:
   targetApplication: offender-case-notes
