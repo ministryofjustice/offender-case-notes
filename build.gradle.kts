@@ -8,6 +8,7 @@ configurations {
 }
 
 dependencies {
+  agentDeps("com.microsoft.azure:applicationinsights-agent:3.2.0-BETA.4")
   annotationProcessor("org.projectlombok:lombok:1.18.20")
 
   compileOnly("org.projectlombok:lombok:1.18.20")
