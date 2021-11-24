@@ -3,7 +3,7 @@
 generic-service:
   replicaCount: 4
   ingress:
-    host: preprod.offender-case-notes.service.justice.gov.uk
+    host: preprod.offender-case-notes.service.justice.gov.ukn    contextColour: green
 
   env:
     ELITE2_API_BASE_URL: "https://api-preprod.prison.service.justice.gov.uk"
