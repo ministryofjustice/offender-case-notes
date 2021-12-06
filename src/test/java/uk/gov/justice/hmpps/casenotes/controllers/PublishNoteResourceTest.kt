@@ -1,9 +1,9 @@
 package uk.gov.justice.hmpps.casenotes.controllers
 
-import com.nhaarman.mockitokotlin2.any
-import com.nhaarman.mockitokotlin2.verify
-import com.nhaarman.mockitokotlin2.whenever
 import org.junit.jupiter.api.Test
+import org.mockito.kotlin.any
+import org.mockito.kotlin.verify
+import org.mockito.kotlin.whenever
 import org.springframework.boot.test.mock.mockito.MockBean
 import uk.gov.justice.hmpps.casenotes.model.CaseNoteType
 import uk.gov.justice.hmpps.casenotes.model.OffenderCaseNote

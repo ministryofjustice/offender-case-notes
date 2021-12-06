@@ -53,6 +53,7 @@ dependencies {
 
   testImplementation("org.springframework.security.oauth:spring-security-oauth2:2.5.1.RELEASE")
   testImplementation("org.springframework.security:spring-security-jwt:1.1.1.RELEASE")
+  testImplementation("org.mockito.kotlin:mockito-kotlin:4.0.0")
 }
 
 java {
