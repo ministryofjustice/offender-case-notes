@@ -12,7 +12,7 @@ dependencies {
 
   compileOnly("org.projectlombok:lombok:1.18.22")
 
-  runtimeOnly("com.h2database:h2:1.4.200")
+  runtimeOnly("com.h2database:h2:2.0.202")
   runtimeOnly("org.flywaydb:flyway-core:8.2.2")
   runtimeOnly("org.postgresql:postgresql:42.3.1")
 
