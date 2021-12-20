@@ -20,6 +20,7 @@ spring:
     generate-ddl: false
     hibernate:
       ddl-auto: none
+    database-platform: org.hibernate.dialect.PostgreSQL10Dialect
 
   flyway:
     enabled: true
