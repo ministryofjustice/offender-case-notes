@@ -1,5 +1,8 @@
 # Offender Case Notes Service
 
+[![CircleCI](https://circleci.com/gh/ministryofjustice/prison-to-nhs-update/tree/main.svg?style=svg)](https://circleci.com/gh/ministryofjustice/offender-case-notes)
+[![API docs](https://img.shields.io/badge/API_docs_(needs_VPN)-view-85EA2D.svg?logo=swagger)](https://dev.offender-case-notes.service.justice.gov.uk/swagger-ui/?configUrl=/v3/api-docs)
+
 Service to provide secure access to retrieving and storing case notes about offenders
 
 ### Running against localstack
