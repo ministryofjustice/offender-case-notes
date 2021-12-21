@@ -20,6 +20,10 @@ spring:
         jwt:
           public-key-location: classpath:local-public-key.pub
 
+  test:
+    database:
+      replace: none
+
 server:
   shutdown: immediate
 

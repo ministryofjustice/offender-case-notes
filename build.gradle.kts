@@ -1,6 +1,6 @@
 plugins {
   id("uk.gov.justice.hmpps.gradle-spring-boot") version "4.0.0"
-  kotlin("plugin.spring") version "1.6.10"
+  kotlin("plugin.spring") version "1.6.0"
 }
 
 configurations {
@@ -12,7 +12,7 @@ dependencies {
 
   compileOnly("org.projectlombok:lombok:1.18.22")
 
-  runtimeOnly("com.h2database:h2:1.4.200")
+  runtimeOnly("com.h2database:h2:2.0.202")
   runtimeOnly("org.flywaydb:flyway-core:8.2.2")
   runtimeOnly("org.postgresql:postgresql:42.3.1")
 
