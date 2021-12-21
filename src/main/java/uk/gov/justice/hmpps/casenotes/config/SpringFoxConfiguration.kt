@@ -17,7 +17,6 @@ import springfox.documentation.spi.DocumentationType
 import springfox.documentation.spring.web.plugins.Docket
 import springfox.documentation.spring.web.plugins.WebFluxRequestHandlerProvider
 import springfox.documentation.spring.web.plugins.WebMvcRequestHandlerProvider
-import springfox.documentation.swagger2.annotations.EnableSwagger2
 import uk.gov.justice.hmpps.casenotes.controllers.CaseNoteController
 import java.lang.reflect.Field
 import java.time.LocalDateTime
@@ -27,7 +26,6 @@ import java.util.Optional
 import java.util.stream.Collectors
 
 @Configuration
-@EnableSwagger2
 @Import(BeanValidatorPluginsConfiguration::class)
 class SpringFoxConfiguration(buildProperties: BuildProperties) {
   private val version: String = buildProperties.version
@@ -45,7 +43,7 @@ class SpringFoxConfiguration(buildProperties: BuildProperties) {
       emptyList()
     )
 
-    val docket = Docket(DocumentationType.SWAGGER_2)
+    val docket = Docket(DocumentationType.OAS_30)
       .useDefaultResponseMessages(false)
       .apiInfo(apiInfo)
       .select()

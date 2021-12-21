@@ -58,6 +58,9 @@ spring:
   codec:
     max-in-memory-size: 10MB
 
+  mvc:
+    pathmatch:
+      matching-strategy: ant_path_matcher
 
 server:
   port: 8080
