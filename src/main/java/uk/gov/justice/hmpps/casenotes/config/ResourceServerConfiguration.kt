@@ -32,7 +32,7 @@ class ResourceServerConfiguration(private val tokenVerifyingAuthManager: TokenVe
             "/info",
             "/ping",
             "/h2-console/**",
-            "/v2/api-docs",
+            "/v3/api-docs",
             "/swagger-ui/**", "/swagger-resources", "/swagger-resources/configuration/ui",
             "/swagger-resources/configuration/security",
             "/queue-admin/retry-all-dlqs"
