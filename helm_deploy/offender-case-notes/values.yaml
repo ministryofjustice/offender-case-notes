@@ -18,6 +18,7 @@ generic-service:
           return 401;
         }
     tlsSecretName: offender-case-notes-cert
+    contextColour: green
 
 
   env:

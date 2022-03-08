@@ -4,7 +4,6 @@ generic-service:
   replicaCount: 2
   ingress:
     host: dev.offender-case-notes.service.justice.gov.uk
-    contextColour: green
 
   env:
     ELITE2_API_BASE_URL: "https://api-dev.prison.service.justice.gov.uk"
