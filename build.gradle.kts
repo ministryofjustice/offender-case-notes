@@ -40,6 +40,9 @@ dependencies {
 
   implementation("software.amazon.awssdk:sns:2.17.158")
 
+  implementation("io.swagger:swagger-core:1.6.5")
+  implementation("io.swagger.core.v3:swagger-core:2.1.13")
+
   testAnnotationProcessor("org.projectlombok:lombok:1.18.22")
   testCompileOnly("org.projectlombok:lombok:1.18.22")
   testImplementation("org.springframework.security:spring-security-test")
