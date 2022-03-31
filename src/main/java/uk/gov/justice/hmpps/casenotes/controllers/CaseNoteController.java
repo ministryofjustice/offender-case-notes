@@ -59,8 +59,7 @@ public class CaseNoteController {
 
     @GetMapping("/{offenderIdentifier}/{caseNoteIdentifier}")
     @ResponseBody
-    @ApiOperation(value = "Retrieves a case note",
-            nickname = "retrieve case note")
+    @ApiOperation(value = "Retrieves a case note", nickname = "retrieve case note", produces = "application/json")
     @ApiResponses({
             @ApiResponse(code = 404, message = "Offender or case note not found"),
             @ApiResponse(code = 200, message = "OK", response = CaseNote.class, responseContainer = "List")})
@@ -72,17 +71,16 @@ public class CaseNoteController {
 
     @GetMapping("/{offenderIdentifier}")
     @ResponseBody
-    @ApiOperation(value = "Retrieves a list of case notes",
-            nickname = "retrieve case notes")
+    @ApiOperation(value = "Retrieves a list of case notes", nickname = "retrieve case notes", produces = "application/json")
     @ApiResponses({
             @ApiResponse(code = 404, message = "Offender not found"),
             @ApiResponse(code = 200, message = "OK", response = CaseNote.class, responseContainer = "List")})
     @ApiImplicitParams({
-            @ApiImplicitParam(name = "page", dataType = "int", paramType = "query",
+            @ApiImplicitParam(name = "page", dataType = "java.lang.Integer", paramType = "query",
                     value = "Results page you want to retrieve (0..N)", example = "0", defaultValue = "0"),
-            @ApiImplicitParam(name = "size", dataType = "int", paramType = "query",
+            @ApiImplicitParam(name = "size", dataType = "java.lang.Integer", paramType = "query",
                     value = "Number of records per page.", example = "10", defaultValue = "10"),
-            @ApiImplicitParam(name = "sort", dataType = "string", paramType = "query",
+            @ApiImplicitParam(name = "sort", dataType = "java.lang.String", paramType = "query",
                     value = "Sort column and direction, e.g. sort=occurrenceDateTime,desc. Multiple sort params allowed.")})
     public Page<CaseNote> getCaseNotes(
             @ApiParam(value = "Offender Identifier", required = true, example = "A1234AA") @PathVariable("offenderIdentifier") final String offenderIdentifier,
@@ -93,9 +91,7 @@ public class CaseNoteController {
 
     @PostMapping(value = "/{offenderIdentifier}", consumes = APPLICATION_JSON_VALUE)
     @ResponseStatus(HttpStatus.CREATED)
-    @ApiOperation(value = "Add Case Note for offender",
-            response = CaseNote.class,
-            notes = "Creates a note for a specific type/subType")
+    @ApiOperation(value = "Add Case Note for offender", response = CaseNote.class, notes = "Creates a note for a specific type/subType", produces = "application/json")
     @ApiResponses(value = {
             @ApiResponse(code = 201, message = "The Case Note has been recorded. The updated object is returned including the status.", response = CaseNote.class),
             @ApiResponse(code = 409, message = "The case note has already been recorded under the booking. The current unmodified object (including status) is returned.", response = ErrorResponse.class)})
@@ -111,9 +107,7 @@ public class CaseNoteController {
     }
 
     @PutMapping(value = "/{offenderIdentifier}/{caseNoteIdentifier}", consumes = APPLICATION_JSON_VALUE)
-    @ApiOperation(value = "Amend Case Note for offender",
-            response = CaseNote.class,
-            notes = "Amend a case note information adds and additional entry to the note")
+    @ApiOperation(value = "Amend Case Note for offender", response = CaseNote.class, notes = "Amend a case note information adds and additional entry to the note", produces = "application/json")
     @ApiResponses(value = {
             @ApiResponse(code = 201, message = "The Case Note has been recorded. The updated object is returned including the status.", response = CaseNote.class),
             @ApiResponse(code = 404, message = "No case notes where found for this offender and case note id", response = ErrorResponse.class)})
@@ -131,7 +125,7 @@ public class CaseNoteController {
     }
 
     @GetMapping(value = "/types")
-    @ApiOperation(value = "Retrieves a list of case note types", response = CaseNoteTypeDto.class)
+    @ApiOperation(value = "Retrieves a list of case note types", response = CaseNoteTypeDto.class, produces = "application/json")
     @ApiResponses({
             @ApiResponse(code = 404, message = "Case notes types not found"),
             @ApiResponse(code = 200, message = "OK", response = CaseNoteTypeDto.class, responseContainer = "List")})
@@ -151,9 +145,7 @@ public class CaseNoteController {
 
     @PostMapping(value = "/types", consumes = APPLICATION_JSON_VALUE)
     @ResponseStatus(HttpStatus.CREATED)
-    @ApiOperation(value = "Add New Case Note Type",
-            response = NewCaseNoteType.class,
-            notes = "Creates a new case note type")
+    @ApiOperation(value = "Add New Case Note Type", response = NewCaseNoteType.class, notes = "Creates a new case note type", produces = "application/json")
     @ApiResponses(value = {
             @ApiResponse(code = 201, message = "The Case Note Type has been recorded. The updated object is returned including the status.", response = CaseNoteTypeDto.class),
             @ApiResponse(code = 409, message = "The case note type has already been recorded. The current unmodified object (including status) is returned.", response = ErrorResponse.class)})
@@ -163,9 +155,7 @@ public class CaseNoteController {
 
     @PostMapping(value = "/types/{parentType}", consumes = APPLICATION_JSON_VALUE)
     @ResponseStatus(HttpStatus.CREATED)
-    @ApiOperation(value = "Add New Case Note Sub Type",
-            response = NewCaseNoteType.class,
-            notes = "Creates a new case note sub type")
+    @ApiOperation(value = "Add New Case Note Sub Type", response = NewCaseNoteType.class, notes = "Creates a new case note sub type", produces = "application/json")
     @ApiResponses(value = {
             @ApiResponse(code = 201, message = "The Case Note Sub Type has been recorded. The updated object is returned including the status.", response = CaseNoteTypeDto.class),
             @ApiResponse(code = 409, message = "The case note sub type has already been recorded. The current unmodified object (including status) is returned.", response = ErrorResponse.class)})
@@ -177,9 +167,7 @@ public class CaseNoteController {
 
     @PutMapping(value = "/types/{parentType}", consumes = APPLICATION_JSON_VALUE)
     @ResponseStatus(HttpStatus.OK)
-    @ApiOperation(value = "Update Case Note Type",
-            response = UpdateCaseNoteType.class,
-            notes = "Creates a new case note type")
+    @ApiOperation(value = "Update Case Note Type", response = UpdateCaseNoteType.class, notes = "Creates a new case note type", produces = "application/json")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "The case note type has been updated. The updated object is returned.", response = CaseNoteTypeDto.class),
             @ApiResponse(code = 404, message = "The case note type is not found", response = ErrorResponse.class)})
@@ -191,9 +179,7 @@ public class CaseNoteController {
 
     @PutMapping(value = "/types/{parentType}/{subType}", consumes = APPLICATION_JSON_VALUE)
     @ResponseStatus(HttpStatus.OK)
-    @ApiOperation(value = "Update Case Note Sub Type",
-            response = UpdateCaseNoteType.class,
-            notes = "Creates a new case note sub type")
+    @ApiOperation(value = "Update Case Note Sub Type", response = UpdateCaseNoteType.class, notes = "Creates a new case note sub type", produces = "application/json")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "The case note sub type update has been updated. The updated object is returned.", response = CaseNoteTypeDto.class),
             @ApiResponse(code = 404, message = "The case note sub type is not found", response = ErrorResponse.class)})
