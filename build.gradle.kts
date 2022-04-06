@@ -1,6 +1,6 @@
 plugins {
-  id("uk.gov.justice.hmpps.gradle-spring-boot") version "4.1.3-beta"
-  kotlin("plugin.spring") version "1.6.10"
+  id("uk.gov.justice.hmpps.gradle-spring-boot") version "4.1.3"
+  kotlin("plugin.spring") version "1.6.20"
 }
 
 configurations {
@@ -13,7 +13,7 @@ dependencies {
   compileOnly("org.projectlombok:lombok:1.18.22")
 
   runtimeOnly("com.h2database:h2:2.1.210")
-  runtimeOnly("org.flywaydb:flyway-core:8.5.4")
+  runtimeOnly("org.flywaydb:flyway-core:8.5.5")
   runtimeOnly("org.postgresql:postgresql:42.3.3")
 
   implementation("org.springframework.boot:spring-boot-starter-data-jpa")
@@ -23,7 +23,7 @@ dependencies {
   implementation("org.springframework.boot:spring-boot-starter-oauth2-client")
   implementation("org.springframework.boot:spring-boot-starter-webflux")
 
-  implementation("uk.gov.justice.service.hmpps:hmpps-sqs-spring-boot-starter:1.1.2")
+  implementation("uk.gov.justice.service.hmpps:hmpps-sqs-spring-boot-starter:1.1.3")
 
   implementation("com.google.code.gson:gson:2.9.0")
   implementation("javax.activation:activation:1.1.1")
@@ -38,16 +38,16 @@ dependencies {
   implementation("com.pauldijou:jwt-core_2.11:5.0.0")
   implementation("com.google.code.gson:gson:2.9.0")
 
-  implementation("software.amazon.awssdk:sns:2.17.158")
+  implementation("software.amazon.awssdk:sns:2.17.163")
 
-  implementation("io.swagger:swagger-core:1.6.5")
-  implementation("io.swagger.core.v3:swagger-core:2.1.13")
+  implementation("io.swagger:swagger-core:1.6.6")
+  implementation("io.swagger.core.v3:swagger-core:2.2.0")
 
   testAnnotationProcessor("org.projectlombok:lombok:1.18.22")
   testCompileOnly("org.projectlombok:lombok:1.18.22")
   testImplementation("org.springframework.security:spring-security-test")
   testImplementation("com.tngtech.java:junit-dataprovider:1.13.1")
-  testImplementation("net.javacrumbs.json-unit:json-unit-assertj:2.32.0")
+  testImplementation("net.javacrumbs.json-unit:json-unit-assertj:2.33.0")
   testImplementation("io.github.http-builder-ng:http-builder-ng-apache:1.0.4")
   testImplementation("com.github.tomakehurst:wiremock-standalone:2.27.2")
   testImplementation("io.jsonwebtoken:jjwt:0.9.1")
@@ -57,7 +57,7 @@ dependencies {
   testImplementation("org.springframework.security.oauth:spring-security-oauth2:2.5.1.RELEASE")
   testImplementation("org.springframework.security:spring-security-jwt:1.1.1.RELEASE")
   testImplementation("org.mockito.kotlin:mockito-kotlin:4.0.0")
-  testImplementation("io.swagger.parser.v3:swagger-parser-v3:2.0.31")
+  testImplementation("io.swagger.parser.v3:swagger-parser-v3:2.0.32")
 }
 
 java {
