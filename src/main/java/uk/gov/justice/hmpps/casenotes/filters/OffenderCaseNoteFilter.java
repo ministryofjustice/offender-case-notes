@@ -61,6 +61,7 @@ public class OffenderCaseNoteFilter implements Specification<OffenderCaseNote> {
         }
 
         final var predicates = predicateBuilder.build();
+        root.fetch("amendments", JoinType.LEFT);
         return cb.and(predicates.toArray(new Predicate[0]));
     }
 
