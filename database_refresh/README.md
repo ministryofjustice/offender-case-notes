@@ -16,7 +16,7 @@ Also check that the rule defined in `03-prometheus-alert.yaml` has the correct n
 
 For this job to work the preprod database credentials need to be available production namespace. This is achieved by having terraform export the preprod credentials, which is an output of the terraform rds module, to a secret in the production namespace.  See this example:
 
-<https://github.com/ministryofjustice/cloud-platform-environments/blob/master/namespaces/live-1.cloud-platform.service.justice.gov.uk/offender-case-notes-preprod/resources/rds.tf#L41-L56>
+<https://github.com/ministryofjustice/cloud-platform-environments/blob/master/namespaces/live.cloud-platform.service.justice.gov.uk/offender-case-notes-preprod/resources/rds.tf#L44-L58>
 
 ### Overview
 
