@@ -1,5 +1,5 @@
 plugins {
-  id("uk.gov.justice.hmpps.gradle-spring-boot") version "4.3.0-beta"
+  id("uk.gov.justice.hmpps.gradle-spring-boot") version "4.3.0-beta-1"
   kotlin("plugin.spring") version "1.7.0"
 }
 
@@ -38,7 +38,7 @@ dependencies {
   implementation("com.pauldijou:jwt-core_2.11:5.0.0")
   implementation("com.google.code.gson:gson:2.9.0")
 
-  implementation("software.amazon.awssdk:sns:2.17.217")
+  implementation("software.amazon.awssdk:sns:2.17.219")
 
   implementation("io.swagger:swagger-core:1.6.6")
   implementation("io.swagger.core.v3:swagger-core:2.2.1")
