@@ -13,6 +13,11 @@ generic-service:
     SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_JWK_SET_URI: "https://sign-in-preprod.hmpps.service.justice.gov.uk/auth/.well-known/jwks.json"
     APPLICATIONINSIGHTS_CONFIGURATION_FILE: applicationinsights.json
 
+  allowlist:
+    delius-pre-prod-1: "52.56.240.62/32"
+    delius-pre-prod-2: "18.130.110.168/32"
+    delius-pre-prod-3: "35.178.44.184/32"
+
 # CloudPlatform AlertManager receiver to route promethues alerts to slack
 generic-prometheus-alerts:
   alertSeverity: hmpps_tech_non_prod
