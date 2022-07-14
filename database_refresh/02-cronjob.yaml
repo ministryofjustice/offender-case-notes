@@ -10,8 +10,8 @@ spec:
   failedJobsHistoryLimit: 3
   jobTemplate:
     spec:
-      # Tidy up all jobs after 4 days
-      ttlSecondsAfterFinished: 345600
+      # Tidy up all jobs after 16 days
+      ttlSecondsAfterFinished: 1382400
       backoffLimit: 0
       activeDeadlineSeconds: 1200
       template:
