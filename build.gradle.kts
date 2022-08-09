@@ -14,7 +14,7 @@ dependencies {
 
   runtimeOnly("com.h2database:h2:2.1.214")
   runtimeOnly("org.flywaydb:flyway-core:8.5.13")
-  runtimeOnly("org.postgresql:postgresql:42.4.0")
+  runtimeOnly("org.postgresql:postgresql:42.4.1")
 
   implementation("org.springframework.boot:spring-boot-starter-data-jpa")
   implementation("org.springframework.boot:spring-boot-starter-cache")
@@ -23,9 +23,9 @@ dependencies {
   implementation("org.springframework.boot:spring-boot-starter-oauth2-client")
   implementation("org.springframework.boot:spring-boot-starter-webflux")
 
-  implementation("uk.gov.justice.service.hmpps:hmpps-sqs-spring-boot-starter:1.1.6")
+  implementation("uk.gov.justice.service.hmpps:hmpps-sqs-spring-boot-starter:1.1.8")
 
-  implementation("com.google.code.gson:gson:2.9.0")
+  implementation("com.google.code.gson:gson:2.9.1")
   implementation("javax.activation:activation:1.1.1")
   implementation("javax.transaction:javax.transaction-api:1.3")
 
@@ -36,12 +36,12 @@ dependencies {
   implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.13.3")
   implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.13.3")
   implementation("com.pauldijou:jwt-core_2.11:5.0.0")
-  implementation("com.google.code.gson:gson:2.9.0")
+  implementation("com.google.code.gson:gson:2.9.1")
 
-  implementation("software.amazon.awssdk:sns:2.17.225")
+  implementation("software.amazon.awssdk:sns:2.17.248")
 
   implementation("io.swagger:swagger-core:1.6.6")
-  implementation("io.swagger.core.v3:swagger-core:2.2.1")
+  implementation("io.swagger.core.v3:swagger-core:2.2.2")
 
   testAnnotationProcessor("org.projectlombok:lombok:1.18.24")
   testCompileOnly("org.projectlombok:lombok:1.18.24")
