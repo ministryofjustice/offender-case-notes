@@ -17,8 +17,8 @@ class OpenApiConfiguration(buildProperties: BuildProperties) {
     .servers(
       listOf(
         Server().url("https://offender-case-notes.service.justice.gov.uk").description("Prod"),
-        Server().url("https://offender-case-notes-preprod.service.justice.gov.uk").description("PreProd"),
-        Server().url("https://offender-case-notes-dev.service.justice.gov.uk").description("Development"),
+        Server().url("https://preprod.offender-case-notes.service.justice.gov.uk").description("PreProd"),
+        Server().url("https://dev.offender-case-notes.service.justice.gov.uk").description("Development"),
         Server().url("http://localhost:8080").description("Local"),
       )
     )

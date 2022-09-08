@@ -1,7 +1,6 @@
 package uk.gov.justice.hmpps.casenotes.config
 
 import lombok.AllArgsConstructor
-import org.springframework.boot.info.BuildProperties
 import org.springframework.context.annotation.Configuration
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
@@ -14,10 +13,7 @@ import org.springframework.security.config.http.SessionCreationPolicy
 @EnableGlobalMethodSecurity(prePostEnabled = true, proxyTargetClass = true)
 @AllArgsConstructor
 class ResourceServerConfiguration(private val tokenVerifyingAuthManager: TokenVerifyingAuthManager) : WebSecurityConfigurerAdapter() {
-  private val buildProperties: BuildProperties? = null
-
-  @Throws(Exception::class)
-  public override fun configure(http: HttpSecurity) {
+   override fun configure(http: HttpSecurity) {
     http.headers().frameOptions().sameOrigin().and()
       .sessionManagement()
       .sessionCreationPolicy(SessionCreationPolicy.STATELESS) // Can't have CSRF protection as requires session
@@ -32,9 +28,9 @@ class ResourceServerConfiguration(private val tokenVerifyingAuthManager: TokenVe
             "/info",
             "/ping",
             "/h2-console/**",
-            "/v3/api-docs",
-            "/swagger-ui/**", "/swagger-resources", "/swagger-resources/configuration/ui",
-            "/swagger-resources/configuration/security",
+            "/v3/api-docs/**",
+            "/swagger-ui/**",
+            "/swagger-ui.html",
             "/queue-admin/retry-all-dlqs"
           )
           .permitAll()
