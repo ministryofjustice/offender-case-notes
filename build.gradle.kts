@@ -13,7 +13,7 @@ dependencies {
   compileOnly("org.projectlombok:lombok:1.18.24")
 
   runtimeOnly("com.h2database:h2:2.1.214")
-  runtimeOnly("org.flywaydb:flyway-core:9.2.3")
+  runtimeOnly("org.flywaydb:flyway-core")
   runtimeOnly("org.postgresql:postgresql:42.5.0")
 
   implementation("org.springframework.boot:spring-boot-starter-data-jpa")
