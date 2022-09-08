@@ -1,6 +1,6 @@
 package uk.gov.justice.hmpps.casenotes.controllers
 
-import io.swagger.annotations.ApiOperation
+import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.Parameter
 import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.responses.ApiResponses
@@ -19,7 +19,7 @@ import uk.gov.justice.hmpps.casenotes.services.PublishNoteService
 import java.time.LocalDateTime
 import javax.validation.constraints.NotNull
 
-@Tag(name = "publish-notes")
+@Tag(name = "publish-notes", description = "Prison Notes Controller")
 @RestController
 @RequestMapping(value = ["publish-notes"], produces = [APPLICATION_JSON_VALUE])
 class PublishNotesController(private val publishNoteService: PublishNoteService) {
@@ -28,7 +28,7 @@ class PublishNotesController(private val publishNoteService: PublishNoteService)
   }
 
   @PostMapping
-  @ApiOperation(value = "Publish sensitive case notes", nickname = "publish sensitive case notes")
+  @Operation(summary = "Publish sensitive case notes")
   @ApiResponses(
     value = [
       ApiResponse(responseCode = "200", description = "Number of notes to be published (asynchronously)")
