@@ -1,8 +1,9 @@
 package uk.gov.justice.hmpps.casenotes.dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.Hidden;;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -17,7 +18,7 @@ import java.time.LocalDateTime;
  * Case Note Amendment
  **/
 @SuppressWarnings("unused")
-@ApiModel(description = "Case Note Amendment")
+@Schema(description = "Case Note Amendment")
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @Builder
 @AllArgsConstructor
@@ -25,27 +26,27 @@ import java.time.LocalDateTime;
 @EqualsAndHashCode
 @Data
 public class CaseNoteAmendment {
-    @ApiModelProperty(required = true, value = "Amendment Case Note Id (unique)", example = "123232", position = 1)
+    @Schema(required = true, description = "Amendment Case Note Id (unique)", example = "123232")
     @NotNull
     private Long caseNoteAmendmentId;
 
-    @ApiModelProperty(required = true, value = "Date and Time of Case Note creation", example = "2018-12-01T13:45:00", position = 2)
+    @Schema(required = true, description = "Date and Time of Case Note creation", example = "2018-12-01T13:45:00")
     @NotNull
     private LocalDateTime creationDateTime;
 
-    @ApiModelProperty(required = true, value = "Username of the user amending the case note", position = 3, example = "USER1")
+    @Schema(required = true, description = "Username of the user amending the case note", example = "USER1")
     @NotBlank
     private String authorUserName;
 
-    @ApiModelProperty(required = true, value = "Name of the user amending the case note", position = 4, example = "Mickey Mouse")
+    @Schema(required = true, description = "Name of the user amending the case note", example = "Mickey Mouse")
     @NotBlank
     private String authorName;
 
-    @ApiModelProperty(required = true, value = "User Id of the user amending the case note - staffId for nomis users, userId for auth users", position = 10, example = "12345")
+    @Schema(required = true, description = "User Id of the user amending the case note - staffId for nomis users, userId for auth users", example = "12345")
     @NotNull
     private String authorUserId;
 
-    @ApiModelProperty(required = true, value = "Additional Case Note Information", position = 5, example = "Some Additional Text")
+    @Schema(required = true, description = "Additional Case Note Information", example = "Some Additional Text")
     @NotBlank
     private String additionalNoteText;
 

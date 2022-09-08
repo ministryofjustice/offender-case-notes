@@ -1,8 +1,9 @@
 package uk.gov.justice.hmpps.casenotes.dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.Hidden;;
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
@@ -16,7 +17,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 
-@ApiModel(description = "Case Note")
+@Schema(description = "Case Note")
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @AllArgsConstructor
 @NoArgsConstructor
@@ -24,65 +25,65 @@ import java.util.List;
 @ToString
 public class CaseNote {
 
-    @ApiModelProperty(required = true, value = "Case Note Id (unique)", position = 1, example = "12311312")
+    @Schema(required = true, description = "Case Note Id (unique)", example = "12311312")
     @NotNull
     private String caseNoteId;
 
-    @ApiModelProperty(required = true, value = "Offender Unique Identifier", position = 2, example = "A1234AA")
+    @Schema(required = true, description = "Offender Unique Identifier", example = "A1234AA")
     @NotNull
     private String offenderIdentifier;
 
-    @ApiModelProperty(required = true, value = "Case Note Type", position = 3, example = "KA")
+    @Schema(required = true, description = "Case Note Type", example = "KA")
     @NotBlank
     private String type;
 
-    @ApiModelProperty(required = true, value = "Case Note Type Description", position = 4, example = "Key Worker")
+    @Schema(required = true, description = "Case Note Type Description", example = "Key Worker")
     @NotBlank
     private String typeDescription;
 
-    @ApiModelProperty(required = true, value = "Case Note Sub Type", position = 5, example = "KS")
+    @Schema(required = true, description = "Case Note Sub Type", example = "KS")
     @NotBlank
     private String subType;
 
-    @ApiModelProperty(required = true, value = "Case Note Sub Type Description", position = 6, example = "Key Worker Session")
+    @Schema(required = true, description = "Case Note Sub Type Description", example = "Key Worker Session")
     @NotBlank
     private String subTypeDescription;
 
-    @ApiModelProperty(required = true, value = "Source Type", position = 7, example = "INST")
+    @Schema(required = true, description = "Source Type", example = "INST")
     @NotBlank
     private String source;
 
-    @ApiModelProperty(required = true, value = "Date and Time of Case Note creation", position = 8, example = "2017-10-31T01:30:00")
+    @Schema(required = true, description = "Date and Time of Case Note creation", example = "2017-10-31T01:30:00")
     @NotNull
     private LocalDateTime creationDateTime;
 
-    @ApiModelProperty(required = true, value = "Date and Time of when case note contact with offender was made", position = 9, example = "2017-10-31T01:30:00")
+    @Schema(required = true, description = "Date and Time of when case note contact with offender was made", example = "2017-10-31T01:30:00")
     @NotNull
     private LocalDateTime occurrenceDateTime;
 
-    @ApiModelProperty(required = true, value = "Full name of case note author", position = 11, example = "John Smith")
+    @Schema(required = true, description = "Full name of case note author", example = "John Smith")
     @NotNull
     private String authorName;
 
-    @ApiModelProperty(required = true, value = "User Id of case note author - staffId for nomis users, userId for auth users", position = 11, example = "12345")
+    @Schema(required = true, description = "User Id of case note author - staffId for nomis users, userId for auth users", example = "12345")
     @NotNull
     private String authorUserId;
 
-    @ApiModelProperty(required = true, value = "Case Note Text", position = 13, example = "This is some text")
+    @Schema(required = true, description = "Case Note Text", example = "This is some text")
     @NotBlank
     private String text;
 
-    @ApiModelProperty(value = "Location Id representing where Case Note was made.", position = 14, example = "MDI")
+    @Schema(description = "Location Id representing where Case Note was made.", example = "MDI")
     private String locationId;
 
-    @ApiModelProperty(required = true, value = "Delius number representation of the case note id - will be negative for sensitive case note types", position = 15, example = "-23")
+    @Schema(required = true, description = "Delius number representation of the case note id - will be negative for sensitive case note types", example = "-23")
     @NotNull
     private Integer eventId;
 
-    @ApiModelProperty(required = true, value = "Sensitive Note", position = 16, example = "true")
+    @Schema(required = true, description = "Sensitive Note", example = "true")
     private boolean sensitive;
 
-    @ApiModelProperty(required = true, value = "Ordered list of amendments to the case note (oldest first)", position = 17)
+    @Schema(required = true, description = "Ordered list of amendments to the case note (oldest first)")
     @NotNull
     private List<CaseNoteAmendment> amendments = new ArrayList<>();
 
