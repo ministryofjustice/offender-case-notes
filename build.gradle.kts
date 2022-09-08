@@ -1,5 +1,5 @@
 plugins {
-  id("uk.gov.justice.hmpps.gradle-spring-boot") version "4.4.3-beta"
+  id("uk.gov.justice.hmpps.gradle-spring-boot") version "4.5.0-beta"
   kotlin("plugin.spring") version "1.7.10"
 }
 
@@ -13,8 +13,8 @@ dependencies {
   compileOnly("org.projectlombok:lombok:1.18.24")
 
   runtimeOnly("com.h2database:h2:2.1.214")
-  runtimeOnly("org.flywaydb:flyway-core:8.5.13")
-  runtimeOnly("org.postgresql:postgresql:42.4.1")
+  runtimeOnly("org.flywaydb:flyway-core:9.2.3")
+  runtimeOnly("org.postgresql:postgresql:42.5.0")
 
   implementation("org.springframework.boot:spring-boot-starter-data-jpa")
   implementation("org.springframework.boot:spring-boot-starter-cache")
@@ -33,12 +33,12 @@ dependencies {
 
   implementation("net.sf.ehcache:ehcache:2.10.9.2")
   implementation("org.apache.commons:commons-text:1.9")
-  implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.13.3")
-  implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.13.3")
+  implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.13.4")
+  implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.13.4")
   implementation("com.pauldijou:jwt-core_2.11:5.0.0")
   implementation("com.google.code.gson:gson:2.9.1")
 
-  implementation("software.amazon.awssdk:sns:2.17.248")
+  implementation("software.amazon.awssdk:sns:2.17.269")
 
   implementation("io.swagger:swagger-core:1.6.6")
   implementation("io.swagger.core.v3:swagger-core:2.2.2")
@@ -57,7 +57,7 @@ dependencies {
   testImplementation("org.springframework.security.oauth:spring-security-oauth2:2.5.2.RELEASE")
   testImplementation("org.springframework.security:spring-security-jwt:1.1.1.RELEASE")
   testImplementation("org.mockito.kotlin:mockito-kotlin:4.0.0")
-  testImplementation("io.swagger.parser.v3:swagger-parser-v3:2.1.1")
+  testImplementation("io.swagger.parser.v3:swagger-parser-v3:2.1.2")
 }
 
 java {
