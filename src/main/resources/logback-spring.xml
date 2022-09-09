@@ -38,10 +38,6 @@
         <appender-ref ref="logAppender"/>
     </logger>
 
-    <logger name="springfox.documentation.spring" additivity="false" level="INFO">
-        <appender-ref ref="logAppender"/>
-    </logger>
-
     <logger name="com.microsoft.applicationinsights" additivity="false" level="INFO">
         <appender-ref ref="logAppender"/>
     </logger>

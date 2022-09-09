@@ -1,10 +1,10 @@
 package uk.gov.justice.hmpps.casenotes.controllers
 
-import io.swagger.annotations.Api
-import io.swagger.annotations.ApiOperation
-import io.swagger.annotations.ApiParam
-import io.swagger.annotations.ApiResponse
-import io.swagger.annotations.ApiResponses
+import io.swagger.v3.oas.annotations.Operation
+import io.swagger.v3.oas.annotations.Parameter
+import io.swagger.v3.oas.annotations.responses.ApiResponse
+import io.swagger.v3.oas.annotations.responses.ApiResponses
+import io.swagger.v3.oas.annotations.tags.Tag
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.format.annotation.DateTimeFormat
@@ -19,7 +19,7 @@ import uk.gov.justice.hmpps.casenotes.services.PublishNoteService
 import java.time.LocalDateTime
 import javax.validation.constraints.NotNull
 
-@Api(tags = ["publish-notes"])
+@Tag(name = "publish-notes", description = "Prison Notes Controller")
 @RestController
 @RequestMapping(value = ["publish-notes"], produces = [APPLICATION_JSON_VALUE])
 class PublishNotesController(private val publishNoteService: PublishNoteService) {
@@ -28,12 +28,16 @@ class PublishNotesController(private val publishNoteService: PublishNoteService)
   }
 
   @PostMapping
-  @ApiOperation(value = "Publish sensitive case notes", nickname = "publish sensitive case notes")
-  @ApiResponses(ApiResponse(code = 200, message = "Number of notes to be published (asynchronously)"))
+  @Operation(summary = "Publish sensitive case notes")
+  @ApiResponses(
+    value = [
+      ApiResponse(responseCode = "200", description = "Number of notes to be published (asynchronously)")
+    ]
+  )
   fun publishCaseNotes(
-    @ApiParam(value = "A timestamp that indicates the earliest record required")
+    @Parameter(description = "A timestamp that indicates the earliest record required")
     @RequestParam("fromDateTime", required = false) @DateTimeFormat(iso = ISO.DATE_TIME) fromDateTime: LocalDateTime?,
-    @ApiParam(value = "A timestamp that indicates the latest record required", required = true)
+    @Parameter(description = "A timestamp that indicates the latest record required", required = true)
     @NotNull @RequestParam("toDateTime") @DateTimeFormat(iso = ISO.DATE_TIME) toDateTime: LocalDateTime
   ): Int {
 

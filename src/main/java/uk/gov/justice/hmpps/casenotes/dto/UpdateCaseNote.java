@@ -1,7 +1,8 @@
 package uk.gov.justice.hmpps.casenotes.dto;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.Hidden;;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -11,13 +12,13 @@ import org.hibernate.validator.constraints.Length;
 import javax.validation.constraints.NotBlank;
 
 
-@ApiModel(description = "Amend a Case Note")
+@Schema(description = "Amend a Case Note")
 @NoArgsConstructor
 @AllArgsConstructor
 @EqualsAndHashCode
 @Data
 public class UpdateCaseNote {
-    @ApiModelProperty(required = true, value = "Text of case note", example = "This is a case note message", position = 5)
+    @Schema(required = true, description = "Text of case note", example = "This is a case note message")
     @NotBlank
     @Length(max = 30000)
     private String text;
