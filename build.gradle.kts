@@ -29,9 +29,9 @@ dependencies {
   implementation("javax.activation:activation:1.1.1")
   implementation("javax.transaction:javax.transaction-api:1.3")
 
-  implementation("org.springdoc:springdoc-openapi-ui:1.6.1")
-  implementation("org.springdoc:springdoc-openapi-kotlin:1.6.1")
-  implementation("org.springdoc:springdoc-openapi-data-rest:1.6.1")
+  implementation("org.springdoc:springdoc-openapi-ui:1.6.11")
+  implementation("org.springdoc:springdoc-openapi-kotlin:1.6.11")
+  implementation("org.springdoc:springdoc-openapi-data-rest:1.6.11")
 
   implementation("net.sf.ehcache:ehcache:2.10.9.2")
   implementation("org.apache.commons:commons-text:1.9")
@@ -40,7 +40,7 @@ dependencies {
   implementation("com.pauldijou:jwt-core_2.11:5.0.0")
   implementation("com.google.code.gson:gson:2.9.1")
 
-  implementation("software.amazon.awssdk:sns:2.17.269")
+  implementation("software.amazon.awssdk:sns:2.17.270")
 
   implementation("io.swagger:swagger-core:1.6.6")
   implementation("io.swagger.core.v3:swagger-core:2.2.2")
