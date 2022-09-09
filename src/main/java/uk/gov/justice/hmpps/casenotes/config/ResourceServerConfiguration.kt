@@ -13,7 +13,7 @@ import org.springframework.security.config.http.SessionCreationPolicy
 @EnableGlobalMethodSecurity(prePostEnabled = true, proxyTargetClass = true)
 @AllArgsConstructor
 class ResourceServerConfiguration(private val tokenVerifyingAuthManager: TokenVerifyingAuthManager) : WebSecurityConfigurerAdapter() {
-   override fun configure(http: HttpSecurity) {
+  override fun configure(http: HttpSecurity) {
     http.headers().frameOptions().sameOrigin().and()
       .sessionManagement()
       .sessionCreationPolicy(SessionCreationPolicy.STATELESS) // Can't have CSRF protection as requires session
