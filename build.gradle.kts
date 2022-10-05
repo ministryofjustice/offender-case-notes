@@ -1,5 +1,5 @@
 plugins {
-  id("uk.gov.justice.hmpps.gradle-spring-boot") version "4.5.2-beta"
+  id("uk.gov.justice.hmpps.gradle-spring-boot") version "4.5.4"
   kotlin("plugin.spring") version "1.7.10"
 }
 
@@ -23,7 +23,7 @@ dependencies {
   implementation("org.springframework.boot:spring-boot-starter-oauth2-client")
   implementation("org.springframework.boot:spring-boot-starter-webflux")
 
-  implementation("uk.gov.justice.service.hmpps:hmpps-sqs-spring-boot-starter:1.1.10")
+  implementation("uk.gov.justice.service.hmpps:hmpps-sqs-spring-boot-starter:1.1.11")
 
   implementation("com.google.code.gson:gson:2.9.1")
   implementation("javax.activation:activation:1.1.1")
@@ -34,13 +34,13 @@ dependencies {
   implementation("org.springdoc:springdoc-openapi-data-rest:1.6.11")
 
   implementation("net.sf.ehcache:ehcache:2.10.9.2")
-  implementation("org.apache.commons:commons-text:1.9")
+  implementation("org.apache.commons:commons-text:1.10.0")
   implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.13.4")
   implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.13.4")
   implementation("com.pauldijou:jwt-core_2.11:5.0.0")
   implementation("com.google.code.gson:gson:2.9.1")
 
-  implementation("software.amazon.awssdk:sns:2.17.283")
+  implementation("software.amazon.awssdk:sns:2.17.287")
 
   implementation("io.swagger:swagger-core:1.6.7")
   implementation("io.swagger.core.v3:swagger-core:2.2.3")
