@@ -1,7 +1,7 @@
 version: 2.1
 
 orbs:
-  hmpps: ministryofjustice/hmpps@5.2
+  hmpps: ministryofjustice/hmpps@6.0
 
 jobs:
   validate:
@@ -107,12 +107,11 @@ workflows:
           slack_channel: hmpps_tech_alerts_security
           context:
             - hmpps-common-vars
-      # currently disabled as no support for jdk 18 or kotlin 1.7
-      #- hmpps/veracode_pipeline_scan:
-      #    slack_channel: hmpps_tech_alerts_security
-      #    context:
-      #      - hmpps-common-vars
-      #      - veracode-credentials
+      - hmpps/veracode_pipeline_scan:
+          slack_channel: hmpps_tech_alerts_security
+          context:
+            - hmpps-common-vars
+            - veracode-credentials
   security-weekly:
     triggers:
       - schedule:
