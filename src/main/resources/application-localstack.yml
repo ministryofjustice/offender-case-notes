@@ -9,3 +9,5 @@ hmpps.sqs:
   topics:
     offenderevents:
       arn: arn:aws:sns:eu-west-2:000000000000:offender_events
+    domain-events:
+      arn: arn:aws:sns:eu-west-2:000000000000:domain_events

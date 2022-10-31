@@ -21,23 +21,26 @@ class CaseNoteAwsEventPusherTest {
   private val snsClient: AmazonSNS = mock()
   private val objectMapper: ObjectMapper = mock()
 
-  private val service = CaseNoteAwsEventPusher(hmppsQueueService, objectMapper)
+  private val service = CaseNoteAwsEventPusher(hmppsQueueService, objectMapper, "http://localhost:8080")
 
   @Test
   fun `send event converts to case note event`() {
     whenever(objectMapper.writeValueAsString(any())).thenReturn("messageAsJson")
-    whenever(hmppsQueueService.findByTopicId("offenderevents")).thenReturn(HmppsTopic("id", "topicUrn", snsClient))
+    whenever(hmppsQueueService.findByTopicId("domain-events")).thenReturn(HmppsTopic("id", "topicUrn", snsClient))
     whenever(snsClient.publish(any())).thenReturn(PublishResult().withMessageId("Hello"))
     service.sendEvent(caseCaseNote())
     verify(objectMapper).writeValueAsString(
-      check<CaseNoteEvent> {
+      check<HmppsDomainEvent> {
         assertThat(it).isEqualTo(
-          CaseNoteEvent(
-            eventType = "GEN-OSE",
-            eventDatetime = LocalDateTime.parse("2019-03-04T10:11:12"),
-            offenderIdDisplay = "A1234AC",
-            agencyLocationId = "MDI",
-            caseNoteId = "abcde"
+          HmppsDomainEvent(
+            eventType = "prison.case-note.published",
+            detailUrl = "http://localhost:8080/case-notes/A1234AC/abcde",
+            occurredAt = LocalDateTime.parse("2019-03-04T10:11:12"),
+            personReference = PersonReference(identifiers = listOf(PersonIdentifier("NOMS", "A1234AC"))),
+            additionalInformation = CaseNoteAdditionalInformation(
+              caseNoteId = "abcde",
+              caseNoteType = "GEN-OSE",
+            ),
           )
         )
       }
@@ -47,14 +50,15 @@ class CaseNoteAwsEventPusherTest {
   @Test
   fun `send event sends to the sns client`() {
     whenever(objectMapper.writeValueAsString(any())).thenReturn("messageAsJson")
-    whenever(hmppsQueueService.findByTopicId("offenderevents")).thenReturn(HmppsTopic("id", "topicArn", snsClient))
+    whenever(hmppsQueueService.findByTopicId("domain-events")).thenReturn(HmppsTopic("id", "topicArn", snsClient))
     whenever(snsClient.publish(any())).thenReturn(PublishResult().withMessageId("Hello"))
     service.sendEvent(caseCaseNote())
     verify(snsClient).publish(
       check {
         assertThat(it.message).isEqualTo("messageAsJson")
         assertThat(it.topicArn).isEqualTo("topicArn")
-        assertThat(it.messageAttributes).containsEntry("eventType", MessageAttributeValue().withDataType("String").withStringValue("GEN-OSE"))
+        assertThat(it.messageAttributes).containsEntry("eventType", MessageAttributeValue().withDataType("String").withStringValue("prison.case-note.published"))
+        assertThat(it.messageAttributes).containsEntry("caseNoteType", MessageAttributeValue().withDataType("String").withStringValue("GEN-OSE"))
       }
     )
   }

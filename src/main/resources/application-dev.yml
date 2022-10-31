@@ -22,6 +22,8 @@ spring:
 server:
   shutdown: immediate
 
+casenotes:
+  api.base.url: http://localhost:8080
 elite2:
   api.base.url: http://localhost:8080
 oauth:
