@@ -38,7 +38,7 @@ dependencies {
   implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.13.4")
   implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.13.4")
   implementation("com.pauldijou:jwt-core_2.11:5.0.0")
-  implementation("com.google.code.gson:gson:2.9.10")
+  implementation("com.google.code.gson:gson:2.10")
 
   implementation("software.amazon.awssdk:sns:2.18.7")
 
