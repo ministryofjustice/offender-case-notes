@@ -33,7 +33,7 @@ class CaseNoteAwsEventPusher(
     val log: Logger = LoggerFactory.getLogger(this::class.java)
   }
 
-  internal val eventTopic by lazy { hmppsQueueService.findByTopicId("domain-events") as HmppsTopic }
+  internal val eventTopic by lazy { hmppsQueueService.findByTopicId("domainevents") as HmppsTopic }
   internal val snsClient by lazy { eventTopic.snsClient }
   internal val topicArn by lazy { eventTopic.arn }
 

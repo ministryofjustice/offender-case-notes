@@ -58,5 +58,5 @@ hmpps.sqs:
   topics:
     offenderevents:
       arn: arn:aws:sns:eu-west-2:000000000000:${random.uuid}
-    domain-events:
+    domainevents:
       arn: arn:aws:sns:eu-west-2:000000000000:${random.uuid}
