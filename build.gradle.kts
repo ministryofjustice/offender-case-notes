@@ -1,6 +1,6 @@
 plugins {
-  id("uk.gov.justice.hmpps.gradle-spring-boot") version "4.5.5"
-  kotlin("plugin.spring") version "1.7.10"
+  id("uk.gov.justice.hmpps.gradle-spring-boot") version "4.5.7-beta"
+  kotlin("plugin.spring") version "1.7.20"
 }
 
 configurations {
@@ -23,33 +23,33 @@ dependencies {
   implementation("org.springframework.boot:spring-boot-starter-oauth2-client")
   implementation("org.springframework.boot:spring-boot-starter-webflux")
 
-  implementation("uk.gov.justice.service.hmpps:hmpps-sqs-spring-boot-starter:1.1.11")
+  implementation("uk.gov.justice.service.hmpps:hmpps-sqs-spring-boot-starter:1.1.12")
 
-  implementation("com.google.code.gson:gson:2.9.1")
+  implementation("com.google.code.gson:gson:2.10")
   implementation("javax.activation:activation:1.1.1")
   implementation("javax.transaction:javax.transaction-api:1.3")
 
-  implementation("org.springdoc:springdoc-openapi-ui:1.6.11")
-  implementation("org.springdoc:springdoc-openapi-kotlin:1.6.11")
-  implementation("org.springdoc:springdoc-openapi-data-rest:1.6.11")
+  implementation("org.springdoc:springdoc-openapi-ui:1.6.12")
+  implementation("org.springdoc:springdoc-openapi-kotlin:1.6.12")
+  implementation("org.springdoc:springdoc-openapi-data-rest:1.6.12")
 
   implementation("net.sf.ehcache:ehcache:2.10.9.2")
   implementation("org.apache.commons:commons-text:1.10.0")
   implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.13.4")
   implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.13.4")
   implementation("com.pauldijou:jwt-core_2.11:5.0.0")
-  implementation("com.google.code.gson:gson:2.9.1")
+  implementation("com.google.code.gson:gson:2.10")
 
-  implementation("software.amazon.awssdk:sns:2.17.287")
+  implementation("software.amazon.awssdk:sns:2.18.8")
 
-  implementation("io.swagger:swagger-core:1.6.7")
-  implementation("io.swagger.core.v3:swagger-core:2.2.3")
+  implementation("io.swagger:swagger-core:1.6.8")
+  implementation("io.swagger.core.v3:swagger-core:2.2.4")
 
   testAnnotationProcessor("org.projectlombok:lombok:1.18.24")
   testCompileOnly("org.projectlombok:lombok:1.18.24")
   testImplementation("org.springframework.security:spring-security-test")
   testImplementation("com.tngtech.java:junit-dataprovider:1.13.1")
-  testImplementation("net.javacrumbs.json-unit:json-unit-assertj:2.35.0")
+  testImplementation("net.javacrumbs.json-unit:json-unit-assertj:2.36.0")
   testImplementation("io.github.http-builder-ng:http-builder-ng-apache:1.0.4")
   testImplementation("com.github.tomakehurst:wiremock-standalone:2.27.2")
   testImplementation("io.jsonwebtoken:jjwt:0.9.1")
@@ -59,7 +59,7 @@ dependencies {
   testImplementation("org.springframework.security.oauth:spring-security-oauth2:2.5.2.RELEASE")
   testImplementation("org.springframework.security:spring-security-jwt:1.1.1.RELEASE")
   testImplementation("org.mockito.kotlin:mockito-kotlin:4.0.0")
-  testImplementation("io.swagger.parser.v3:swagger-parser-v3:2.1.3")
+  testImplementation("io.swagger.parser.v3:swagger-parser-v3:2.1.7")
 }
 
 java {
