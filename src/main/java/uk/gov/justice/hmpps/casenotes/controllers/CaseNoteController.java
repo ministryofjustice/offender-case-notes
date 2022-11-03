@@ -234,6 +234,8 @@ public class CaseNoteController {
 
     private Map<String, String> createEventProperties(final CaseNote caseNote) {
         return Map.of(
+            "caseNoteId", caseNote.getCaseNoteId(),
+            "caseNoteType", String.format("%s-%s", caseNote.getType(), caseNote.getSubType()),
             "type", caseNote.getType(),
             "subType", caseNote.getSubType(),
             "offenderIdentifier", caseNote.getOffenderIdentifier(),
