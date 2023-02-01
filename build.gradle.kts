@@ -1,5 +1,5 @@
 plugins {
-  id("uk.gov.justice.hmpps.gradle-spring-boot") version "4.8.1-beta-1"
+  id("uk.gov.justice.hmpps.gradle-spring-boot") version "4.8.2-beta"
   kotlin("plugin.spring") version "1.8.0"
 }
 
@@ -35,12 +35,12 @@ dependencies {
 
   implementation("net.sf.ehcache:ehcache:2.10.9.2")
   implementation("org.apache.commons:commons-text:1.10.0")
-  implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.14.1")
-  implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.14.1")
+  implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.14.2")
+  implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.14.2")
   implementation("com.pauldijou:jwt-core_2.11:5.0.0")
   implementation("com.google.code.gson:gson:2.10.1")
 
-  implementation("software.amazon.awssdk:sns:2.19.15")
+  implementation("software.amazon.awssdk:sns:2.19.28")
 
   implementation("io.swagger:swagger-core:1.6.9")
   implementation("io.swagger.core.v3:swagger-core:2.2.8")
@@ -49,7 +49,7 @@ dependencies {
   testCompileOnly("org.projectlombok:lombok:1.18.24")
   testImplementation("org.springframework.security:spring-security-test")
   testImplementation("com.tngtech.java:junit-dataprovider:1.13.1")
-  testImplementation("net.javacrumbs.json-unit:json-unit-assertj:2.36.0")
+  testImplementation("net.javacrumbs.json-unit:json-unit-assertj:2.36.1")
   testImplementation("io.github.http-builder-ng:http-builder-ng-apache:1.0.4")
   testImplementation("com.github.tomakehurst:wiremock-standalone:2.27.2")
   testImplementation("io.jsonwebtoken:jjwt:0.9.1")
@@ -59,7 +59,7 @@ dependencies {
   testImplementation("org.springframework.security.oauth:spring-security-oauth2:2.5.2.RELEASE")
   testImplementation("org.springframework.security:spring-security-jwt:1.1.1.RELEASE")
   testImplementation("org.mockito.kotlin:mockito-kotlin:4.1.0")
-  testImplementation("io.swagger.parser.v3:swagger-parser-v3:2.1.10")
+  testImplementation("io.swagger.parser.v3:swagger-parser-v3:2.1.11")
 }
 
 java {
