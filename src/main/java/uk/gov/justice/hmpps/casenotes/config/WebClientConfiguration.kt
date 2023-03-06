@@ -34,7 +34,7 @@ class WebClientConfiguration(
   @Value("\${oauth.api.base.url}") private val oauthApiBaseUrl: @URL String,
   /** OAUTH2 API Rest URL endpoint ("http://localhost:8100") */
   @Value("\${tokenverification.api.base.url}") private val tokenVerificationApiBaseUrl: @URL String,
-  @Value("\${api.health-timeout:1s}") private val healthTimeout: Duration
+  @Value("\${api.health-timeout:1s}") private val healthTimeout: Duration,
 ) {
 
   @Bean
@@ -52,7 +52,7 @@ class WebClientConfiguration(
   @Bean
   fun tokenVerificationApiWebClient(builder: Builder): WebClient = builder.baseUrl(tokenVerificationApiBaseUrl)
     .clientConnector(
-      ReactorClientHttpConnector(HttpClient.create().warmupWithHealthPing(tokenVerificationApiBaseUrl))
+      ReactorClientHttpConnector(HttpClient.create().warmupWithHealthPing(tokenVerificationApiBaseUrl)),
     )
     .build()
 
@@ -63,7 +63,7 @@ class WebClientConfiguration(
   private fun createForwardAuthWebClient(builder: Builder, url: @URL String): WebClient = builder.baseUrl(url)
     .filter(addAuthHeaderFilterFunction())
     .clientConnector(
-      ReactorClientHttpConnector(HttpClient.create().warmupWithHealthPing(tokenVerificationApiBaseUrl))
+      ReactorClientHttpConnector(HttpClient.create().warmupWithHealthPing(tokenVerificationApiBaseUrl)),
     )
     .build()
 
@@ -89,12 +89,12 @@ class WebClientConfiguration(
   @Bean
   fun authorizedClientManagerAppScope(
     clientRegistrationRepository: ClientRegistrationRepository?,
-    oAuth2AuthorizedClientService: OAuth2AuthorizedClientService?
+    oAuth2AuthorizedClientService: OAuth2AuthorizedClientService?,
   ): OAuth2AuthorizedClientManager {
     val authorizedClientProvider = OAuth2AuthorizedClientProviderBuilder.builder().clientCredentials().build()
     val authorizedClientManager = AuthorizedClientServiceOAuth2AuthorizedClientManager(
       clientRegistrationRepository,
-      oAuth2AuthorizedClientService
+      oAuth2AuthorizedClientService,
     )
     authorizedClientManager.setAuthorizedClientProvider(authorizedClientProvider)
     return authorizedClientManager
@@ -103,13 +103,13 @@ class WebClientConfiguration(
   @Bean
   fun elite2ClientCredentialsWebClient(
     @Qualifier(value = "authorizedClientManagerAppScope") authorizedClientManager: OAuth2AuthorizedClientManager,
-    builder: Builder
+    builder: Builder,
   ): WebClient = getOAuthWebClient(authorizedClientManager, builder, elite2ApiBaseUrl)
 
   private fun getOAuthWebClient(
     authorizedClientManager: OAuth2AuthorizedClientManager,
     builder: Builder,
-    rootUri: String
+    rootUri: String,
   ): WebClient {
     val oauth2Client = ServletOAuth2AuthorizedClientExchangeFilterFunction(authorizedClientManager)
     oauth2Client.setDefaultClientRegistrationId("elite2-api")

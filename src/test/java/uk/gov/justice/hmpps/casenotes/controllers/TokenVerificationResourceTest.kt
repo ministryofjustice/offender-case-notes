@@ -21,7 +21,7 @@ class TokenVerificationResourceTest : ResourceTest() {
 
     tokenVerificationApi.verify(
       postRequestedFor(urlEqualTo("/token/verify"))
-        .withHeader(HttpHeader.AUTHORIZATION.asString(), equalTo("Bearer $jwt"))
+        .withHeader(HttpHeader.AUTHORIZATION.asString(), equalTo("Bearer $jwt")),
     )
   }
 
@@ -39,7 +39,7 @@ class TokenVerificationResourceTest : ResourceTest() {
 
     tokenVerificationApi.verify(
       postRequestedFor(urlEqualTo("/token/verify"))
-        .withHeader(HttpHeader.AUTHORIZATION.asString(), equalTo("Bearer $jwt"))
+        .withHeader(HttpHeader.AUTHORIZATION.asString(), equalTo("Bearer $jwt")),
     )
   }
 }

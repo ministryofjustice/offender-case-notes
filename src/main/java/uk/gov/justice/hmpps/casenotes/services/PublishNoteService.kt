@@ -16,7 +16,7 @@ import java.util.stream.Collectors
 @Validated
 open class PublishNoteService(
   private val repository: OffenderCaseNoteRepository,
-  private val caseNoteEventPusher: CaseNoteEventPusher
+  private val caseNoteEventPusher: CaseNoteEventPusher,
 ) {
 
   @PreAuthorize("hasAnyRole('PUBLISH_SENSITIVE_CASE_NOTES')")

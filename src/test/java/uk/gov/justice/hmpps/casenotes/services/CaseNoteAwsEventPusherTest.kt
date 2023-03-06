@@ -41,9 +41,9 @@ class CaseNoteAwsEventPusherTest {
               caseNoteId = "abcde",
               caseNoteType = "GEN-OSE",
             ),
-          )
+          ),
         )
-      }
+      },
     )
   }
 
@@ -57,9 +57,15 @@ class CaseNoteAwsEventPusherTest {
       check {
         assertThat(it.message).isEqualTo("messageAsJson")
         assertThat(it.topicArn).isEqualTo("topicArn")
-        assertThat(it.messageAttributes).containsEntry("eventType", MessageAttributeValue().withDataType("String").withStringValue("prison.case-note.published"))
-        assertThat(it.messageAttributes).containsEntry("caseNoteType", MessageAttributeValue().withDataType("String").withStringValue("GEN-OSE"))
-      }
+        assertThat(it.messageAttributes).containsEntry(
+          "eventType",
+          MessageAttributeValue().withDataType("String").withStringValue("prison.case-note.published"),
+        )
+        assertThat(it.messageAttributes).containsEntry(
+          "caseNoteType",
+          MessageAttributeValue().withDataType("String").withStringValue("GEN-OSE"),
+        )
+      },
     )
   }
 

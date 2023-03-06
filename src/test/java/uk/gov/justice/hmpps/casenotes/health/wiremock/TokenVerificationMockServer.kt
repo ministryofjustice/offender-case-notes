@@ -37,8 +37,8 @@ class TokenVerificationMockServer : WireMockServer(9100) {
         .willReturn(
           WireMock.aResponse()
             .withHeaders(HttpHeaders(HttpHeader("Content-Type", "application/json")))
-            .withBody(""" {"active": "$active"} """)
-        )
+            .withBody(""" {"active": "$active"} """),
+        ),
     )
   }
 }

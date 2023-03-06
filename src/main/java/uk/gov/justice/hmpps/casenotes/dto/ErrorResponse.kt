@@ -9,5 +9,5 @@ data class ErrorResponse @JsonCreator constructor(
   val errorCode: Int? = null,
   val userMessage: String? = null,
   val developerMessage: String? = null,
-  val moreInfo: String? = null
+  val moreInfo: String? = null,
 )

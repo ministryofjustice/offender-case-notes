@@ -60,21 +60,21 @@ class Elite2MockServer : WireMockServer(WIREMOCK_PORT) {
                     .subCodes(
                       listOf(
                         CaseNoteTypeDto.builder().code("KS").description("Key worker Session").build(),
-                        CaseNoteTypeDto.builder().code("KE").description("Key worker Entry").build()
-                      )
+                        CaseNoteTypeDto.builder().code("KE").description("Key worker Entry").build(),
+                      ),
                     ).build(),
                   CaseNoteTypeDto.builder().code("OBS").description("Observation")
                     .subCodes(
                       listOf(
                         CaseNoteTypeDto.builder().code("GEN").description("General").build(),
-                        CaseNoteTypeDto.builder().code("SPECIAL").description("Special").build()
-                      )
-                    ).build()
-                )
-              )
+                        CaseNoteTypeDto.builder().code("SPECIAL").description("Special").build(),
+                      ),
+                    ).build(),
+                ),
+              ),
             )
-            .withStatus(200)
-        )
+            .withStatus(200),
+        ),
     )
   }
 
@@ -91,20 +91,20 @@ class Elite2MockServer : WireMockServer(WIREMOCK_PORT) {
                   CaseNoteTypeDto.builder().code("KA").description("Key worker")
                     .subCodes(
                       listOf(
-                        CaseNoteTypeDto.builder().code("KS").description("Key worker Session").build()
-                      )
+                        CaseNoteTypeDto.builder().code("KS").description("Key worker Session").build(),
+                      ),
                     ).build(),
                   CaseNoteTypeDto.builder().code("OBS").description("Observation")
                     .subCodes(
                       listOf(
-                        CaseNoteTypeDto.builder().code("GEN").description("General").build()
-                      )
-                    ).build()
-                )
-              )
+                        CaseNoteTypeDto.builder().code("GEN").description("General").build(),
+                      ),
+                    ).build(),
+                ),
+              ),
             )
-            .withStatus(200)
-        )
+            .withStatus(200),
+        ),
     )
   }
 
@@ -120,10 +120,10 @@ class Elite2MockServer : WireMockServer(WIREMOCK_PORT) {
                 "  \"bookingId\": 1,\n" +
                 "  \"offenderNo\": \"" + offenderIdentifier + "\",\n" +
                 "  \"agencyId\": \"LEI\"" +
-                "}"
+                "}",
             )
-            .withStatus(200)
-        )
+            .withStatus(200),
+        ),
     )
   }
 
@@ -150,10 +150,10 @@ class Elite2MockServer : WireMockServer(WIREMOCK_PORT) {
                       "bookingId": $bookingIdentifier,
                       "caseloadType": "INST"
                     }
-                  ]"""
+                  ]""",
             )
-            .withStatus(200)
-        )
+            .withStatus(200),
+        ),
     )
   }
 
@@ -175,10 +175,10 @@ class Elite2MockServer : WireMockServer(WIREMOCK_PORT) {
                     "activeFlag": false,
                     "dateOfBirth": "1932-05-04"
                   }
-              """.trimIndent()
+              """.trimIndent(),
             )
-            .withStatus(200)
-        )
+            .withStatus(200),
+        ),
     )
   }
 
@@ -237,8 +237,8 @@ class Elite2MockServer : WireMockServer(WIREMOCK_PORT) {
           aResponse()
             .withHeader("Content-Type", "application/json")
             .withBody(body)
-            .withStatus(200)
-        )
+            .withStatus(200),
+        ),
     )
   }
 
@@ -256,10 +256,10 @@ class Elite2MockServer : WireMockServer(WIREMOCK_PORT) {
                       "userMessage": "Resource with id [A9868AN] not found.",
                       "developerMessage": "Resource with id [A9868AN] not found."
                   }
-              """.trimIndent()
+              """.trimIndent(),
             )
-            .withStatus(404)
-        )
+            .withStatus(404),
+        ),
     )
   }
 
@@ -272,8 +272,8 @@ class Elite2MockServer : WireMockServer(WIREMOCK_PORT) {
           aResponse()
             .withHeader("Content-Type", "application/json")
             .withBody(body)
-            .withStatus(200)
-        )
+            .withStatus(200),
+        ),
     )
   }
 
@@ -303,21 +303,30 @@ class Elite2MockServer : WireMockServer(WIREMOCK_PORT) {
           aResponse()
             .withHeader("Content-Type", "application/json")
             .withBody(body)
-            .withStatus(201)
-        )
+            .withStatus(201),
+        ),
     )
   }
 
   fun subAmendCaseNote(offenderIdentifier: String?, caseNoteIdentifier: String?) {
     val body = gson.toJson(createNomisCaseNote())
     stubFor(
-      WireMock.put(urlPathMatching(String.format("%s/offenders/%s/case-notes/%s", API_PREFIX, offenderIdentifier, caseNoteIdentifier)))
+      WireMock.put(
+        urlPathMatching(
+          String.format(
+            "%s/offenders/%s/case-notes/%s",
+            API_PREFIX,
+            offenderIdentifier,
+            caseNoteIdentifier,
+          ),
+        ),
+      )
         .willReturn(
           aResponse()
             .withHeader("Content-Type", "application/json")
             .withBody(body)
-            .withStatus(200)
-        )
+            .withStatus(200),
+        ),
     )
   }
 

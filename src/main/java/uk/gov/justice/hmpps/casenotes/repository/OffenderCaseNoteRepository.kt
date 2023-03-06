@@ -11,21 +11,45 @@ import java.time.LocalDateTime
 import java.util.UUID
 
 @Repository
-interface OffenderCaseNoteRepository : PagingAndSortingRepository<OffenderCaseNote, UUID>, JpaSpecificationExecutor<OffenderCaseNote> {
+interface OffenderCaseNoteRepository :
+  PagingAndSortingRepository<OffenderCaseNote, UUID>,
+  JpaSpecificationExecutor<OffenderCaseNote> {
 
-  fun findByCaseNoteType_ParentType_TypeInAndModifyDateTimeAfterOrderByModifyDateTime(types: Set<String>?, createdDate: LocalDateTime?, page: Pageable?): List<OffenderCaseNote>
+  fun findByCaseNoteType_ParentType_TypeInAndModifyDateTimeAfterOrderByModifyDateTime(
+    types: Set<String>?,
+    createdDate: LocalDateTime?,
+    page: Pageable?,
+  ): List<OffenderCaseNote>
 
-  fun findByModifyDateTimeBetweenOrderByModifyDateTime(fromDateTime: LocalDateTime, toDateTime: LocalDateTime): List<OffenderCaseNote>
+  fun findByModifyDateTimeBetweenOrderByModifyDateTime(
+    fromDateTime: LocalDateTime,
+    toDateTime: LocalDateTime,
+  ): List<OffenderCaseNote>
 
   @Modifying
-  @Query("UPDATE OFFENDER_CASE_NOTE ocn SET offender_identifier = ?2 WHERE ocn.offender_identifier = ?1", nativeQuery = true)
+  @Query(
+    "UPDATE OFFENDER_CASE_NOTE ocn SET offender_identifier = ?2 WHERE ocn.offender_identifier = ?1",
+    nativeQuery = true,
+    // see https://github.com/spring-projects/spring-data-jpa/issues/2812. Remove after upgrade past 2.7.9. Not used.
+    countQuery = "select 1",
+  )
   fun updateOffenderIdentifier(oldOffenderIdentifier: String, newOffenderIdentifier: String): Int
 
   @Modifying
-  @Query(value = "DELETE FROM OFFENDER_CASE_NOTE ocn WHERE ocn.offender_identifier = ?1", nativeQuery = true)
+  @Query(
+    value = "DELETE FROM OFFENDER_CASE_NOTE ocn WHERE ocn.offender_identifier = ?1",
+    nativeQuery = true,
+    // see https://github.com/spring-projects/spring-data-jpa/issues/2812. Remove after upgrade past 2.7.9. Not used.
+    countQuery = "select 1",
+  )
   fun deleteOffenderCaseNoteByOffenderIdentifier(offenderIdentifier: String): Int
 
   @Modifying
-  @Query(value = "DELETE FROM offender_case_note_amendment ocna where offender_case_note_id in (select offender_case_note_id from offender_case_note where offender_identifier = ?1)", nativeQuery = true)
+  @Query(
+    value = "DELETE FROM offender_case_note_amendment ocna where offender_case_note_id in (select offender_case_note_id from offender_case_note where offender_identifier = ?1)",
+    nativeQuery = true,
+    // see https://github.com/spring-projects/spring-data-jpa/issues/2812. Remove after upgrade past 2.7.9. Not used.
+    countQuery = "select 1",
+  )
   fun deleteOffenderCaseNoteAmendmentsByOffenderIdentifier(offenderIdentifier: String): Int
 }
