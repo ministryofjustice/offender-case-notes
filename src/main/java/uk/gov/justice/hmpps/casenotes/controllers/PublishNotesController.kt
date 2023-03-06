@@ -36,10 +36,13 @@ class PublishNotesController(private val publishNoteService: PublishNoteService)
   )
   fun publishCaseNotes(
     @Parameter(description = "A timestamp that indicates the earliest record required")
-    @RequestParam("fromDateTime", required = false) @DateTimeFormat(iso = ISO.DATE_TIME)
+    @DateTimeFormat(iso = ISO.DATE_TIME)
+    @RequestParam("fromDateTime", required = false)
     fromDateTime: LocalDateTime?,
     @Parameter(description = "A timestamp that indicates the latest record required", required = true)
-    @NotNull @RequestParam("toDateTime") @DateTimeFormat(iso = ISO.DATE_TIME)
+    @DateTimeFormat(iso = ISO.DATE_TIME)
+    @RequestParam("toDateTime")
+    @NotNull
     toDateTime: LocalDateTime,
   ): Int {
     val caseNotes: List<CaseNote> = publishNoteService.findCaseNotes(
