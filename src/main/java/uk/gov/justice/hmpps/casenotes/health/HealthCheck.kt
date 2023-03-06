@@ -16,7 +16,11 @@ abstract class HealthCheck(private val webClient: WebClient) : HealthIndicator {
       .retrieve()
       .toEntity(String::class.java)
       .flatMap { Mono.just(Health.up().withDetail("HttpStatus", it?.statusCode).build()) }
-      .onErrorResume(WebClientResponseException::class.java) { Mono.just(Health.down(it).withDetail("body", it.responseBodyAsString).withDetail("HttpStatus", it.statusCode).build()) }
+      .onErrorResume(WebClientResponseException::class.java) {
+        Mono.just(
+          Health.down(it).withDetail("body", it.responseBodyAsString).withDetail("HttpStatus", it.statusCode).build(),
+        )
+      }
       .onErrorResume(Exception::class.java) { Mono.just(Health.down(it).build()) }
       .block()
 }
@@ -33,7 +37,7 @@ constructor(@Qualifier("oauthApiHealthWebClient") webClient: WebClient) : Health
 class TokenVerificationApiHealth
 constructor(
   @Qualifier("tokenVerificationApiHealthWebClient") webClient: WebClient,
-  @Value("\${tokenverification.enabled:false}") private val tokenVerificationEnabled: Boolean
+  @Value("\${tokenverification.enabled:false}") private val tokenVerificationEnabled: Boolean,
 ) : HealthCheck(webClient) {
   override fun health(): Health? =
     if (tokenVerificationEnabled) {

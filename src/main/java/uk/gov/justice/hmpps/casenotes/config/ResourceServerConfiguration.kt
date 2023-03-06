@@ -12,7 +12,8 @@ import org.springframework.security.config.http.SessionCreationPolicy
 @EnableWebSecurity
 @EnableGlobalMethodSecurity(prePostEnabled = true, proxyTargetClass = true)
 @AllArgsConstructor
-class ResourceServerConfiguration(private val tokenVerifyingAuthManager: TokenVerifyingAuthManager) : WebSecurityConfigurerAdapter() {
+class ResourceServerConfiguration(private val tokenVerifyingAuthManager: TokenVerifyingAuthManager) :
+  WebSecurityConfigurerAdapter() {
   override fun configure(http: HttpSecurity) {
     http.headers().frameOptions().sameOrigin().and()
       .sessionManagement()
@@ -31,7 +32,7 @@ class ResourceServerConfiguration(private val tokenVerifyingAuthManager: TokenVe
             "/v3/api-docs/**",
             "/swagger-ui/**",
             "/swagger-ui.html",
-            "/queue-admin/retry-all-dlqs"
+            "/queue-admin/retry-all-dlqs",
           )
           .permitAll()
           .anyRequest()

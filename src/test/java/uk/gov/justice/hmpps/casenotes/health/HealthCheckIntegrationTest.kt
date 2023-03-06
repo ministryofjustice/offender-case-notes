@@ -104,8 +104,8 @@ class HealthCheckIntegrationTest : QueueListenerIntegrationTest() {
         aResponse()
           .withHeader("Content-Type", "application/json")
           .withBody(if (status == 200) "{\"status\":\"UP\"}" else "some error")
-          .withStatus(status)
-      )
+          .withStatus(status),
+      ),
     )
 
     elite2Api.stubFor(
@@ -113,8 +113,8 @@ class HealthCheckIntegrationTest : QueueListenerIntegrationTest() {
         aResponse()
           .withHeader("Content-Type", "application/json")
           .withBody(if (status == 200) "{\"status\":\"UP\"}" else "some error")
-          .withStatus(status)
-      )
+          .withStatus(status),
+      ),
     )
 
     tokenVerificationApi.stubFor(
@@ -122,8 +122,8 @@ class HealthCheckIntegrationTest : QueueListenerIntegrationTest() {
         aResponse()
           .withHeader("Content-Type", "application/json")
           .withBody(if (status == 200) "{\"status\":\"UP\"}" else "some error")
-          .withStatus(status)
-      )
+          .withStatus(status),
+      ),
     )
   }
 }

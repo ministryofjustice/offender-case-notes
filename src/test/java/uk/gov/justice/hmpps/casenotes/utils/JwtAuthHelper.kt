@@ -32,9 +32,10 @@ class JwtAuthHelper {
     scope: List<String>? = listOf(),
     roles: List<String>? = listOf(),
     expiryTime: Duration = Duration.ofHours(1),
-    jwtId: String = UUID.randomUUID().toString()
+    jwtId: String = UUID.randomUUID().toString(),
   ): String {
-    val claims = mutableMapOf<String, Any?>("user_name" to subject, "client_id" to "elite2apiclient", "user_id" to userId)
+    val claims =
+      mutableMapOf<String, Any?>("user_name" to subject, "client_id" to "elite2apiclient", "user_id" to userId)
     roles?.let { claims["authorities"] = roles }
     scope?.let { claims["scope"] = scope }
     return Jwts.builder()

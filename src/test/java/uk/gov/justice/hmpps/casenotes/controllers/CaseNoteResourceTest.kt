@@ -214,7 +214,13 @@ class CaseNoteResourceTest : ResourceTest() {
     // create the case note
     webTestClient.post().uri("/case-notes/{offenderIdentifier}", "A1234AD")
       .headers(addBearerAuthorisation("SECURE_CASENOTE_USER", CASENOTES_ROLES))
-      .bodyValue(CREATE_CASE_NOTE_BY_TYPE.format("OLDPOM", "OLDTWO", "This is another case note with inactive case note type"))
+      .bodyValue(
+        CREATE_CASE_NOTE_BY_TYPE.format(
+          "OLDPOM",
+          "OLDTWO",
+          "This is another case note with inactive case note type",
+        ),
+      )
       .exchange()
       .expectStatus().isBadRequest
   }
@@ -238,7 +244,7 @@ class CaseNoteResourceTest : ResourceTest() {
     webTestClient.put().uri(
       "/case-notes/{offenderIdentifier}/{caseNoteId}",
       "A1234AB",
-      postResponse.responseBody.blockFirst()!!.caseNoteId
+      postResponse.responseBody.blockFirst()!!.caseNoteId,
     )
       .headers(addBearerToken(token))
       .bodyValue("""{ "text": "Amended case note" }""")
@@ -313,7 +319,7 @@ class CaseNoteResourceTest : ResourceTest() {
             "description": "A New Type 1",
             "active": false
             }
-        """.trimIndent()
+        """.trimIndent(),
       )
       .exchange()
       .expectStatus().isCreated
@@ -328,7 +334,7 @@ class CaseNoteResourceTest : ResourceTest() {
             "description": "Change The Desc",
             "active": true
             }
-        """.trimIndent()
+        """.trimIndent(),
       )
       .exchange()
       .expectStatus().isOk
@@ -344,7 +350,7 @@ class CaseNoteResourceTest : ResourceTest() {
             "description": "A New Sub Type 1",
             "active": false
             }
-        """.trimIndent()
+        """.trimIndent(),
       )
       .exchange()
       .expectStatus().isCreated
@@ -359,7 +365,7 @@ class CaseNoteResourceTest : ResourceTest() {
             "description": "Change The Desc",
             "active": true
             }
-        """.trimIndent()
+        """.trimIndent(),
       )
       .exchange()
       .expectStatus().isOk
@@ -381,7 +387,7 @@ class CaseNoteResourceTest : ResourceTest() {
             "description": "Wrong!",
             "active": false
             }
-        """.trimIndent()
+        """.trimIndent(),
       )
       .exchange()
       .expectStatus().isBadRequest
@@ -395,7 +401,7 @@ class CaseNoteResourceTest : ResourceTest() {
             "description": "Change The Desc","
             "active": notvalidtype
             }
-        """.trimIndent()
+        """.trimIndent(),
       )
       .exchange()
       .expectStatus().is5xxServerError
@@ -408,7 +414,7 @@ class CaseNoteResourceTest : ResourceTest() {
             "description": "012345678901234567890123456789012345678901234567890123456789012345678901234567890",
             "active": true
             }
-        """.trimIndent()
+        """.trimIndent(),
       )
       .exchange()
       .expectStatus().isBadRequest
@@ -423,7 +429,7 @@ class CaseNoteResourceTest : ResourceTest() {
             "description": "New Type",
             "active": false
             }
-        """.trimIndent()
+        """.trimIndent(),
       )
       .exchange()
       .expectStatus().isBadRequest
@@ -436,7 +442,7 @@ class CaseNoteResourceTest : ResourceTest() {
             "type": "NEWSUBTYPE1",
             "description": "012345678901234567890123456789012345678901234567890123456789012345678901234567890","active": false
             }
-        """.trimIndent()
+        """.trimIndent(),
       )
       .exchange()
       .expectStatus().isBadRequest
@@ -449,7 +455,7 @@ class CaseNoteResourceTest : ResourceTest() {
             "description": "012345678901234567890123456789012345678901234567890123456789012345678901234567890",
             "active": true
             }
-        """.trimIndent()
+        """.trimIndent(),
       )
       .exchange()
       .expectStatus().isBadRequest
@@ -490,7 +496,7 @@ class CaseNoteResourceTest : ResourceTest() {
         "{" +
           "'status':404," +
           "'developerMessage':'Resource with id [$id] not found." +
-          "'}"
+          "'}",
       )
   }
 
@@ -499,7 +505,8 @@ class CaseNoteResourceTest : ResourceTest() {
     oAuthApi.subGetUserDetails("SECURE_CASENOTE_USER")
     val token = jwtHelper.createJwt("SECURE_CASENOTE_USER", roles = CASENOTES_ROLES)
 
-    webTestClient.delete().uri("/case-notes/{offenderIdentifier}/{caseNoteId}", "Z1234ZZ", "231eb4ee-c06c-49a3-846c-1b542cc0ed6b")
+    webTestClient.delete()
+      .uri("/case-notes/{offenderIdentifier}/{caseNoteId}", "Z1234ZZ", "231eb4ee-c06c-49a3-846c-1b542cc0ed6b")
       .headers(addBearerToken(token))
       .exchange()
       .expectStatus().isForbidden
@@ -519,7 +526,7 @@ class CaseNoteResourceTest : ResourceTest() {
         "{" +
           "'status':400," +
           "'developerMessage':'Case note id not a sensitive case note, please delete through NOMIS'" +
-          "}"
+          "}",
       )
   }
 
@@ -528,7 +535,8 @@ class CaseNoteResourceTest : ResourceTest() {
     oAuthApi.subGetUserDetails("DELETE_CASE_NOTE_USER")
     val token = jwtHelper.createJwt("DELETE_CASE_NOTE_USER", roles = DELETE_CASENOTE_ROLES)
 
-    webTestClient.delete().uri("/case-notes/{offenderIdentifier}/{caseNoteId}", "Z1234ZZ", "231eb4ee-c06c-49a3-846c-1b542cc0ed6b")
+    webTestClient.delete()
+      .uri("/case-notes/{offenderIdentifier}/{caseNoteId}", "Z1234ZZ", "231eb4ee-c06c-49a3-846c-1b542cc0ed6b")
       .headers(addBearerToken(token))
       .exchange()
       .expectStatus().isNotFound
@@ -537,7 +545,7 @@ class CaseNoteResourceTest : ResourceTest() {
         "{" +
           "'status':404," +
           "'developerMessage':'Case note not found'" +
-          "}"
+          "}",
       )
   }
 
@@ -564,7 +572,7 @@ class CaseNoteResourceTest : ResourceTest() {
         "{" +
           "'status\':400," +
           "'developerMessage':'case note id not connected with offenderIdentifier'" +
-          "}"
+          "}",
       )
   }
 
@@ -572,7 +580,8 @@ class CaseNoteResourceTest : ResourceTest() {
   fun testCanSoftDeleteCaseNoteAmendment() {
     oAuthApi.subGetUserDetails("DELETE_CASE_NOTE_USER")
     elite2Api.subGetOffender("A1234BC")
-    val token = jwtHelper.createJwt("DELETE_CASE_NOTE_USER", roles = DELETE_CASENOTE_ROLES, scope = listOf("read", "write"))
+    val token =
+      jwtHelper.createJwt("DELETE_CASE_NOTE_USER", roles = DELETE_CASENOTE_ROLES, scope = listOf("read", "write"))
 
     val postResponse = webTestClient.post().uri("/case-notes/{offenderIdentifier}", "A1234BC")
       .headers(addBearerToken(token))
@@ -589,14 +598,16 @@ class CaseNoteResourceTest : ResourceTest() {
       .expectStatus().isOk
       .expectBody().json(readFile("A1234BC-update-casenote.json"))
 
-    val postResponseAmendment = webTestClient.get().uri("/case-notes/{offenderIdentifier}/{caseNoteIdentifier}", "A1234BC", id)
-      .headers(addBearerToken(token))
-      .exchange()
-      .expectStatus().isOk
-      .returnResult(CaseNote::class.java)
+    val postResponseAmendment =
+      webTestClient.get().uri("/case-notes/{offenderIdentifier}/{caseNoteIdentifier}", "A1234BC", id)
+        .headers(addBearerToken(token))
+        .exchange()
+        .expectStatus().isOk
+        .returnResult(CaseNote::class.java)
     val amendmentId = postResponseAmendment.responseBody.blockFirst()!!.amendments.get(0).caseNoteAmendmentId
 
-    webTestClient.delete().uri("/case-notes/amendment/{offenderIdentifier}/{caseNoteAmendmentId}", "A1234BC", amendmentId)
+    webTestClient.delete()
+      .uri("/case-notes/amendment/{offenderIdentifier}/{caseNoteAmendmentId}", "A1234BC", amendmentId)
       .headers(addBearerToken(token))
       .exchange()
       .expectStatus().isOk
@@ -634,7 +645,7 @@ class CaseNoteResourceTest : ResourceTest() {
         "{" +
           "'status':404," +
           "'developerMessage':'Case note amendment not found'" +
-          "}"
+          "}",
       )
   }
 
@@ -658,14 +669,16 @@ class CaseNoteResourceTest : ResourceTest() {
       .exchange()
       .expectStatus().isOk
 
-    val postResponseAmendment = webTestClient.get().uri("/case-notes/{offenderIdentifier}/{caseNoteIdentifier}", "A1234BE", id)
-      .headers(addBearerToken(token))
-      .exchange()
-      .expectStatus().isOk
-      .returnResult(CaseNote::class.java)
+    val postResponseAmendment =
+      webTestClient.get().uri("/case-notes/{offenderIdentifier}/{caseNoteIdentifier}", "A1234BE", id)
+        .headers(addBearerToken(token))
+        .exchange()
+        .expectStatus().isOk
+        .returnResult(CaseNote::class.java)
     val amendmentId = postResponseAmendment.responseBody.blockFirst()!!.amendments.get(0).caseNoteAmendmentId
 
-    webTestClient.delete().uri("/case-notes/amendment/{offenderIdentifier}/{caseNoteAmendmentId}", "Z1234ZZ", amendmentId)
+    webTestClient.delete()
+      .uri("/case-notes/amendment/{offenderIdentifier}/{caseNoteAmendmentId}", "Z1234ZZ", amendmentId)
       .headers(addBearerToken(token))
       .exchange()
       .expectStatus().isBadRequest
@@ -674,7 +687,7 @@ class CaseNoteResourceTest : ResourceTest() {
         "{" +
           "'status':400," +
           "'developerMessage':'case note amendment id not connected with offenderIdentifier'" +
-          "}"
+          "}",
       )
   }
 
@@ -690,6 +703,11 @@ class CaseNoteResourceTest : ResourceTest() {
     private val POM_ROLE = listOf("ROLE_POM")
     private val CASENOTES_ROLES = listOf("ROLE_VIEW_SENSITIVE_CASE_NOTES", "ROLE_ADD_SENSITIVE_CASE_NOTES")
     private val SYSTEM_ROLES = listOf("ROLE_SYSTEM_USER")
-    private val DELETE_CASENOTE_ROLES = listOf("ROLE_DELETE_SENSITIVE_CASE_NOTES", "ROLE_SYSTEM_USER", "ROLE_VIEW_SENSITIVE_CASE_NOTES", "ROLE_ADD_SENSITIVE_CASE_NOTES")
+    private val DELETE_CASENOTE_ROLES = listOf(
+      "ROLE_DELETE_SENSITIVE_CASE_NOTES",
+      "ROLE_SYSTEM_USER",
+      "ROLE_VIEW_SENSITIVE_CASE_NOTES",
+      "ROLE_ADD_SENSITIVE_CASE_NOTES",
+    )
   }
 }

@@ -18,7 +18,7 @@ import org.springframework.web.reactive.function.client.WebClient
 class TokenVerifyingAuthManager(
   jwtDecoder: JwtDecoder,
   private val tokenVerificationApiWebClient: WebClient,
-  @Value("\${tokenverification.enabled:false}") private val tokenVerificationEnabled: Boolean
+  @Value("\${tokenverification.enabled:false}") private val tokenVerificationEnabled: Boolean,
 ) :
   AuthenticationManager {
 
@@ -29,7 +29,6 @@ class TokenVerifyingAuthManager(
   }
 
   override fun authenticate(authentication: Authentication): Authentication {
-
     if (tokenVerificationEnabled) {
       val bearer = authentication as BearerTokenAuthenticationToken
 

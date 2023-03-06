@@ -43,13 +43,14 @@ class CaseNoteAwsEventPusher(
       log.info("Pushing case note {} to event topic with event type of {}", caseNote.caseNoteId, cne.eventType)
       val publishRequest = PublishRequest(
         topicArn,
-        objectMapper.writeValueAsString(cne)
+        objectMapper.writeValueAsString(cne),
       ).withMessageAttributes(
         mapOf(
           "eventType" to MessageAttributeValue().withDataType("String").withStringValue(cne.eventType),
           "contentType" to MessageAttributeValue().withDataType("String").withStringValue("text/plain;charset=UTF-8"),
-          "caseNoteType" to MessageAttributeValue().withDataType("String").withStringValue(cne.additionalInformation.caseNoteType),
-        )
+          "caseNoteType" to MessageAttributeValue().withDataType("String")
+            .withStringValue(cne.additionalInformation.caseNoteType),
+        ),
       )
 
       try {
@@ -85,6 +86,6 @@ data class HmppsDomainEvent(
     additionalInformation = CaseNoteAdditionalInformation(
       caseNoteId = caseNote.caseNoteId,
       caseNoteType = "${caseNote.type}-${caseNote.subType}",
-    )
+    ),
   )
 }

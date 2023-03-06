@@ -20,12 +20,12 @@ class OpenApiConfiguration(buildProperties: BuildProperties) {
         Server().url("https://preprod.offender-case-notes.service.justice.gov.uk").description("PreProd"),
         Server().url("https://dev.offender-case-notes.service.justice.gov.uk").description("Development"),
         Server().url("http://localhost:8080").description("Local"),
-      )
+      ),
     )
     .info(
       Info().title("HMPPS Offender Case Notes")
         .version(version)
         .description("HMPPS Offender Case Notes API")
-        .contact(Contact().name("HMPPS Digital Studio").email("feedback@digital.justice.gov.uk"))
+        .contact(Contact().name("HMPPS Digital Studio").email("feedback@digital.justice.gov.uk")),
     )
 }

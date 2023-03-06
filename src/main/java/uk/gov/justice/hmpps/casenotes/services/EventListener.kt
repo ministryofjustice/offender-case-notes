@@ -9,7 +9,7 @@ import org.springframework.stereotype.Service
 class EventListener(
   private val caseNoteService: CaseNoteService,
   private val mergeOffenderService: MergeOffenderService,
-  private val gson: Gson
+  private val gson: Gson,
 ) {
   companion object {
     private val log = LoggerFactory.getLogger(this::class.java)

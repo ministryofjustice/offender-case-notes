@@ -20,7 +20,11 @@ class PublishNoteResourceTest : ResourceTest() {
   @Test
   fun testPublishCaseNotes_AccessDenied() {
     whenever(repository.findByModifyDateTimeBetweenOrderByModifyDateTime(any(), any())).thenReturn(
-      listOf(createOffenderCaseNote(CaseNoteType.builder().type("subtype").parentType(ParentNoteType.builder().type("parent").build()).build()))
+      listOf(
+        createOffenderCaseNote(
+          CaseNoteType.builder().type("subtype").parentType(ParentNoteType.builder().type("parent").build()).build(),
+        ),
+      ),
     )
     webTestClient.post().uri("/publish-notes?toDateTime={toDateTime}", now())
       .headers(addBearerAuthorisation("SECURE_CASENOTE_USER", CASENOTES_ROLES))
@@ -31,7 +35,11 @@ class PublishNoteResourceTest : ResourceTest() {
   @Test
   fun testPublishCaseNotesNoFrom() {
     whenever(repository.findByModifyDateTimeBetweenOrderByModifyDateTime(any(), any())).thenReturn(
-      listOf(createOffenderCaseNote(CaseNoteType.builder().type("subtype").parentType(ParentNoteType.builder().type("parent").build()).build()))
+      listOf(
+        createOffenderCaseNote(
+          CaseNoteType.builder().type("subtype").parentType(ParentNoteType.builder().type("parent").build()).build(),
+        ),
+      ),
     )
     val toDate: LocalDateTime = now()
     webTestClient.post().uri("/publish-notes?toDateTime={toDateTime}", toDate)
@@ -40,13 +48,20 @@ class PublishNoteResourceTest : ResourceTest() {
       .expectStatus().isOk
       .expectBody()
       .json("1")
-    verify(repository).findByModifyDateTimeBetweenOrderByModifyDateTime(LocalDateTime.parse("2019-01-01T00:00:00"), toDate)
+    verify(repository).findByModifyDateTimeBetweenOrderByModifyDateTime(
+      LocalDateTime.parse("2019-01-01T00:00:00"),
+      toDate,
+    )
   }
 
   @Test
   fun testPublishCaseNotes_FromAndTo() {
     whenever(repository.findByModifyDateTimeBetweenOrderByModifyDateTime(any(), any())).thenReturn(
-      listOf(createOffenderCaseNote(CaseNoteType.builder().type("subtype").parentType(ParentNoteType.builder().type("parent").build()).build()))
+      listOf(
+        createOffenderCaseNote(
+          CaseNoteType.builder().type("subtype").parentType(ParentNoteType.builder().type("parent").build()).build(),
+        ),
+      ),
     )
     val toDate: LocalDateTime = now()
     val fromDate: LocalDateTime = LocalDateTime.parse("2019-01-02T02:03:04")

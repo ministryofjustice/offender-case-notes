@@ -43,9 +43,9 @@ class OAuthMockServer : WireMockServer(WIREMOCK_PORT) {
                     "token_type": "bearer",
                     "access_token": "ABCDE"
                 }
-              """.trimIndent()
-            )
-        )
+              """.trimIndent(),
+            ),
+        ),
     )
   }
 
@@ -64,10 +64,10 @@ class OAuthMockServer : WireMockServer(WIREMOCK_PORT) {
                 "  \"name\": \"Mikey Mouse\",\n" +
                 "  \"authSource\": \"nomis\",\n" +
                 "  \"activeCaseLoadId\": \"LEI\"\n" +
-                "}"
+                "}",
             )
-            .withStatus(200)
-        )
+            .withStatus(200),
+        ),
     )
   }
 

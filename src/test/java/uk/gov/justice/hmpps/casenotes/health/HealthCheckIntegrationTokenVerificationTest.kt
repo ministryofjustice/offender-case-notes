@@ -11,7 +11,7 @@ import uk.gov.justice.hmpps.casenotes.health.wiremock.TokenVerificationExtension
 
 @SpringBootTest(
   webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
-  properties = ["tokenverification.enabled=true", "sqs.provider=false"]
+  properties = ["tokenverification.enabled=true", "sqs.provider=false"],
 )
 class HealthCheckIntegrationTokenVerificationTest : IntegrationTest() {
 
@@ -82,8 +82,8 @@ class HealthCheckIntegrationTokenVerificationTest : IntegrationTest() {
         aResponse()
           .withHeader("Content-Type", "application/json")
           .withBody(if (status == 200) "{\"status\":\"UP\"}" else "some error")
-          .withStatus(status)
-      )
+          .withStatus(status),
+      ),
     )
 
     elite2Api.stubFor(
@@ -91,8 +91,8 @@ class HealthCheckIntegrationTokenVerificationTest : IntegrationTest() {
         aResponse()
           .withHeader("Content-Type", "application/json")
           .withBody(if (status == 200) "{\"status\":\"UP\"}" else "some error")
-          .withStatus(status)
-      )
+          .withStatus(status),
+      ),
     )
 
     tokenVerificationApi.stubFor(
@@ -100,8 +100,8 @@ class HealthCheckIntegrationTokenVerificationTest : IntegrationTest() {
         aResponse()
           .withHeader("Content-Type", "application/json")
           .withBody(if (status == 200) "{\"status\":\"UP\"}" else "some error")
-          .withStatus(status)
-      )
+          .withStatus(status),
+      ),
     )
   }
 }
