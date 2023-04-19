@@ -1,6 +1,6 @@
 plugins {
-  id("uk.gov.justice.hmpps.gradle-spring-boot") version "4.8.5-beta-3"
-  kotlin("plugin.spring") version "1.8.10"
+  id("uk.gov.justice.hmpps.gradle-spring-boot") version "4.8.6-beta-2"
+  kotlin("plugin.spring") version "1.8.20"
 }
 
 configurations {
@@ -29,9 +29,9 @@ dependencies {
   implementation("javax.activation:activation:1.1.1")
   implementation("javax.transaction:javax.transaction-api:1.3")
 
-  implementation("org.springdoc:springdoc-openapi-ui:1.6.15")
-  implementation("org.springdoc:springdoc-openapi-kotlin:1.6.15")
-  implementation("org.springdoc:springdoc-openapi-data-rest:1.6.15")
+  implementation("org.springdoc:springdoc-openapi-ui:1.7.0")
+  implementation("org.springdoc:springdoc-openapi-kotlin:1.7.0")
+  implementation("org.springdoc:springdoc-openapi-data-rest:1.7.0")
 
   implementation("net.sf.ehcache:ehcache:2.10.9.2")
   implementation("org.apache.commons:commons-text:1.10.0")
@@ -40,7 +40,7 @@ dependencies {
   implementation("com.pauldijou:jwt-core_2.11:5.0.0")
   implementation("com.google.code.gson:gson:2.10.1")
 
-  implementation("software.amazon.awssdk:sns:2.20.32")
+  implementation("software.amazon.awssdk:sns:2.20.48")
 
   implementation("io.swagger:swagger-core:1.6.10")
   implementation("io.swagger.core.v3:swagger-core:2.2.9")
