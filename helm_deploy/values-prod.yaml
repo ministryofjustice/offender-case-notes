@@ -15,6 +15,20 @@ generic-service:
     SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_JWK_SET_URI: "https://sign-in.hmpps.service.justice.gov.uk/auth/.well-known/jwks.json"
     APPLICATIONINSIGHTS_CONFIGURATION_FILE: applicationinsights.json
 
+  postgresDatabaseRestore:
+    enabled: true
+    namespace_secrets:
+      dps-rds-instance-output:
+        DB_NAME: "database_name"
+        DB_USER: "database_username"
+        DB_PASS: "database_password"
+        DB_HOST: "rds_instance_address"
+      dps-rds-instance-output-preprod:
+        DB_NAME_PREPROD: "database_name"
+        DB_USER_PREPROD: "database_username"
+        DB_PASS_PREPROD: "database_password"
+        DB_HOST_PREPROD: "rds_instance_address"
+
   allowlist:
     delius-prod-1: "52.56.115.146/32"
     delius-prod-2: "35.178.104.253/32"
