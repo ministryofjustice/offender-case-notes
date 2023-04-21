@@ -52,7 +52,7 @@ services:
       - SPRING_PROFILES_ACTIVE=dev
 
   offender-case-notes-db:
-    image: postgres
+    image: postgres:15
     networks:
       - hmpps
     container_name: offender-case-notes-db
