@@ -22,7 +22,7 @@ import uk.gov.justice.hmpps.casenotes.repository.OffenderCaseNoteAmendmentReposi
 import uk.gov.justice.hmpps.casenotes.repository.OffenderCaseNoteRepository;
 import uk.gov.justice.hmpps.casenotes.repository.ParentCaseNoteTypeRepository;
 
-import javax.validation.ValidationException;
+import jakarta.validation.ValidationException;
 import java.time.LocalDateTime;
 import java.util.Map;
 import java.util.Optional;

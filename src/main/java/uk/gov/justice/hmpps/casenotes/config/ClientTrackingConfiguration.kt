@@ -1,8 +1,10 @@
 package uk.gov.justice.hmpps.casenotes.config
 
-import com.microsoft.applicationinsights.web.internal.ThreadContext
 import com.nimbusds.jwt.JWTClaimsSet
 import com.nimbusds.jwt.SignedJWT
+import io.opentelemetry.api.trace.Span
+import jakarta.servlet.http.HttpServletRequest
+import jakarta.servlet.http.HttpServletResponse
 import org.apache.commons.lang3.StringUtils
 import org.slf4j.LoggerFactory
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression
@@ -13,8 +15,6 @@ import org.springframework.web.servlet.config.annotation.InterceptorRegistry
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer
 import java.text.ParseException
 import java.util.Optional
-import javax.servlet.http.HttpServletRequest
-import javax.servlet.http.HttpServletResponse
 
 @Configuration
 @ConditionalOnExpression("T(org.apache.commons.lang3.StringUtils).isNotBlank('\${applicationinsights.connection.string:}')")
@@ -37,10 +37,12 @@ class ClientTrackingInterceptor : HandlerInterceptor {
     if (StringUtils.startsWithIgnoreCase(token, bearer)) {
       try {
         val jwtBody = getClaimsFromJWT(token)
-        val properties = ThreadContext.getRequestTelemetryContext().httpRequestTelemetry.properties
         val user = Optional.ofNullable(jwtBody.getClaim("user_name"))
-        user.map { it.toString() }.ifPresent { properties["username"] = it }
-        properties["clientId"] = jwtBody.getClaim("client_id").toString()
+        user.map { it.toString() }.ifPresent {
+          Span.current().setAttribute("username", it) // username in customDimensions
+          Span.current().setAttribute("enduser.id", it) // user_Id at the top level of the request
+        }
+        Span.current().setAttribute("clientId", jwtBody.getClaim("client_id").toString())
       } catch (e: ParseException) {
         log.warn("problem decoding jwt public key for application insights", e)
       }

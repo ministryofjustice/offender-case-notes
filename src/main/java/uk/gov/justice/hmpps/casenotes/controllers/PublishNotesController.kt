@@ -5,6 +5,7 @@ import io.swagger.v3.oas.annotations.Parameter
 import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.responses.ApiResponses
 import io.swagger.v3.oas.annotations.tags.Tag
+import jakarta.validation.constraints.NotNull
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.format.annotation.DateTimeFormat
@@ -17,7 +18,6 @@ import org.springframework.web.bind.annotation.RestController
 import uk.gov.justice.hmpps.casenotes.dto.CaseNote
 import uk.gov.justice.hmpps.casenotes.services.PublishNoteService
 import java.time.LocalDateTime
-import javax.validation.constraints.NotNull
 
 @Tag(name = "publish-notes", description = "Prison Notes Controller")
 @RestController

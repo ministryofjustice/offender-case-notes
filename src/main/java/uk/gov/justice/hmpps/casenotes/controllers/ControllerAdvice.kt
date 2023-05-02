@@ -1,5 +1,7 @@
 package uk.gov.justice.hmpps.casenotes.controllers
 
+import jakarta.persistence.EntityExistsException
+import jakarta.validation.ValidationException
 import lombok.extern.slf4j.Slf4j
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
@@ -12,8 +14,6 @@ import org.springframework.web.reactive.function.client.WebClientException
 import org.springframework.web.reactive.function.client.WebClientResponseException
 import uk.gov.justice.hmpps.casenotes.dto.ErrorResponse
 import uk.gov.justice.hmpps.casenotes.services.EntityNotFoundException
-import javax.persistence.EntityExistsException
-import javax.validation.ValidationException
 
 @RestControllerAdvice(basePackages = ["uk.gov.justice.hmpps.casenotes.controllers"])
 @Slf4j

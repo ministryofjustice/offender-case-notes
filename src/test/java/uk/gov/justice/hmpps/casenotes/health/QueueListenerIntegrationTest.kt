@@ -4,8 +4,10 @@ import com.amazonaws.services.sqs.AmazonSQS
 import com.amazonaws.services.sqs.model.PurgeQueueRequest
 import org.awaitility.kotlin.await
 import org.springframework.beans.factory.annotation.Autowired
+import software.amazon.awssdk.services.sqs.SqsAsyncClient
 import uk.gov.justice.hmpps.sqs.HmppsQueue
 import uk.gov.justice.hmpps.sqs.HmppsQueueService
+import uk.gov.justice.hmpps.sqs.countMessagesOnQueue
 
 abstract class QueueListenerIntegrationTest : IntegrationTest() {
 
@@ -18,19 +20,19 @@ abstract class QueueListenerIntegrationTest : IntegrationTest() {
   internal val eventQueueName by lazy { eventQueue.queueName }
   internal val eventQueueUrl by lazy { eventQueue.queueUrl }
 
-  internal val eventSqsDlqClient by lazy { eventQueue.sqsDlqClient as AmazonSQS }
+  internal val eventSqsDlqClient by lazy { eventQueue.sqsDlqClient as SqsAsyncClient }
   internal val eventDlqName by lazy { eventQueue.dlqName as String }
   internal val eventDlqUrl by lazy { eventQueue.dlqUrl as String }
 
   fun purgeQueues() {
-    eventQueueSqsClient.purgeQueue(PurgeQueueRequest(eventQueueUrl))
+    eventQueueSqsClient.purgeQueue(software.amazon.awssdk.services.sqs.model.PurgeQueueRequest.builder().queueUrl(eventQueueUrl).build())
     await.until { getNumberOfMessagesCurrentlyOnPrisonEventQueue() == 0 }
-    eventSqsDlqClient.purgeQueue(PurgeQueueRequest(eventDlqUrl))
+    eventSqsDlqClient.purgeQueue(software.amazon.awssdk.services.sqs.model.PurgeQueueRequest.builder().queueUrl(eventDlqUrl).build())
     await.until { getNumberOfMessagesCurrentlyOnPrisonEventDlq() == 0 }
   }
 
-  fun getNumberOfMessagesCurrentlyOnPrisonEventQueue(): Int = eventQueueSqsClient.numMessages(eventQueueUrl)
-  fun getNumberOfMessagesCurrentlyOnPrisonEventDlq(): Int = eventSqsDlqClient.numMessages(eventDlqUrl)
+  fun getNumberOfMessagesCurrentlyOnPrisonEventQueue(): Int = eventQueueSqsClient.countMessagesOnQueue(eventQueueUrl).get()
+  fun getNumberOfMessagesCurrentlyOnPrisonEventDlq(): Int = eventSqsDlqClient.countMessagesOnQueue(eventDlqUrl).get()
 }
 
 fun AmazonSQS.numMessages(url: String): Int {

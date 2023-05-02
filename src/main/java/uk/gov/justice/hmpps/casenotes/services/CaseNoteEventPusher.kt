@@ -1,13 +1,13 @@
 package uk.gov.justice.hmpps.casenotes.services
 
-import com.amazonaws.services.sns.model.MessageAttributeValue
-import com.amazonaws.services.sns.model.PublishRequest
 import com.fasterxml.jackson.databind.ObjectMapper
 import org.apache.commons.lang3.math.NumberUtils
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Component
+import software.amazon.awssdk.services.sns.model.MessageAttributeValue
+import software.amazon.awssdk.services.sns.model.PublishRequest
 import uk.gov.justice.hmpps.casenotes.dto.CaseNote
 import uk.gov.justice.hmpps.sqs.HmppsQueueService
 import uk.gov.justice.hmpps.sqs.HmppsTopic
@@ -41,21 +41,21 @@ class CaseNoteAwsEventPusher(
     if (isSensitiveCaseNote(caseNote.caseNoteId)) {
       val cne = HmppsDomainEvent(caseNote, caseNotesApiBaseUrl)
       log.info("Pushing case note {} to event topic with event type of {}", caseNote.caseNoteId, cne.eventType)
-      val publishRequest = PublishRequest(
-        topicArn,
-        objectMapper.writeValueAsString(cne),
-      ).withMessageAttributes(
-        mapOf(
-          "eventType" to MessageAttributeValue().withDataType("String").withStringValue(cne.eventType),
-          "contentType" to MessageAttributeValue().withDataType("String").withStringValue("text/plain;charset=UTF-8"),
-          "caseNoteType" to MessageAttributeValue().withDataType("String")
-            .withStringValue(cne.additionalInformation.caseNoteType),
-        ),
-      )
-
       try {
-        val publishResponse = snsClient.publish(publishRequest)
-        log.debug("Sent case note with message id {}", publishResponse.messageId)
+        val publishResponse = snsClient.publish(
+          PublishRequest.builder()
+            .topicArn(topicArn)
+            .message(objectMapper.writeValueAsString(cne))
+            .messageAttributes(
+              mapOf(
+                "eventType" to MessageAttributeValue.builder().dataType("String").stringValue(cne.eventType).build(),
+                "contentType" to MessageAttributeValue.builder().dataType("String").stringValue("text/plain;charset=UTF-8").build(),
+                "caseNoteType" to MessageAttributeValue.builder().dataType("String").stringValue(cne.additionalInformation.caseNoteType).build(),
+              ),
+            )
+            .build(),
+        )
+        log.debug("Sent case note with message id {}", publishResponse.get().messageId())
       } catch (throwable: Throwable) {
         log.error("Failed to send case note", throwable)
       }
