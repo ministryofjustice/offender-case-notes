@@ -29,6 +29,8 @@ dependencies {
   implementation("javax.activation:activation:1.1.1")
   implementation("javax.transaction:javax.transaction-api:1.3")
 
+  implementation("javax.xml.bind:jaxb-api:2.3.0")
+  implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.1.0")
   implementation("net.sf.ehcache:ehcache:2.10.9.2")
   implementation("org.apache.commons:commons-text:1.10.0")
   implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.15.0")
