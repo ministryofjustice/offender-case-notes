@@ -1,16 +1,17 @@
 package uk.gov.justice.hmpps.casenotes.health
 
-import com.amazonaws.auth.AWSStaticCredentialsProvider
-import com.amazonaws.auth.AnonymousAWSCredentials
-import com.amazonaws.client.builder.AwsClientBuilder
-import com.amazonaws.services.sqs.AmazonSQSClientBuilder
 import org.junit.jupiter.api.Test
 import org.springframework.boot.test.context.TestConfiguration
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Import
+import software.amazon.awssdk.auth.credentials.AwsCredentials
+import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider
+import software.amazon.awssdk.regions.Region
+import software.amazon.awssdk.services.sqs.SqsAsyncClient
 import uk.gov.justice.hmpps.sqs.HmppsQueue
 import uk.gov.justice.hmpps.sqs.HmppsQueueHealth
 import uk.gov.justice.hmpps.sqs.HmppsSqsProperties
+import java.net.URI
 
 @Import(QueueHealthCheckNegativeTest.TestConfig::class)
 class QueueHealthCheckNegativeTest : QueueListenerIntegrationTest() {
@@ -19,15 +20,24 @@ class QueueHealthCheckNegativeTest : QueueListenerIntegrationTest() {
   class TestConfig {
     @Bean
     fun badQueueHealth(hmppsSqsProperties: HmppsSqsProperties): HmppsQueueHealth {
-      val sqsClient = AmazonSQSClientBuilder.standard()
-        .withEndpointConfiguration(
-          AwsClientBuilder.EndpointConfiguration(
-            hmppsSqsProperties.localstackUrl,
-            hmppsSqsProperties.region,
+      val sqsClient = SqsAsyncClient.builder()
+        .endpointOverride(URI.create(hmppsSqsProperties.localstackUrl))
+        .region(Region.EU_WEST_2)
+        .credentialsProvider(
+          StaticCredentialsProvider.create(
+            object : AwsCredentials {
+              override fun accessKeyId(): String? {
+                return "FAKE"
+              }
+
+              override fun secretAccessKey(): String? {
+                return "FAKE"
+              }
+            },
           ),
         )
-        .withCredentials(AWSStaticCredentialsProvider(AnonymousAWSCredentials()))
         .build()
+
       return HmppsQueueHealth(HmppsQueue("missingQueueId", sqsClient, "missingQueue", sqsClient, "missingDlq"))
     }
   }

@@ -37,7 +37,7 @@ import uk.gov.justice.hmpps.casenotes.dto.UpdateCaseNoteType;
 import uk.gov.justice.hmpps.casenotes.services.CaseNoteEventPusher;
 import uk.gov.justice.hmpps.casenotes.services.CaseNoteService;
 
-import javax.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotNull;
 import java.util.List;
 import java.util.Map;
 

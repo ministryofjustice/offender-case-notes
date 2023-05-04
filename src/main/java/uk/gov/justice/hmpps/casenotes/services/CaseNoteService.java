@@ -33,10 +33,10 @@ import uk.gov.justice.hmpps.casenotes.repository.OffenderCaseNoteAmendmentReposi
 import uk.gov.justice.hmpps.casenotes.repository.OffenderCaseNoteRepository;
 import uk.gov.justice.hmpps.casenotes.repository.ParentCaseNoteTypeRepository;
 
-import javax.persistence.EntityExistsException;
-import javax.validation.Valid;
-import javax.validation.ValidationException;
-import javax.validation.constraints.NotNull;
+import jakarta.persistence.EntityExistsException;
+import jakarta.validation.Valid;
+import jakarta.validation.ValidationException;
+import jakarta.validation.constraints.NotNull;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;

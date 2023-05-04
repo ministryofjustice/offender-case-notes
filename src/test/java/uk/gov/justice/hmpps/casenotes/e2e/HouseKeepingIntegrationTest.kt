@@ -6,6 +6,7 @@ import org.awaitility.kotlin.untilCallTo
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.http.MediaType
+import software.amazon.awssdk.services.sqs.model.SendMessageRequest
 import uk.gov.justice.hmpps.casenotes.health.QueueListenerIntegrationTest
 
 class HouseKeepingIntegrationTest : QueueListenerIntegrationTest() {
@@ -17,8 +18,12 @@ class HouseKeepingIntegrationTest : QueueListenerIntegrationTest() {
   @Test
   fun `housekeeping will consume a booking changed message on the dlq and return to main queue`() {
     val message = "/messages/bookingNumberChanged.json".readResourceAsText()
-
-    eventQueueSqsClient.sendMessage(eventDlqUrl, message)
+    eventQueueSqsClient.sendMessage(
+      SendMessageRequest.builder()
+        .queueUrl(eventDlqUrl)
+        .messageBody(message)
+        .build(),
+    )
 
     await untilCallTo { getNumberOfMessagesCurrentlyOnPrisonEventDlq() } matches { it == 1 }
 

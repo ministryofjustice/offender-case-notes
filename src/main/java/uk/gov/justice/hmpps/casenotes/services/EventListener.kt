@@ -1,8 +1,8 @@
 package uk.gov.justice.hmpps.casenotes.services
 
 import com.google.gson.Gson
+import io.awspring.cloud.sqs.annotation.SqsListener
 import org.slf4j.LoggerFactory
-import org.springframework.jms.annotation.JmsListener
 import org.springframework.stereotype.Service
 
 @Service
@@ -15,7 +15,7 @@ class EventListener(
     private val log = LoggerFactory.getLogger(this::class.java)
   }
 
-  @JmsListener(destination = "event", containerFactory = "hmppsQueueContainerFactoryProxy")
+  @SqsListener("event", factory = "hmppsQueueContainerFactoryProxy")
   fun handleEvents(requestJson: String?) {
     val (Message, MessageAttributes) = gson.fromJson(requestJson, Message::class.java)
     val (offenderIdDisplay, bookingId) = gson.fromJson(Message, EventMessage::class.java)

@@ -1,5 +1,5 @@
 plugins {
-  id("uk.gov.justice.hmpps.gradle-spring-boot") version "4.8.6-beta-4"
+  id("uk.gov.justice.hmpps.gradle-spring-boot") version "5.1.4"
   kotlin("plugin.spring") version "1.8.21"
 }
 
@@ -22,17 +22,15 @@ dependencies {
   implementation("org.springframework.boot:spring-boot-starter-oauth2-resource-server")
   implementation("org.springframework.boot:spring-boot-starter-oauth2-client")
   implementation("org.springframework.boot:spring-boot-starter-webflux")
-
-  implementation("uk.gov.justice.service.hmpps:hmpps-sqs-spring-boot-starter:1.2.0")
+  implementation("org.springframework.cloud:spring-cloud-starter-aws-messaging:2.2.6.RELEASE")
+  implementation("uk.gov.justice.service.hmpps:hmpps-sqs-spring-boot-starter:2.0.0")
 
   implementation("com.google.code.gson:gson:2.10.1")
   implementation("javax.activation:activation:1.1.1")
   implementation("javax.transaction:javax.transaction-api:1.3")
 
-  implementation("org.springdoc:springdoc-openapi-ui:1.7.0")
-  implementation("org.springdoc:springdoc-openapi-kotlin:1.7.0")
-  implementation("org.springdoc:springdoc-openapi-data-rest:1.7.0")
-
+  implementation("javax.xml.bind:jaxb-api:2.3.0")
+  implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.1.0")
   implementation("net.sf.ehcache:ehcache:2.10.9.2")
   implementation("org.apache.commons:commons-text:1.10.0")
   implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.15.0")
@@ -40,8 +38,8 @@ dependencies {
   implementation("com.pauldijou:jwt-core_2.11:5.0.0")
   implementation("com.google.code.gson:gson:2.10.1")
 
+  implementation(platform("com.amazonaws:aws-java-sdk-bom:1.12.456"))
   implementation("software.amazon.awssdk:sns:2.20.53")
-
   implementation("io.swagger:swagger-core:1.6.10")
   implementation("io.swagger.core.v3:swagger-core:2.2.9")
 
@@ -51,8 +49,9 @@ dependencies {
   testImplementation("com.tngtech.java:junit-dataprovider:1.13.1")
   testImplementation("net.javacrumbs.json-unit:json-unit-assertj:2.37.0")
   testImplementation("io.github.http-builder-ng:http-builder-ng-apache:1.0.4")
-  testImplementation("com.github.tomakehurst:wiremock-standalone:2.27.2")
-  testImplementation("io.jsonwebtoken:jjwt:0.9.1")
+  testImplementation("com.github.tomakehurst:wiremock-jre8-standalone:2.35.0")
+  testImplementation("io.jsonwebtoken:jjwt-impl:0.11.5")
+  testImplementation("io.jsonwebtoken:jjwt-jackson:0.11.5")
   testImplementation("org.awaitility:awaitility:4.2.0")
   testImplementation("org.awaitility:awaitility-kotlin:4.2.0")
 
