@@ -100,6 +100,7 @@ workflows:
                 - main
     jobs:
       - hmpps/gradle_owasp_dependency_check:
+          jdk_tag: "19.0"
           slack_channel: hmpps_tech_alerts_security
           context:
             - hmpps-common-vars
