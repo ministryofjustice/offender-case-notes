@@ -1,7 +1,7 @@
 ---
 # Environment specific values, override helm_deploy/prison-to-probation-update/values.yaml
 generic-service:
-  replicaCount: 4
+  replicaCount: 2
   ingress:
     host: preprod.offender-case-notes.service.justice.gov.uk
 
