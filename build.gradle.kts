@@ -23,7 +23,7 @@ dependencies {
   implementation("org.springframework.boot:spring-boot-starter-oauth2-client")
   implementation("org.springframework.boot:spring-boot-starter-webflux")
   implementation("org.springframework.cloud:spring-cloud-starter-aws-messaging:2.2.6.RELEASE")
-  implementation("uk.gov.justice.service.hmpps:hmpps-sqs-spring-boot-starter:2.0.0")
+  implementation("uk.gov.justice.service.hmpps:hmpps-sqs-spring-boot-starter:2.0.1")
 
   implementation("com.google.code.gson:gson:2.10.1")
   implementation("javax.activation:activation:1.1.1")
@@ -38,8 +38,8 @@ dependencies {
   implementation("com.pauldijou:jwt-core_2.11:5.0.0")
   implementation("com.google.code.gson:gson:2.10.1")
 
-  implementation(platform("com.amazonaws:aws-java-sdk-bom:1.12.497"))
-  implementation("software.amazon.awssdk:sns:2.20.94")
+  implementation(platform("com.amazonaws:aws-java-sdk-bom:1.12.499"))
+  implementation("software.amazon.awssdk:sns:2.20.96")
   implementation("io.swagger:swagger-core:1.6.11")
   implementation("io.swagger.core.v3:swagger-core:2.2.14")
 
