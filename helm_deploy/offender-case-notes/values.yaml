@@ -21,12 +21,14 @@ generic-service:
         }
     tlsSecretName: offender-case-notes-cert
 
+  serviceAccountName: offender-case-notes
 
   env:
     SERVER_PORT: 8080
     JAVA_OPTS: "-Xmx512m"
     APPLICATIONINSIGHTS_CONNECTION_STRING: "InstrumentationKey=$(APPINSIGHTS_INSTRUMENTATIONKEY);IngestionEndpoint=https://northeurope-0.in.applicationinsights.azure.com/;LiveEndpoint=https://northeurope.livediagnostics.monitor.azure.com/"
     SNS_PROVIDER: "aws"
+    HMPPS_SQS_USE_WEB_TOKEN: true
 
   # Pre-existing kubernetes secrets to load as environment variables in the deployment.
   # namespace_secrets:
@@ -44,16 +46,10 @@ generic-service:
       DATABASE_NAME: "database_name"
       DATABASE_ENDPOINT: "rds_instance_endpoint"
     hmpps-domain-events-topic:
-      HMPPS_SQS_TOPICS_DOMAINEVENTS_ACCESS_KEY_ID: "access_key_id"
-      HMPPS_SQS_TOPICS_DOMAINEVENTS_SECRET_ACCESS_KEY: "secret_access_key"
       HMPPS_SQS_TOPICS_DOMAINEVENTS_ARN: "topic_arn"
     ocn-events-sqs-instance-output:
-      HMPPS_SQS_QUEUES_EVENT_QUEUE_ACCESS_KEY_ID: "access_key_id"
-      HMPPS_SQS_QUEUES_EVENT_QUEUE_SECRET_ACCESS_KEY: "secret_access_key"
       HMPPS_SQS_QUEUES_EVENT_QUEUE_NAME: "sqs_ocne_name"
     ocn-events-sqs-dl-instance-output:
-      HMPPS_SQS_QUEUES_EVENT_DLQ_ACCESS_KEY_ID: "access_key_id"
-      HMPPS_SQS_QUEUES_EVENT_DLQ_SECRET_ACCESS_KEY: "secret_access_key"
       HMPPS_SQS_QUEUES_EVENT_DLQ_NAME: "sqs_ocne_name"
 
   allowlist:
