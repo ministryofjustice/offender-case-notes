@@ -1,7 +1,5 @@
 package uk.gov.justice.hmpps.casenotes.health
 
-import com.amazonaws.services.sqs.AmazonSQS
-import com.amazonaws.services.sqs.model.PurgeQueueRequest
 import org.awaitility.kotlin.await
 import org.springframework.beans.factory.annotation.Autowired
 import software.amazon.awssdk.services.sqs.SqsAsyncClient
@@ -33,9 +31,4 @@ abstract class QueueListenerIntegrationTest : IntegrationTest() {
 
   fun getNumberOfMessagesCurrentlyOnPrisonEventQueue(): Int = eventQueueSqsClient.countMessagesOnQueue(eventQueueUrl).get()
   fun getNumberOfMessagesCurrentlyOnPrisonEventDlq(): Int = eventSqsDlqClient.countMessagesOnQueue(eventDlqUrl).get()
-}
-
-fun AmazonSQS.numMessages(url: String): Int {
-  val queueAttributes = getQueueAttributes(url, listOf("ApproximateNumberOfMessages"))
-  return queueAttributes.attributes["ApproximateNumberOfMessages"]!!.toInt()
 }
