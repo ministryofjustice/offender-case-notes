@@ -1,5 +1,5 @@
 plugins {
-  id("uk.gov.justice.hmpps.gradle-spring-boot") version "5.4.0"
+  id("uk.gov.justice.hmpps.gradle-spring-boot") version "5.4.1"
   kotlin("plugin.spring") version "1.9.10"
 }
 
@@ -12,7 +12,7 @@ dependencies {
 
   compileOnly("org.projectlombok:lombok:1.18.28")
 
-  runtimeOnly("com.h2database:h2:2.2.220")
+  runtimeOnly("com.h2database:h2:2.2.222")
   runtimeOnly("org.flywaydb:flyway-core")
   runtimeOnly("org.postgresql:postgresql:42.6.0")
 
@@ -38,8 +38,8 @@ dependencies {
   implementation("com.google.code.gson:gson:2.10.1")
   implementation("com.google.guava:guava:32.1.2-jre")
 
-  implementation(platform("com.amazonaws:aws-java-sdk-bom:1.12.539"))
-  implementation("software.amazon.awssdk:sns:2.20.136")
+  implementation(platform("com.amazonaws:aws-java-sdk-bom:1.12.547"))
+  implementation("software.amazon.awssdk:sns:2.20.144")
 
   testAnnotationProcessor("org.projectlombok:lombok:1.18.28")
   testCompileOnly("org.projectlombok:lombok:1.18.28")
@@ -47,7 +47,7 @@ dependencies {
   testImplementation("com.tngtech.java:junit-dataprovider:1.13.1")
   testImplementation("net.javacrumbs.json-unit:json-unit-assertj:3.0.0")
   testImplementation("io.github.http-builder-ng:http-builder-ng-apache:1.0.4")
-  testImplementation("com.github.tomakehurst:wiremock-jre8-standalone:2.35.0")
+  testImplementation("com.github.tomakehurst:wiremock-jre8-standalone:3.0.1")
   testImplementation("io.jsonwebtoken:jjwt-impl:0.11.5")
   testImplementation("io.jsonwebtoken:jjwt-jackson:0.11.5")
   testImplementation("org.awaitility:awaitility:4.2.0")
@@ -60,13 +60,13 @@ dependencies {
 }
 
 java {
-  toolchain.languageVersion.set(JavaLanguageVersion.of(19))
+  toolchain.languageVersion.set(JavaLanguageVersion.of(20))
 }
 
 tasks {
   withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
     kotlinOptions {
-      jvmTarget = "19"
+      jvmTarget = "20"
     }
   }
 }
