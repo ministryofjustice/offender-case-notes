@@ -2,6 +2,7 @@
 # Values here are the same across all environments
 generic-service:
   nameOverride: offender-case-notes
+  product-id: DPS067
 
   image:
     repository: quay.io/hmpps/offender-case-notes
