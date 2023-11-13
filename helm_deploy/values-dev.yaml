@@ -1,4 +1,3 @@
----
 # Environment specific values, override helm_deploy/prison-to-probation-update/values.yaml
 generic-service:
   replicaCount: 2
@@ -15,12 +14,13 @@ generic-service:
     APPLICATIONINSIGHTS_CONFIGURATION_FILE: applicationinsights.dev.json
 
   allowlist:
-    delius-dev-1: "35.178.19.203/32"
-    delius-dev-2: "35.177.67.41/32"
-    delius-dev-3: "35.178.40.151/32"
-    delius-test-1: "35.176.126.163/32"
-    delius-test-2: "35.178.162.73/32"
-    delius-test-3: "52.56.195.113/32"
+    delius-dev-1: 35.178.19.203/32
+    delius-dev-2: 35.177.67.41/32
+    delius-dev-3: 35.178.40.151/32
+    delius-test-1: 35.176.126.163/32
+    delius-test-2: 35.178.162.73/32
+    delius-test-3: 52.56.195.113/32
+    groups: []
 
 # CloudPlatform AlertManager receiver to route promethues alerts to slack
 generic-prometheus-alerts:
