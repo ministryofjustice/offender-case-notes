@@ -17,7 +17,6 @@ generic-service:
     delius-pre-prod-1: 52.56.240.62/32
     delius-pre-prod-2: 18.130.110.168/32
     delius-pre-prod-3: 35.178.44.184/32
-    groups: []
 
 # CloudPlatform AlertManager receiver to route promethues alerts to slack
 generic-prometheus-alerts:
