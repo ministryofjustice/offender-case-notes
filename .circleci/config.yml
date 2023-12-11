@@ -7,7 +7,7 @@ jobs:
   validate:
     executor:
       name: hmpps/localstack
-      jdk_tag: "20.0"
+      jdk_tag: "21.0"
       localstack_tag: "0.12.10"
       services: "sqs,sns"
     steps:
@@ -100,7 +100,7 @@ workflows:
                 - main
     jobs:
       - hmpps/gradle_owasp_dependency_check:
-          jdk_tag: "20.0"
+          jdk_tag: "21.0"
           slack_channel: hmpps_tech_alerts_security
           context:
             - hmpps-common-vars

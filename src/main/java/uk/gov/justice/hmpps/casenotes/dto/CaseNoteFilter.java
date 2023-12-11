@@ -2,8 +2,6 @@ package uk.gov.justice.hmpps.casenotes.dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import io.swagger.v3.oas.annotations.media.Schema;
-import io.swagger.v3.oas.annotations.media.Schema;
-import io.swagger.v3.oas.annotations.Hidden;;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;

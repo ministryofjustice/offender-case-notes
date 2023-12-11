@@ -2,16 +2,13 @@ package uk.gov.justice.hmpps.casenotes.dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import io.swagger.v3.oas.annotations.media.Schema;
-import io.swagger.v3.oas.annotations.media.Schema;
-import io.swagger.v3.oas.annotations.Hidden;;
+import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import org.hibernate.validator.constraints.Length;
-
-import jakarta.validation.constraints.NotBlank;
 
 @Schema(description = "Create a New Case Note Type")
 @JsonInclude(JsonInclude.Include.NON_NULL)
