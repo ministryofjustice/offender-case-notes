@@ -1,6 +1,6 @@
 plugins {
-  id("uk.gov.justice.hmpps.gradle-spring-boot") version "5.8.0"
-  kotlin("plugin.spring") version "1.9.20"
+  id("uk.gov.justice.hmpps.gradle-spring-boot") version "5.10.1"
+  kotlin("plugin.spring") version "1.9.21"
 }
 
 configurations {
@@ -14,7 +14,7 @@ dependencies {
 
   runtimeOnly("com.h2database:h2:2.2.224")
   runtimeOnly("org.flywaydb:flyway-core")
-  runtimeOnly("org.postgresql:postgresql:42.6.0")
+  runtimeOnly("org.postgresql:postgresql:42.7.1")
 
   implementation("org.springframework.boot:spring-boot-starter-data-jpa")
   implementation("org.springframework.boot:spring-boot-starter-cache")
@@ -29,17 +29,17 @@ dependencies {
   implementation("javax.transaction:javax.transaction-api:1.3")
 
   implementation("javax.xml.bind:jaxb-api:2.3.1")
-  implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.2.0")
+  implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.3.0")
   implementation("net.sf.ehcache:ehcache:2.10.9.2")
-  implementation("org.apache.commons:commons-text:1.10.0")
-  implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.15.3")
-  implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.15.3")
+  implementation("org.apache.commons:commons-text:1.11.0")
+  implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.16.0")
+  implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.16.0")
   implementation("com.pauldijou:jwt-core_2.11:5.0.0")
   implementation("com.google.code.gson:gson:2.10.1")
   implementation("com.google.guava:guava:32.1.3-jre")
 
-  implementation(platform("com.amazonaws:aws-java-sdk-bom:1.12.570"))
-  implementation("software.amazon.awssdk:sns:2.21.4")
+  implementation(platform("com.amazonaws:aws-java-sdk-bom:1.12.614"))
+  implementation("software.amazon.awssdk:sns:2.21.44")
 
   testAnnotationProcessor("org.projectlombok:lombok:1.18.30")
   testCompileOnly("org.projectlombok:lombok:1.18.30")
@@ -55,8 +55,8 @@ dependencies {
 
   testImplementation("org.springframework.security.oauth:spring-security-oauth2:2.5.2.RELEASE")
   testImplementation("org.springframework.security:spring-security-jwt:1.1.1.RELEASE")
-  testImplementation("org.mockito.kotlin:mockito-kotlin:5.1.0")
-  testImplementation("io.swagger.parser.v3:swagger-parser-v3:2.1.18")
+  testImplementation("org.mockito.kotlin:mockito-kotlin:5.2.1")
+  testImplementation("io.swagger.parser.v3:swagger-parser-v3:2.1.19")
 }
 
 java {
