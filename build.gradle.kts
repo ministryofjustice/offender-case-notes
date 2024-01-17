@@ -1,6 +1,6 @@
 plugins {
-  id("uk.gov.justice.hmpps.gradle-spring-boot") version "5.10.1"
-  kotlin("plugin.spring") version "1.9.21"
+  id("uk.gov.justice.hmpps.gradle-spring-boot") version "5.14.1"
+  kotlin("plugin.spring") version "1.9.22"
 }
 
 configurations {
@@ -22,7 +22,7 @@ dependencies {
   implementation("org.springframework.boot:spring-boot-starter-oauth2-resource-server")
   implementation("org.springframework.boot:spring-boot-starter-oauth2-client")
   implementation("org.springframework.boot:spring-boot-starter-webflux")
-  implementation("uk.gov.justice.service.hmpps:hmpps-sqs-spring-boot-starter:2.1.1")
+  implementation("uk.gov.justice.service.hmpps:hmpps-sqs-spring-boot-starter:2.2.1")
 
   implementation("com.google.code.gson:gson:2.10.1")
   implementation("javax.activation:activation:1.1.1")
@@ -32,14 +32,14 @@ dependencies {
   implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.3.0")
   implementation("net.sf.ehcache:ehcache:2.10.9.2")
   implementation("org.apache.commons:commons-text:1.11.0")
-  implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.16.0")
-  implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.16.0")
+  implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.16.1")
+  implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.16.1")
   implementation("com.pauldijou:jwt-core_2.11:5.0.0")
   implementation("com.google.code.gson:gson:2.10.1")
-  implementation("com.google.guava:guava:32.1.3-jre")
+  implementation("com.google.guava:guava:33.0.0-jre")
 
-  implementation(platform("com.amazonaws:aws-java-sdk-bom:1.12.570"))
-  implementation("software.amazon.awssdk:sns:2.21.4")
+  implementation(platform("com.amazonaws:aws-java-sdk-bom:1.12.638"))
+  implementation("software.amazon.awssdk:sns:2.23.4")
 
   testAnnotationProcessor("org.projectlombok:lombok:1.18.30")
   testCompileOnly("org.projectlombok:lombok:1.18.30")

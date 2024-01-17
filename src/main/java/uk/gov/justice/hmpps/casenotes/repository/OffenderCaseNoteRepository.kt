@@ -17,6 +17,7 @@ interface OffenderCaseNoteRepository :
   JpaSpecificationExecutor<OffenderCaseNote>,
   CrudRepository<OffenderCaseNote, UUID> {
 
+  @Suppress("FunctionName")
   fun findByCaseNoteType_ParentType_TypeInAndModifyDateTimeAfterOrderByModifyDateTime(
     types: Set<String>?,
     createdDate: LocalDateTime?,
