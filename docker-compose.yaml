@@ -64,7 +64,7 @@ services:
       - POSTGRES_DB=offender-case-notes
 
   localstack:
-    image: localstack/localstack:2.0
+    image: localstack/localstack:3.0
     networks:
       - hmpps
     container_name: localstack
