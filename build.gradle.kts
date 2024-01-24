@@ -1,5 +1,5 @@
 plugins {
-  id("uk.gov.justice.hmpps.gradle-spring-boot") version "5.14.1"
+  id("uk.gov.justice.hmpps.gradle-spring-boot") version "5.15.1"
   kotlin("plugin.spring") version "1.9.22"
 }
 
@@ -38,8 +38,8 @@ dependencies {
   implementation("com.google.code.gson:gson:2.10.1")
   implementation("com.google.guava:guava:33.0.0-jre")
 
-  implementation(platform("com.amazonaws:aws-java-sdk-bom:1.12.638"))
-  implementation("software.amazon.awssdk:sns:2.23.4")
+  implementation(platform("com.amazonaws:aws-java-sdk-bom:1.12.643"))
+  implementation("software.amazon.awssdk:sns:2.23.9")
 
   testAnnotationProcessor("org.projectlombok:lombok:1.18.30")
   testCompileOnly("org.projectlombok:lombok:1.18.30")
@@ -56,7 +56,7 @@ dependencies {
   testImplementation("org.springframework.security.oauth:spring-security-oauth2:2.5.2.RELEASE")
   testImplementation("org.springframework.security:spring-security-jwt:1.1.1.RELEASE")
   testImplementation("org.mockito.kotlin:mockito-kotlin:5.2.1")
-  testImplementation("io.swagger.parser.v3:swagger-parser-v3:2.1.19")
+  testImplementation("io.swagger.parser.v3:swagger-parser-v3:2.1.20")
 }
 
 java {
