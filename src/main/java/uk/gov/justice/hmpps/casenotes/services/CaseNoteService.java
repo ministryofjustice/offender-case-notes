@@ -195,6 +195,7 @@ public class CaseNoteService {
                         a -> CaseNoteAmendment.builder()
                                 .authorName(a.getAuthorName())
                                 .authorUserId(a.getAuthorUserId())
+                                .authorUserName(a.getAuthorUsername())
                                 .additionalNoteText(a.getAdditionalNoteText())
                                 .creationDateTime(a.getCreationDateTime())
                                 .build()

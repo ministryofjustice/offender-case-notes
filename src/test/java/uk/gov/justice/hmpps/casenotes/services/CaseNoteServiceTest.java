@@ -12,6 +12,7 @@ import uk.gov.justice.hmpps.casenotes.config.SecurityUserContext.UserIdUser;
 import uk.gov.justice.hmpps.casenotes.dto.CaseNoteAmendment;
 import uk.gov.justice.hmpps.casenotes.dto.NewCaseNote;
 import uk.gov.justice.hmpps.casenotes.dto.NomisCaseNote;
+import uk.gov.justice.hmpps.casenotes.dto.NomisCaseNoteAmendment;
 import uk.gov.justice.hmpps.casenotes.dto.UpdateCaseNote;
 import uk.gov.justice.hmpps.casenotes.model.CaseNoteType;
 import uk.gov.justice.hmpps.casenotes.model.OffenderCaseNote;
@@ -24,6 +25,7 @@ import uk.gov.justice.hmpps.casenotes.repository.ParentCaseNoteTypeRepository;
 
 import jakarta.validation.ValidationException;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
@@ -151,6 +153,33 @@ public class CaseNoteServiceTest {
         assertThat(caseNote.getLocationId()).isEqualTo("agency");
         assertThat(caseNote.getCaseNoteId()).isEqualTo("12345");
         assertThat(caseNote.getEventId()).isEqualTo(12345);
+    }
+
+    @Test
+    public void getCaseNoteWithAmendment_callElite2() {
+        final var nomisCaseNote = createNomisCaseNote();
+        nomisCaseNote.setAmendments(
+            List.of(
+                NomisCaseNoteAmendment.builder()
+                    .additionalNoteText("additional details")
+                    .authorUsername("AAA11B")
+                    .creationDateTime(LocalDateTime.parse("2019-03-24T11:22"))
+                    .build()
+            )
+        );
+        when(externalApiService.getOffenderCaseNote(anyString(), anyLong())).thenReturn(nomisCaseNote);
+
+        final var caseNote = caseNoteService.getCaseNote("12345", "21455");
+
+        assertThat(caseNote).isEqualToIgnoringGivenFields(nomisCaseNote, "authorUsername", "locationId", "text", "caseNoteId", "authorUserId", "eventId", "sensitive", "amendments");
+        assertThat(caseNote.getText()).isEqualTo("original");
+        assertThat(caseNote.getAuthorUserId()).isEqualTo("23456");
+        assertThat(caseNote.getLocationId()).isEqualTo("agency");
+        assertThat(caseNote.getCaseNoteId()).isEqualTo("12345");
+        assertThat(caseNote.getEventId()).isEqualTo(12345);
+        assertThat(caseNote.getAmendments().get(0).getAdditionalNoteText()).isEqualTo("additional details");
+        assertThat(caseNote.getAmendments().get(0).getAuthorUserName()).isEqualTo("AAA11B");
+        assertThat(caseNote.getAmendments().get(0).getCreationDateTime()).isEqualTo("2019-03-24T11:22");
     }
 
     @Test

@@ -34,5 +34,5 @@ public class NomisCaseNote {
     private String agencyId;
 
     @Builder.Default
-    private List<CaseNoteAmendment> amendments = new ArrayList<>();
+    private List<NomisCaseNoteAmendment> amendments = new ArrayList<>();
 }
