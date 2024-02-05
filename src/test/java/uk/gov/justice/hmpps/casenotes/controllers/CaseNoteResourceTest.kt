@@ -171,7 +171,7 @@ class CaseNoteResourceTest : ResourceTest() {
           .withQueryParam("to", equalTo("2024-02-01"))
           .withQueryParam("size", equalTo("20"))
           .withQueryParam("page", equalTo("5"))
-          .withQueryParam("sort", equalTo("creationDateTime,ASC")),
+          .withQueryParam("sort", equalTo("createDatetime,ASC")),
       )
     }
 
@@ -199,7 +199,7 @@ class CaseNoteResourceTest : ResourceTest() {
             "sort",
             ExactMatchMultiValuePattern(
               listOf(
-                equalTo("creationDateTime,ASC"),
+                equalTo("createDatetime,ASC"),
                 equalTo("occurrenceDateTime,DESC"),
               ),
             ),
