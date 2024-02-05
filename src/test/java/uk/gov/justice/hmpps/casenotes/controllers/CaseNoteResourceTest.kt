@@ -1,5 +1,11 @@
+@file:Suppress("ClassName")
+
 package uk.gov.justice.hmpps.casenotes.controllers
 
+import com.github.tomakehurst.wiremock.client.WireMock.equalTo
+import com.github.tomakehurst.wiremock.client.WireMock.getRequestedFor
+import com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo
+import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import uk.gov.justice.hmpps.casenotes.dto.CaseNote
 import uk.gov.justice.hmpps.casenotes.health.wiremock.Elite2Extension.Companion.elite2Api
@@ -83,82 +89,159 @@ class CaseNoteResourceTest : ResourceTest() {
       .json(readFile("userCaseNoteTypesSecure.json"))
   }
 
-  @Test
-  fun testRetrieveCaseNotesForOffenderSensitive() {
-    oAuthApi.subGetUserDetails("SECURE_CASENOTE_USER")
-    elite2Api.subGetOffender("A1234AA")
-    elite2Api.subGetCaseNotesForOffender("A1234AA")
-    val token = jwtHelper.createJwt("SECURE_CASENOTE_USER", roles = CASENOTES_ROLES)
-    webTestClient.post().uri("/case-notes/{offenderIdentifier}", "A1234AA")
-      .headers(addBearerToken(token))
-      .bodyValue(CREATE_CASE_NOTE_WITHOUT_LOC.format("This is a case note"))
-      .exchange()
-      .expectStatus().isCreated
-      .expectBody()
-      .json(readFile("A1234AA-create-casenote.json"))
-    webTestClient.get().uri("/case-notes/{offenderIdentifier}", "A1234AA")
-      .headers(addBearerToken(token))
-      .exchange()
-      .expectStatus().isOk
-      .expectBody()
-      .json(readFile("A1234AA-casenote.json"))
-  }
+  @Nested
+  inner class getCaseNotes {
+    @Test
+    fun testRetrieveCaseNotesForOffenderSensitive() {
+      oAuthApi.subGetUserDetails("SECURE_CASENOTE_USER")
+      elite2Api.subGetOffender("A1234AA")
+      elite2Api.subGetCaseNotesForOffender("A1234AA")
+      val token = jwtHelper.createJwt("SECURE_CASENOTE_USER", roles = CASENOTES_ROLES)
+      webTestClient.post().uri("/case-notes/{offenderIdentifier}", "A1234AA")
+        .headers(addBearerToken(token))
+        .bodyValue(CREATE_CASE_NOTE_WITHOUT_LOC.format("This is a case note"))
+        .exchange()
+        .expectStatus().isCreated
+        .expectBody()
+        .json(readFile("A1234AA-create-casenote.json"))
+      webTestClient.get().uri("/case-notes/{offenderIdentifier}", "A1234AA")
+        .headers(addBearerToken(token))
+        .exchange()
+        .expectStatus().isOk
+        .expectBody()
+        .json(readFile("A1234AA-casenote.json"))
+    }
 
-  @Test
-  fun testCanRetrieveCaseNotesForOffenderNormal() {
-    oAuthApi.subGetUserDetails("API_TEST_USER")
-    elite2Api.subGetCaseNotesForOffender("A1234AA")
-    webTestClient.get().uri("/case-notes/{offenderIdentifier}", "A1234AA")
-      .headers(addBearerAuthorisation("API_TEST_USER"))
-      .exchange()
-      .expectStatus().isOk
-      .expectBody()
-      .json(readFile("A1234AA-normal-casenote.json"))
-  }
+    @Test
+    fun testCanRetrieveCaseNotesForOffenderNormal() {
+      oAuthApi.subGetUserDetails("API_TEST_USER")
+      elite2Api.subGetCaseNotesForOffender("A1234AA")
+      webTestClient.get().uri("/case-notes/{offenderIdentifier}", "A1234AA")
+        .headers(addBearerAuthorisation("API_TEST_USER"))
+        .exchange()
+        .expectStatus().isOk
+        .expectBody()
+        .json(readFile("A1234AA-normal-casenote.json"))
+    }
 
-  @Test
-  fun testRetrieveCaseNotesWillReturn404IfOffenderNotFound() {
-    oAuthApi.subGetUserDetails("API_TEST_USER")
-    elite2Api.subGetCaseNotesForOffenderNotFound("A1234AA")
-    webTestClient.get().uri("/case-notes/{offenderIdentifier}", "A1234AA")
-      .headers(addBearerAuthorisation("API_TEST_USER"))
-      .exchange()
-      .expectStatus().isNotFound
-      .expectBody()
-      .json(readFile("offender-not-found.json"))
-  }
+    @Test
+    fun `test can retrieve case notes - check Prison API default query`() {
+      oAuthApi.subGetUserDetails("API_TEST_USER")
+      elite2Api.subGetCaseNotesForOffender("A1234AA")
+      webTestClient.get().uri("/case-notes/{offenderIdentifier}", "A1234AA")
+        .headers(addBearerAuthorisation("API_TEST_USER"))
+        .exchange()
+        .expectStatus().isOk
 
-  @Test
-  fun testCanRetrieveCaseNoteForOffender() {
-    oAuthApi.subGetUserDetails("API_TEST_USER")
-    elite2Api.subGetOffender("A1234AA")
-    elite2Api.subGetCaseNoteForOffender("A1234AA", 131232L)
-    webTestClient.get().uri("/case-notes/{offenderIdentifier}/{caseNoteIdentifier}", "A1234AA", "131232")
-      .headers(addBearerAuthorisation("API_TEST_USER"))
-      .exchange()
-      .expectStatus().isOk
-      .expectBody()
-      .json(readFile("A1234AA-single-normal-casenote.json"))
-  }
+      elite2Api.verify(
+        getRequestedFor(urlPathEqualTo("/api/offenders/A1234AA/case-notes/v2"))
+          .withQueryParam("size", equalTo("10"))
+          .withQueryParam("page", equalTo("0"))
+          .withQueryParam("sort", equalTo("occurrenceDateTime,DESC")),
+      )
+    }
 
-  @Test
-  fun testRetrieveCaseNoteForOffenderSensitive() {
-    oAuthApi.subGetUserDetails("SECURE_CASENOTE_USER")
-    elite2Api.subGetOffender("A1234AF")
-    val token = jwtHelper.createJwt("SECURE_CASENOTE_USER", roles = CASENOTES_ROLES)
-    val postResponse = webTestClient.post().uri("/case-notes/{offenderIdentifier}", "A1234AF")
-      .headers(addBearerToken(token))
-      .bodyValue(CREATE_CASE_NOTE_WITHOUT_LOC.format("This is a case note"))
-      .exchange()
-      .expectStatus().isCreated
-      .returnResult(CaseNote::class.java)
-    val id = postResponse.responseBody.blockFirst()!!.caseNoteId
-    webTestClient.get().uri("/case-notes/{offenderIdentifier}/{caseNoteIdentifier}", "A1234AF", id)
-      .headers(addBearerToken(token))
-      .exchange()
-      .expectStatus().isOk
-      .expectBody()
-      .json(readFile("A1234AF-single-casenote.json"))
+    @Test
+    fun `test can retrieve case notes - check Prison API parameters`() {
+      oAuthApi.subGetUserDetails("API_TEST_USER")
+      elite2Api.subGetCaseNotesForOffender("A1234AA")
+      webTestClient.get().uri {
+        it.path("/case-notes/{offenderIdentifier}")
+          .queryParam("type", "GEN")
+          .queryParam("subType", "OSI")
+          .queryParam("locationId", "MDI")
+          .queryParam("startDate", "2024-01-02T10:20:30")
+          .queryParam("endDate", "2024-02-01T12:10:05")
+          .queryParam("size", "20")
+          .queryParam("page", "5")
+          .queryParam("sort", "creationDateTime,ASC")
+          .build("A1234AA")
+      }
+        .headers(addBearerAuthorisation("API_TEST_USER"))
+        .exchange()
+        .expectStatus().isOk
+
+      elite2Api.verify(
+        getRequestedFor(urlPathEqualTo("/api/offenders/A1234AA/case-notes/v2"))
+          .withQueryParam("type", equalTo("GEN"))
+          .withQueryParam("subType", equalTo("OSI"))
+          .withQueryParam("prisonId", equalTo("MDI"))
+          .withQueryParam("from", equalTo("2024-01-02"))
+          .withQueryParam("to", equalTo("2024-02-01"))
+          .withQueryParam("size", equalTo("20"))
+          .withQueryParam("page", equalTo("5"))
+          .withQueryParam("sort", equalTo("creationDateTime,ASC")),
+      )
+    }
+
+    @Test
+    fun `test can retrieve case notes - query params passed through`() {
+      oAuthApi.subGetUserDetails("API_TEST_USER")
+      elite2Api.subGetCaseNotesForOffender("A1234AA")
+      webTestClient.get().uri {
+        it.path("/case-notes/{offenderIdentifier}")
+          .queryParam("size", "30")
+          .queryParam("page", "5")
+          .queryParam("sort", "creationDateTime,ASC")
+          .queryParam("sort", "occurrenceDateTime,DESC")
+          .build("A1234AA")
+      }
+        .headers(addBearerAuthorisation("API_TEST_USER"))
+        .exchange()
+        .expectStatus().isOk
+
+      elite2Api.verify(
+        getRequestedFor(urlPathEqualTo("/api/offenders/A1234AA/case-notes/v2"))
+          .withQueryParam("size", equalTo("30"))
+          .withQueryParam("page", equalTo("5"))
+          .withQueryParam("sort", equalTo("creationDateTime,ASCsort=occurrenceDateTime,DESC")),
+      )
+    }
+
+    @Test
+    fun testRetrieveCaseNotesWillReturn404IfOffenderNotFound() {
+      oAuthApi.subGetUserDetails("API_TEST_USER")
+      elite2Api.subGetCaseNotesForOffenderNotFound("A1234AA")
+      webTestClient.get().uri("/case-notes/{offenderIdentifier}", "A1234AA")
+        .headers(addBearerAuthorisation("API_TEST_USER"))
+        .exchange()
+        .expectStatus().isNotFound
+        .expectBody()
+        .json(readFile("offender-not-found.json"))
+    }
+
+    @Test
+    fun testCanRetrieveCaseNoteForOffender() {
+      oAuthApi.subGetUserDetails("API_TEST_USER")
+      elite2Api.subGetOffender("A1234AA")
+      elite2Api.subGetCaseNoteForOffender("A1234AA", 131232L)
+      webTestClient.get().uri("/case-notes/{offenderIdentifier}/{caseNoteIdentifier}", "A1234AA", "131232")
+        .headers(addBearerAuthorisation("API_TEST_USER"))
+        .exchange()
+        .expectStatus().isOk
+        .expectBody()
+        .json(readFile("A1234AA-single-normal-casenote.json"))
+    }
+
+    @Test
+    fun testRetrieveCaseNoteForOffenderSensitive() {
+      oAuthApi.subGetUserDetails("SECURE_CASENOTE_USER")
+      elite2Api.subGetOffender("A1234AF")
+      val token = jwtHelper.createJwt("SECURE_CASENOTE_USER", roles = CASENOTES_ROLES)
+      val postResponse = webTestClient.post().uri("/case-notes/{offenderIdentifier}", "A1234AF")
+        .headers(addBearerToken(token))
+        .bodyValue(CREATE_CASE_NOTE_WITHOUT_LOC.format("This is a case note"))
+        .exchange()
+        .expectStatus().isCreated
+        .returnResult(CaseNote::class.java)
+      val id = postResponse.responseBody.blockFirst()!!.caseNoteId
+      webTestClient.get().uri("/case-notes/{offenderIdentifier}/{caseNoteIdentifier}", "A1234AF", id)
+        .headers(addBearerToken(token))
+        .exchange()
+        .expectStatus().isOk
+        .expectBody()
+        .json(readFile("A1234AF-single-casenote.json"))
+    }
   }
 
   @Test
