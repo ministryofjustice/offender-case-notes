@@ -6,7 +6,6 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
-import org.mockito.Mockito.mock
 import org.mockito.kotlin.any
 import org.mockito.kotlin.check
 import org.mockito.kotlin.eq
@@ -76,7 +75,7 @@ class ExternalApiServiceTest {
       whenever(responseSpecMock.bodyToMono(any<ParameterizedTypeReference<*>>())).thenReturn(
         Mono.just(result),
       )
-      assertThat(externalApiService.caseNoteTypes).isSameAs(result)
+      assertThat(externalApiService.getCaseNoteTypes()).isSameAs(result)
 
       verify(prisonApiWebClient).get()
       verify(requestHeadersUriSpec).uri("/api/reference-domains/caseNoteTypes")
@@ -91,7 +90,7 @@ class ExternalApiServiceTest {
       whenever(responseSpecMock.bodyToMono(any<ParameterizedTypeReference<*>>())).thenReturn(
         Mono.just(result),
       )
-      assertThat(externalApiService.userCaseNoteTypes).isSameAs(result)
+      assertThat(externalApiService.getUserCaseNoteTypes()).isSameAs(result)
 
       verify(prisonApiWebClient).get()
       verify(requestHeadersUriSpec).uri("/api/users/me/caseNoteTypes")
@@ -268,13 +267,13 @@ class ExternalApiServiceTest {
         check {
           val components = UriComponentsBuilder.fromUriString(it).build()
           assertThat(components.path).isEqualTo("/api/offenders/{offenderIdentifier}/case-notes/v2")
-          assertThat(components.queryParams).containsExactlyInAnyOrderEntriesOf(
-            mapOf(
-              "size" to listOf("20"),
-              "page" to listOf("5"),
-              "sort" to listOf("creationDateTime,ASCsort=occurrenceDateTime,ASC"),
-            ),
-          )
+          assertThat(components.queryParams)
+            .containsEntry("size", listOf("20"))
+            .containsEntry("page", listOf("5"))
+            .containsKey("sort")
+            .hasSize(3)
+          assertThat(components.queryParams.get("sort"))
+            .containsExactly("creationDateTime,ASC", "occurrenceDateTime,ASC")
         },
         eq("AA123B"),
       )
@@ -300,13 +299,13 @@ class ExternalApiServiceTest {
         check {
           val components = UriComponentsBuilder.fromUriString(it).build()
           assertThat(components.path).isEqualTo("/api/offenders/{offenderIdentifier}/case-notes/v2")
-          assertThat(components.queryParams).containsExactlyInAnyOrderEntriesOf(
-            mapOf(
-              "size" to listOf("20"),
-              "page" to listOf("5"),
-              "sort" to listOf("creationDateTime,ASCsort=occurrenceDateTime,DESC"),
-            ),
-          )
+          assertThat(components.queryParams)
+            .containsEntry("size", listOf("20"))
+            .containsEntry("page", listOf("5"))
+            .containsKey("sort")
+            .hasSize(3)
+          assertThat(components.queryParams.get("sort"))
+            .containsExactly("creationDateTime,ASC", "occurrenceDateTime,DESC")
         },
         eq("AA123B"),
       )

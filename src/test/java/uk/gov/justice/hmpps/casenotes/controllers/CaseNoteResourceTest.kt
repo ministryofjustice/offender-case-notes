@@ -5,6 +5,7 @@ package uk.gov.justice.hmpps.casenotes.controllers
 import com.github.tomakehurst.wiremock.client.WireMock.equalTo
 import com.github.tomakehurst.wiremock.client.WireMock.getRequestedFor
 import com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo
+import com.github.tomakehurst.wiremock.matching.ExactMatchMultiValuePattern
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import uk.gov.justice.hmpps.casenotes.dto.CaseNote
@@ -194,7 +195,15 @@ class CaseNoteResourceTest : ResourceTest() {
         getRequestedFor(urlPathEqualTo("/api/offenders/A1234AA/case-notes/v2"))
           .withQueryParam("size", equalTo("30"))
           .withQueryParam("page", equalTo("5"))
-          .withQueryParam("sort", equalTo("creationDateTime,ASCsort=occurrenceDateTime,DESC")),
+          .withQueryParam(
+            "sort",
+            ExactMatchMultiValuePattern(
+              listOf(
+                equalTo("creationDateTime,ASC"),
+                equalTo("occurrenceDateTime,DESC"),
+              ),
+            ),
+          ),
       )
     }
 
