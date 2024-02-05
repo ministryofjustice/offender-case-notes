@@ -44,14 +44,11 @@ public class MergeOffenderServiceTest {
     public void testCheckForExistingCaseNotesThatNeedMerging() {
         when(externalApiService.getMergedIdentifiersByBookingId(BOOKING_ID))
                 .thenReturn(List.of(
-                        BookingIdentifier.builder().type("MERGED").value(MERGED_OFFENDER_NO).build()
+                        new BookingIdentifier("MERGED", MERGED_OFFENDER_NO)
                 ));
 
         when(externalApiService.getBooking(BOOKING_ID))
-                .thenReturn(OffenderBooking.builder()
-                        .bookingId(BOOKING_ID)
-                        .offenderNo(OFFENDER_NO)
-                        .build());
+                .thenReturn(new OffenderBooking(BOOKING_ID, OFFENDER_NO, "LSI"));
 
         final var numRows = 5;
         when(repository.updateOffenderIdentifier(MERGED_OFFENDER_NO, OFFENDER_NO))
@@ -69,15 +66,12 @@ public class MergeOffenderServiceTest {
     public void testCountingOfMultipleRows() {
         when(externalApiService.getMergedIdentifiersByBookingId(BOOKING_ID))
                 .thenReturn(List.of(
-                        BookingIdentifier.builder().type("MERGED").value(MERGED_OFFENDER_NO).build(),
-                        BookingIdentifier.builder().type("MERGED").value("C1234CC").build()
+                        new BookingIdentifier("MERGED", MERGED_OFFENDER_NO),
+                        new BookingIdentifier("MERGED", "C1234CC")
                 ));
 
         when(externalApiService.getBooking(BOOKING_ID))
-                .thenReturn(OffenderBooking.builder()
-                        .bookingId(BOOKING_ID)
-                        .offenderNo(OFFENDER_NO)
-                        .build());
+                .thenReturn(new OffenderBooking(BOOKING_ID, OFFENDER_NO, "MDI"));
 
         when(repository.updateOffenderIdentifier(MERGED_OFFENDER_NO, OFFENDER_NO)).thenReturn(2);
         when(repository.updateOffenderIdentifier("C1234CC", OFFENDER_NO)).thenReturn(3);

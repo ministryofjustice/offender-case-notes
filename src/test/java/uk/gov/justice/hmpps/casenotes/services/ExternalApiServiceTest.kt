@@ -102,7 +102,7 @@ class ExternalApiServiceTest {
   inner class getMergedIdentifiersByBookingId {
     @Test
     fun `test calls Prison API`() {
-      val result = listOf(BookingIdentifier())
+      val result = listOf(BookingIdentifier(type = "MERGED", value = "AB12345C"))
       whenever(responseSpecMock.bodyToMono(any<ParameterizedTypeReference<*>>())).thenReturn(
         Mono.just(result),
       )
@@ -117,7 +117,7 @@ class ExternalApiServiceTest {
   inner class getBooking {
     @Test
     fun `test calls Prison API`() {
-      val result = OffenderBooking()
+      val result = OffenderBooking(bookingId = 12345L, offenderNo = "AA123B", agencyId = "LSI")
       whenever(responseSpecMock.bodyToMono(any<Class<*>>())).thenReturn(
         Mono.just(result),
       )
@@ -169,7 +169,7 @@ class ExternalApiServiceTest {
     @Test
     fun `test calls Prison API`() {
       whenever(responseSpecMock.bodyToMono(any<Class<*>>())).thenReturn(
-        Mono.just(OffenderBooking().apply { agencyId = "MDI" }),
+        Mono.just(OffenderBooking(agencyId = "MDI", bookingId = 12345L, offenderNo = "AA123B")),
       )
       assertThat(externalApiService.getOffenderLocation("AA123B")).isEqualTo("MDI")
 
@@ -321,7 +321,7 @@ class ExternalApiServiceTest {
       )
       val response = externalApiService.getOffenderCaseNotes(
         "AA123B",
-        CaseNoteFilter().apply { type = "GEN" },
+        CaseNoteFilter(type = "GEN"),
         pageable,
       )
       assertThat(response.totalElements).isEqualTo(12)
@@ -349,7 +349,7 @@ class ExternalApiServiceTest {
       )
       val response = externalApiService.getOffenderCaseNotes(
         "AA123B",
-        CaseNoteFilter().apply { subType = "OSI" },
+        CaseNoteFilter(subType = "OSI"),
         pageable,
       )
       assertThat(response.totalElements).isEqualTo(12)
@@ -377,7 +377,7 @@ class ExternalApiServiceTest {
       )
       val response = externalApiService.getOffenderCaseNotes(
         "AA123B",
-        CaseNoteFilter().apply { locationId = "MDI" },
+        CaseNoteFilter(locationId = "MDI"),
         pageable,
       )
       assertThat(response.totalElements).isEqualTo(12)
@@ -405,7 +405,7 @@ class ExternalApiServiceTest {
       )
       val response = externalApiService.getOffenderCaseNotes(
         "AA123B",
-        CaseNoteFilter().apply { startDate = LocalDateTime.parse("2023-01-02T10:20:30") },
+        CaseNoteFilter(startDate = LocalDateTime.parse("2023-01-02T10:20:30")),
         pageable,
       )
       assertThat(response.totalElements).isEqualTo(12)
@@ -433,7 +433,7 @@ class ExternalApiServiceTest {
       )
       val response = externalApiService.getOffenderCaseNotes(
         "AA123B",
-        CaseNoteFilter().apply { endDate = LocalDateTime.parse("2023-02-03T10:20:30") },
+        CaseNoteFilter(endDate = LocalDateTime.parse("2023-02-03T10:20:30")),
         pageable,
       )
       assertThat(response.totalElements).isEqualTo(12)
