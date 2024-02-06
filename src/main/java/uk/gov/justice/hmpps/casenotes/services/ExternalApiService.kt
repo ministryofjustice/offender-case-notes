@@ -101,7 +101,10 @@ class ExternalApiService(
       filter.endDate?.let { this["to"] = filter.endDate.format(DateTimeFormatter.ISO_DATE) }
     }
     val params = paramFilterMap.entries.joinToString(separator = "&") { (key, value) -> "$key=$value" }
-    val sortParams = pageable.sort.map { "sort=${it.property},${it.direction}" }
+    val sortParams = pageable.sort.map {
+      val mappedProperty = if (it.property == "creationDateTime") "createDatetime" else it.property
+      "sort=$mappedProperty,${it.direction}"
+    }
       .joinToString(separator = "&", prefix = "&")
     return "$params$sortParams"
   }

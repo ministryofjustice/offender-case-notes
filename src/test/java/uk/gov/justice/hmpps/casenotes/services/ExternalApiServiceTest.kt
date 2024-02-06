@@ -244,7 +244,7 @@ class ExternalApiServiceTest {
           val components = UriComponentsBuilder.fromUriString(it).build()
           assertThat(components.path).isEqualTo("/api/offenders/{offenderIdentifier}/case-notes/v2")
           assertThat(components.queryParams).containsExactlyInAnyOrderEntriesOf(
-            mapOf("size" to listOf("20"), "page" to listOf("5"), "sort" to listOf("creationDateTime,ASC")),
+            mapOf("size" to listOf("20"), "page" to listOf("5"), "sort" to listOf("createDatetime,ASC")),
           )
         },
         eq("AA123B"),
@@ -273,7 +273,7 @@ class ExternalApiServiceTest {
             .containsKey("sort")
             .hasSize(3)
           assertThat(components.queryParams.get("sort"))
-            .containsExactly("creationDateTime,ASC", "occurrenceDateTime,ASC")
+            .containsExactly("createDatetime,ASC", "occurrenceDateTime,ASC")
         },
         eq("AA123B"),
       )
@@ -305,7 +305,7 @@ class ExternalApiServiceTest {
             .containsKey("sort")
             .hasSize(3)
           assertThat(components.queryParams.get("sort"))
-            .containsExactly("creationDateTime,ASC", "occurrenceDateTime,DESC")
+            .containsExactly("createDatetime,ASC", "occurrenceDateTime,DESC")
         },
         eq("AA123B"),
       )
