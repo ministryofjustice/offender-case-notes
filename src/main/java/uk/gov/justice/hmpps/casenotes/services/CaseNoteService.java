@@ -1,6 +1,7 @@
 package uk.gov.justice.hmpps.casenotes.services;
 
 import com.microsoft.applicationinsights.TelemetryClient;
+import io.micrometer.common.util.StringUtils;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.math.NumberUtils;
@@ -38,9 +39,7 @@ import jakarta.validation.Valid;
 import jakarta.validation.ValidationException;
 import jakarta.validation.constraints.NotNull;
 import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static java.lang.String.format;
@@ -66,54 +65,66 @@ public class CaseNoteService {
 
     public Page<CaseNote> getCaseNotes(final String offenderIdentifier, final CaseNoteFilter caseNoteFilter, final Pageable pageable) {
 
+        final Page<CaseNote> caseNotes;
+
+
+        final List<CaseNote> dtoNotes = new java.util.ArrayList<>(Collections.emptyList());
+
+        if(!StringUtils.isEmpty(caseNoteFilter.getType())){
+            dtoNotes.addAll(getCaseNotesByTypeAndSubTypes(offenderIdentifier,caseNoteFilter,pageable,caseNoteFilter.getType(), caseNoteFilter.getSubType()));
+        }
+
+
+        Objects.requireNonNull(caseNoteFilter.getCaseNoteTypeSubTypes()).forEach(typeLine->{
+            var types = typeLine.split("\\+");
+            dtoNotes.addAll(getCaseNotesByTypeAndSubTypes(offenderIdentifier,caseNoteFilter,pageable,types[0], types.length>1?types[1]:null));
+        });
+
+
+        // only supports one field sort.
+        final var direction = pageable.getSort().isSorted() ? pageable.getSort().get().map(Sort.Order::getDirection).toList().getFirst() : Sort.Direction.DESC;
+        final var sortField = pageable.getSort().isSorted() ? pageable.getSort().get().map(Sort.Order::getProperty).toList().getFirst() : "occurrenceDateTime";
+
+        final var sortedList = sortByFieldName(dtoNotes, sortField, direction);
+
+        final var toIndex = (int) (pageable.getOffset() + pageable.getPageSize());
+        final var pagedList = sortedList.subList((int) pageable.getOffset(), Math.min(toIndex, sortedList.size()));
+
+        caseNotes = new PageImpl<>(pagedList, pageable, dtoNotes.size());
+        return caseNotes;
+    }
+
+    private List<CaseNote> getCaseNotesByTypeAndSubTypes(final String offenderIdentifier, final CaseNoteFilter caseNoteFilter,final Pageable pageable, final String type, final String subType){
         final List<CaseNote> sensitiveCaseNotes;
 
-
         final var filter = OffenderCaseNoteFilter.builder()
-                .offenderIdentifier(offenderIdentifier)
-                .type(caseNoteFilter.getType())
-                .subType(caseNoteFilter.getSubType())
-                .locationId(caseNoteFilter.getLocationId())
-                .authorUsername(caseNoteFilter.getAuthorUsername())
-                .startDate(caseNoteFilter.getStartDate())
-                .endDate(caseNoteFilter.getEndDate())
-                .excludeSensitive(!isAllowedToViewOrCreateSensitiveCaseNote())
-                .build();
+            .offenderIdentifier(offenderIdentifier)
+            .type(type)
+            .subType(subType)
+            .locationId(caseNoteFilter.getLocationId())
+            .authorUsername(caseNoteFilter.getAuthorUsername())
+            .startDate(caseNoteFilter.getStartDate())
+            .endDate(caseNoteFilter.getEndDate())
+            .excludeSensitive(!isAllowedToViewOrCreateSensitiveCaseNote())
+            .build();
 
         sensitiveCaseNotes = repository.findAll(filter)
-                .stream()
-                .map(this::mapper)
-                .collect(Collectors.toList());
+            .stream()
+            .map(this::mapper)
+            .toList();
 
-        final Page<CaseNote> caseNotes;
         if (sensitiveCaseNotes.isEmpty()) {
             // Just delegate to prison api for data
             final var pagedNotes = externalApiService.getOffenderCaseNotes(offenderIdentifier, caseNoteFilter, pageable);
-
-            final var dtoNotes = translateToDto(pagedNotes, offenderIdentifier);
-            caseNotes = new PageImpl<>(dtoNotes, pageable, pagedNotes.getTotalElements());
+            return translateToDto(pagedNotes, offenderIdentifier);
 
         } else {
             // There are both case note sources.  Combine
             final var pagedNotes = externalApiService.getOffenderCaseNotes(offenderIdentifier, caseNoteFilter, PageRequest.of(0, 10000));
-
             final var dtoNotes = translateToDto(pagedNotes, offenderIdentifier);
-
             dtoNotes.addAll(sensitiveCaseNotes);
-
-            // only supports one field sort.
-            final var direction = pageable.getSort().isSorted() ? pageable.getSort().get().map(Sort.Order::getDirection).collect(Collectors.toList()).get(0) : Sort.Direction.DESC;
-            final var sortField = pageable.getSort().isSorted() ? pageable.getSort().get().map(Sort.Order::getProperty).collect(Collectors.toList()).get(0) : "occurrenceDateTime";
-
-            final var sortedList = sortByFieldName(dtoNotes, sortField, direction);
-
-            final var toIndex = (int) (pageable.getOffset() + pageable.getPageSize());
-            final var pagedList = sortedList.subList((int) pageable.getOffset(), Math.min(toIndex, sortedList.size()));
-
-            caseNotes = new PageImpl<>(pagedList, pageable, pagedNotes.getTotalElements() + sensitiveCaseNotes.size());
+            return dtoNotes;
         }
-        return caseNotes;
-
     }
 
     private List<CaseNote> translateToDto(final Page<NomisCaseNote> pagedNotes, final String offenderIdentifier) {
