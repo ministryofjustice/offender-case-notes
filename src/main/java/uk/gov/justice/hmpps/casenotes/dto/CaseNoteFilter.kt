@@ -28,6 +28,6 @@ class CaseNoteFilter(
   @Schema(description = "Filter by username", example = "USER1")
   val authorUsername: String? = null,
 
-  @Schema(description = "Filter by a list of case note types and optional case not sub types separated by plus", example = "KA+KE,OBS,POM+GEN")
+  @Schema(description = "Filter by a list of case note types and optional case not sub types separated by plus", example = "KA-KE,OBS,POM-GEN")
   val caseNoteTypeSubTypes: String? = null,
 )
