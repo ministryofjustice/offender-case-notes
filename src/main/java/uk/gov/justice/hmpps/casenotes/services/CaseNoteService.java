@@ -66,34 +66,21 @@ public class CaseNoteService {
     public Page<CaseNote> getCaseNotes(final String offenderIdentifier, final CaseNoteFilter caseNoteFilter, final Pageable pageable) {
 
         final Page<CaseNote> caseNotes;
+        final List<CaseNote> dtoNotes = getCaseNotesByTypeAndSubTypes(offenderIdentifier,caseNoteFilter,pageable,caseNoteFilter.getType(), caseNoteFilter.getSubType());
 
-
-        final List<CaseNote> dtoNotes = new java.util.ArrayList<>(Collections.emptyList());
-
-        if(!StringUtils.isEmpty(caseNoteFilter.getType())){
-            dtoNotes.addAll(getCaseNotesByTypeAndSubTypes(offenderIdentifier,caseNoteFilter,pageable,caseNoteFilter.getType(), caseNoteFilter.getSubType()));
-        }
         final var additionalTypes = caseNoteFilter.getCaseNoteTypeSubTypes();
         if(!StringUtils.isEmpty(additionalTypes)){
             Arrays.stream(additionalTypes.split(",")).toList().forEach(typeLine->{
-                var types = typeLine.split("\\+");
+                var types = typeLine.split("-");
                 dtoNotes.addAll(getCaseNotesByTypeAndSubTypes(offenderIdentifier,caseNoteFilter,pageable,types[0], types.length>1?types[1]:null));
             });
         }
 
-
-
-
-        // only supports one field sort.
         final var direction = pageable.getSort().isSorted() ? pageable.getSort().get().map(Sort.Order::getDirection).toList().getFirst() : Sort.Direction.DESC;
         final var sortField = pageable.getSort().isSorted() ? pageable.getSort().get().map(Sort.Order::getProperty).toList().getFirst() : "occurrenceDateTime";
 
         final var sortedList = sortByFieldName(dtoNotes, sortField, direction);
-
-        final var toIndex = (int) (pageable.getOffset() + pageable.getPageSize());
-        final var pagedList = sortedList.subList((int) pageable.getOffset(), Math.min(toIndex, sortedList.size()));
-
-        caseNotes = new PageImpl<>(pagedList, pageable, dtoNotes.size());
+        caseNotes = new PageImpl<>(sortedList, pageable, dtoNotes.size());
         return caseNotes;
     }
 
@@ -128,7 +115,17 @@ public class CaseNoteService {
             final var pagedNotes = externalApiService.getOffenderCaseNotes(offenderIdentifier, externalApiFilter, PageRequest.of(0, 10000));
             final var dtoNotes = translateToDto(pagedNotes, offenderIdentifier);
             dtoNotes.addAll(sensitiveCaseNotes);
-            return dtoNotes;
+
+            // only supports one field sort.
+            final var direction = pageable.getSort().isSorted() ? pageable.getSort().get().map(Sort.Order::getDirection).collect(Collectors.toList()).get(0) : Sort.Direction.DESC;
+            final var sortField = pageable.getSort().isSorted() ? pageable.getSort().get().map(Sort.Order::getProperty).collect(Collectors.toList()).get(0) : "occurrenceDateTime";
+
+            final var sortedList = sortByFieldName(dtoNotes, sortField, direction);
+
+            final var toIndex = (int) (pageable.getOffset() + pageable.getPageSize());
+            final var pagedList = sortedList.subList((int) pageable.getOffset(), Math.min(toIndex, sortedList.size()));
+
+            return pagedList;
         }
     }
 

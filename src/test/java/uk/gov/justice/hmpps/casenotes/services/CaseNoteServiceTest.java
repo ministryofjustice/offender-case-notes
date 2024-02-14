@@ -207,7 +207,7 @@ public class CaseNoteServiceTest {
         when(securityUserContext.isOverrideRole(anyString(), anyString(), anyString())).thenReturn(Boolean.TRUE);
 
         final var rootNoteType = CaseNoteType.builder().type("someSubType").parentType(ParentNoteType.builder().type("someType").build()).build();
-        final var rootTypeFilter = new CaseNoteFilter("someType","someSubType",LocalDateTime.now(),LocalDateTime.now().plusDays(1),"Location","user","someAddType+someAddSubType");
+        final var rootTypeFilter = new CaseNoteFilter("someType","someSubType",LocalDateTime.now(),LocalDateTime.now().plusDays(1),"Location","user","someAddType-someAddSubType");
         final var rootTypeOffenderCaseNoteFilter = OffenderCaseNoteFilter.builder()
             .offenderIdentifier(offenderIdentifier)
             .type("someType")

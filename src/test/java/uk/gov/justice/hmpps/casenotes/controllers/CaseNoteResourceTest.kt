@@ -186,7 +186,7 @@ class CaseNoteResourceTest : ResourceTest() {
           .queryParam("locationId", "MDI")
           .queryParam("startDate", "2024-01-02T10:20:30")
           .queryParam("endDate", "2024-02-01T12:10:05")
-          .queryParam("caseNoteTypeSubTypes", "POM+GEN")
+          .queryParam("caseNoteTypeSubTypes", "POM-GEN")
           .queryParam("size", "20")
           .queryParam("page", "5")
           .queryParam("sort", "creationDateTime,ASC")
