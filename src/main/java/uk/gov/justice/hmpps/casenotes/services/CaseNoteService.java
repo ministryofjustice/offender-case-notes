@@ -113,14 +113,16 @@ public class CaseNoteService {
             .map(this::mapper)
             .toList();
 
+        final var externalApiFilter = new CaseNoteFilter(type,subType,caseNoteFilter.getStartDate(),caseNoteFilter.getEndDate(),caseNoteFilter.getLocationId(),caseNoteFilter.getAuthorUsername(),caseNoteFilter.getCaseNoteTypeSubTypes());
+
         if (sensitiveCaseNotes.isEmpty()) {
             // Just delegate to prison api for data
-            final var pagedNotes = externalApiService.getOffenderCaseNotes(offenderIdentifier, caseNoteFilter, pageable);
+            final var pagedNotes = externalApiService.getOffenderCaseNotes(offenderIdentifier, externalApiFilter, pageable);
             return translateToDto(pagedNotes, offenderIdentifier);
 
         } else {
             // There are both case note sources.  Combine
-            final var pagedNotes = externalApiService.getOffenderCaseNotes(offenderIdentifier, caseNoteFilter, PageRequest.of(0, 10000));
+            final var pagedNotes = externalApiService.getOffenderCaseNotes(offenderIdentifier, externalApiFilter, PageRequest.of(0, 10000));
             final var dtoNotes = translateToDto(pagedNotes, offenderIdentifier);
             dtoNotes.addAll(sensitiveCaseNotes);
             return dtoNotes;

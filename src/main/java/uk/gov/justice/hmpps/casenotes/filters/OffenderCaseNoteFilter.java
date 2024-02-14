@@ -3,6 +3,7 @@ package uk.gov.justice.hmpps.casenotes.filters;
 import com.google.common.collect.ImmutableList;
 import lombok.Builder;
 import lombok.EqualsAndHashCode;
+import lombok.Getter;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.jpa.domain.Specification;
 import uk.gov.justice.hmpps.casenotes.model.OffenderCaseNote;
@@ -21,7 +22,9 @@ public class OffenderCaseNoteFilter implements Specification<OffenderCaseNote> {
     private final String offenderIdentifier;
     private final String locationId;
     private final String authorUsername;
+    @Getter
     private final String type;
+    @Getter
     private final String subType;
     private final boolean excludeSensitive;
     private final LocalDateTime startDate;

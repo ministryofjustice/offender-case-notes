@@ -4,16 +4,23 @@ import com.microsoft.applicationinsights.TelemetryClient;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentMatchers;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort.Direction;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.access.AccessDeniedException;
 import uk.gov.justice.hmpps.casenotes.config.SecurityUserContext;
 import uk.gov.justice.hmpps.casenotes.config.SecurityUserContext.UserIdUser;
 import uk.gov.justice.hmpps.casenotes.dto.CaseNoteAmendment;
+import uk.gov.justice.hmpps.casenotes.dto.CaseNoteFilter;
 import uk.gov.justice.hmpps.casenotes.dto.NewCaseNote;
 import uk.gov.justice.hmpps.casenotes.dto.NomisCaseNote;
 import uk.gov.justice.hmpps.casenotes.dto.NomisCaseNoteAmendment;
 import uk.gov.justice.hmpps.casenotes.dto.UpdateCaseNote;
+import uk.gov.justice.hmpps.casenotes.filters.OffenderCaseNoteFilter;
 import uk.gov.justice.hmpps.casenotes.model.CaseNoteType;
 import uk.gov.justice.hmpps.casenotes.model.OffenderCaseNote;
 import uk.gov.justice.hmpps.casenotes.model.OffenderCaseNoteAmendment;
@@ -25,10 +32,7 @@ import uk.gov.justice.hmpps.casenotes.repository.ParentCaseNoteTypeRepository;
 
 import jakarta.validation.ValidationException;
 import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 import static java.time.LocalDateTime.now;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -153,6 +157,89 @@ public class CaseNoteServiceTest {
         assertThat(caseNote.getLocationId()).isEqualTo("agency");
         assertThat(caseNote.getCaseNoteId()).isEqualTo("12345");
         assertThat(caseNote.getEventId()).isEqualTo(12345);
+    }
+
+    @Test
+    public void getCaseNotes_GetNotesFromRootTypeAndSubType_NoSensitiveCaseNotes_ReturnCaseNotesFromPrisonApi() {
+        final var offenderCaseNote = createNomisCaseNote("someType", "someSubType");
+        final var pageable = PageRequest.of(0,10, Direction.DESC,"occurrenceDateTime");
+        final var list =Collections.singletonList(offenderCaseNote);
+        when(externalApiService.getOffenderCaseNotes(anyString(),any(),any())).thenReturn(new PageImpl<>(list, pageable, list.size()));
+        when(securityUserContext.isOverrideRole(anyString(), anyString(), anyString())).thenReturn(Boolean.TRUE);
+
+        final var filter = new CaseNoteFilter("someType","someSUbType",LocalDateTime.now(),LocalDateTime.now().plusDays(1),"Location","user",Collections.emptyList());
+        final var caseNotes = caseNoteService.getCaseNotes("12345", filter, pageable);
+        final var caseNote = caseNotes.getContent().getFirst();
+        assertThat(caseNotes.getContent().getFirst()).isEqualToIgnoringGivenFields(offenderCaseNote,
+            "authorUsername", "locationId", "text", "caseNoteId", "authorUserId", "eventId", "sensitive");
+        assertThat(caseNote.getType()).isEqualTo("someType");
+        assertThat(caseNote.getSubType()).isEqualTo("someSubType");
+    }
+
+    @Test
+    public void getCaseNotes_GetNotesFromRootTypeAndSubType_HasSensitiveCaseNotes_ReturnCombinedCaseNotes() {
+        final var nomisCaseNote = createNomisCaseNote("someType", "someSubType");
+        final var noteType = CaseNoteType.builder().type("someSubType").parentType(ParentNoteType.builder().type("someType").build()).build();
+        final var offenderCaseNote = createOffenderCaseNote(noteType);
+        final var pageable = PageRequest.of(0,10, Direction.DESC,"occurrenceDateTime");
+        final var apiResponseList =Collections.singletonList(nomisCaseNote);
+        final var repositoryResponseList =Collections.singletonList((offenderCaseNote));
+        when(repository.findAll(ArgumentMatchers.<Specification<OffenderCaseNote>>any())).thenReturn(repositoryResponseList);
+        when(externalApiService.getOffenderCaseNotes(anyString(),any(),any())).thenReturn(new PageImpl<>(apiResponseList, pageable, apiResponseList.size()));
+        when(securityUserContext.isOverrideRole(anyString(), anyString(), anyString())).thenReturn(Boolean.TRUE);
+
+
+
+        final var filter = new CaseNoteFilter("someType","someSubType",LocalDateTime.now(),LocalDateTime.now().plusDays(1),"Location","user",Collections.emptyList());
+        final var caseNotes = caseNoteService.getCaseNotes("12345", filter, pageable).getContent();
+        assertThat(caseNotes.size()).isEqualTo(2);
+        assert(caseNotes.stream().allMatch(x->x.getType().equals("someType")&&x.getSubType().equals("someSubType")));
+        // offenderCaseNote exist
+        assert(caseNotes.stream().anyMatch(x->x.getText().equals("HELLO")));
+        // nomisCaseNote exist
+        assert(caseNotes.stream().anyMatch(x->x.getText().equals("original")));
+    }
+
+    @Test
+    public void getCaseNotes_GetNotesForRootTypeAndAdditionalTypes_ReturnAllCaseNotes() {
+        final var offenderIdentifier="12345";
+        final var pageable = PageRequest.of(0,10, Direction.DESC,"occurrenceDateTime");
+        when(securityUserContext.isOverrideRole(anyString(), anyString(), anyString())).thenReturn(Boolean.TRUE);
+
+        final var rootNoteType = CaseNoteType.builder().type("someSubType").parentType(ParentNoteType.builder().type("someType").build()).build();
+        final var rootTypeFilter = new CaseNoteFilter("someType","someSubType",LocalDateTime.now(),LocalDateTime.now().plusDays(1),"Location","user",Collections.singletonList("someAddType+someAddSubType"));
+        final var rootTypeOffenderCaseNoteFilter = OffenderCaseNoteFilter.builder()
+            .offenderIdentifier(offenderIdentifier)
+            .type("someType")
+            .subType("someSubType")
+            .locationId(rootTypeFilter.getLocationId())
+            .authorUsername(rootTypeFilter.getAuthorUsername())
+            .startDate(rootTypeFilter.getStartDate())
+            .endDate(rootTypeFilter.getEndDate())
+            .excludeSensitive(false)
+            .build();
+
+        final var offenderCaseNote = createOffenderCaseNote(rootNoteType);
+        final var rootTypeRepositoryResponseList =Collections.singletonList((offenderCaseNote));
+        when(repository.findAll(rootTypeOffenderCaseNoteFilter)).thenReturn(rootTypeRepositoryResponseList);
+
+        final var rootTypeNomisCaseNote = createNomisCaseNote("someType", "someSubType");
+        final var rootTypeApiResponseList =Collections.singletonList(rootTypeNomisCaseNote);
+        final var addtionalTypeNomisCaseNote = createNomisCaseNote("someAddType", "someAddSubType");
+        final var addtionalTypeApiResponseList =Collections.singletonList(addtionalTypeNomisCaseNote);
+        when(externalApiService.getOffenderCaseNotes(anyString(),any(),any())).thenAnswer(invocation ->{
+            var filter =(CaseNoteFilter) invocation.getArguments()[1];
+            if(Objects.requireNonNull(filter.getType()).equals("someAddType")&& Objects.requireNonNull(filter.getSubType()).equals("someAddSubType"))
+                return new PageImpl<>(addtionalTypeApiResponseList, pageable, addtionalTypeApiResponseList.size());
+            else
+                return new PageImpl<>(rootTypeApiResponseList, pageable, rootTypeApiResponseList.size());
+        });
+
+        final var caseNotes = caseNoteService.getCaseNotes(offenderIdentifier, rootTypeFilter, pageable).getContent();
+
+        assertThat(caseNotes.size()).isEqualTo(3);
+        assertThat(caseNotes.stream().filter(x->x.getType().equals("someType")&&x.getSubType().equals("someSubType")).count()).isEqualTo(2);
+        assertThat(caseNotes.stream().filter(x->x.getType().equals("someAddType")&&x.getSubType().equals("someAddSubType")).count()).isEqualTo(1);
     }
 
     @Test
@@ -345,6 +432,7 @@ public class CaseNoteServiceTest {
 
 
     private NomisCaseNote createNomisCaseNote() {
+
         return NomisCaseNote.builder()
                 .agencyId("agency")
                 .authorName("somebody")
@@ -361,6 +449,26 @@ public class CaseNoteServiceTest {
                 .typeDescription("Type desc")
                 .offenderIdentifier("12345")
                 .build();
+    }
+
+    private NomisCaseNote createNomisCaseNote(String type, String subType) {
+
+        return NomisCaseNote.builder()
+            .agencyId("agency")
+            .authorName("somebody")
+            .caseNoteId(12345)
+            .creationDateTime(LocalDateTime.parse("2019-03-23T11:22"))
+            .occurrenceDateTime(LocalDateTime.parse("2019-04-16T10:42"))
+            .originalNoteText("original")
+            .source("WHERE")
+            .staffId(23456L)
+            .subType(subType)
+            .subTypeDescription("Sub desc")
+            .text("new text")
+            .type(type)
+            .typeDescription("Type desc")
+            .offenderIdentifier("12345")
+            .build();
     }
 
     private OffenderCaseNote createOffenderCaseNote(final CaseNoteType caseNoteType) {
@@ -386,4 +494,7 @@ public class CaseNoteServiceTest {
                 .authorName("some user")
                 .build());
     }
+
 }
+
+
