@@ -73,12 +73,15 @@ public class CaseNoteService {
         if(!StringUtils.isEmpty(caseNoteFilter.getType())){
             dtoNotes.addAll(getCaseNotesByTypeAndSubTypes(offenderIdentifier,caseNoteFilter,pageable,caseNoteFilter.getType(), caseNoteFilter.getSubType()));
         }
+        final var additionalTypes = caseNoteFilter.getCaseNoteTypeSubTypes();
+        if(!StringUtils.isEmpty(additionalTypes)){
+            Arrays.stream(additionalTypes.split(",")).toList().forEach(typeLine->{
+                var types = typeLine.split("\\+");
+                dtoNotes.addAll(getCaseNotesByTypeAndSubTypes(offenderIdentifier,caseNoteFilter,pageable,types[0], types.length>1?types[1]:null));
+            });
+        }
 
 
-        Objects.requireNonNull(caseNoteFilter.getCaseNoteTypeSubTypes()).forEach(typeLine->{
-            var types = typeLine.split("\\+");
-            dtoNotes.addAll(getCaseNotesByTypeAndSubTypes(offenderIdentifier,caseNoteFilter,pageable,types[0], types.length>1?types[1]:null));
-        });
 
 
         // only supports one field sort.

@@ -167,7 +167,7 @@ public class CaseNoteServiceTest {
         when(externalApiService.getOffenderCaseNotes(anyString(),any(),any())).thenReturn(new PageImpl<>(list, pageable, list.size()));
         when(securityUserContext.isOverrideRole(anyString(), anyString(), anyString())).thenReturn(Boolean.TRUE);
 
-        final var filter = new CaseNoteFilter("someType","someSUbType",LocalDateTime.now(),LocalDateTime.now().plusDays(1),"Location","user",Collections.emptyList());
+        final var filter = new CaseNoteFilter("someType","someSUbType",LocalDateTime.now(),LocalDateTime.now().plusDays(1),"Location","user",null);
         final var caseNotes = caseNoteService.getCaseNotes("12345", filter, pageable);
         final var caseNote = caseNotes.getContent().getFirst();
         assertThat(caseNotes.getContent().getFirst()).isEqualToIgnoringGivenFields(offenderCaseNote,
@@ -190,7 +190,7 @@ public class CaseNoteServiceTest {
 
 
 
-        final var filter = new CaseNoteFilter("someType","someSubType",LocalDateTime.now(),LocalDateTime.now().plusDays(1),"Location","user",Collections.emptyList());
+        final var filter = new CaseNoteFilter("someType","someSubType",LocalDateTime.now(),LocalDateTime.now().plusDays(1),"Location","user",null);
         final var caseNotes = caseNoteService.getCaseNotes("12345", filter, pageable).getContent();
         assertThat(caseNotes.size()).isEqualTo(2);
         assert(caseNotes.stream().allMatch(x->x.getType().equals("someType")&&x.getSubType().equals("someSubType")));
@@ -207,7 +207,7 @@ public class CaseNoteServiceTest {
         when(securityUserContext.isOverrideRole(anyString(), anyString(), anyString())).thenReturn(Boolean.TRUE);
 
         final var rootNoteType = CaseNoteType.builder().type("someSubType").parentType(ParentNoteType.builder().type("someType").build()).build();
-        final var rootTypeFilter = new CaseNoteFilter("someType","someSubType",LocalDateTime.now(),LocalDateTime.now().plusDays(1),"Location","user",Collections.singletonList("someAddType+someAddSubType"));
+        final var rootTypeFilter = new CaseNoteFilter("someType","someSubType",LocalDateTime.now(),LocalDateTime.now().plusDays(1),"Location","user","someAddType+someAddSubType");
         final var rootTypeOffenderCaseNoteFilter = OffenderCaseNoteFilter.builder()
             .offenderIdentifier(offenderIdentifier)
             .type("someType")
