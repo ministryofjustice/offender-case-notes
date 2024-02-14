@@ -176,6 +176,40 @@ class CaseNoteResourceTest : ResourceTest() {
     }
 
     @Test
+    fun `test can retrieve case notes - check Prison API parameters for additional types`() {
+      oAuthApi.subGetUserDetails("API_TEST_USER")
+      elite2Api.subGetCaseNotesForOffender("A1234AA")
+      webTestClient.get().uri {
+        it.path("/case-notes/{offenderIdentifier}")
+          .queryParam("type", "GEN")
+          .queryParam("subType", "OSI")
+          .queryParam("locationId", "MDI")
+          .queryParam("startDate", "2024-01-02T10:20:30")
+          .queryParam("endDate", "2024-02-01T12:10:05")
+          .queryParam("caseNoteTypeSubTypes", "POM+GEN")
+          .queryParam("size", "20")
+          .queryParam("page", "5")
+          .queryParam("sort", "creationDateTime,ASC")
+          .build("A1234AA")
+      }
+        .headers(addBearerAuthorisation("API_TEST_USER"))
+        .exchange()
+        .expectStatus().isOk
+
+      elite2Api.verify(
+        getRequestedFor(urlPathEqualTo("/api/offenders/A1234AA/case-notes/v2"))
+          .withQueryParam("type", equalTo("POM"))
+          .withQueryParam("subType", equalTo("GEN"))
+          .withQueryParam("prisonId", equalTo("MDI"))
+          .withQueryParam("from", equalTo("2024-01-02"))
+          .withQueryParam("to", equalTo("2024-02-01"))
+          .withQueryParam("size", equalTo("20"))
+          .withQueryParam("page", equalTo("5"))
+          .withQueryParam("sort", equalTo("createDatetime,ASC")),
+      )
+    }
+
+    @Test
     fun `test can retrieve case notes - query params passed through`() {
       oAuthApi.subGetUserDetails("API_TEST_USER")
       elite2Api.subGetCaseNotesForOffender("A1234AA")
