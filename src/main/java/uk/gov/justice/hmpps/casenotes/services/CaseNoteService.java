@@ -65,7 +65,6 @@ public class CaseNoteService {
 
     public Page<CaseNote> getCaseNotes(final String offenderIdentifier, final CaseNoteFilter caseNoteFilter, final Pageable pageable) {
 
-        final Page<CaseNote> caseNotes;
         final List<CaseNote> dtoNotes = getCaseNotesByTypeAndSubTypes(offenderIdentifier,caseNoteFilter,pageable,caseNoteFilter.getType(), caseNoteFilter.getSubType());
 
         final var additionalTypes = caseNoteFilter.getCaseNoteTypeSubTypes();
@@ -80,8 +79,7 @@ public class CaseNoteService {
         final var sortField = pageable.getSort().isSorted() ? pageable.getSort().get().map(Sort.Order::getProperty).toList().getFirst() : "occurrenceDateTime";
 
         final var sortedList = sortByFieldName(dtoNotes, sortField, direction);
-        caseNotes = new PageImpl<>(sortedList, pageable, dtoNotes.size());
-        return caseNotes;
+        return new PageImpl<>(sortedList, pageable, dtoNotes.size());
     }
 
     private List<CaseNote> getCaseNotesByTypeAndSubTypes(final String offenderIdentifier, final CaseNoteFilter caseNoteFilter,final Pageable pageable, final String type, final String subType){
