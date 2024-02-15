@@ -160,24 +160,24 @@ public class CaseNoteServiceTest {
     }
 
     @Test
-    public void getCaseNotes_GetNotesFromRootTypeAndSubType_NoSensitiveCaseNotes_ReturnCaseNotesFromPrisonApi() {
+    public void getCaseNotes() {
         final var offenderCaseNote = createNomisCaseNote("someType", "someSubType");
         final var pageable = PageRequest.of(0,10, Direction.DESC,"occurrenceDateTime");
         final var list =Collections.singletonList(offenderCaseNote);
         when(externalApiService.getOffenderCaseNotes(anyString(),any(),any())).thenReturn(new PageImpl<>(list, pageable, list.size()));
         when(securityUserContext.isOverrideRole(anyString(), anyString(), anyString())).thenReturn(Boolean.TRUE);
-
         final var filter = new CaseNoteFilter("someType","someSUbType",LocalDateTime.now(),LocalDateTime.now().plusDays(1),"Location","user",null);
+
         final var caseNotes = caseNoteService.getCaseNotes("12345", filter, pageable);
+
         final var caseNote = caseNotes.getContent().getFirst();
-        assertThat(caseNotes.getContent().getFirst()).isEqualToIgnoringGivenFields(offenderCaseNote,
-            "authorUsername", "locationId", "text", "caseNoteId", "authorUserId", "eventId", "sensitive");
+        assertThat(caseNotes.getContent().getFirst()).isEqualToIgnoringGivenFields(offenderCaseNote,"authorUsername", "locationId", "text", "caseNoteId", "authorUserId", "eventId", "sensitive");
         assertThat(caseNote.getType()).isEqualTo("someType");
         assertThat(caseNote.getSubType()).isEqualTo("someSubType");
     }
 
     @Test
-    public void getCaseNotes_GetNotesFromRootTypeAndSubType_HasSensitiveCaseNotes_ReturnCombinedCaseNotes() {
+    public void getCaseNotes_callElite2() {
         final var nomisCaseNote = createNomisCaseNote("someType", "someSubType");
         final var noteType = CaseNoteType.builder().type("someSubType").parentType(ParentNoteType.builder().type("someType").build()).build();
         final var offenderCaseNote = createOffenderCaseNote(noteType);
@@ -201,7 +201,7 @@ public class CaseNoteServiceTest {
     }
 
     @Test
-    public void getCaseNotes_GetNotesForRootTypeAndAdditionalTypes_ReturnAllCaseNotes() {
+    public void getCaseNotes_callElite2_multipleTypes() {
         final var offenderIdentifier="12345";
         final var pageable = PageRequest.of(0,10, Direction.DESC,"occurrenceDateTime");
         when(securityUserContext.isOverrideRole(anyString(), anyString(), anyString())).thenReturn(Boolean.TRUE);
