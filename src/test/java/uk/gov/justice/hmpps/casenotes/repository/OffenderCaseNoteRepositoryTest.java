@@ -19,6 +19,7 @@ import uk.gov.justice.hmpps.casenotes.model.OffenderCaseNote;
 import uk.gov.justice.hmpps.casenotes.model.OffenderCaseNote.OffenderCaseNoteBuilder;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Collections;
 import java.util.Set;
 
@@ -141,12 +142,10 @@ public class OffenderCaseNoteRepositoryTest {
                 .build();
         repository.save(entity);
 
-        final var allCaseNotes = repository.findAll(OffenderCaseNoteFilter.builder()
-                .type(" ").subType(" ").authorUsername(" ").locationId(" ").offenderIdentifier(" ").build());
+        final var allCaseNotes = repository.findAll(new OffenderCaseNoteFilter());
         assertThat(allCaseNotes.size()).isGreaterThan(0);
 
-        final var caseNotes = repository.findAll(OffenderCaseNoteFilter.builder()
-                .type(PARENT_TYPE).subType(SUB_TYPE).authorUsername("FILTER").locationId("BOB").offenderIdentifier(OFFENDER_IDENTIFIER).build());
+        final var caseNotes = repository.findAll(new OffenderCaseNoteFilter(OFFENDER_IDENTIFIER,"BOB","FILTER",false,null,null,List.of(PARENT_TYPE + "+" + SUB_TYPE)));
         assertThat(caseNotes).hasSize(1);
     }
 

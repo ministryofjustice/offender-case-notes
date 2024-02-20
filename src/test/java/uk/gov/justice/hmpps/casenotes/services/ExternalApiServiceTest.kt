@@ -62,6 +62,7 @@ class ExternalApiServiceTest {
     whenever(requestHeadersUriSpec.uri(any<String>(), any<Any>())).thenReturn(requestHeadersSpec)
     whenever(requestBodyUriSpec.uri(any<String>(), any<Any>())).thenReturn(requestBodySpec)
     whenever(requestHeadersUriSpec.uri(any<String>(), any<Any>(), any<Any>())).thenReturn(requestHeadersSpec)
+    whenever(requestHeadersUriSpec.uri(any<String>(), any<Any>(), any<Any>(), any<Any>())).thenReturn(requestHeadersSpec)
     whenever(requestBodyUriSpec.uri(any<String>(), any<Any>(), any<Any>())).thenReturn(requestBodySpec)
     whenever(requestHeadersSpec.retrieve()).thenReturn(responseSpecMock)
     whenever(requestBodySpec.retrieve()).thenReturn(responseSpecMock)
@@ -332,15 +333,16 @@ class ExternalApiServiceTest {
           val components = UriComponentsBuilder.fromUriString(it).build()
           assertThat(components.path).isEqualTo("/api/offenders/{offenderIdentifier}/case-notes/v2")
           assertThat(components.queryParams).containsExactlyInAnyOrderEntriesOf(
-            mapOf("size" to listOf("10"), "page" to listOf("0"), "type" to listOf("GEN")),
+            mapOf("size" to listOf("10"), "page" to listOf("0"), "typeSubTypes" to listOf("{typeSubTypes}")),
           )
         },
         eq("AA123B"),
+        eq("GEN"),
       )
     }
 
     @Test
-    fun `test calls Prison API with sub type filter`() {
+    fun `test calls Prison API with typeSubTypes filter`() {
       val content = listOf(NomisCaseNote())
       val pageable = Pageable.ofSize(10)
       whenever(responseSpecMock.toEntity(any<ParameterizedTypeReference<*>>())).thenReturn(
@@ -348,7 +350,7 @@ class ExternalApiServiceTest {
       )
       val response = externalApiService.getOffenderCaseNotes(
         "AA123B",
-        CaseNoteFilter(subType = "OSI"),
+        CaseNoteFilter(typeSubTypes = listOf("GEN", "AddType+AddSubType")),
         pageable,
       )
       assertThat(response.totalElements).isEqualTo(12)
@@ -360,10 +362,12 @@ class ExternalApiServiceTest {
           val components = UriComponentsBuilder.fromUriString(it).build()
           assertThat(components.path).isEqualTo("/api/offenders/{offenderIdentifier}/case-notes/v2")
           assertThat(components.queryParams).containsExactlyInAnyOrderEntriesOf(
-            mapOf("size" to listOf("10"), "page" to listOf("0"), "subType" to listOf("OSI")),
+            mapOf("size" to listOf("10"), "page" to listOf("0"), "typeSubTypes" to listOf("{typeSubTypes}", "{typeSubTypes}")),
           )
         },
         eq("AA123B"),
+        eq("GEN"),
+        eq("AddType+AddSubType"),
       )
     }
 

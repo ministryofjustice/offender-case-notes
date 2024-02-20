@@ -1,72 +1,121 @@
-package uk.gov.justice.hmpps.casenotes.filters;
+package uk.gov.justice.hmpps.casenotes.filters
 
-import com.google.common.collect.ImmutableList;
-import lombok.Builder;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.data.jpa.domain.Specification;
-import uk.gov.justice.hmpps.casenotes.model.OffenderCaseNote;
-
-import jakarta.persistence.criteria.CriteriaBuilder;
-import jakarta.persistence.criteria.CriteriaQuery;
-import jakarta.persistence.criteria.JoinType;
-import jakarta.persistence.criteria.Predicate;
-import jakarta.persistence.criteria.Root;
-import java.time.LocalDateTime;
+import com.google.common.collect.ImmutableList
+import jakarta.persistence.criteria.CriteriaBuilder
+import jakarta.persistence.criteria.CriteriaQuery
+import jakarta.persistence.criteria.Join
+import jakarta.persistence.criteria.JoinType
+import jakarta.persistence.criteria.Predicate
+import jakarta.persistence.criteria.Root
+import lombok.Builder
+import lombok.EqualsAndHashCode
+import org.apache.commons.lang3.StringUtils
+import org.springframework.data.jpa.domain.Specification
+import uk.gov.justice.hmpps.casenotes.model.OffenderCaseNote
+import java.time.LocalDateTime
+import java.util.function.Consumer
+import java.util.stream.Collectors
+import java.util.stream.Stream
 
 @Builder
 @EqualsAndHashCode
-public class OffenderCaseNoteFilter implements Specification<OffenderCaseNote> {
+class OffenderCaseNoteFilter(
+  private val offenderIdentifier: String? = null,
+  private val locationId: String? = null,
+  private val authorUsername: String? = null,
 
-    private final String offenderIdentifier;
-    private final String locationId;
-    private final String authorUsername;
-    @Getter
-    private final String type;
-    @Getter
-    private final String subType;
-    private final boolean excludeSensitive;
-    private final LocalDateTime startDate;
-    private final LocalDateTime endDate;
+  private val excludeSensitive: Boolean = false,
+  private val startDate: LocalDateTime? = null,
+  private val endDate: LocalDateTime? = null,
+  private val typeSubTypes: List<String> = emptyList(),
+) : Specification<OffenderCaseNote> {
 
-    @Override
-    public Predicate toPredicate(final Root<OffenderCaseNote> root, final CriteriaQuery<?> query, final CriteriaBuilder cb) {
-        final ImmutableList.Builder<Predicate> predicateBuilder = ImmutableList.builder();
+  override fun toPredicate(root: Root<OffenderCaseNote>, query: CriteriaQuery<*>, cb: CriteriaBuilder): Predicate? {
+    val predicateBuilder: ImmutableList.Builder<Predicate> = ImmutableList.builder()
 
-        if (StringUtils.isNotBlank(offenderIdentifier)) {
-            predicateBuilder.add(cb.equal(root.get("offenderIdentifier"), offenderIdentifier));
-        }
-        if (StringUtils.isNotBlank(locationId)) {
-            predicateBuilder.add(cb.equal(root.get("locationId"), locationId));
-        }
-        if (StringUtils.isNotBlank(authorUsername)) {
-            predicateBuilder.add(cb.equal(root.get("authorUsername"), authorUsername));
-        }
-        if (StringUtils.isNotBlank(type)) {
-            final var caseNoteType = root.join("caseNoteType", JoinType.INNER);
-            final var parentType = caseNoteType.join("parentType", JoinType.INNER);
-            predicateBuilder.add(cb.equal(parentType.get("type"), type));
-        }
-        if (StringUtils.isNotBlank(subType)) {
-            final var caseNoteType = root.join("caseNoteType", JoinType.INNER);
-            predicateBuilder.add(cb.equal(caseNoteType.get("type"), subType));
-        }
-        if (excludeSensitive) {
-            final var caseNoteType = root.join("caseNoteType", JoinType.INNER);
-            predicateBuilder.add(cb.equal(caseNoteType.get("sensitive"), false));
-        }
-        if (startDate != null) {
-            predicateBuilder.add(cb.greaterThanOrEqualTo(root.get("occurrenceDateTime"), startDate));
-        }
-        if (endDate != null) {
-            predicateBuilder.add(cb.lessThanOrEqualTo(root.get("occurrenceDateTime"), endDate));
-        }
-
-        final var predicates = predicateBuilder.build();
-        root.fetch("amendments", JoinType.LEFT);
-        return cb.and(predicates.toArray(new Predicate[0]));
+    if (!offenderIdentifier.isNullOrBlank()) {
+      predicateBuilder.add(cb.equal(root.get<Any>("offenderIdentifier"), offenderIdentifier))
+    }
+    if (!locationId.isNullOrBlank()) {
+      predicateBuilder.add(cb.equal(root.get<Any>("locationId"), locationId))
+    }
+    if (!authorUsername.isNullOrBlank()) {
+      predicateBuilder.add(cb.equal(root.get<Any>("authorUsername"), authorUsername))
+    }
+    if (excludeSensitive) {
+      val caseNoteType: Join<Any, Any> = root.join("caseNoteType", JoinType.INNER)
+      predicateBuilder.add(cb.equal(caseNoteType.get<Any>("sensitive"), false))
+    }
+    startDate?.let {
+      predicateBuilder.add(cb.greaterThanOrEqualTo(root.get("occurrenceDateTime"), startDate))
+    }
+    endDate?.let {
+      predicateBuilder.add(cb.lessThanOrEqualTo(root.get("occurrenceDateTime"), endDate))
+    }
+    if (typeSubTypes.isNotEmpty()) {
+      predicateBuilder.add(getTypesPredicate(root, cb))
     }
 
-}
+    val predicates: ImmutableList<Predicate> = predicateBuilder.build()
+    root.fetch<Any, Any>("amendments", JoinType.LEFT)
 
+    return cb.and(*predicates.toTypedArray())
+  }
+
+  private fun getTypesPredicate(root: Root<OffenderCaseNote>, cb: CriteriaBuilder): Predicate {
+    val typesAndSubTypes: Map<String, List<String>> = splitTypes(typeSubTypes)
+    val typesPredicates: List<Predicate> = typesAndSubTypes.entries
+      .map { (key, value) ->
+        if (value.isEmpty()) {
+          getTypePredicate(root, cb, key)
+        } else {
+          getSubtypesPredicate(root, cb, key, value)
+        }
+      }
+
+    // if we only have one entry then just return that, which prevents an or clause with only one entry
+    if (typesPredicates.size == 1) return typesPredicates[0]
+
+    return cb.or(*typesPredicates.toTypedArray<Predicate>())
+  }
+
+  private fun getTypePredicate(root: Root<OffenderCaseNote>, cb: CriteriaBuilder, type: String?): Predicate {
+    val caseNoteType: Join<Any, Any> = root.join("caseNoteType", JoinType.INNER)
+    val parentType: Join<Any, Any> = caseNoteType.join("parentType", JoinType.INNER)
+    return cb.equal(parentType.get<Any>("type"), type)
+  }
+
+  private fun getSubtypesPredicate(
+    root: Root<OffenderCaseNote>,
+    cb: CriteriaBuilder,
+    type: String,
+    subTypes: List<String>,
+  ): Predicate {
+    val typePredicateBuilder: ImmutableList.Builder<Predicate> = ImmutableList.builder()
+
+    typePredicateBuilder.add(getTypePredicate(root, cb, type))
+
+    val caseNoteType: Join<Any, Any> = root.join("caseNoteType", JoinType.INNER)
+    val inTypes: CriteriaBuilder.In<Any> = cb.`in`(caseNoteType.get("type"))
+    subTypes.forEach(Consumer { t: String -> inTypes.value(t) })
+    typePredicateBuilder.add(inTypes)
+
+    val typePredicates: ImmutableList<Predicate> = typePredicateBuilder.build()
+    return cb.and(*typePredicates.toTypedArray<Predicate>())
+  }
+
+  private fun splitTypes(types: List<String>?): Map<String, List<String>> {
+    return types!!.stream()
+      .map { t: String -> t.trim().replace(' ', '+') }
+      .collect(
+        Collectors.toMap(
+          { n -> StringUtils.substringBefore(n, "+") },
+          { n ->
+            val subtype: String = StringUtils.substringAfter(n, "+")
+            if (subtype.isEmpty()) listOf() else listOf(subtype)
+          },
+          { v1, v2 -> Stream.of(v1, v2).flatMap { obj -> obj.stream() }.toList() },
+        ),
+      )
+  }
+}

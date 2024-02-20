@@ -72,7 +72,7 @@ class ExternalApiService(
   ): Page<NomisCaseNote> {
     val paramFilter = getParamFilter(filter, pageable)
     val url = "/api/offenders/{offenderIdentifier}/case-notes/v2?$paramFilter"
-    return elite2ApiWebClient.get().uri(url, offenderIdentifier)
+    return elite2ApiWebClient.get().uri(url, offenderIdentifier, *filter.getTypesAndSubTypes().toTypedArray())
       .retrieve()
       .toEntity(object : ParameterizedTypeReference<RestResponsePage<NomisCaseNote>>() {})
       .map { e: ResponseEntity<RestResponsePage<NomisCaseNote>> ->
@@ -90,12 +90,6 @@ class ExternalApiService(
       "page" to pageable.pageNumber.toString(),
       "size" to pageable.pageSize.toString(),
     ).apply {
-      if (!filter.type.isNullOrBlank()) {
-        this["type"] = filter.type
-      }
-      if (!filter.subType.isNullOrBlank()) {
-        this["subType"] = filter.subType
-      }
       filter.locationId?.let { this["prisonId"] = filter.locationId }
       filter.startDate?.let { this["from"] = filter.startDate.format(DateTimeFormatter.ISO_DATE) }
       filter.endDate?.let { this["to"] = filter.endDate.format(DateTimeFormatter.ISO_DATE) }
@@ -106,6 +100,12 @@ class ExternalApiService(
       "sort=$mappedProperty,${it.direction}"
     }
       .joinToString(separator = "&", prefix = "&")
+
+    if (filter.getTypesAndSubTypes().isNotEmpty()) {
+      val typeSubTypesParams = filter.getTypesAndSubTypes().joinToString(separator = "&", prefix = "&") { _ -> "typeSubTypes={typeSubTypes}" }
+      return "$params$typeSubTypesParams$sortParams"
+    }
+
     return "$params$sortParams"
   }
 
