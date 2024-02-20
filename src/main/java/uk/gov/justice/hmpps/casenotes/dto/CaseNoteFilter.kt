@@ -41,8 +41,8 @@ class CaseNoteFilter(
       return if (subType.isNullOrEmpty()) listOf(type) else listOf("$type+$subType")
     } else if (!subType.isNullOrEmpty()) {
       throw ValidationException("SubType must used in conjunction with type.")
-    } else {
-      return typeSubTypes ?: emptyList()
     }
+
+    return typeSubTypes ?: emptyList()
   }
 }

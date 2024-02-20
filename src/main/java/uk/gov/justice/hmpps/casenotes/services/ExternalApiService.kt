@@ -102,7 +102,7 @@ class ExternalApiService(
       .joinToString(separator = "&", prefix = "&")
 
     if (filter.getTypesAndSubTypes().isNotEmpty()) {
-      val typeSubTypesParams = filter.getTypesAndSubTypes().joinToString(separator = "&", prefix = "&") { _ -> "typeSubTypes={typeSubTypes}" }
+      val typeSubTypesParams = filter.getTypesAndSubTypes().joinToString(separator = "&", prefix = "&") { "typeSubTypes={typeSubTypes}" }
       return "$params$typeSubTypesParams$sortParams"
     }
 

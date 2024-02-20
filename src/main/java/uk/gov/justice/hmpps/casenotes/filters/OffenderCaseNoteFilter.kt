@@ -7,8 +7,6 @@ import jakarta.persistence.criteria.Join
 import jakarta.persistence.criteria.JoinType
 import jakarta.persistence.criteria.Predicate
 import jakarta.persistence.criteria.Root
-import lombok.Builder
-import lombok.EqualsAndHashCode
 import org.apache.commons.lang3.StringUtils
 import org.springframework.data.jpa.domain.Specification
 import uk.gov.justice.hmpps.casenotes.model.OffenderCaseNote
@@ -17,8 +15,6 @@ import java.util.function.Consumer
 import java.util.stream.Collectors
 import java.util.stream.Stream
 
-@Builder
-@EqualsAndHashCode
 class OffenderCaseNoteFilter(
   private val offenderIdentifier: String? = null,
   private val locationId: String? = null,
@@ -30,7 +26,7 @@ class OffenderCaseNoteFilter(
 ) : Specification<OffenderCaseNote> {
 
   override fun toPredicate(root: Root<OffenderCaseNote>, query: CriteriaQuery<*>, cb: CriteriaBuilder): Predicate? {
-    val predicateBuilder: ImmutableList.Builder<Predicate> = ImmutableList.builder()
+    val predicateBuilder = mutableListOf<Predicate>()
 
     if (!offenderIdentifier.isNullOrBlank()) {
       predicateBuilder.add(cb.equal(root.get<Any>("offenderIdentifier"), offenderIdentifier))
@@ -55,10 +51,8 @@ class OffenderCaseNoteFilter(
       predicateBuilder.add(getTypesPredicate(root, cb))
     }
 
-    val predicates: ImmutableList<Predicate> = predicateBuilder.build()
     root.fetch<Any, Any>("amendments", JoinType.LEFT)
-
-    return cb.and(*predicates.toTypedArray())
+    return cb.and(*predicateBuilder.toTypedArray())
   }
 
   private fun getTypesPredicate(root: Root<OffenderCaseNote>, cb: CriteriaBuilder): Predicate {
