@@ -4,6 +4,7 @@ package uk.gov.justice.hmpps.casenotes.controllers
 
 import com.github.tomakehurst.wiremock.client.WireMock.equalTo
 import com.github.tomakehurst.wiremock.client.WireMock.getRequestedFor
+import com.github.tomakehurst.wiremock.client.WireMock.havingExactly
 import com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo
 import com.github.tomakehurst.wiremock.matching.ExactMatchMultiValuePattern
 import org.junit.jupiter.api.Nested
@@ -164,11 +165,97 @@ class CaseNoteResourceTest : ResourceTest() {
 
       elite2Api.verify(
         getRequestedFor(urlPathEqualTo("/api/offenders/A1234AA/case-notes/v2"))
-          .withQueryParam("type", equalTo("GEN"))
-          .withQueryParam("subType", equalTo("OSI"))
+          .withQueryParam("typeSubTypes", equalTo("GEN+OSI"))
           .withQueryParam("prisonId", equalTo("MDI"))
           .withQueryParam("from", equalTo("2024-01-02"))
           .withQueryParam("to", equalTo("2024-02-01"))
+          .withQueryParam("size", equalTo("20"))
+          .withQueryParam("page", equalTo("5"))
+          .withQueryParam("sort", equalTo("createDatetime,ASC")),
+      )
+    }
+
+    @Test
+    fun `test subType must used in conjunction with type`() {
+      oAuthApi.subGetUserDetails("API_TEST_USER")
+      elite2Api.subGetCaseNotesForOffender("A1234AA")
+      webTestClient.get().uri {
+        it.path("/case-notes/{offenderIdentifier}")
+          .queryParam("subType", "OSI")
+          .queryParam("locationId", "MDI")
+          .queryParam("startDate", "2024-01-02T10:20:30")
+          .queryParam("endDate", "2024-02-01T12:10:05")
+          .queryParam("size", "20")
+          .queryParam("page", "5")
+          .queryParam("sort", "creationDateTime,ASC")
+          .build("A1234AA")
+      }
+        .headers(addBearerAuthorisation("API_TEST_USER"))
+        .exchange()
+        .expectStatus().isBadRequest
+        .expectBody()
+        .json(
+          "{" +
+            "'status':400," +
+            "'developerMessage':'SubType must used in conjunction with type.'" +
+            "}",
+        )
+    }
+
+    @Test
+    fun `test cannot set both type and typSubTypes`() {
+      oAuthApi.subGetUserDetails("API_TEST_USER")
+      elite2Api.subGetCaseNotesForOffender("A1234AA")
+      webTestClient.get().uri {
+        it.path("/case-notes/{offenderIdentifier}")
+          .queryParam("type", "GEN")
+          .queryParam("subType", "OSI")
+          .queryParam("locationId", "MDI")
+          .queryParam("startDate", "2024-01-02T10:20:30")
+          .queryParam("endDate", "2024-02-01T12:10:05")
+          .queryParam("typeSubTypes", "GEN+OSI")
+          .queryParam("size", "20")
+          .queryParam("page", "5")
+          .queryParam("sort", "creationDateTime,ASC")
+          .build("A1234AA")
+      }
+        .headers(addBearerAuthorisation("API_TEST_USER"))
+        .exchange()
+        .expectStatus().isBadRequest
+        .expectBody()
+        .json(
+          "{" +
+            "'status':400," +
+            "'developerMessage':'Both type and typeSubTypes are set, please only use one to filter.'" +
+            "}",
+        )
+    }
+
+    @Test
+    fun `test can retrieve case notes - check Prison API parameters for additional types`() {
+      oAuthApi.subGetUserDetails("API_TEST_USER")
+      elite2Api.subGetCaseNotesForOffender("A1234AA")
+      webTestClient.get().uri {
+        it.path("/case-notes/{offenderIdentifier}")
+          .queryParam("locationId", "MDI")
+          .queryParam("startDate", "2024-01-02T10:20:30")
+          .queryParam("endDate", "2024-02-01T12:10:05")
+          .queryParam("typeSubTypes", "{typeSubTypes1}")
+          .queryParam("typeSubTypes", "{typeSubTypes2}")
+          .queryParam("size", "20")
+          .queryParam("page", "5")
+          .queryParam("sort", "creationDateTime,ASC")
+          .build("A1234AA", "GEN+OSI", "APP")
+      }
+        .headers(addBearerAuthorisation("API_TEST_USER"))
+        .exchange()
+        .expectStatus().isOk
+
+      elite2Api.verify(
+        getRequestedFor(urlPathEqualTo("/api/offenders/A1234AA/case-notes/v2"))
+          .withQueryParam("from", equalTo("2024-01-02"))
+          .withQueryParam("to", equalTo("2024-02-01"))
+          .withQueryParam("typeSubTypes", havingExactly("GEN+OSI", "APP"))
           .withQueryParam("size", equalTo("20"))
           .withQueryParam("page", equalTo("5"))
           .withQueryParam("sort", equalTo("createDatetime,ASC")),

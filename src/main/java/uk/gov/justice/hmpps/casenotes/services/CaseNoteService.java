@@ -39,8 +39,8 @@ import jakarta.validation.ValidationException;
 import jakarta.validation.constraints.NotNull;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import static java.lang.String.format;
@@ -68,22 +68,19 @@ public class CaseNoteService {
 
         final List<CaseNote> sensitiveCaseNotes;
 
-
-        final var filter = OffenderCaseNoteFilter.builder()
-                .offenderIdentifier(offenderIdentifier)
-                .type(caseNoteFilter.getType())
-                .subType(caseNoteFilter.getSubType())
-                .locationId(caseNoteFilter.getLocationId())
-                .authorUsername(caseNoteFilter.getAuthorUsername())
-                .startDate(caseNoteFilter.getStartDate())
-                .endDate(caseNoteFilter.getEndDate())
-                .excludeSensitive(!isAllowedToViewOrCreateSensitiveCaseNote())
-                .build();
+        final var filter = new OffenderCaseNoteFilter(
+            offenderIdentifier,
+            caseNoteFilter.getLocationId(),
+            caseNoteFilter.getAuthorUsername(),
+            !isAllowedToViewOrCreateSensitiveCaseNote(),
+            caseNoteFilter.getStartDate(),
+            caseNoteFilter.getEndDate(),
+            caseNoteFilter.getTypesAndSubTypes());
 
         sensitiveCaseNotes = repository.findAll(filter)
-                .stream()
-                .map(this::mapper)
-                .collect(Collectors.toList());
+            .stream()
+            .map(this::mapper)
+            .toList();
 
         final Page<CaseNote> caseNotes;
         if (sensitiveCaseNotes.isEmpty()) {
@@ -113,7 +110,6 @@ public class CaseNoteService {
             caseNotes = new PageImpl<>(pagedList, pageable, pagedNotes.getTotalElements() + sensitiveCaseNotes.size());
         }
         return caseNotes;
-
     }
 
     private List<CaseNote> translateToDto(final Page<NomisCaseNote> pagedNotes, final String offenderIdentifier) {
