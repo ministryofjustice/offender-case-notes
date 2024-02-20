@@ -1,5 +1,5 @@
 plugins {
-  id("uk.gov.justice.hmpps.gradle-spring-boot") version "5.15.1"
+  id("uk.gov.justice.hmpps.gradle-spring-boot") version "5.15.2"
   kotlin("plugin.spring") version "1.9.22"
 }
 
@@ -22,7 +22,7 @@ dependencies {
   implementation("org.springframework.boot:spring-boot-starter-oauth2-resource-server")
   implementation("org.springframework.boot:spring-boot-starter-oauth2-client")
   implementation("org.springframework.boot:spring-boot-starter-webflux")
-  implementation("uk.gov.justice.service.hmpps:hmpps-sqs-spring-boot-starter:2.2.1")
+  implementation("uk.gov.justice.service.hmpps:hmpps-sqs-spring-boot-starter:3.1.1")
 
   implementation("com.google.code.gson:gson:2.10.1")
   implementation("javax.activation:activation:1.1.1")
@@ -38,18 +38,18 @@ dependencies {
   implementation("com.google.code.gson:gson:2.10.1")
   implementation("com.google.guava:guava:33.0.0-jre")
 
-  implementation(platform("com.amazonaws:aws-java-sdk-bom:1.12.643"))
-  implementation("software.amazon.awssdk:sns:2.23.9")
+  implementation(platform("com.amazonaws:aws-java-sdk-bom:1.12.660"))
+  implementation("software.amazon.awssdk:sns:2.24.4")
 
   testAnnotationProcessor("org.projectlombok:lombok:1.18.30")
   testCompileOnly("org.projectlombok:lombok:1.18.30")
   testImplementation("org.springframework.security:spring-security-test")
   testImplementation("com.tngtech.java:junit-dataprovider:1.13.1")
-  testImplementation("net.javacrumbs.json-unit:json-unit-assertj:3.2.2")
+  testImplementation("net.javacrumbs.json-unit:json-unit-assertj:3.2.4")
   testImplementation("io.github.http-builder-ng:http-builder-ng-apache:1.0.4")
   testImplementation("com.github.tomakehurst:wiremock-jre8-standalone:3.0.1")
-  testImplementation("io.jsonwebtoken:jjwt-impl:0.12.3")
-  testImplementation("io.jsonwebtoken:jjwt-jackson:0.12.3")
+  testImplementation("io.jsonwebtoken:jjwt-impl:0.12.5")
+  testImplementation("io.jsonwebtoken:jjwt-jackson:0.12.5")
   testImplementation("org.awaitility:awaitility:4.2.0")
   testImplementation("org.awaitility:awaitility-kotlin:4.2.0")
 
