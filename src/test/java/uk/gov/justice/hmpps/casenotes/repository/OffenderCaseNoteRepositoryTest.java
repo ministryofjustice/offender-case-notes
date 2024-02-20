@@ -145,7 +145,7 @@ public class OffenderCaseNoteRepositoryTest {
         final var allCaseNotes = repository.findAll(new OffenderCaseNoteFilter());
         assertThat(allCaseNotes.size()).isGreaterThan(0);
 
-        final var caseNotes = repository.findAll(new OffenderCaseNoteFilter(OFFENDER_IDENTIFIER,"BOB","FILTER",false,null,null,List.of(PARENT_TYPE + "+" + SUB_TYPE)));
+        final var caseNotes = repository.findAll(new OffenderCaseNoteFilter(OFFENDER_IDENTIFIER, "BOB", "FILTER", false, null, null, List.of(PARENT_TYPE + "+" + SUB_TYPE)));
         assertThat(caseNotes).hasSize(1);
     }
 

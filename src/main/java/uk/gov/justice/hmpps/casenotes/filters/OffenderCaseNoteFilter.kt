@@ -23,7 +23,6 @@ class OffenderCaseNoteFilter(
   private val offenderIdentifier: String? = null,
   private val locationId: String? = null,
   private val authorUsername: String? = null,
-
   private val excludeSensitive: Boolean = false,
   private val startDate: LocalDateTime? = null,
   private val endDate: LocalDateTime? = null,
@@ -100,12 +99,12 @@ class OffenderCaseNoteFilter(
     subTypes.forEach(Consumer { t: String -> inTypes.value(t) })
     typePredicateBuilder.add(inTypes)
 
-    val typePredicates: ImmutableList<Predicate> = typePredicateBuilder.build()
+    val typePredicates = typePredicateBuilder.build()
     return cb.and(*typePredicates.toTypedArray<Predicate>())
   }
 
-  private fun splitTypes(types: List<String>?): Map<String, List<String>> {
-    return types!!.stream()
+  private fun splitTypes(types: List<String>): Map<String, List<String>> {
+    return types.stream()
       .map { t: String -> t.trim().replace(' ', '+') }
       .collect(
         Collectors.toMap(
