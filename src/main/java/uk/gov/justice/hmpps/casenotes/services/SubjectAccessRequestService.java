@@ -6,7 +6,7 @@ import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import uk.gov.justice.hmpps.casenotes.dto.CaseNoteAmendment;
+import uk.gov.justice.hmpps.casenotes.dto.SARCaseNoteAmendment;
 import uk.gov.justice.hmpps.casenotes.dto.SubjectAccessRequestContent;
 import uk.gov.justice.hmpps.casenotes.filters.SAROffenderCaseNoteAmendmentFilter;
 import uk.gov.justice.hmpps.casenotes.filters.SAROffenderCaseNoteFilter;
@@ -70,7 +70,7 @@ public class SubjectAccessRequestService {
                 .text(cn.getNoteText())
                 .creationDateTime(cn.getCreateDateTime())
                 .amendments(cn.getAmendments().stream().map(
-                        a -> CaseNoteAmendment.builder()
+                        a -> SARCaseNoteAmendment.builder()
                                 .authorName(a.getAuthorName())
                                 .additionalNoteText(a.getNoteText())
                                 .creationDateTime(a.getCreateDateTime())
