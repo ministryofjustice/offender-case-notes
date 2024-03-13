@@ -52,14 +52,14 @@ public class SubjectAccessRequestService {
         offenderCaseNoteList = offenderCaseNoteList.stream().distinct().toList();
 
         sensitiveCaseNotes = offenderCaseNoteList.stream()
-                .map(this::mapper)
+                .map(this::toSubjectAccessRequestContent)
                 .toList();
         log.debug("{} Case notes for Subject access request fetched for offender identifier {}", sensitiveCaseNotes.size(), offenderIdentifier);
         telemetryClient.trackEvent("SAROffenderCaseNotes", Map.of("offenderNo", offenderIdentifier, "fromDate", valueOf(fromDate),"toDate", valueOf(toDate),"count", valueOf(sensitiveCaseNotes.size())), null);
         return sensitiveCaseNotes;
     }
 
-    private SubjectAccessRequestContent mapper(final OffenderCaseNote cn) {
+    private SubjectAccessRequestContent toSubjectAccessRequestContent(final OffenderCaseNote cn) {
 
         final var parentType = cn.getCaseNoteType().getParentType();
 
