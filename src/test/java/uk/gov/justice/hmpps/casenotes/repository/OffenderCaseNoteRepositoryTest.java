@@ -274,7 +274,7 @@ public class OffenderCaseNoteRepositoryTest {
         TestTransaction.end();
 
         final var caseNoteCountBefore = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM offender_case_note_amendment", Integer.class);
-        assertThat(caseNoteCountBefore).isEqualTo(3);
+        assertThat(caseNoteCountBefore).isEqualTo(6);
 
         TestTransaction.start();
         repository.deleteOffenderCaseNoteAmendmentsByOffenderIdentifier("X3111XX");
@@ -288,7 +288,7 @@ public class OffenderCaseNoteRepositoryTest {
         TestTransaction.end();
 
         final var caseNoteCountAfter = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM offender_case_note_amendment", Integer.class);
-        assertThat(caseNoteCountAfter).isEqualTo(2);
+        assertThat(caseNoteCountAfter).isEqualTo(5);
 
     }
 
