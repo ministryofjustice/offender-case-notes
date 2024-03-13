@@ -1,25 +1,24 @@
 package uk.gov.justice.hmpps.casenotes.dto;
 
-
+import java.time.LocalDateTime;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Builder;
 import lombok.Data;
 import lombok.extern.jackson.Jacksonized;
-import java.time.LocalDateTime;
-import java.util.List;
 
 
+/**
+ * Subject Access Request Case Note Amendment
+ **/
+@SuppressWarnings("unused")
 @Schema(description = "SubjectAccessResponse")
 @Data
 @Jacksonized
 @Builder
-public class SubjectAccessRequestContent {
+public class SARCaseNoteAmendment {
 
-    private String type;
-    private String subType;
     private LocalDateTime creationDateTime;
     private String authorName;
-    private String text;
-    private List<SARCaseNoteAmendment> amendments;
+    private String additionalNoteText;
 
 }
