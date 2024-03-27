@@ -7,7 +7,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import uk.gov.justice.hmpps.casenotes.dto.SARCaseNoteAmendment;
-import uk.gov.justice.hmpps.casenotes.dto.SubjectAccessRequestContent;
+import uk.gov.justice.hmpps.casenotes.dto. SubjectAccessRequestData;
 import uk.gov.justice.hmpps.casenotes.filters.SAROffenderCaseNoteAmendmentFilter;
 import uk.gov.justice.hmpps.casenotes.filters.SAROffenderCaseNoteFilter;
 import uk.gov.justice.hmpps.casenotes.model.OffenderCaseNote;
@@ -32,9 +32,9 @@ public class SubjectAccessRequestService {
 
     private final TelemetryClient telemetryClient;
 
-    public List<SubjectAccessRequestContent> getCaseNotes(final String offenderIdentifier, final LocalDate fromDate, final LocalDate toDate) {
+    public List< SubjectAccessRequestData> getCaseNotes(final String offenderIdentifier, final LocalDate fromDate, final LocalDate toDate) {
 
-        final List<SubjectAccessRequestContent> sensitiveCaseNotes;
+        final List< SubjectAccessRequestData> sensitiveCaseNotes;
 
         final var sarOffenderCaseNoteFilter = new SAROffenderCaseNoteFilter(offenderIdentifier, fromDate, toDate);
 
@@ -59,11 +59,11 @@ public class SubjectAccessRequestService {
         return sensitiveCaseNotes;
     }
 
-    private SubjectAccessRequestContent toSubjectAccessRequestContent(final OffenderCaseNote cn) {
+    private SubjectAccessRequestData toSubjectAccessRequestContent(final OffenderCaseNote cn) {
 
         final var parentType = cn.getCaseNoteType().getParentType();
 
-        return  SubjectAccessRequestContent.builder()
+        return   SubjectAccessRequestData.builder()
                 .authorName(cn.getAuthorName())
                 .type(parentType.getType())
                 .subType(cn.getCaseNoteType().getType())

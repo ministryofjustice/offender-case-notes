@@ -13,7 +13,7 @@ import java.util.List;
 @Data
 @Jacksonized
 @Builder
-public class SubjectAccessRequestContent {
+public class SubjectAccessRequestData {
 
     private String type;
     private String subType;

@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
 import uk.gov.justice.hmpps.casenotes.dto.ErrorResponse
-import uk.gov.justice.hmpps.casenotes.dto.SubjectAccessRequestContent
+import uk.gov.justice.hmpps.casenotes.dto.SubjectAccessRequestData
 import uk.gov.justice.hmpps.casenotes.services.SubjectAccessRequestService
 import java.time.LocalDate
 
@@ -113,6 +113,8 @@ class SubjectAccessRequestController(private val service: SubjectAccessRequestSe
         ),
       )
     }
-    return ResponseEntity.ok(result)
+    return ResponseEntity.ok(SubjectAccessRequestContent(result))
   }
 }
+
+data class SubjectAccessRequestContent(val content: List<SubjectAccessRequestData>)

@@ -7,7 +7,7 @@ import org.mockito.kotlin.verify
 import org.mockito.kotlin.verifyNoInteractions
 import org.mockito.kotlin.whenever
 import org.springframework.boot.test.mock.mockito.MockBean
-import uk.gov.justice.hmpps.casenotes.dto.SubjectAccessRequestContent
+import uk.gov.justice.hmpps.casenotes.dto.SubjectAccessRequestData
 import uk.gov.justice.hmpps.casenotes.services.SubjectAccessRequestService
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -29,6 +29,13 @@ class SubjectAccessRequestControllerTest : ResourceTest() {
       .headers(addBearerAuthorisation("API_TEST_USER", listOf("ROLE_SAR_DATA_ACCESS")))
       .exchange()
       .expectStatus().isOk
+      .expectBody()
+      .json(
+        """{"content":
+                  [{"type":"SA","subType":"SARTH","creationDateTime":"2019-02-03T23:20:19","authorName":"Tom Smith","text":null,"amendments":null}]
+                }
+        """.trimIndent(),
+      )
 
     verify(service).getCaseNotes("123456", null, null)
   }
@@ -134,11 +141,11 @@ class SubjectAccessRequestControllerTest : ResourceTest() {
     verifyNoInteractions(service)
   }
 
-  private fun createOffenderCaseNote(): SubjectAccessRequestContent =
-    SubjectAccessRequestContent.builder()
-      .authorName("authorName")
-      .type("type")
+  private fun createOffenderCaseNote(): SubjectAccessRequestData =
+    SubjectAccessRequestData.builder()
+      .authorName("Tom Smith")
+      .type("SA")
       .creationDateTime(LocalDateTime.parse("2019-02-03T23:20:19"))
-      .subType("subType")
+      .subType("SARTH")
       .build()
 }
