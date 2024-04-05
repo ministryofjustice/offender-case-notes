@@ -68,11 +68,12 @@ public class CaseNoteService {
 
         final List<CaseNote> sensitiveCaseNotes;
 
+        final var includeSensitiveCaseNotes = isAllowedToViewOrCreateSensitiveCaseNote() && caseNoteFilter.getIncludeSensitive();
         final var filter = new OffenderCaseNoteFilter(
             offenderIdentifier,
             caseNoteFilter.getLocationId(),
             caseNoteFilter.getAuthorUsername(),
-            !isAllowedToViewOrCreateSensitiveCaseNote(),
+            !includeSensitiveCaseNotes,
             caseNoteFilter.getStartDate(),
             caseNoteFilter.getEndDate(),
             caseNoteFilter.getTypesAndSubTypes());
@@ -209,7 +210,7 @@ public class CaseNoteService {
             return mapper(externalApiService.createCaseNote(offenderIdentifier, newCaseNote), offenderIdentifier);
         }
 
-        // ensure that the user can then create a the case note
+        // ensure that the user can then create the case note
         if (type.isRestrictedUse() && !isAllowedToCreateRestrictedCaseNote()) {
             throw new AccessDeniedException("User not allowed to create this case note type [" + type + "]");
         }

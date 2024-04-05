@@ -29,8 +29,11 @@ class CaseNoteFilter(
   @Schema(description = "Filter by username", example = "USER1")
   val authorUsername: String? = null,
 
-  @Schema(description = "Filter by a list of case note types and optional case not sub types separated by plus. Cannot be used in conjunction with type or subType.", example = "KA+KE,OBS,POM+GEN")
+  @Schema(description = "Filter by a list of case note types and optional case note sub types separated by plus. Cannot be used in conjunction with type or subType.", example = "KA+KE,OBS,POM+GEN")
   val typeSubTypes: List<String>? = null,
+
+  @Schema(description = "Allow client credentials clients to filter out sensitive case notes. Defaults to true (sensitive case notes are included by default).", example = "false")
+  val includeSensitive: Boolean = true,
 ) {
 
   fun getTypesAndSubTypes(): List<String> {

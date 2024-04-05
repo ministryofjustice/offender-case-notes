@@ -7,8 +7,10 @@ import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
+import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatchers
 import org.mockito.ArgumentMatchers.anyString
+import org.mockito.Captor
 import org.mockito.Mockito
 import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.any
@@ -16,6 +18,7 @@ import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
+import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageImpl
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Sort.Direction
@@ -30,6 +33,7 @@ import uk.gov.justice.hmpps.casenotes.dto.NewCaseNote
 import uk.gov.justice.hmpps.casenotes.dto.NomisCaseNote
 import uk.gov.justice.hmpps.casenotes.dto.NomisCaseNoteAmendment
 import uk.gov.justice.hmpps.casenotes.dto.UpdateCaseNote
+import uk.gov.justice.hmpps.casenotes.filters.OffenderCaseNoteFilter
 import uk.gov.justice.hmpps.casenotes.model.CaseNoteType
 import uk.gov.justice.hmpps.casenotes.model.OffenderCaseNote
 import uk.gov.justice.hmpps.casenotes.model.OffenderCaseNoteAmendment
@@ -58,6 +62,9 @@ class CaseNoteServiceTest {
   private val caseNoteTypeMerger: CaseNoteTypeMerger = mock()
   private val telemetryClient: TelemetryClient = mock()
   private var caseNoteService: CaseNoteService = mock()
+
+  @Captor
+  lateinit var filterCaptor: ArgumentCaptor<OffenderCaseNoteFilter>
 
   @BeforeEach
   fun setUp() {
@@ -491,6 +498,34 @@ class CaseNoteServiceTest {
       caseNotes.stream().filter { x: CaseNote -> x.type == "someAddType" && x.subType == "someAddSubType" }
         .count(),
     ).isEqualTo(1)
+  }
+
+  @Test
+  fun `getCaseNotes includes sensitive case notes by default when presented with client credentials token`() {
+    whenever(repository.findAll(ArgumentMatchers.any<Specification<OffenderCaseNote>>())).thenReturn(emptyList())
+    whenever(externalApiService.getOffenderCaseNotes(anyString(), any(), any())).thenReturn(Page.empty())
+    whenever(securityUserContext.isOverrideRole(anyString(), anyString(), anyString())).thenReturn(true)
+
+    val filter = CaseNoteFilter()
+    val pageable = PageRequest.of(0, 10, Direction.DESC, "occurrenceDateTime")
+    caseNoteService.getCaseNotes("12345", filter, pageable).content
+
+    verify(repository).findAll(filterCaptor.capture())
+    assertThat(filterCaptor.value.excludeSensitive).isFalse()
+  }
+
+  @Test
+  fun `getCaseNotes excludes sensitive case notes when presented with client credentials token and includeSensitive is false`() {
+    whenever(repository.findAll(ArgumentMatchers.any<Specification<OffenderCaseNote>>())).thenReturn(emptyList())
+    whenever(externalApiService.getOffenderCaseNotes(anyString(), any(), any())).thenReturn(Page.empty())
+    whenever(securityUserContext.isOverrideRole(anyString(), anyString(), anyString())).thenReturn(true)
+
+    val filter = CaseNoteFilter(includeSensitive = false)
+    val pageable = PageRequest.of(0, 10, Direction.DESC, "occurrenceDateTime")
+    caseNoteService.getCaseNotes("12345", filter, pageable).content
+
+    verify(repository).findAll(filterCaptor.capture())
+    assertThat(filterCaptor.value.excludeSensitive).isTrue()
   }
 
   private fun createNomisCaseNote(): NomisCaseNote {
