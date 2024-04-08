@@ -16,13 +16,13 @@ import java.util.stream.Collectors
 import java.util.stream.Stream
 
 class OffenderCaseNoteFilter(
-  private val offenderIdentifier: String? = null,
-  private val locationId: String? = null,
-  private val authorUsername: String? = null,
-  private val excludeSensitive: Boolean = false,
-  private val startDate: LocalDateTime? = null,
-  private val endDate: LocalDateTime? = null,
-  private val typeSubTypes: List<String> = emptyList(),
+  internal val offenderIdentifier: String? = null,
+  internal val locationId: String? = null,
+  internal val authorUsername: String? = null,
+  internal val excludeSensitive: Boolean = false,
+  internal val startDate: LocalDateTime? = null,
+  internal val endDate: LocalDateTime? = null,
+  internal val typeSubTypes: List<String> = emptyList(),
 ) : Specification<OffenderCaseNote> {
 
   override fun toPredicate(root: Root<OffenderCaseNote>, query: CriteriaQuery<*>, cb: CriteriaBuilder): Predicate? {

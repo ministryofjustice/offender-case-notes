@@ -22,14 +22,14 @@ dependencies {
   implementation("org.springframework.boot:spring-boot-starter-oauth2-resource-server")
   implementation("org.springframework.boot:spring-boot-starter-oauth2-client")
   implementation("org.springframework.boot:spring-boot-starter-webflux")
-  implementation("uk.gov.justice.service.hmpps:hmpps-sqs-spring-boot-starter:3.1.1")
+  implementation("uk.gov.justice.service.hmpps:hmpps-sqs-spring-boot-starter:3.1.2")
 
   implementation("com.google.code.gson:gson:2.10.1")
   implementation("javax.activation:activation:1.1.1")
   implementation("javax.transaction:javax.transaction-api:1.3")
 
   implementation("javax.xml.bind:jaxb-api:2.3.1")
-  implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.4.0")
+  implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.5.0")
   implementation("net.sf.ehcache:ehcache:2.10.9.2")
   implementation("org.apache.commons:commons-text:1.11.0")
   implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.17.0")
@@ -38,8 +38,8 @@ dependencies {
   implementation("com.google.code.gson:gson:2.10.1")
   implementation("com.google.guava:guava:33.1.0-jre")
 
-  implementation(platform("com.amazonaws:aws-java-sdk-bom:1.12.689"))
-  implementation("software.amazon.awssdk:sns:2.25.19")
+  implementation(platform("com.amazonaws:aws-java-sdk-bom:1.12.695"))
+  implementation("software.amazon.awssdk:sns:2.25.25")
 
   testAnnotationProcessor("org.projectlombok:lombok:1.18.32")
   testCompileOnly("org.projectlombok:lombok:1.18.32")
@@ -56,7 +56,7 @@ dependencies {
   testImplementation("org.springframework.security.oauth:spring-security-oauth2:2.5.2.RELEASE")
   testImplementation("org.springframework.security:spring-security-jwt:1.1.1.RELEASE")
   testImplementation("org.mockito.kotlin:mockito-kotlin:5.2.1")
-  testImplementation("io.swagger.parser.v3:swagger-parser-v3:2.1.21")
+  testImplementation("io.swagger.parser.v3:swagger-parser-v3:2.1.22")
 }
 
 java {
