@@ -35,7 +35,9 @@ import uk.gov.justice.hmpps.casenotes.dto.NewCaseNote
 import uk.gov.justice.hmpps.casenotes.dto.NomisCaseNote
 import uk.gov.justice.hmpps.casenotes.dto.OffenderBooking
 import uk.gov.justice.hmpps.casenotes.dto.UpdateCaseNote
+import uk.gov.justice.hmpps.casenotes.dto.UserDetails
 import java.time.LocalDateTime
+import java.util.Optional
 
 class ExternalApiServiceTest {
   private val responseSpecMock: ResponseSpec = mock()
@@ -129,35 +131,21 @@ class ExternalApiServiceTest {
   }
 
   @Nested
-  inner class getUserFullName {
+  inner class getUserDetails {
     @Test
     fun `test calls HMPPS Auth`() {
-      whenever(responseSpecMock.bodyToMono(any<ParameterizedTypeReference<*>>())).thenReturn(
-        Mono.just(mapOf("name" to "Joe")),
-      )
-      assertThat(externalApiService.getUserFullName("user")).isEqualTo("Joe")
+      val userDetails = UserDetails(name = "Joe")
+      whenever(responseSpecMock.bodyToMono(any<Class<*>>())).thenReturn(Mono.just(userDetails))
+      assertThat(externalApiService.getUserDetails("user")).isEqualTo(Optional.of(userDetails))
 
       verify(authWebClient).get()
       verify(requestHeadersUriSpec).uri("/api/user/{username}", "user")
     }
 
     @Test
-    fun `test calls HMPPS Auth and returns default value`() {
-      whenever(responseSpecMock.bodyToMono(any<ParameterizedTypeReference<*>>())).thenReturn(
-        Mono.just(emptyMap<String, String>()),
-      )
-      assertThat(externalApiService.getUserFullName("user")).isEqualTo("user")
-
-      verify(authWebClient).get()
-      verify(requestHeadersUriSpec).uri("/api/user/{username}", "user")
-    }
-
-    @Test
-    fun `test calls HMPPS Auth and returns default value if no response`() {
-      whenever(responseSpecMock.bodyToMono(any<ParameterizedTypeReference<*>>())).thenReturn(
-        Mono.empty(),
-      )
-      assertThat(externalApiService.getUserFullName("user")).isEqualTo("user")
+    fun `test calls HMPPS Auth and returns empty if no response`() {
+      whenever(responseSpecMock.bodyToMono(any<Class<*>>())).thenReturn(Mono.empty())
+      assertThat(externalApiService.getUserDetails("user")).isEmpty
 
       verify(authWebClient).get()
       verify(requestHeadersUriSpec).uri("/api/user/{username}", "user")

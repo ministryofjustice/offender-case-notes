@@ -14,7 +14,9 @@ import uk.gov.justice.hmpps.casenotes.dto.NewCaseNote
 import uk.gov.justice.hmpps.casenotes.dto.NomisCaseNote
 import uk.gov.justice.hmpps.casenotes.dto.OffenderBooking
 import uk.gov.justice.hmpps.casenotes.dto.UpdateCaseNote
+import uk.gov.justice.hmpps.casenotes.dto.UserDetails
 import java.time.format.DateTimeFormatter
+import java.util.Optional
 
 @Service
 class ExternalApiService(
@@ -49,14 +51,11 @@ class ExternalApiService(
       .bodyToMono(OffenderBooking::class.java)
       .block()!!
 
-  fun getUserFullName(currentUsername: String): String =
+  fun getUserDetails(currentUsername: String): Optional<UserDetails> =
     oauthApiWebClient.get().uri("/api/user/{username}", currentUsername)
       .retrieve()
-      .bodyToMono(
-        object : ParameterizedTypeReference<Map<String, String>>() {},
-      )
-      .blockOptional().map { u -> u["name"] ?: currentUsername }
-      .orElse(currentUsername)
+      .bodyToMono(UserDetails::class.java)
+      .blockOptional()
 
   fun getOffenderLocation(offenderIdentifier: String): String =
     elite2ApiWebClient.get().uri("/api/bookings/offenderNo/{offenderNo}", offenderIdentifier)
