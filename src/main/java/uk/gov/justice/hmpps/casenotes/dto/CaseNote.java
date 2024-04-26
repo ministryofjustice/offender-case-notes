@@ -63,7 +63,7 @@ public class CaseNote {
     @NotNull
     private String authorName;
 
-    @Schema(required = true, description = "User Id of case note author - staffId for nomis users, userId for auth users", example = "12345")
+    @Schema(required = true, description = "User Id of case note author - staffId for nomis users, username for auth users", example = "12345 or USERNAME_12345")
     @NotNull
     private String authorUserId;
 
