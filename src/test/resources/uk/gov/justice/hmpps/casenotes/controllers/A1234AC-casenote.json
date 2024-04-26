@@ -7,7 +7,7 @@
       "subType": "GEN",
       "subTypeDescription": "General POM Note",
       "source": "OCNS",
-      "authorUserId": "SECURE_CASENOTE_USER_ID",
+      "authorUserId": "1111",
       "authorName": "Mikey Mouse",
       "text": "This is a case note 1",
       "locationId": "MDI",

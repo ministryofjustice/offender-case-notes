@@ -5,6 +5,7 @@ import jakarta.validation.ValidationException
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.ArgumentCaptor
@@ -33,6 +34,7 @@ import uk.gov.justice.hmpps.casenotes.dto.NewCaseNote
 import uk.gov.justice.hmpps.casenotes.dto.NomisCaseNote
 import uk.gov.justice.hmpps.casenotes.dto.NomisCaseNoteAmendment
 import uk.gov.justice.hmpps.casenotes.dto.UpdateCaseNote
+import uk.gov.justice.hmpps.casenotes.dto.UserDetails
 import uk.gov.justice.hmpps.casenotes.filters.OffenderCaseNoteFilter
 import uk.gov.justice.hmpps.casenotes.model.CaseNoteType
 import uk.gov.justice.hmpps.casenotes.model.OffenderCaseNote
@@ -45,11 +47,6 @@ import uk.gov.justice.hmpps.casenotes.repository.ParentCaseNoteTypeRepository
 import java.time.LocalDateTime
 import java.util.Optional
 import java.util.UUID
-import kotlin.Int
-import kotlin.Long
-import kotlin.String
-import kotlin.assert
-import kotlin.to
 
 @ExtendWith(MockitoExtension::class)
 class CaseNoteServiceTest {
@@ -80,70 +77,165 @@ class CaseNoteServiceTest {
     )
   }
 
-  @Test
-  fun createCaseNote_callElite2() {
-    whenever(caseNoteTypeRepository.findCaseNoteTypeByParentType_TypeAndType(any<String>(), any<String>())).thenReturn(null)
-    val nomisCaseNote: NomisCaseNote = createNomisCaseNote()
-    whenever(externalApiService.createCaseNote(any<String>(), any())).thenReturn(nomisCaseNote)
+  @Nested
+  inner class CreateCaseNote {
+    @Test
+    fun `non sensitive case note stored in NOMIS`() {
+      whenever(
+        caseNoteTypeRepository.findCaseNoteTypeByParentType_TypeAndType(
+          any<String>(),
+          any<String>(),
+        ),
+      ).thenReturn(null)
+      val nomisCaseNote: NomisCaseNote = createNomisCaseNote()
+      whenever(externalApiService.createCaseNote(any<String>(), any())).thenReturn(nomisCaseNote)
 
-    val caseNote = caseNoteService.createCaseNote("12345", NewCaseNote.builder().type("type").subType("SUB").build())
+      val caseNote = caseNoteService.createCaseNote("12345", NewCaseNote.builder().type("type").subType("SUB").build())
 
-    assertThat(caseNote).usingRecursiveComparison()
-      .ignoringFields(
-        "authorUsername",
-        "locationId",
-        "text",
-        "caseNoteId",
-        "authorUserId",
-        "eventId",
-        "sensitive",
-      )
-      .isEqualTo(nomisCaseNote)
-    assertThat(caseNote.text).isEqualTo("original")
-    assertThat(caseNote.authorUserId).isEqualTo("23456")
-    assertThat(caseNote.locationId).isEqualTo("agency")
-    assertThat(caseNote.caseNoteId).isEqualTo("12345")
-    assertThat(caseNote.eventId).isEqualTo(12345)
-    Mockito.verify(caseNoteTypeRepository).findCaseNoteTypeByParentType_TypeAndType("type", "SUB")
-  }
+      assertThat(caseNote).usingRecursiveComparison()
+        .ignoringFields(
+          "authorUsername",
+          "locationId",
+          "text",
+          "caseNoteId",
+          "authorUserId",
+          "eventId",
+          "sensitive",
+        )
+        .isEqualTo(nomisCaseNote)
+      assertThat(caseNote.text).isEqualTo("original")
+      assertThat(caseNote.authorUserId).isEqualTo("23456")
+      assertThat(caseNote.locationId).isEqualTo("agency")
+      assertThat(caseNote.caseNoteId).isEqualTo("12345")
+      assertThat(caseNote.eventId).isEqualTo(12345)
+      Mockito.verify(caseNoteTypeRepository).findCaseNoteTypeByParentType_TypeAndType("type", "SUB")
+    }
 
-  @Test
-  fun createCaseNote_noAddRole() {
-    whenever(caseNoteTypeRepository.findCaseNoteTypeByParentType_TypeAndType(any<String>(), any<String>())).thenReturn(CaseNoteType.builder().build())
-    whenever(securityUserContext.isOverrideRole(any<String>(), any<String>())).thenReturn(false)
+    @Test
+    fun `cannot create case note without appropriate role`() {
+      whenever(
+        caseNoteTypeRepository.findCaseNoteTypeByParentType_TypeAndType(
+          any<String>(),
+          any<String>(),
+        ),
+      ).thenReturn(CaseNoteType.builder().build())
+      whenever(securityUserContext.isOverrideRole(any<String>(), any<String>())).thenReturn(false)
 
-    assertThatThrownBy { caseNoteService.createCaseNote("12345", NewCaseNote.builder().type("type").subType("SUB").build()) }.isInstanceOf(AccessDeniedException::class.java)
+      assertThatThrownBy {
+        caseNoteService.createCaseNote(
+          "12345",
+          NewCaseNote.builder().type("type").subType("SUB").build(),
+        )
+      }.isInstanceOf(AccessDeniedException::class.java)
 
-    Mockito.verify(securityUserContext).isOverrideRole("POM", "ADD_SENSITIVE_CASE_NOTES")
-  }
+      Mockito.verify(securityUserContext).isOverrideRole("POM", "ADD_SENSITIVE_CASE_NOTES")
+    }
 
-  @Test
-  fun createCaseNote() {
-    val noteType: CaseNoteType = CaseNoteType.builder().type("sometype").parentType(ParentNoteType.builder().build()).build()
-    whenever(caseNoteTypeRepository.findCaseNoteTypeByParentType_TypeAndType(any<String>(), any<String>())).thenReturn(noteType)
-    whenever(securityUserContext.isOverrideRole(any<String>(), any<String>())).thenReturn(true)
-    whenever(securityUserContext.getCurrentUser()).thenReturn(UserIdUser("someuser", "userId"))
-    val offenderCaseNote: OffenderCaseNote = createOffenderCaseNote(noteType)
-    whenever(repository.save(any())).thenReturn(offenderCaseNote)
+    @Nested
+    inner class Sensitive {
+      val caseNoteId = UUID.randomUUID()
+      val now = LocalDateTime.now()
+      val noteType: CaseNoteType = CaseNoteType.builder()
+        .parentType(ParentNoteType.builder().type("someparent").build())
+        .type("sometype")
+        .sensitive(true)
+        .build()
 
-    val createdNote: CaseNote = caseNoteService.createCaseNote("12345", NewCaseNote.builder().type("type").subType("sub").build())
+      @BeforeEach
+      fun beforeEach() {
+        whenever(caseNoteTypeRepository.findCaseNoteTypeByParentType_TypeAndType(any(), any())).thenReturn(noteType)
+        whenever(securityUserContext.isOverrideRole(any<String>(), any<String>())).thenReturn(true)
+        whenever(securityUserContext.getCurrentUser()).thenReturn(UserIdUser("someuser", "userId"))
+        whenever(repository.save(any<OffenderCaseNote>())).thenAnswer { i ->
+          (i.arguments[0] as OffenderCaseNote).toBuilder().id(caseNoteId).build()
+        }
+      }
 
-    assertThat(createdNote).usingRecursiveComparison()
-      .ignoringFields(
-        "authorUsername",
-        "caseNoteId",
-        "type",
-        "typeDescription",
-        "subType",
-        "subTypeDescription",
-        "source",
-        "creationDateTime",
-        "text",
-        "amendments",
-        "sensitive",
-      )
-      .isEqualTo(offenderCaseNote)
-    assertThat(createdNote.text).isEqualTo("HELLO")
+      @Test
+      fun `sensitive case note stored outside NOMIS in dedicated database`() {
+        whenever(externalApiService.getUserDetails("someuser")).thenReturn(
+          Optional.of(UserDetails(name = "John Smith", userId = "4321")),
+        )
+
+        val createdNote: CaseNote = caseNoteService.createCaseNote(
+          "A1234AA",
+          NewCaseNote.builder()
+            .type("someparent")
+            .subType("sometype")
+            .occurrenceDateTime(now)
+            .text("HELLO")
+            .build(),
+        )
+
+        assertThat(createdNote).isEqualTo(
+          CaseNote.builder()
+            .caseNoteId(caseNoteId.toString())
+            .offenderIdentifier("A1234AA")
+            .sensitive(true)
+            .type("someparent")
+            .subType("sometype")
+            .text("HELLO")
+            .occurrenceDateTime(now)
+            .authorName("John Smith")
+            .authorUserId("4321")
+            .source("OCNS")
+            .amendments(emptyList())
+            .build(),
+        )
+      }
+
+      @Test
+      fun `sensitive case note defaults author details to username where user details not returned`() {
+        whenever(externalApiService.getUserDetails("someuser")).thenReturn(Optional.empty())
+
+        val createdNote: CaseNote = caseNoteService.createCaseNote(
+          "A1234AA",
+          NewCaseNote.builder()
+            .type("someparent")
+            .subType("sometype")
+            .occurrenceDateTime(now)
+            .text("HELLO")
+            .build(),
+        )
+
+        assertThat(createdNote.authorName).isEqualTo("someuser")
+        assertThat(createdNote.authorUserId).isEqualTo("someuser")
+      }
+
+      @Test
+      fun `sensitive case note defaults author name to username where user name not returned`() {
+        whenever(externalApiService.getUserDetails("someuser")).thenReturn(Optional.of(UserDetails(name = null)))
+
+        val createdNote: CaseNote = caseNoteService.createCaseNote(
+          "A1234AA",
+          NewCaseNote.builder()
+            .type("someparent")
+            .subType("sometype")
+            .occurrenceDateTime(now)
+            .text("HELLO")
+            .build(),
+        )
+
+        assertThat(createdNote.authorName).isEqualTo("someuser")
+      }
+
+      @Test
+      fun `sensitive case note defaults author name to username where user id not returned`() {
+        whenever(externalApiService.getUserDetails("someuser")).thenReturn(Optional.of(UserDetails(userId = null)))
+
+        val createdNote: CaseNote = caseNoteService.createCaseNote(
+          "A1234AA",
+          NewCaseNote.builder()
+            .type("someparent")
+            .subType("sometype")
+            .occurrenceDateTime(now)
+            .text("HELLO")
+            .build(),
+        )
+
+        assertThat(createdNote.authorUserId).isEqualTo("someuser")
+      }
+    }
   }
 
   @Test
@@ -256,61 +348,149 @@ class CaseNoteServiceTest {
     assertThat(caseNote.amendments.get(0).creationDateTime).isEqualTo("2019-03-24T11:22")
   }
 
-  @Test
-  fun amendCaseNote_callElite2() {
-    val nomisCaseNote: NomisCaseNote = createNomisCaseNote()
-    whenever(externalApiService.amendOffenderCaseNote(any<String>(), any<Long>(), any())).thenReturn(nomisCaseNote)
+  @Nested
+  inner class AmendCaseNote {
+    @Test
+    fun `amend non sensitive case note`() {
+      val nomisCaseNote: NomisCaseNote = createNomisCaseNote()
+      whenever(externalApiService.amendOffenderCaseNote(any<String>(), any<Long>(), any())).thenReturn(nomisCaseNote)
 
-    val caseNote: CaseNote = caseNoteService.amendCaseNote("12345", "21455", UpdateCaseNote("text"))
+      val caseNote: CaseNote = caseNoteService.amendCaseNote("12345", "21455", UpdateCaseNote("text"))
 
-    assertThat(caseNote).usingRecursiveComparison()
-      .ignoringFields(
-        "authorUsername",
-        "locationId",
-        "text",
-        "caseNoteId",
-        "authorUserId",
-        "eventId",
-        "sensitive",
-      )
-      .isEqualTo(nomisCaseNote)
+      assertThat(caseNote).usingRecursiveComparison()
+        .ignoringFields(
+          "authorUsername",
+          "locationId",
+          "text",
+          "caseNoteId",
+          "authorUserId",
+          "eventId",
+          "sensitive",
+        )
+        .isEqualTo(nomisCaseNote)
 
-    assertThat(caseNote.text).isEqualTo("original")
-    assertThat(caseNote.authorUserId).isEqualTo("23456")
-    assertThat(caseNote.locationId).isEqualTo("agency")
-    assertThat(caseNote.caseNoteId).isEqualTo("12345")
-    assertThat(caseNote.eventId).isEqualTo(12345)
-  }
+      assertThat(caseNote.text).isEqualTo("original")
+      assertThat(caseNote.authorUserId).isEqualTo("23456")
+      assertThat(caseNote.locationId).isEqualTo("agency")
+      assertThat(caseNote.caseNoteId).isEqualTo("12345")
+      assertThat(caseNote.eventId).isEqualTo(12345)
+    }
 
-  @Test
-  fun amendCaseNote_noAddRole() {
-    val noteType: CaseNoteType = CaseNoteType.builder().type("sometype").parentType(ParentNoteType.builder().build()).build()
-    val offenderCaseNote: OffenderCaseNote = createOffenderCaseNote(noteType)
-    whenever(repository.findById(any())).thenReturn(Optional.of(offenderCaseNote))
+    @Test
+    fun `cannot amend case note without required roles`() {
+      val noteType: CaseNoteType =
+        CaseNoteType.builder().type("sometype").parentType(ParentNoteType.builder().build()).build()
+      val offenderCaseNote: OffenderCaseNote = createOffenderCaseNote(noteType)
+      whenever(repository.findById(any())).thenReturn(Optional.of(offenderCaseNote))
 
-    assertThatThrownBy { caseNoteService.amendCaseNote("12345", UUID.randomUUID().toString(), UpdateCaseNote("text")) }
-      .isInstanceOf(AccessDeniedException::class.java)
+      assertThatThrownBy {
+        caseNoteService.amendCaseNote(
+          "12345",
+          UUID.randomUUID().toString(),
+          UpdateCaseNote("text"),
+        )
+      }
+        .isInstanceOf(AccessDeniedException::class.java)
 
-    Mockito.verify(securityUserContext).isOverrideRole("POM", "ADD_SENSITIVE_CASE_NOTES")
-  }
+      Mockito.verify(securityUserContext).isOverrideRole("POM", "ADD_SENSITIVE_CASE_NOTES")
+    }
 
-  @Test
-  fun amendCaseNote_notFound() {
-    val caseNoteIdentifier: String = UUID.randomUUID().toString()
+    @Test
+    fun `cannot amend case note with unknown id`() {
+      val caseNoteIdentifier: String = UUID.randomUUID().toString()
 
-    assertThatThrownBy { caseNoteService.amendCaseNote("12345", caseNoteIdentifier, UpdateCaseNote("text")) }
-      .isInstanceOf(EntityNotFoundException::class.java)
-      .hasMessage(String.format("Resource with id [%s] not found.", caseNoteIdentifier))
-  }
+      assertThatThrownBy { caseNoteService.amendCaseNote("12345", caseNoteIdentifier, UpdateCaseNote("text")) }
+        .isInstanceOf(EntityNotFoundException::class.java)
+        .hasMessage(String.format("Resource with id [%s] not found.", caseNoteIdentifier))
+    }
 
-  @Test
-  fun amendCaseNote_wrongOffender() {
-    val noteType: CaseNoteType = CaseNoteType.builder().type("sometype").restrictedUse(false).parentType(ParentNoteType.builder().build()).build()
-    val offenderCaseNote: OffenderCaseNote = createOffenderCaseNote(noteType)
-    whenever(repository.findById(any())).thenReturn(Optional.of(offenderCaseNote))
+    @Test
+    fun `cannot amend case note when wrong offender identifier supplied`() {
+      val noteType: CaseNoteType =
+        CaseNoteType.builder().type("sometype").restrictedUse(false).parentType(ParentNoteType.builder().build())
+          .build()
+      val offenderCaseNote: OffenderCaseNote = createOffenderCaseNote(noteType)
+      whenever(repository.findById(any())).thenReturn(Optional.of(offenderCaseNote))
 
-    assertThatThrownBy { caseNoteService.amendCaseNote("12345", UUID.randomUUID().toString(), UpdateCaseNote("text")) }
-      .isInstanceOf(EntityNotFoundException::class.java).hasMessage("Resource with id [12345] not found.")
+      assertThatThrownBy {
+        caseNoteService.amendCaseNote(
+          "12345",
+          UUID.randomUUID().toString(),
+          UpdateCaseNote("text"),
+        )
+      }
+        .isInstanceOf(EntityNotFoundException::class.java).hasMessage("Resource with id [12345] not found.")
+    }
+
+    @Nested
+    inner class Sensitive {
+      val caseNoteIdentifier = UUID.randomUUID()
+
+      @BeforeEach
+      fun beforeEach() {
+        val noteType: CaseNoteType = CaseNoteType.builder().type("sometype").parentType(ParentNoteType.builder().build()).build()
+        val offenderCaseNote: OffenderCaseNote = createOffenderCaseNote(noteType)
+        whenever(repository.findById(any())).thenReturn(Optional.of(offenderCaseNote))
+        whenever(securityUserContext.isOverrideRole(any<String>(), any<String>())).thenReturn(true)
+        whenever(securityUserContext.getCurrentUser()).thenReturn(UserIdUser("user", "userId"))
+      }
+
+      @Test
+      fun `can amend sensitive case note`() {
+        whenever(externalApiService.getUserDetails(any<String>())).thenReturn(Optional.of(UserDetails(name = "author", userId = "12345")))
+
+        val caseNote: CaseNote = caseNoteService.amendCaseNote("A1234AC", caseNoteIdentifier.toString(), UpdateCaseNote("text"))
+
+        assertThat(caseNote.amendments).hasSize(1)
+
+        val expected: CaseNoteAmendment = CaseNoteAmendment.builder()
+          .additionalNoteText("text")
+          .authorName("author")
+          .authorUserId("12345")
+          .authorUserName("user")
+          .build()
+
+        assertThat(caseNote.amendments[0]).usingRecursiveComparison()
+          .comparingOnlyFields(
+            "additionalNoteText",
+            "authorName",
+            "authorUserName",
+            "authorUserId",
+          )
+          .isEqualTo(expected)
+      }
+
+      @Test
+      fun `sensitive case note amendment defaults author details to username where user details not returned`() {
+        whenever(externalApiService.getUserDetails(any<String>())).thenReturn(Optional.empty())
+
+        val caseNote: CaseNote =
+          caseNoteService.amendCaseNote("A1234AC", caseNoteIdentifier.toString(), UpdateCaseNote("text"))
+
+        assertThat(caseNote.amendments[0].authorName).isEqualTo("user")
+        assertThat(caseNote.amendments[0].authorUserId).isEqualTo("user")
+      }
+
+      @Test
+      fun `sensitive case note amendment defaults author name to username where user name not returned`() {
+        whenever(externalApiService.getUserDetails(any<String>())).thenReturn(Optional.of(UserDetails(name = null)))
+
+        val caseNote: CaseNote =
+          caseNoteService.amendCaseNote("A1234AC", caseNoteIdentifier.toString(), UpdateCaseNote("text"))
+
+        assertThat(caseNote.amendments[0].authorName).isEqualTo("user")
+      }
+
+      @Test
+      fun `sensitive case note amendment defaults author name to username where user id not returned`() {
+        whenever(externalApiService.getUserDetails(any<String>())).thenReturn(Optional.of(UserDetails(userId = null)))
+
+        val caseNote: CaseNote =
+          caseNoteService.amendCaseNote("A1234AC", caseNoteIdentifier.toString(), UpdateCaseNote("text"))
+
+        assertThat(caseNote.amendments[0].authorUserId).isEqualTo("user")
+      }
+    }
   }
 
   @Test
@@ -325,33 +505,8 @@ class CaseNoteServiceTest {
     whenever(repository.deleteOffenderCaseNoteByOffenderIdentifier(eq("A1234AC")))
       .thenReturn(3)
     caseNoteService.deleteCaseNotesForOffender("A1234AC")
-    Mockito.verify(telemetryClient).trackEvent("OffenderDelete", mapOf("offenderNo" to "A1234AC", "count" to "3"), null)
-  }
-
-  @Test
-  fun amendCaseNote() {
-    val noteType: CaseNoteType = CaseNoteType.builder().type("sometype").parentType(ParentNoteType.builder().build()).build()
-    val offenderCaseNote: OffenderCaseNote = createOffenderCaseNote(noteType)
-    whenever(repository.findById(any())).thenReturn(Optional.of(offenderCaseNote))
-    whenever(securityUserContext.isOverrideRole(any<String>(), any<String>())).thenReturn(true)
-    whenever(securityUserContext.getCurrentUser()).thenReturn(UserIdUser("user", "userId"))
-    whenever(externalApiService.getUserFullName(any<String>())).thenReturn("author")
-
-    val caseNote: CaseNote = caseNoteService.amendCaseNote("A1234AC", UUID.randomUUID().toString(), UpdateCaseNote("text"))
-    assertThat(caseNote.amendments).hasSize(1)
-    val expected: CaseNoteAmendment = CaseNoteAmendment.builder()
-      .additionalNoteText("text")
-      .authorName("author")
-      .authorUserId("some id")
-      .authorUserName("user")
-      .build()
-    assertThat(caseNote.amendments[0]).usingRecursiveComparison()
-      .comparingOnlyFields(
-        "additionalNoteText",
-        "authorName",
-        "authorUserName",
-      )
-      .isEqualTo(expected)
+    Mockito.verify(telemetryClient)
+      .trackEvent("OffenderDelete", mapOf("offenderNo" to "A1234AC", "count" to "3"), null)
   }
 
   @Test

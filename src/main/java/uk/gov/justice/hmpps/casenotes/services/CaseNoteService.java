@@ -43,6 +43,7 @@ import java.util.UUID;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import static com.google.common.base.Strings.isNullOrEmpty;
 import static java.lang.String.format;
 import static java.lang.String.valueOf;
 import static org.springframework.data.domain.Sort.Direction.ASC;
@@ -220,16 +221,22 @@ public class CaseNoteService {
             throw new ValidationException(format("Case Note Type %s/%s is not active", type.getParentType().getType(), type.getType()));
         }
 
-        final var author = securityUserContext.getCurrentUser();
-        final var staffName = externalApiService.getUserFullName(author.getUsername());
+        final var username = securityUserContext.getCurrentUser().getUsername();
+        final var userDetails = externalApiService.getUserDetails(username);
+        final var authorName = userDetails
+            .map(user -> isNullOrEmpty(user.getName()) ? username : user.getName())
+            .orElse(username);
+        final var authorUserId = userDetails
+            .map(user -> isNullOrEmpty(user.getUserId()) ? username : user.getUserId())
+            .orElse(username);
 
         final var locationId = newCaseNote.getLocationId() == null ? externalApiService.getOffenderLocation(offenderIdentifier) : newCaseNote.getLocationId();
 
         final var caseNote = OffenderCaseNote.builder()
                 .noteText(newCaseNote.getText())
-                .authorUsername(author.getUsername())
-                .authorUserId(author.getUserId())
-                .authorName(staffName)
+                .authorUsername(username)
+                .authorUserId(authorUserId)
+                .authorName(authorName)
                 .occurrenceDateTime(newCaseNote.getOccurrenceDateTime() == null ? LocalDateTime.now() : newCaseNote.getOccurrenceDateTime())
                 .caseNoteType(type)
                 .offenderIdentifier(offenderIdentifier)
@@ -254,10 +261,16 @@ public class CaseNoteService {
             throw EntityNotFoundException.withId(offenderIdentifier);
         }
 
-        final var author = securityUserContext.getCurrentUser();
-        final var authorFullName = externalApiService.getUserFullName(author.getUsername());
+        final var username = securityUserContext.getCurrentUser().getUsername();
+        final var userDetails = externalApiService.getUserDetails(username);
+        final var authorName = userDetails
+            .map(user -> isNullOrEmpty(user.getName()) ? username : user.getName())
+            .orElse(username);
+        final var authorUserId = userDetails
+            .map(user -> isNullOrEmpty(user.getUserId()) ? username : user.getUserId())
+            .orElse(username);
 
-        offenderCaseNote.addAmendment(amendCaseNote.getText(), author.getUsername(), authorFullName, author.getUserId());
+        offenderCaseNote.addAmendment(amendCaseNote.getText(), username, authorName, authorUserId);
         repository.save(offenderCaseNote);
         return mapper(offenderCaseNote);
     }
