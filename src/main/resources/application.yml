@@ -20,7 +20,6 @@ spring:
     generate-ddl: false
     hibernate:
       ddl-auto: none
-    database-platform: org.hibernate.dialect.PostgreSQLDialect
 
   flyway:
     enabled: true
@@ -30,8 +29,6 @@ spring:
     url: 'jdbc:postgresql://${DATABASE_ENDPOINT}/${DATABASE_NAME}?sslmode=verify-full'
     username: ${DATABASE_USERNAME}
     password: ${DATABASE_PASSWORD}
-    continue-on-error: true
-
     hikari:
       pool-name: OffenderCaseNotes-CP
       connectionTimeout: 10000
