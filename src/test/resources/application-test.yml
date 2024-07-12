@@ -1,6 +1,7 @@
 spring:
   datasource:
-    url: 'jdbc:h2:mem:offender-case-notes-db;MODE=PostgreSQL'
+    driverClassName: org.h2.Driver
+    url: 'jdbc:h2:mem:offender-case-notes-db;MODE=PostgreSQL;DEFAULT_NULL_ORDERING=HIGH;NON_KEYWORDS=VALUE'
     username: sa
     password:
 
