@@ -33,8 +33,8 @@ class HouseKeepingIntegrationTest : QueueListenerIntegrationTest() {
       .exchange()
       .expectStatus().isOk
 
-    await untilCallTo { getNumberOfMessagesCurrentlyOnPrisonEventDlq() } matches { it == 0 }
     await untilCallTo { getNumberOfMessagesCurrentlyOnPrisonEventQueue() } matches { it == 0 }
+    await untilCallTo { getNumberOfMessagesCurrentlyOnPrisonEventDlq() } matches { it == 1 }
   }
 }
 
