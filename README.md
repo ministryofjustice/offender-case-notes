@@ -5,6 +5,14 @@
 
 Service to provide secure access to retrieving and storing case notes about offenders
 
+## Architectural Decision Records
+
+For detailed insights into the architectural decisions made during the project to combine the DPS and NOMIS case notes, making this API the system of record for the latter, refer to our ADRs:
+
+* [ADR001: Offender Case Notes API will become the system of record for all case notes data](architectural_decision_records/001-combine-nomis-and-dps-case-notes.md)
+* [ADR002: Migrate full NOMIS case notes data set across all bookings](architectural_decision_records/002-migrate-full-case-notes-data-set.md)
+* [ADR003: Adopting a Two-Way Sync for Prisoner Case Notes](architectural_decision_records/003-two-way-sync.md)
+
 ### Running against localstack
 
 Localstack has been introduced for some integration tests and it is also possible to run the application against localstack.
