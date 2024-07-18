@@ -25,6 +25,7 @@ The central requirement for the Move and Improve case notes project is to combin
 * The Prison API case notes endpoints used by the Offender Case Notes API are hidden
 * The following services have integrated with the Offender Case Notes API in order of highest to lowest number of calls
     * Prisoner Profile (Read/Write)
+    * Probation Integration Services (Read only)
     * Whereabouts (Read/Write)
     * DPS Core (Read/Write)
     * Approved Premises (Read)
