@@ -40,29 +40,22 @@ The Prisoner Profile got around this by getting the `ADD_SENSITIVE_CASE_NOTES` r
 
 ## Decision
 
-The Move and Improve team will add two sets of service roles
-
-### Non sensitive roles
+The Move and Improve team will add two new service roles in line with the standard naming convention
 
 * PRISONER_CASE_NOTES__RO
 * PRISONER_CASE_NOTES__RW
 
-A UI or service client would request this role if they will only ever be interested in non sensitive and non restricted case notes.
-
-### Sensitive roles
-
-* PRISONER_SENSITIVE_CASE_NOTES__RO
-* PRISONER_SENSITIVE_CASE_NOTES__RW
-
-A UI or service client would request this role if they need to view and manage sensitive and restricted case notes. They would be stating that they can be trusted to request these case notes when the user's roles allow it.
-
 ### Request parameter
 
-All endpoints that return or manage case notes associated with sensitive or restricted case note sub-types or return those sub-types would have an additional `allowSensitive` request parameter. If a client with one of the sensitive roles includes `allowSensitive=true` in the request, the API logic will allow the inclusion or management of sensitive and restricted case notes.
+All endpoints that return case notes or case note types and sub-types would have an additional `includeSensitive` request parameter. If a client with one of the sensitive roles supplies `includeSensitive=true` in the request, the API logic will return sensitive and restricted case notes and sub-types in addition to the non sensitive ones.
+
+The `includeSensitive` parameter is already present in the [get case notes endpoint](https://dev.offender-case-notes.service.justice.gov.uk/swagger-ui/index.html#/case-notes/getCaseNotes) and is being correctly populated by the Prisoner Profile. This change would therefore be limited to adding the parameter to the [get types and sub-types endpoint](https://dev.offender-case-notes.service.justice.gov.uk/swagger-ui/index.html#/case-notes/getCaseNoteTypes).
 
 ### Existing roles
 
 The existing roles used in the Offender Case Notes API would be retained for compatibility with existing clients until such time as all clients have moved over to the new roles.
+
+Until the existing roles have been decommissioned, the `includeSensitive` request parameter will only be used when the client has one of the new roles. The presence of a new role would indicate that they have switched from passing the user token to using a client token and are therefore aware of the new request parameter.
 
 ## Rationale
 
