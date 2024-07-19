@@ -1,13 +1,6 @@
 spring:
   application:
     name: offender-case-notes
-    profiles:
-      groups:
-        dev:
-          - "localstack"
-        test:
-          - "localstack"
-          - "stdout"
 
   jpa:
     open-in-view: false
