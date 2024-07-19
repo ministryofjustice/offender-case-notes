@@ -4,22 +4,19 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.security.oauth2.jwt.Jwt
 import org.springframework.security.test.context.support.WithAnonymousUser
-import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.transaction.TestTransaction
 import org.springframework.transaction.annotation.Transactional
 import uk.gov.justice.hmpps.casenotes.config.AuthAwareAuthenticationToken
+import uk.gov.justice.hmpps.casenotes.health.IntegrationTest
 import uk.gov.justice.hmpps.casenotes.model.CaseNoteType
 import uk.gov.justice.hmpps.casenotes.model.OffenderCaseNote
 import java.time.LocalDateTime
 
-@ActiveProfiles("test")
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK)
 @Transactional
-class OffenderCaseNoteAmendmentRepositoryTest {
+class OffenderCaseNoteAmendmentRepositoryTest : IntegrationTest() {
   @Autowired
   private lateinit var repository: OffenderCaseNoteRepository
 
@@ -95,6 +92,7 @@ class OffenderCaseNoteAmendmentRepositoryTest {
     assertThat(additionalAmendment.noteText).isEqualTo("Another Note 1")
     TestTransaction.end()
   }
+
   private fun transientEntity(offenderIdentifier: String): OffenderCaseNote {
     return transientEntityBuilder(offenderIdentifier).build()
   }

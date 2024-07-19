@@ -12,7 +12,6 @@ dependencies {
 
   compileOnly("org.projectlombok:lombok:1.18.34")
 
-  runtimeOnly("com.h2database:h2:2.3.230")
   runtimeOnly("org.flywaydb:flyway-core")
   runtimeOnly("org.flywaydb:flyway-database-postgresql")
   runtimeOnly("org.postgresql:postgresql")
@@ -49,7 +48,9 @@ dependencies {
   testImplementation("com.tngtech.java:junit-dataprovider:1.13.1")
   testImplementation("net.javacrumbs.json-unit:json-unit-assertj:3.4.1")
   testImplementation("io.github.http-builder-ng:http-builder-ng-apache:1.0.4")
-  testImplementation("com.github.tomakehurst:wiremock-jre8-standalone:3.0.1")
+  testImplementation("org.wiremock:wiremock-standalone:3.8.0")
+  testImplementation("org.testcontainers:postgresql:1.20.0")
+  testImplementation("org.testcontainers:localstack:1.20.0")
   testImplementation("io.jsonwebtoken:jjwt-impl:0.12.6")
   testImplementation("io.jsonwebtoken:jjwt-jackson:0.12.6")
   testImplementation("org.awaitility:awaitility:4.2.1")

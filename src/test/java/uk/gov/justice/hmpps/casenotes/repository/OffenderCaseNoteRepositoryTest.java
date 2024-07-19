@@ -14,6 +14,7 @@ import org.springframework.test.context.transaction.TestTransaction;
 import org.springframework.transaction.annotation.Transactional;
 import uk.gov.justice.hmpps.casenotes.config.AuthAwareAuthenticationToken;
 import uk.gov.justice.hmpps.casenotes.filters.OffenderCaseNoteFilter;
+import uk.gov.justice.hmpps.casenotes.health.IntegrationTest;
 import uk.gov.justice.hmpps.casenotes.model.CaseNoteType;
 import uk.gov.justice.hmpps.casenotes.model.OffenderCaseNote;
 import uk.gov.justice.hmpps.casenotes.model.OffenderCaseNote.OffenderCaseNoteBuilder;
@@ -26,10 +27,8 @@ import java.util.Set;
 import static java.time.LocalDateTime.now;
 import static org.assertj.core.api.Assertions.assertThat;
 
-@ActiveProfiles("test")
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK)
 @Transactional
-public class OffenderCaseNoteRepositoryTest {
+public class OffenderCaseNoteRepositoryTest extends IntegrationTest {
 
     private static final String PARENT_TYPE = "POM";
     private static final String SUB_TYPE = "GEN";
@@ -168,7 +167,7 @@ public class OffenderCaseNoteRepositoryTest {
 
         // set the notes to two days ago
         final var update = jdbcTemplate.update("update offender_case_note set modify_date_time = ? where offender_case_note_id in (?, ?)", twoDaysAgo,
-                oldNote.getId().toString(), oldNoteWithOldAmendment.getId().toString());
+                oldNote.getId(), oldNoteWithOldAmendment.getId());
         assertThat(update).isEqualTo(2);
 
         // now add an amendment
@@ -197,7 +196,7 @@ public class OffenderCaseNoteRepositoryTest {
         TestTransaction.start();
 
         // set the old notes two days ago so won't be returned
-        final var update = jdbcTemplate.update("update offender_case_note set modify_date_time = ? where offender_case_note_id in (?)", twoDaysAgo, oldNote.getId().toString());
+        final var update = jdbcTemplate.update("update offender_case_note set modify_date_time = ? where offender_case_note_id in (?)", twoDaysAgo, oldNote.getId());
         assertThat(update).isEqualTo(1);
 
         final var yesterday = now().minusDays(1);
