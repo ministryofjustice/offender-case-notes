@@ -16,7 +16,6 @@ import uk.gov.justice.hmpps.casenotes.health.wiremock.TokenVerificationExtension
 @ActiveProfiles("test")
 @ExtendWith(Elite2Extension::class, OAuthExtension::class, TokenVerificationExtension::class)
 abstract class IntegrationTest {
-  @Suppress("SpringJavaInjectionPointsAutowiringInspection")
   @Autowired
   lateinit var webTestClient: WebTestClient
 

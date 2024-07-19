@@ -13,7 +13,6 @@ import org.springframework.security.oauth2.server.resource.authentication.JwtAut
 import org.springframework.stereotype.Component
 import org.springframework.web.reactive.function.client.WebClient
 
-@Suppress("SpringJavaInjectionPointsAutowiringInspection")
 @Component
 class TokenVerifyingAuthManager(
   jwtDecoder: JwtDecoder,

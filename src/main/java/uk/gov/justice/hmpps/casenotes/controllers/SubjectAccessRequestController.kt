@@ -20,7 +20,6 @@ import uk.gov.justice.hmpps.casenotes.dto.SubjectAccessRequestData
 import uk.gov.justice.hmpps.casenotes.services.SubjectAccessRequestService
 import java.time.LocalDate
 
-@Suppress("SpringJavaInjectionPointsAutowiringInspection")
 @RestController
 @Tag(name = "Subject Access Request")
 @PreAuthorize("hasRole('SAR_DATA_ACCESS')")
