@@ -12,6 +12,7 @@ For detailed insights into the architectural decisions made during the project t
 * [ADR001: Offender Case Notes API will become the system of record for all case notes data](architectural_decision_records/001-combine-nomis-and-dps-case-notes.md)
 * [ADR002: Migrate full NOMIS case notes data set across all bookings](architectural_decision_records/002-migrate-full-case-notes-data-set.md)
 * [ADR003: Adopting a Two-Way Sync for Prisoner Case Notes](architectural_decision_records/003-two-way-sync.md)
+* [ADR004: Add new roles in line with agreed naming convention and remove reliance on DPS roles and user tokens](architectural_decision_records/004-roles.md)
 
 ### Running against localstack
 
