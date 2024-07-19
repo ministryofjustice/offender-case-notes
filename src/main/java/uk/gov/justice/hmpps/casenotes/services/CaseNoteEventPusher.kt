@@ -22,7 +22,6 @@ interface CaseNoteEventPusher {
   }
 }
 
-@Suppress("SpringJavaInjectionPointsAutowiringInspection")
 @Component
 class CaseNoteAwsEventPusher(
   private val hmppsQueueService: HmppsQueueService,

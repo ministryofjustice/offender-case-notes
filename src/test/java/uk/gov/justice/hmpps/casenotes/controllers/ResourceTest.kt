@@ -21,7 +21,6 @@ import java.util.function.Consumer
 @SpringBootTest(webEnvironment = RANDOM_PORT)
 @ExtendWith(Elite2Extension::class, OAuthExtension::class, TokenVerificationExtension::class)
 abstract class ResourceTest {
-  @Suppress("SpringJavaInjectionPointsAutowiringInspection")
   @Autowired
   internal lateinit var webTestClient: WebTestClient
 
