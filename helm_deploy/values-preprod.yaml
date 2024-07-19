@@ -5,6 +5,7 @@ generic-service:
     host: preprod.offender-case-notes.service.justice.gov.uk
 
   env:
+    SENTRY_ENVIRONMENT: preprod
     CASENOTES_API_BASE_URL: "https://preprod.offender-case-notes.service.justice.gov.uk"
     ELITE2_API_BASE_URL: "https://prison-api-preprod.prison.service.justice.gov.uk"
     OAUTH_API_BASE_URL: "https://sign-in-preprod.hmpps.service.justice.gov.uk/auth"
