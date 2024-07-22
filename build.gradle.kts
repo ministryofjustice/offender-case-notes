@@ -23,7 +23,7 @@ dependencies {
   implementation("org.springframework.boot:spring-boot-starter-oauth2-client")
   implementation("org.springframework.boot:spring-boot-starter-webflux")
   implementation("uk.gov.justice.service.hmpps:hmpps-sqs-spring-boot-starter:4.0.1")
-  implementation("io.sentry:sentry-spring-boot-starter-jakarta:7.10.0")
+  implementation("io.sentry:sentry-spring-boot-starter-jakarta:7.12.0")
 
   implementation("com.google.code.gson:gson:2.11.0")
   implementation("javax.activation:activation:1.1.1")
@@ -48,7 +48,7 @@ dependencies {
   testImplementation("com.tngtech.java:junit-dataprovider:1.13.1")
   testImplementation("net.javacrumbs.json-unit:json-unit-assertj:3.4.1")
   testImplementation("io.github.http-builder-ng:http-builder-ng-apache:1.0.4")
-  testImplementation("org.wiremock:wiremock-standalone:3.8.0")
+  testImplementation("org.wiremock:wiremock-standalone:3.9.0")
   testImplementation("org.testcontainers:postgresql:1.20.0")
   testImplementation("org.testcontainers:localstack:1.20.0")
   testImplementation("io.jsonwebtoken:jjwt-impl:0.12.6")
