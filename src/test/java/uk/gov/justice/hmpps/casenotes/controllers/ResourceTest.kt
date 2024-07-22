@@ -9,7 +9,7 @@ import org.springframework.http.MediaType
 import org.springframework.test.annotation.DirtiesContext
 import org.springframework.test.annotation.DirtiesContext.ClassMode.BEFORE_CLASS
 import org.springframework.test.context.ActiveProfiles
-import org.springframework.test.web.reactive.server.WebTestClient
+import uk.gov.justice.hmpps.casenotes.health.IntegrationTest
 import uk.gov.justice.hmpps.casenotes.health.wiremock.Elite2Extension
 import uk.gov.justice.hmpps.casenotes.health.wiremock.OAuthExtension
 import uk.gov.justice.hmpps.casenotes.health.wiremock.TokenVerificationExtension
@@ -20,9 +20,7 @@ import java.util.function.Consumer
 @ActiveProfiles("test", "noqueue", "token-verification")
 @SpringBootTest(webEnvironment = RANDOM_PORT)
 @ExtendWith(Elite2Extension::class, OAuthExtension::class, TokenVerificationExtension::class)
-abstract class ResourceTest {
-  @Autowired
-  internal lateinit var webTestClient: WebTestClient
+abstract class ResourceTest : IntegrationTest() {
 
   @Autowired
   internal lateinit var jwtHelper: JwtAuthHelper
@@ -38,5 +36,5 @@ abstract class ResourceTest {
     headers.add(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
   }
 
-  fun readFile(file: String): String = this.javaClass.getResource(file).readText()
+  fun readFile(file: String): String = this.javaClass.getResource(file)!!.readText()
 }

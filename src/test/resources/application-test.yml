@@ -1,29 +1,21 @@
 spring:
-  datasource:
-    driverClassName: org.h2.Driver
-    url: 'jdbc:h2:mem:offender-case-notes-db;MODE=PostgreSQL;DEFAULT_NULL_ORDERING=HIGH;NON_KEYWORDS=VALUE'
-    username: sa
-    password:
-
   flyway:
     enabled: true
     locations: classpath:db/migration/general,classpath:db/migration/{vendor},classpath:db/test/migration
 
-  h2:
-    console:
-      enabled: true
   jpa:
     show-sql: true
+
+  datasource:
+    url: 'jdbc:postgresql://localhost:5432/case_notes'
+    username: case
+    password: notes
 
   security:
     oauth2:
       resourceserver:
         jwt:
           public-key-location: classpath:local-public-key.pub
-
-  test:
-    database:
-      replace: none
 
 server:
   shutdown: immediate

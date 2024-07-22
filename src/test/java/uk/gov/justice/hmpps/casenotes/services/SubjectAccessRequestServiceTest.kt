@@ -2,18 +2,11 @@ package uk.gov.justice.hmpps.casenotes.services
 
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.extension.ExtendWith
-import org.mockito.junit.jupiter.MockitoExtension
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.test.context.ActiveProfiles
+import uk.gov.justice.hmpps.casenotes.health.IntegrationTest
 import java.time.LocalDate
-import java.util.*
 
-@ExtendWith(MockitoExtension::class)
-@ActiveProfiles("test")
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK)
-class SubjectAccessRequestServiceTest {
+class SubjectAccessRequestServiceTest : IntegrationTest() {
 
   @Autowired
   lateinit var subjectAccessRequestService: SubjectAccessRequestService

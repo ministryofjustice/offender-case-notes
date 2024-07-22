@@ -6,10 +6,14 @@ orbs:
 jobs:
   validate:
     executor:
-      name: hmpps/localstack
+      name: hmpps/java_localstack_postgres_with_db_name
       jdk_tag: "21.0"
       localstack_tag: "3"
       services: "sqs,sns"
+      postgres_tag: "16"
+      postgres_db: "case_notes"
+      postgres_username: "case"
+      postgres_password: "notes"
     steps:
       - checkout
       - restore_cache:
