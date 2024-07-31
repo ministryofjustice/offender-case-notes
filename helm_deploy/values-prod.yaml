@@ -5,6 +5,7 @@ generic-service:
     host: offender-case-notes.service.justice.gov.uk
 
   env:
+    SENTRY_ENVIRONMENT: prod
     SPRING_DATASOURCE_HIKARI_MAXIMUMPOOLSIZE: 30
     CASENOTES_API_BASE_URL: "https://offender-case-notes.service.justice.gov.uk"
     ELITE2_API_BASE_URL: "https://prison-api.prison.service.justice.gov.uk"

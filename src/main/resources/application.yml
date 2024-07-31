@@ -1,13 +1,7 @@
 spring:
   application:
     name: offender-case-notes
-  profiles:
-    groups:
-      dev:
-        - "localstack"
-      test:
-        - "localstack"
-        - "stdout"
+
   jpa:
     open-in-view: false
     properties:
@@ -59,6 +53,9 @@ spring:
   mvc:
     pathmatch:
       matching-strategy: ant_path_matcher
+
+sentry:
+  exception-resolver-order: -2147483647
 
 server:
   port: 8080

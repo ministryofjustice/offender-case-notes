@@ -29,6 +29,8 @@ generic-service:
     APPLICATIONINSIGHTS_CONNECTION_STRING: "InstrumentationKey=$(APPINSIGHTS_INSTRUMENTATIONKEY);IngestionEndpoint=https://northeurope-0.in.applicationinsights.azure.com/;LiveEndpoint=https://northeurope.livediagnostics.monitor.azure.com/"
     SNS_PROVIDER: "aws"
     HMPPS_SQS_USE_WEB_TOKEN: true
+    SENTRY_TRACES_SAMPLE_RATE: '0.05'
+    SENTRY_IGNORED_EXCEPTIONS_FOR_TYPE: "org.apache.catalina.connector.ClientAbortException"
 
   # Pre-existing kubernetes secrets to load as environment variables in the deployment.
   # namespace_secrets:
@@ -40,6 +42,8 @@ generic-service:
       APPINSIGHTS_INSTRUMENTATIONKEY: "APPINSIGHTS_INSTRUMENTATIONKEY"
       OFFENDER_CASE_NOTES_CLIENT_ID: "OFFENDER_CASE_NOTES_CLIENT_ID"
       OFFENDER_CASE_NOTES_CLIENT_SECRET: "OFFENDER_CASE_NOTES_CLIENT_SECRET"
+      SENTRY_DSN: SENTRY_DSN
+      SENTRY_AUTH_TOKEN: SENTRY_AUTH_TOKEN
     dps-rds-instance-output:
       DATABASE_USERNAME: "database_username"
       DATABASE_PASSWORD: "database_password"
