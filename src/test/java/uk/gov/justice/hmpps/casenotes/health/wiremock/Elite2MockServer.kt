@@ -6,23 +6,14 @@ import com.github.tomakehurst.wiremock.client.WireMock.aResponse
 import com.github.tomakehurst.wiremock.client.WireMock.get
 import com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo
 import com.github.tomakehurst.wiremock.client.WireMock.urlPathMatching
-import com.google.gson.GsonBuilder
-import com.google.gson.JsonDeserializationContext
-import com.google.gson.JsonDeserializer
-import com.google.gson.JsonElement
-import com.google.gson.JsonParseException
-import com.google.gson.JsonPrimitive
-import com.google.gson.JsonSerializationContext
-import com.google.gson.JsonSerializer
 import org.junit.jupiter.api.extension.AfterAllCallback
 import org.junit.jupiter.api.extension.BeforeAllCallback
 import org.junit.jupiter.api.extension.BeforeEachCallback
 import org.junit.jupiter.api.extension.ExtensionContext
 import uk.gov.justice.hmpps.casenotes.dto.CaseNoteTypeDto
 import uk.gov.justice.hmpps.casenotes.dto.NomisCaseNote
-import java.lang.reflect.Type
+import uk.gov.justice.hmpps.casenotes.utils.JsonHelper.objectMapper
 import java.time.LocalDateTime
-import java.time.format.DateTimeFormatter
 
 class Elite2Extension : BeforeAllCallback, AfterAllCallback, BeforeEachCallback {
   companion object {
@@ -44,8 +35,6 @@ class Elite2Extension : BeforeAllCallback, AfterAllCallback, BeforeEachCallback 
 }
 
 class Elite2MockServer : WireMockServer(WIREMOCK_PORT) {
-  private val gson = GsonBuilder().registerTypeAdapter(LocalDateTime::class.java, LocalDateTimeConverter()).create()
-
   fun subGetCaseNoteTypes() {
     val getCaseNoteTypes = "$API_PREFIX/reference-domains/caseNoteTypes"
     stubFor(
@@ -54,7 +43,7 @@ class Elite2MockServer : WireMockServer(WIREMOCK_PORT) {
           aResponse()
             .withHeader("Content-Type", "application/json")
             .withBody(
-              gson.toJson(
+              objectMapper.writeValueAsString(
                 listOf(
                   CaseNoteTypeDto.builder().code("KA").description("Key worker")
                     .subCodes(
@@ -86,7 +75,7 @@ class Elite2MockServer : WireMockServer(WIREMOCK_PORT) {
           aResponse()
             .withHeader("Content-Type", "application/json")
             .withBody(
-              gson.toJson(
+              objectMapper.writeValueAsString(
                 listOf(
                   CaseNoteTypeDto.builder().code("KA").description("Key worker")
                     .subCodes(
@@ -265,7 +254,7 @@ class Elite2MockServer : WireMockServer(WIREMOCK_PORT) {
 
   fun subGetCaseNoteForOffender(offenderIdentifier: String?, caseNoteIdentifier: Long?) {
     val getCaseNote = String.format("%s/offenders/%s/case-notes/%s", API_PREFIX, offenderIdentifier, caseNoteIdentifier)
-    val body = gson.toJson(createNomisCaseNote())
+    val body = objectMapper.writeValueAsString(createNomisCaseNote())
     stubFor(
       get(urlPathMatching(getCaseNote))
         .willReturn(
@@ -296,7 +285,7 @@ class Elite2MockServer : WireMockServer(WIREMOCK_PORT) {
   }
 
   fun subCreateCaseNote(offenderIdentifier: String?) {
-    val body = gson.toJson(createNomisCaseNote())
+    val body = objectMapper.writeValueAsString(createNomisCaseNote())
     stubFor(
       WireMock.post(urlPathMatching(String.format("%s/offenders/%s/case-notes", API_PREFIX, offenderIdentifier)))
         .willReturn(
@@ -309,7 +298,7 @@ class Elite2MockServer : WireMockServer(WIREMOCK_PORT) {
   }
 
   fun subAmendCaseNote(offenderIdentifier: String?, caseNoteIdentifier: String?) {
-    val body = gson.toJson(createNomisCaseNote())
+    val body = objectMapper.writeValueAsString(createNomisCaseNote())
     stubFor(
       WireMock.put(
         urlPathMatching(
@@ -328,21 +317,6 @@ class Elite2MockServer : WireMockServer(WIREMOCK_PORT) {
             .withStatus(200),
         ),
     )
-  }
-
-  private class LocalDateTimeConverter : JsonSerializer<LocalDateTime?>, JsonDeserializer<LocalDateTime> {
-    @Throws(JsonParseException::class)
-    override fun deserialize(json: JsonElement, typeOfT: Type, context: JsonDeserializationContext): LocalDateTime {
-      return LocalDateTime.parse(json.asJsonPrimitive.asString)
-    }
-
-    override fun serialize(src: LocalDateTime?, typeOfSrc: Type, context: JsonSerializationContext): JsonElement {
-      return JsonPrimitive(FORMATTER.format(src))
-    }
-
-    companion object {
-      private val FORMATTER = DateTimeFormatter.ISO_LOCAL_DATE_TIME
-    }
   }
 
   companion object {

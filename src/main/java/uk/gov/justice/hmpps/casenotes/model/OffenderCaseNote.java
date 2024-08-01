@@ -1,59 +1,56 @@
 package uk.gov.justice.hmpps.casenotes.model;
 
+import com.fasterxml.uuid.Generators;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EntityListeners;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.EqualsAndHashCode;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
-import org.hibernate.annotations.GenericGenerator;
-import org.hibernate.annotations.ResultCheckStyle;
-import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.SoftDelete;
 import org.hibernate.annotations.SortComparator;
-import org.hibernate.annotations.Where;
 import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedBy;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EntityListeners;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToMany;
-import jakarta.persistence.Table;
 import java.time.LocalDateTime;
 import java.util.Comparator;
 import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.UUID;
 
-import static java.time.LocalDateTime.now;
 import static jakarta.persistence.CascadeType.DETACH;
 import static jakarta.persistence.CascadeType.MERGE;
 import static jakarta.persistence.CascadeType.PERSIST;
 import static jakarta.persistence.CascadeType.REFRESH;
+import static java.time.LocalDateTime.now;
 
 @Entity
 @Table(name = "OFFENDER_CASE_NOTE")
-@Where(clause = "not SOFT_DELETED")
-@SQLDelete(sql = "UPDATE offender_case_note SET soft_deleted = TRUE WHERE offender_case_note_id = ?", check = ResultCheckStyle.COUNT)
+@SoftDelete(columnName = "soft_deleted")
 @NoArgsConstructor
 @AllArgsConstructor
+@Getter
 @EntityListeners(AuditingEntityListener.class)
 @Builder(toBuilder = true)
 @EqualsAndHashCode(of = {"offenderIdentifier", "occurrenceDateTime", "locationId", "authorUsername", "caseNoteType", "noteText"})
 @ToString(of = {"id", "offenderIdentifier", "occurrenceDateTime", "locationId", "authorUsername", "caseNoteType"})
 public class OffenderCaseNote {
 
+    @Builder.Default
     @Id
-    @GeneratedValue(generator = "UUID")
-    @GenericGenerator(name = "UUID", strategy = "org.hibernate.id.UUIDGenerator")
     @Column(name = "OFFENDER_CASE_NOTE_ID", updatable = false, nullable = false)
-    private UUID id;
+    private UUID id = generateNewUuid();
 
     @Column(nullable = false)
     private LocalDateTime occurrenceDateTime;
@@ -103,9 +100,6 @@ public class OffenderCaseNote {
     @Column(columnDefinition = "serial", insertable = false, updatable = false)
     private Integer eventId;
 
-    @Builder.Default
-    private boolean softDeleted = false;
-
     public void addAmendment(final String noteText, final String authorUsername, final String authorName, final String authorUserId) {
 
         final var amendment = OffenderCaseNoteAmendment.builder()
@@ -123,70 +117,14 @@ public class OffenderCaseNote {
         modifyDateTime = now();
     }
 
-    public UUID getId() {
-        return this.id;
-    }
-
-    public LocalDateTime getOccurrenceDateTime() {
-        return this.occurrenceDateTime;
-    }
-
-    public String getOffenderIdentifier() {
-        return this.offenderIdentifier;
-    }
-
-    public String getLocationId() {
-        return this.locationId;
-    }
-
-    public String getAuthorUsername() {
-        return this.authorUsername;
-    }
-
-    public String getAuthorUserId() {
-        return this.authorUserId;
-    }
-
-    public String getAuthorName() {
-        return this.authorName;
-    }
-
-    public CaseNoteType getCaseNoteType() {
-        return this.caseNoteType;
-    }
-
-    public String getNoteText() {
-        return this.noteText;
-    }
-
-    public SortedSet<OffenderCaseNoteAmendment> getAmendments() {
-        return this.amendments;
-    }
-
-    public LocalDateTime getCreateDateTime() {
-        return this.createDateTime;
-    }
-
-    public String getCreateUserId() {
-        return this.createUserId;
-    }
-
-    public LocalDateTime getModifyDateTime() {
-        return this.modifyDateTime;
-    }
-
-    public String getModifyUserId() {
-        return this.modifyUserId;
-    }
-
-    public Integer getEventId() {
-        return this.eventId;
-    }
-
     public static class AmendmentComparator implements Comparator<OffenderCaseNoteAmendment> {
         @Override
         public int compare(final OffenderCaseNoteAmendment a1, final OffenderCaseNoteAmendment a2) {
             return a1.getCreateDateTime().compareTo(a2.getCreateDateTime());
         }
+    }
+
+    private static UUID generateNewUuid() {
+        return Generators.timeBasedEpochGenerator().generate();
     }
 }

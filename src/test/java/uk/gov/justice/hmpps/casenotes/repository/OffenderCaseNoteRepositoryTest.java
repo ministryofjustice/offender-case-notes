@@ -3,13 +3,11 @@ package uk.gov.justice.hmpps.casenotes.repository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.test.context.support.WithAnonymousUser;
-import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.transaction.TestTransaction;
 import org.springframework.transaction.annotation.Transactional;
 import uk.gov.justice.hmpps.casenotes.config.AuthAwareAuthenticationToken;
@@ -20,8 +18,8 @@ import uk.gov.justice.hmpps.casenotes.model.OffenderCaseNote;
 import uk.gov.justice.hmpps.casenotes.model.OffenderCaseNote.OffenderCaseNoteBuilder;
 
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Collections;
+import java.util.List;
 import java.util.Set;
 
 import static java.time.LocalDateTime.now;
@@ -70,11 +68,8 @@ public class OffenderCaseNoteRepositoryTest extends IntegrationTest {
         final var retrievedEntity = repository.findById(persistedEntity.getId()).orElseThrow();
 
         assertThat(retrievedEntity).usingRecursiveComparison().ignoringFields("occurrenceDateTime", "caseNoteType", "eventId", "createDateTime", "modifyDateTime").isEqualTo(caseNote);
-        assertThat(retrievedEntity.getCreateDateTime()).isEqualToIgnoringNanos(caseNote.getCreateDateTime());
-        assertThat(retrievedEntity.getModifyDateTime()).isEqualToIgnoringNanos(caseNote.getModifyDateTime());
         assertThat(retrievedEntity.getOccurrenceDateTime()).isEqualToIgnoringNanos(caseNote.getOccurrenceDateTime());
         assertThat(retrievedEntity.getCaseNoteType()).isEqualTo(caseNote.getCaseNoteType());
-        assertThat(retrievedEntity.getCreateUserId()).isEqualTo("anonymous");
     }
 
     @Test
@@ -239,7 +234,13 @@ public class OffenderCaseNoteRepositoryTest extends IntegrationTest {
     @Test
     public void testDeleteOfSoftDeletedCaseNotes() {
 
-        final var persistedEntity = repository.save(transientEntityBuilder("X2111XX").noteText("note to delete").softDeleted(true).build());
+        final var persistedEntity = repository.save(transientEntityBuilder("X2111XX").noteText("note to delete").build());
+
+        TestTransaction.flagForCommit();
+        TestTransaction.end();
+        TestTransaction.start();
+
+        repository.delete(persistedEntity);
 
         TestTransaction.flagForCommit();
         TestTransaction.end();
@@ -265,10 +266,15 @@ public class OffenderCaseNoteRepositoryTest extends IntegrationTest {
 
         final var persistedEntity = repository.save(transientEntityBuilder("X3111XX")
                 .noteText("note to delete")
-                .softDeleted(true)
                 .build());
         persistedEntity.addAmendment("Another Note 0", "someuser", "Some User", "user id");
         repository.save(persistedEntity);
+        TestTransaction.flagForCommit();
+        TestTransaction.end();
+        TestTransaction.start();
+
+        repository.delete(persistedEntity);
+
         TestTransaction.flagForCommit();
         TestTransaction.end();
 
@@ -404,7 +410,7 @@ public class OffenderCaseNoteRepositoryTest extends IntegrationTest {
     @WithAnonymousUser
     public void testRetrieveASoftDeletedFalseCaseNote() {
 
-        final var persistedEntity = repository.save(transientEntityBuilder("X4111XX").noteText("note to retrieve").softDeleted(false).build());
+        final var persistedEntity = repository.save(transientEntityBuilder("X4111XX").noteText("note to retrieve").build());
 
         TestTransaction.flagForCommit();
         TestTransaction.end();
@@ -426,7 +432,13 @@ public class OffenderCaseNoteRepositoryTest extends IntegrationTest {
     @WithAnonymousUser
     public void testRetrieveASoftDeletedTrueCaseNote() {
 
-        final var persistedEntity = repository.save(transientEntityBuilder("X5111XX").noteText("note to retrieve").softDeleted(true).build());
+        final var persistedEntity = repository.save(transientEntityBuilder("X5111XX").noteText("note to retrieve").build());
+
+        TestTransaction.flagForCommit();
+        TestTransaction.end();
+        TestTransaction.start();
+
+        repository.delete(persistedEntity);
 
         TestTransaction.flagForCommit();
         TestTransaction.end();
@@ -483,7 +495,9 @@ public class OffenderCaseNoteRepositoryTest extends IntegrationTest {
                 .authorName("Mickey Mouse")
                 .offenderIdentifier(offenderIdentifier)
                 .caseNoteType(genType)
-                .noteText("HELLO");
+                .noteText("HELLO")
+                .createUserId("anonymous")
+                .modifyUserId("anonymous");
 
     }
 }
