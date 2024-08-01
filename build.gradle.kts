@@ -25,7 +25,6 @@ dependencies {
   implementation("uk.gov.justice.service.hmpps:hmpps-sqs-spring-boot-starter:4.1.0")
   implementation("io.sentry:sentry-spring-boot-starter-jakarta:7.13.0")
 
-  implementation("com.google.code.gson:gson:2.11.0")
   implementation("javax.activation:activation:1.1.1")
   implementation("javax.transaction:javax.transaction-api:1.3")
 
@@ -35,8 +34,8 @@ dependencies {
   implementation("org.apache.commons:commons-text:1.12.0")
   implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.17.2")
   implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.17.2")
+  implementation("com.fasterxml.uuid:java-uuid-generator:5.1.0")
   implementation("com.pauldijou:jwt-core_2.11:5.0.0")
-  implementation("com.google.code.gson:gson:2.11.0")
   implementation("com.google.guava:guava:33.2.1-jre")
 
   implementation(platform("com.amazonaws:aws-java-sdk-bom:1.12.767"))

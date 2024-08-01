@@ -1,6 +1,6 @@
 package uk.gov.justice.hmpps.casenotes.services
 
-import com.google.gson.Gson
+import com.fasterxml.jackson.databind.ObjectMapper
 import org.junit.jupiter.api.Test
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.verify
@@ -12,10 +12,10 @@ import wiremock.org.apache.commons.io.IOUtils
 import java.nio.charset.StandardCharsets
 
 @JsonTest
-class EventListenerTest(@Autowired gson: Gson) {
+class EventListenerTest(@Autowired objectMapper: ObjectMapper) {
   private val caseNoteService: CaseNoteService = mock()
   private val mergeOffenderService: MergeOffenderService = mock()
-  private var eventListener: EventListener = EventListener(caseNoteService, mergeOffenderService, gson)
+  private var eventListener: EventListener = EventListener(caseNoteService, mergeOffenderService, objectMapper)
 
   @Test
   fun testDeleteEvent() {

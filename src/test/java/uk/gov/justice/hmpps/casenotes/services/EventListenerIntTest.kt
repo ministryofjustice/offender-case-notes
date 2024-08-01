@@ -30,4 +30,4 @@ class EventListenerIntTest : IntegrationTest() {
   }
 }
 
-private fun String.readFile(): String = EventListenerIntTest::class.java.getResource(this).readText()
+private fun String.readFile(): String = EventListenerIntTest::class.java.getResource(this)!!.readText()
