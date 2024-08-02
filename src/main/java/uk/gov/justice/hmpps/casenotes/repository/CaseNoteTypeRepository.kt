@@ -6,6 +6,5 @@ import uk.gov.justice.hmpps.casenotes.model.CaseNoteType
 
 @Repository
 interface CaseNoteTypeRepository : JpaRepository<CaseNoteType?, Long?> {
-  @Suppress("FunctionName")
-  fun findCaseNoteTypeByParentType_TypeAndType(parentType: String?, type: String?): CaseNoteType?
+  fun findCaseNoteTypeByParentTypeTypeAndType(parentType: String?, type: String?): CaseNoteType?
 }

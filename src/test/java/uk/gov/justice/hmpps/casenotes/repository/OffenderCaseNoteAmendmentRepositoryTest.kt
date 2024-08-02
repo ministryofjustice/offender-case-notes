@@ -31,7 +31,7 @@ class OffenderCaseNoteAmendmentRepositoryTest : IntegrationTest() {
   fun setUp() {
     val jwt = Jwt.withTokenValue("some").subject("anonymous").header("head", "something").build()
     SecurityContextHolder.getContext().authentication = AuthAwareAuthenticationToken(jwt, "userId", emptyList())
-    genType = caseNoteTypeRepository.findCaseNoteTypeByParentType_TypeAndType(PARENT_TYPE, SUB_TYPE)!!
+    genType = caseNoteTypeRepository.findCaseNoteTypeByParentTypeTypeAndType(PARENT_TYPE, SUB_TYPE)!!
   }
 
   @Test

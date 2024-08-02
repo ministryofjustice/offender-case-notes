@@ -40,11 +40,13 @@ class SubjectAccessRequestServiceTest : IntegrationTest() {
     val caseNotes = subjectAccessRequestService.getCaseNotes(offenderIdentifier, fromDate, toDate)
 
     assertThat(caseNotes.size).isEqualTo(5)
-    assertThat(caseNotes[0].creationDateTime).isEqualTo("2019-08-29T17:08:46.655233")
-    assertThat(caseNotes[1].creationDateTime).isEqualTo("2022-07-29T11:08:46.655233")
-    assertThat(caseNotes[2].creationDateTime).isEqualTo("2023-07-29T17:08:46.655233")
-    assertThat(caseNotes[3].creationDateTime).isEqualTo("2023-11-29T17:08:46.655233")
-    assertThat(caseNotes[4].creationDateTime).isEqualTo("2023-12-30T17:08:46.655233")
+    assertThat(caseNotes.map { it.creationDateTime.toString() }).containsExactlyInAnyOrder(
+      "2019-08-29T17:08:46.655233",
+      "2022-07-29T11:08:46.655233",
+      "2023-07-29T17:08:46.655233",
+      "2023-11-29T17:08:46.655233",
+      "2023-12-30T17:08:46.655233",
+    )
   }
 
   @Test
@@ -56,9 +58,11 @@ class SubjectAccessRequestServiceTest : IntegrationTest() {
     val caseNotes = subjectAccessRequestService.getCaseNotes(offenderIdentifier, fromDate, toDate)
 
     assertThat(caseNotes.size).isEqualTo(3)
-    assertThat(caseNotes[0].creationDateTime).isEqualTo("2023-07-29T17:08:46.655233")
-    assertThat(caseNotes[1].creationDateTime).isEqualTo("2023-11-29T17:08:46.655233")
-    assertThat(caseNotes[2].creationDateTime).isEqualTo("2023-12-30T17:08:46.655233")
+    assertThat(caseNotes.map { it.creationDateTime.toString() }).containsExactlyInAnyOrder(
+      "2023-07-29T17:08:46.655233",
+      "2023-11-29T17:08:46.655233",
+      "2023-12-30T17:08:46.655233",
+    )
   }
 
   @Test
