@@ -5,10 +5,11 @@ import org.springframework.data.domain.AuditorAware
 import org.springframework.data.jpa.repository.config.EnableJpaAuditing
 import org.springframework.stereotype.Service
 import java.util.Optional
+import java.util.Optional.of
 
 @Configuration
 @EnableJpaAuditing(auditorAwareRef = "auditorAware")
 @Service(value = "auditorAware")
-class AuditorAwareImpl(private val authenticationFacade: SecurityUserContext) : AuditorAware<String> {
-  override fun getCurrentAuditor(): Optional<String> = authenticationFacade.getCurrentUsername()
+class AuditorAwareImpl : AuditorAware<String> {
+  override fun getCurrentAuditor(): Optional<String> = of(CaseNoteRequestContext.get().username)
 }

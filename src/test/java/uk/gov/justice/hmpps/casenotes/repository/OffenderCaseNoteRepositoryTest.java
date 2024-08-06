@@ -48,7 +48,7 @@ public class OffenderCaseNoteRepositoryTest extends IntegrationTest {
         final var jwt = Jwt.withTokenValue("some").subject("anonymous").header("head", "something").build();
         SecurityContextHolder.getContext().setAuthentication(
                 new AuthAwareAuthenticationToken(jwt, "userId", Collections.emptyList()));
-        genType = caseNoteTypeRepository.findCaseNoteTypeByParentType_TypeAndType(PARENT_TYPE, SUB_TYPE);
+        genType = caseNoteTypeRepository.findCaseNoteTypeByParentTypeTypeAndType(PARENT_TYPE, SUB_TYPE);
     }
 
     @Test
@@ -171,7 +171,7 @@ public class OffenderCaseNoteRepositoryTest extends IntegrationTest {
         repository.save(retrievedOldNote);
 
         final var yesterday = now().minusDays(1);
-        final var rows = repository.findByCaseNoteType_ParentType_TypeInAndModifyDateTimeAfterOrderByModifyDateTime(Set.of("POM"), yesterday, Pageable.unpaged());
+        final var rows = repository.findByCaseNoteTypeParentTypeTypeInAndModifyDateTimeAfterOrderByModifyDateTime(Set.of("POM"), yesterday, Pageable.unpaged());
         assertThat(rows).extracting(OffenderCaseNote::getNoteText).contains(noteText).doesNotContain(noteTextWithAmendment);
     }
 
@@ -195,7 +195,7 @@ public class OffenderCaseNoteRepositoryTest extends IntegrationTest {
         assertThat(update).isEqualTo(1);
 
         final var yesterday = now().minusDays(1);
-        final var rows = repository.findByCaseNoteType_ParentType_TypeInAndModifyDateTimeAfterOrderByModifyDateTime(Set.of("POM", "BOB"), yesterday, Pageable.unpaged());
+        final var rows = repository.findByCaseNoteTypeParentTypeTypeInAndModifyDateTimeAfterOrderByModifyDateTime(Set.of("POM", "BOB"), yesterday, Pageable.unpaged());
         assertThat(rows).extracting(OffenderCaseNote::getNoteText).contains(newNoteText).doesNotContain(oldNoteText);
     }
 
@@ -496,8 +496,8 @@ public class OffenderCaseNoteRepositoryTest extends IntegrationTest {
                 .offenderIdentifier(offenderIdentifier)
                 .caseNoteType(genType)
                 .noteText("HELLO")
-                .createUserId("anonymous")
-                .modifyUserId("anonymous");
+                .createUserId("SYS")
+                .modifyUserId("SYS");
 
     }
 }

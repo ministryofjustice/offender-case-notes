@@ -15,6 +15,8 @@ import jakarta.servlet.ServletRequest;
 import jakarta.servlet.ServletResponse;
 import java.io.IOException;
 
+import static java.util.Optional.ofNullable;
+
 @Slf4j
 @Component
 @Order(1)
@@ -40,10 +42,10 @@ public class UserMdcFilter implements Filter {
         final var currentUsername = securityUserContext.getCurrentUsername();
 
         try {
-            currentUsername.ifPresent(u -> MDC.put(USER_ID_HEADER, u));
+            ofNullable(currentUsername).ifPresent(u -> MDC.put(USER_ID_HEADER, u));
             chain.doFilter(request, response);
         } finally {
-            currentUsername.ifPresent(u -> MDC.remove(USER_ID_HEADER));
+            ofNullable(currentUsername).ifPresent(u -> MDC.remove(USER_ID_HEADER));
         }
     }
 

@@ -90,8 +90,11 @@ class CaseNoteAwsEventPusherTest {
       .authorName("Mickey Mouse")
       .offenderIdentifier("A1234AC")
       .type("GEN")
+      .typeDescription("Description of GEN")
       .subType("OSE")
+      .subTypeDescription("Description of OSE")
       .text("HELLO")
+      .source("OCNS")
       .build()
   }
 }

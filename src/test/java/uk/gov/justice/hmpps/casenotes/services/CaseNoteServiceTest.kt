@@ -1,6 +1,7 @@
 package uk.gov.justice.hmpps.casenotes.services
 
 import com.microsoft.applicationinsights.TelemetryClient
+import jakarta.persistence.EntityManager
 import jakarta.validation.ValidationException
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
@@ -24,9 +25,14 @@ import org.springframework.data.domain.PageImpl
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Sort.Direction
 import org.springframework.data.jpa.domain.Specification
+import org.springframework.mock.web.MockHttpServletRequest
 import org.springframework.security.access.AccessDeniedException
+import org.springframework.web.context.request.RequestContextHolder
+import org.springframework.web.context.request.ServletRequestAttributes
+import uk.gov.justice.hmpps.casenotes.config.CaseNoteRequestContext
 import uk.gov.justice.hmpps.casenotes.config.SecurityUserContext
 import uk.gov.justice.hmpps.casenotes.config.SecurityUserContext.UserIdUser
+import uk.gov.justice.hmpps.casenotes.config.Source
 import uk.gov.justice.hmpps.casenotes.dto.CaseNote
 import uk.gov.justice.hmpps.casenotes.dto.CaseNoteAmendment
 import uk.gov.justice.hmpps.casenotes.dto.CaseNoteFilter
@@ -59,6 +65,7 @@ class CaseNoteServiceTest {
   private val caseNoteTypeMerger: CaseNoteTypeMerger = mock()
   private val telemetryClient: TelemetryClient = mock()
   private var caseNoteService: CaseNoteService = mock()
+  private var entityManager: EntityManager = mock()
 
   @Captor
   lateinit var filterCaptor: ArgumentCaptor<OffenderCaseNoteFilter>
@@ -74,6 +81,7 @@ class CaseNoteServiceTest {
       externalApiService,
       caseNoteTypeMerger,
       telemetryClient,
+      entityManager,
     )
   }
 
@@ -82,7 +90,7 @@ class CaseNoteServiceTest {
     @Test
     fun `non sensitive case note stored in NOMIS`() {
       whenever(
-        caseNoteTypeRepository.findCaseNoteTypeByParentType_TypeAndType(
+        caseNoteTypeRepository.findCaseNoteTypeByParentTypeTypeAndType(
           any<String>(),
           any<String>(),
         ),
@@ -108,13 +116,13 @@ class CaseNoteServiceTest {
       assertThat(caseNote.locationId).isEqualTo("agency")
       assertThat(caseNote.caseNoteId).isEqualTo("12345")
       assertThat(caseNote.eventId).isEqualTo(12345)
-      Mockito.verify(caseNoteTypeRepository).findCaseNoteTypeByParentType_TypeAndType("type", "SUB")
+      Mockito.verify(caseNoteTypeRepository).findCaseNoteTypeByParentTypeTypeAndType("type", "SUB")
     }
 
     @Test
     fun `cannot create case note without appropriate role`() {
       whenever(
-        caseNoteTypeRepository.findCaseNoteTypeByParentType_TypeAndType(
+        caseNoteTypeRepository.findCaseNoteTypeByParentTypeTypeAndType(
           any<String>(),
           any<String>(),
         ),
@@ -136,26 +144,39 @@ class CaseNoteServiceTest {
       val caseNoteId = UUID.randomUUID()
       val now = LocalDateTime.now()
       val noteType: CaseNoteType = CaseNoteType.builder()
-        .parentType(ParentNoteType.builder().type("someparent").build())
+        .parentType(
+          ParentNoteType.builder().type("someparent").description("description of parent")
+            .createDateTime(LocalDateTime.MIN).build(),
+        )
         .type("sometype")
+        .description("description of some type")
         .sensitive(true)
+        .createDateTime(LocalDateTime.MIN)
         .build()
+      val defaultContext = CaseNoteRequestContext("someuser", "Some User", "userId", source = Source.DPS)
 
       @BeforeEach
       fun beforeEach() {
-        whenever(caseNoteTypeRepository.findCaseNoteTypeByParentType_TypeAndType(any(), any())).thenReturn(noteType)
+        whenever(caseNoteTypeRepository.findCaseNoteTypeByParentTypeTypeAndType(any(), any())).thenReturn(noteType)
         whenever(securityUserContext.isOverrideRole(any<String>(), any<String>())).thenReturn(true)
         whenever(securityUserContext.getCurrentUser()).thenReturn(UserIdUser("someuser", "userId"))
-        whenever(repository.save(any<OffenderCaseNote>())).thenAnswer { i ->
-          (i.arguments[0] as OffenderCaseNote).toBuilder().id(caseNoteId).build()
+        whenever(repository.saveAndFlush(any<OffenderCaseNote>())).thenAnswer { i ->
+          (i.arguments[0] as OffenderCaseNote).toBuilder().id(caseNoteId).createDateTime(now).eventId(1234).build()
         }
+        val request = MockHttpServletRequest()
+        RequestContextHolder.setRequestAttributes(ServletRequestAttributes(request))
+        RequestContextHolder.getRequestAttributes()!!
+          .setAttribute(CaseNoteRequestContext::class.simpleName!!, defaultContext, 0)
       }
 
       @Test
       fun `sensitive case note stored outside NOMIS in dedicated database`() {
-        whenever(externalApiService.getUserDetails("someuser")).thenReturn(
-          Optional.of(UserDetails(name = "John Smith", userId = "4321")),
-        )
+        RequestContextHolder.getRequestAttributes()!!
+          .setAttribute(
+            CaseNoteRequestContext::class.simpleName!!,
+            defaultContext.copy(userDisplayName = "John Smith", userId = "4321"),
+            0,
+          )
 
         val createdNote: CaseNote = caseNoteService.createCaseNote(
           "A1234AA",
@@ -173,20 +194,29 @@ class CaseNoteServiceTest {
             .offenderIdentifier("A1234AA")
             .sensitive(true)
             .type("someparent")
+            .typeDescription("description of parent")
             .subType("sometype")
+            .subTypeDescription("description of some type")
             .text("HELLO")
             .occurrenceDateTime(now)
             .authorName("John Smith")
             .authorUserId("4321")
             .source("OCNS")
             .amendments(emptyList())
+            .creationDateTime(now)
+            .eventId(1234)
             .build(),
         )
       }
 
       @Test
       fun `sensitive case note defaults author details to username where user details not returned`() {
-        whenever(externalApiService.getUserDetails("someuser")).thenReturn(Optional.empty())
+        RequestContextHolder.getRequestAttributes()!!
+          .setAttribute(
+            CaseNoteRequestContext::class.simpleName!!,
+            defaultContext.copy(userDisplayName = "someuser", userId = "someuser"),
+            0,
+          )
 
         val createdNote: CaseNote = caseNoteService.createCaseNote(
           "A1234AA",
@@ -204,7 +234,12 @@ class CaseNoteServiceTest {
 
       @Test
       fun `sensitive case note defaults author name to username where user name not returned`() {
-        whenever(externalApiService.getUserDetails("someuser")).thenReturn(Optional.of(UserDetails(name = null)))
+        RequestContextHolder.getRequestAttributes()!!
+          .setAttribute(
+            CaseNoteRequestContext::class.simpleName!!,
+            defaultContext.copy(userDisplayName = "someuser", userId = "4321"),
+            0,
+          )
 
         val createdNote: CaseNote = caseNoteService.createCaseNote(
           "A1234AA",
@@ -221,7 +256,12 @@ class CaseNoteServiceTest {
 
       @Test
       fun `sensitive case note defaults author name to username where user id not returned`() {
-        whenever(externalApiService.getUserDetails("someuser")).thenReturn(Optional.of(UserDetails(userId = null)))
+        RequestContextHolder.getRequestAttributes()!!
+          .setAttribute(
+            CaseNoteRequestContext::class.simpleName!!,
+            defaultContext.copy(userDisplayName = "someuser", userId = "someuser"),
+            0,
+          )
 
         val createdNote: CaseNote = caseNoteService.createCaseNote(
           "A1234AA",
@@ -240,7 +280,8 @@ class CaseNoteServiceTest {
 
   @Test
   fun caseNote_noAddRole() {
-    val noteType: CaseNoteType = CaseNoteType.builder().type("sometype").parentType(ParentNoteType.builder().build()).build()
+    val noteType: CaseNoteType =
+      CaseNoteType.builder().type("sometype").parentType(ParentNoteType.builder().build()).build()
     val offenderCaseNote: OffenderCaseNote = createOffenderCaseNote(noteType)
     whenever(repository.findById(any())).thenReturn(Optional.of(offenderCaseNote))
 
@@ -261,7 +302,11 @@ class CaseNoteServiceTest {
 
   @Test
   fun getCaseNote() {
-    val noteType: CaseNoteType = CaseNoteType.builder().type("sometype").parentType(ParentNoteType.builder().build()).build()
+    val noteType: CaseNoteType =
+      CaseNoteType.builder().type("sometype").description("Type Description")
+        .parentType(ParentNoteType.builder().type("parenttype").description("Parent Type Description").build())
+        .createDateTime(LocalDateTime.MIN)
+        .build()
     val offenderCaseNote: OffenderCaseNote = createOffenderCaseNote(noteType)
     whenever(repository.findById(any())).thenReturn(Optional.of(offenderCaseNote))
     whenever(securityUserContext.isOverrideRole(any<String>(), any<String>(), any<String>())).thenReturn(true)
@@ -428,7 +473,11 @@ class CaseNoteServiceTest {
 
       @BeforeEach
       fun beforeEach() {
-        val noteType: CaseNoteType = CaseNoteType.builder().type("sometype").parentType(ParentNoteType.builder().build()).build()
+        val noteType: CaseNoteType =
+          CaseNoteType.builder().type("sometype").description("Type Description")
+            .parentType(ParentNoteType.builder().type("ParentType").description("Parent Type Description").build())
+            .createDateTime(LocalDateTime.MIN)
+            .build()
         val offenderCaseNote: OffenderCaseNote = createOffenderCaseNote(noteType)
         whenever(repository.findById(any())).thenReturn(Optional.of(offenderCaseNote))
         whenever(securityUserContext.isOverrideRole(any<String>(), any<String>())).thenReturn(true)
@@ -437,9 +486,17 @@ class CaseNoteServiceTest {
 
       @Test
       fun `can amend sensitive case note`() {
-        whenever(externalApiService.getUserDetails(any<String>())).thenReturn(Optional.of(UserDetails(name = "author", userId = "12345")))
+        whenever(externalApiService.getUserDetails(any<String>())).thenReturn(
+          Optional.of(
+            UserDetails(
+              name = "author",
+              userId = "12345",
+            ),
+          ),
+        )
 
-        val caseNote: CaseNote = caseNoteService.amendCaseNote("A1234AC", caseNoteIdentifier.toString(), UpdateCaseNote("text"))
+        val caseNote: CaseNote =
+          caseNoteService.amendCaseNote("A1234AC", caseNoteIdentifier.toString(), UpdateCaseNote("text"))
 
         assertThat(caseNote.amendments).hasSize(1)
 
@@ -532,7 +589,11 @@ class CaseNoteServiceTest {
 
     caseNoteService.softDeleteCaseNote("A1234AC", offenderCaseNoteId.toString())
 
-    Mockito.verify(telemetryClient).trackEvent("SecureCaseNoteSoftDelete", mapOf("userName" to "user", "offenderId" to "A1234AC", "case note id" to offenderCaseNoteId.toString()), null)
+    Mockito.verify(telemetryClient).trackEvent(
+      "SecureCaseNoteSoftDelete",
+      mapOf("userName" to "user", "offenderId" to "A1234AC", "case note id" to offenderCaseNoteId.toString()),
+      null,
+    )
   }
 
   @Test
@@ -573,7 +634,11 @@ class CaseNoteServiceTest {
 
     caseNoteService.softDeleteCaseNoteAmendment("A1234AC", 1L)
 
-    Mockito.verify(telemetryClient).trackEvent("SecureCaseNoteAmendmentSoftDelete", mapOf("userName" to "user", "offenderId" to "A1234AC", "case note amendment id" to "1"), null)
+    Mockito.verify(telemetryClient).trackEvent(
+      "SecureCaseNoteAmendmentSoftDelete",
+      mapOf("userName" to "user", "offenderId" to "A1234AC", "case note amendment id" to "1"),
+      null,
+    )
   }
 
   @Test
@@ -598,8 +663,16 @@ class CaseNoteServiceTest {
     val pageable = PageRequest.of(0, 10, Direction.DESC, "occurrenceDateTime")
     val apiResponseList = listOf(nomisCaseNote)
     val repositoryResponseList = listOf<OffenderCaseNote>()
-    whenever(repository.findAll(ArgumentMatchers.any<Specification<OffenderCaseNote>>())).thenReturn(repositoryResponseList)
-    whenever(externalApiService.getOffenderCaseNotes(anyString(), any(), any())).thenReturn(PageImpl(apiResponseList, pageable, 1))
+    whenever(repository.findAll(ArgumentMatchers.any<Specification<OffenderCaseNote>>())).thenReturn(
+      repositoryResponseList,
+    )
+    whenever(externalApiService.getOffenderCaseNotes(anyString(), any(), any())).thenReturn(
+      PageImpl(
+        apiResponseList,
+        pageable,
+        1,
+      ),
+    )
     whenever(securityUserContext.isOverrideRole(anyString(), anyString(), anyString())).thenReturn(true)
 
     val filter = CaseNoteFilter("someType", "someSubType")
@@ -611,12 +684,26 @@ class CaseNoteServiceTest {
 
   @Test
   fun getCaseNotes_GetFromRepositoryAndPrisonApi() {
-    val noteType = CaseNoteType.builder().type("someSubType").parentType(ParentNoteType.builder().type("someType").build()).build()
+    val noteType =
+      CaseNoteType.builder()
+        .type("someSubType").description("Type Description")
+        .parentType(ParentNoteType.builder().type("someType").description("Parent Type Description").build())
+        .build()
     val offenderCaseNote = createOffenderCaseNote(noteType)
     val pageable = PageRequest.of(0, 10, Direction.DESC, "occurrenceDateTime")
-    whenever(repository.findAll(ArgumentMatchers.any<Specification<OffenderCaseNote>>())).thenReturn(listOf(offenderCaseNote))
+    whenever(repository.findAll(ArgumentMatchers.any<Specification<OffenderCaseNote>>())).thenReturn(
+      listOf(
+        offenderCaseNote,
+      ),
+    )
     val apiResponseList = listOf(createNomisCaseNote("someType", "someSubType"))
-    whenever(externalApiService.getOffenderCaseNotes(anyString(), any(), any())).thenReturn(PageImpl(apiResponseList, pageable, 1))
+    whenever(externalApiService.getOffenderCaseNotes(anyString(), any(), any())).thenReturn(
+      PageImpl(
+        apiResponseList,
+        pageable,
+        1,
+      ),
+    )
     whenever(securityUserContext.isOverrideRole(anyString(), anyString(), anyString())).thenReturn(true)
     val filter = CaseNoteFilter("someType", "someSUbType")
 
@@ -634,9 +721,22 @@ class CaseNoteServiceTest {
 
     val nomisCaseNote = createNomisCaseNote("someType", "someSubType")
     val addNomisCaseNote = createNomisCaseNote("someAddType", "someAddSubType")
-    whenever(externalApiService.getOffenderCaseNotes(anyString(), any(), any())).thenReturn(PageImpl(listOf(nomisCaseNote, addNomisCaseNote), pageable, 2))
+    whenever(externalApiService.getOffenderCaseNotes(anyString(), any(), any())).thenReturn(
+      PageImpl(
+        listOf(
+          nomisCaseNote,
+          addNomisCaseNote,
+        ),
+        pageable,
+        2,
+      ),
+    )
 
-    val noteType = CaseNoteType.builder().type("someSubType").parentType(ParentNoteType.builder().type("someType").build()).build()
+    val noteType =
+      CaseNoteType.builder()
+        .type("someSubType").description("sub type description")
+        .parentType(ParentNoteType.builder().type("someType").description("type description").build())
+        .build()
     val offenderCaseNote = createOffenderCaseNote(noteType)
     whenever(repository.findAll(any<Specification<OffenderCaseNote>>())).thenReturn(listOf(offenderCaseNote))
 
@@ -732,6 +832,8 @@ class CaseNoteServiceTest {
       .offenderIdentifier("A1234AC")
       .caseNoteType(caseNoteType)
       .noteText("HELLO")
+      .eventId(1234)
+      .createDateTime(LocalDateTime.now().minusDays(7))
       .build()
   }
 
