@@ -25,9 +25,14 @@ import org.springframework.data.domain.PageImpl
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Sort.Direction
 import org.springframework.data.jpa.domain.Specification
+import org.springframework.mock.web.MockHttpServletRequest
 import org.springframework.security.access.AccessDeniedException
+import org.springframework.web.context.request.RequestContextHolder
+import org.springframework.web.context.request.ServletRequestAttributes
+import uk.gov.justice.hmpps.casenotes.config.CaseNoteRequestContext
 import uk.gov.justice.hmpps.casenotes.config.SecurityUserContext
 import uk.gov.justice.hmpps.casenotes.config.SecurityUserContext.UserIdUser
+import uk.gov.justice.hmpps.casenotes.config.Source
 import uk.gov.justice.hmpps.casenotes.dto.CaseNote
 import uk.gov.justice.hmpps.casenotes.dto.CaseNoteAmendment
 import uk.gov.justice.hmpps.casenotes.dto.CaseNoteFilter
@@ -148,6 +153,7 @@ class CaseNoteServiceTest {
         .sensitive(true)
         .createDateTime(LocalDateTime.MIN)
         .build()
+      val defaultContext = CaseNoteRequestContext("someuser", "Some User", "userId", source = Source.DPS)
 
       @BeforeEach
       fun beforeEach() {
@@ -157,13 +163,20 @@ class CaseNoteServiceTest {
         whenever(repository.saveAndFlush(any<OffenderCaseNote>())).thenAnswer { i ->
           (i.arguments[0] as OffenderCaseNote).toBuilder().id(caseNoteId).createDateTime(now).eventId(1234).build()
         }
+        val request = MockHttpServletRequest()
+        RequestContextHolder.setRequestAttributes(ServletRequestAttributes(request))
+        RequestContextHolder.getRequestAttributes()!!
+          .setAttribute(CaseNoteRequestContext::class.simpleName!!, defaultContext, 0)
       }
 
       @Test
       fun `sensitive case note stored outside NOMIS in dedicated database`() {
-        whenever(externalApiService.getUserDetails("someuser")).thenReturn(
-          Optional.of(UserDetails(name = "John Smith", userId = "4321")),
-        )
+        RequestContextHolder.getRequestAttributes()!!
+          .setAttribute(
+            CaseNoteRequestContext::class.simpleName!!,
+            defaultContext.copy(userDisplayName = "John Smith", userId = "4321"),
+            0,
+          )
 
         val createdNote: CaseNote = caseNoteService.createCaseNote(
           "A1234AA",
@@ -198,7 +211,12 @@ class CaseNoteServiceTest {
 
       @Test
       fun `sensitive case note defaults author details to username where user details not returned`() {
-        whenever(externalApiService.getUserDetails("someuser")).thenReturn(Optional.empty())
+        RequestContextHolder.getRequestAttributes()!!
+          .setAttribute(
+            CaseNoteRequestContext::class.simpleName!!,
+            defaultContext.copy(userDisplayName = "someuser", userId = "someuser"),
+            0,
+          )
 
         val createdNote: CaseNote = caseNoteService.createCaseNote(
           "A1234AA",
@@ -216,7 +234,12 @@ class CaseNoteServiceTest {
 
       @Test
       fun `sensitive case note defaults author name to username where user name not returned`() {
-        whenever(externalApiService.getUserDetails("someuser")).thenReturn(Optional.of(UserDetails(name = null)))
+        RequestContextHolder.getRequestAttributes()!!
+          .setAttribute(
+            CaseNoteRequestContext::class.simpleName!!,
+            defaultContext.copy(userDisplayName = "someuser", userId = "4321"),
+            0,
+          )
 
         val createdNote: CaseNote = caseNoteService.createCaseNote(
           "A1234AA",
@@ -233,7 +256,12 @@ class CaseNoteServiceTest {
 
       @Test
       fun `sensitive case note defaults author name to username where user id not returned`() {
-        whenever(externalApiService.getUserDetails("someuser")).thenReturn(Optional.of(UserDetails(userId = null)))
+        RequestContextHolder.getRequestAttributes()!!
+          .setAttribute(
+            CaseNoteRequestContext::class.simpleName!!,
+            defaultContext.copy(userDisplayName = "someuser", userId = "someuser"),
+            0,
+          )
 
         val createdNote: CaseNote = caseNoteService.createCaseNote(
           "A1234AA",

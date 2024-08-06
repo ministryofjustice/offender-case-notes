@@ -32,15 +32,19 @@ class CaseNoteContextInterceptor(private val externalApiService: ExternalApiServ
     if (request.method in listOf(POST.name(), PUT.name(), PATCH.name(), DELETE.name())) {
       val source = request.source()
       val context = request.userDetails()?.let {
-        CaseNoteRequestContext(it.username!!, it.name!!, it.userId ?: it.username, it.activeCaseLoadId, source)
+        CaseNoteRequestContext(
+          it.username!!,
+          it.name ?: it.username,
+          it.userId ?: it.username,
+          it.activeCaseLoadId,
+          source,
+        )
+      } ?: when (source) {
+        Source.DPS -> CaseNoteRequestContext(request.username(), request.username(), request.username())
+        Source.NOMIS -> NOMIS_CONTEXT
       }
 
-      check(context != null || source == Source.NOMIS)
-
-      request.setAttribute(
-        CaseNoteRequestContext::class.simpleName,
-        context ?: NOMIS_CONTEXT,
-      )
+      request.setAttribute(CaseNoteRequestContext::class.simpleName, context)
     }
 
     return true

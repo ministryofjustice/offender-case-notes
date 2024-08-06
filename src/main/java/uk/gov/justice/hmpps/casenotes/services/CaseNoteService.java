@@ -258,7 +258,7 @@ public class CaseNoteService {
         final var caseNote = OffenderCaseNote.builder()
             .noteText(newCaseNote.getText())
             .authorUsername(context.getUsername())
-            .authorUserId(ofNullable(context.getUserId()).orElse(context.getUsername()))
+            .authorUserId(context.getUserId())
             .authorName(context.getUserDisplayName())
             .occurrenceDateTime(newCaseNote.getOccurrenceDateTime() == null ? LocalDateTime.now() : newCaseNote.getOccurrenceDateTime())
             .caseNoteType(type)
