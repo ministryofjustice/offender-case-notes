@@ -1,5 +1,5 @@
 plugins {
-  id("uk.gov.justice.hmpps.gradle-spring-boot") version "6.0.1"
+  id("uk.gov.justice.hmpps.gradle-spring-boot") version "6.0.2"
   kotlin("plugin.spring") version "2.0.0"
 }
 
@@ -39,7 +39,7 @@ dependencies {
   implementation("com.google.guava:guava:33.2.1-jre")
 
   implementation(platform("com.amazonaws:aws-java-sdk-bom:1.12.767"))
-  implementation("software.amazon.awssdk:sns:2.26.27")
+  implementation("software.amazon.awssdk:sns:2.26.29")
 
   testAnnotationProcessor("org.projectlombok:lombok:1.18.34")
   testCompileOnly("org.projectlombok:lombok:1.18.34")
