@@ -20,6 +20,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
+import uk.gov.justice.hmpps.casenotes.config.CaseNoteRequestContext;
 import uk.gov.justice.hmpps.casenotes.config.SecurityUserContext;
 import uk.gov.justice.hmpps.casenotes.dto.CaseNote;
 import uk.gov.justice.hmpps.casenotes.dto.CaseNoteAmendment;
@@ -48,6 +49,7 @@ import java.util.stream.Collectors;
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static java.lang.String.format;
 import static java.lang.String.valueOf;
+import static java.util.Optional.ofNullable;
 import static org.springframework.data.domain.Sort.Direction.ASC;
 
 @Service
@@ -248,23 +250,16 @@ public class CaseNoteService {
             ));
         }
 
-        final var username = securityUserContext.getCurrentUser().getUsername();
-        final var userDetails = externalApiService.getUserDetails(username);
-        final var authorName = userDetails
-            .map(user -> isNullOrEmpty(user.getName()) ? username : user.getName())
-            .orElse(username);
-        final var authorUserId = userDetails
-            .map(user -> isNullOrEmpty(user.getUserId()) ? username : user.getUserId())
-            .orElse(username);
+        final CaseNoteRequestContext context = CaseNoteRequestContext.Companion.get();
 
         final var locationId =
             newCaseNote.getLocationId() == null ? externalApiService.getOffenderLocation(offenderIdentifier) : newCaseNote.getLocationId();
 
         final var caseNote = OffenderCaseNote.builder()
             .noteText(newCaseNote.getText())
-            .authorUsername(username)
-            .authorUserId(authorUserId)
-            .authorName(authorName)
+            .authorUsername(context.getUsername())
+            .authorUserId(ofNullable(context.getUserId()).orElse(context.getUsername()))
+            .authorName(context.getUserDisplayName())
             .occurrenceDateTime(newCaseNote.getOccurrenceDateTime() == null ? LocalDateTime.now() : newCaseNote.getOccurrenceDateTime())
             .caseNoteType(type)
             .offenderIdentifier(offenderIdentifier)
