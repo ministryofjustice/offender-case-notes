@@ -1,8 +1,7 @@
 {
   "code": "NEWTYPE1",
   "description": "Change The Desc",
-  "activeFlag": "Y",
+  "activeFlag": "N",
   "source": "OCNS",
-  "subCodes": [
-  ]
+  "subCodes": []
 }

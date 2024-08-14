@@ -1,7 +1,6 @@
 package uk.gov.justice.hmpps.casenotes.services;
 
 import com.microsoft.applicationinsights.TelemetryClient;
-import jakarta.persistence.EntityExistsException;
 import jakarta.persistence.EntityManager;
 import jakarta.validation.Valid;
 import jakarta.validation.ValidationException;
@@ -27,12 +26,10 @@ import uk.gov.justice.hmpps.casenotes.dto.CaseNoteAmendment;
 import uk.gov.justice.hmpps.casenotes.dto.CaseNoteFilter;
 import uk.gov.justice.hmpps.casenotes.dto.CaseNoteTypeDto;
 import uk.gov.justice.hmpps.casenotes.dto.NewCaseNote;
-import uk.gov.justice.hmpps.casenotes.dto.NewCaseNoteType;
 import uk.gov.justice.hmpps.casenotes.dto.NomisCaseNote;
 import uk.gov.justice.hmpps.casenotes.dto.UpdateCaseNote;
 import uk.gov.justice.hmpps.casenotes.dto.UpdateCaseNoteType;
 import uk.gov.justice.hmpps.casenotes.filters.OffenderCaseNoteFilter;
-import uk.gov.justice.hmpps.casenotes.model.CaseNoteType;
 import uk.gov.justice.hmpps.casenotes.model.OffenderCaseNote;
 import uk.gov.justice.hmpps.casenotes.model.ParentNoteType;
 import uk.gov.justice.hmpps.casenotes.repository.CaseNoteTypeRepository;
@@ -49,7 +46,6 @@ import java.util.stream.Collectors;
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static java.lang.String.format;
 import static java.lang.String.valueOf;
-import static java.util.Optional.ofNullable;
 import static org.springframework.data.domain.Sort.Direction.ASC;
 
 @Service
@@ -242,7 +238,7 @@ public class CaseNoteService {
         }
 
         // ensure that the case note type is active
-        if (!type.getParentType().isActive() || !type.isActive()) {
+        if (!type.isActive()) {
             throw new ValidationException(format(
                 "Case Note Type %s/%s is not active",
                 type.getParentType().getType(),
@@ -390,55 +386,10 @@ public class CaseNoteService {
 
     @Transactional
     @PreAuthorize("hasAnyRole('MAINTAIN_REF_DATA', 'SYSTEM_USER')")
-    public CaseNoteTypeDto createCaseNoteType(@NotNull @Valid final NewCaseNoteType newCaseNoteType) {
-
-        final var parentNoteTypeOptional = parentCaseNoteTypeRepository.findById(newCaseNoteType.getType());
-
-        if (parentNoteTypeOptional.isPresent()) {
-            throw new EntityExistsException(newCaseNoteType.getType());
-        }
-
-        final var parentNoteType = parentCaseNoteTypeRepository.save(ParentNoteType.builder()
-            .type(newCaseNoteType.getType())
-            .description(newCaseNoteType.getDescription())
-            .active(newCaseNoteType.isActive())
-            .build());
-
-        return transform(parentNoteType, true, true, true);
-    }
-
-    @Transactional
-    @PreAuthorize("hasAnyRole('MAINTAIN_REF_DATA', 'SYSTEM_USER')")
-    public CaseNoteTypeDto createCaseNoteSubType(
-        final String parentType,
-        @NotNull @Valid final NewCaseNoteType newCaseNoteType
-    ) {
-        final var parentNoteType =
-            parentCaseNoteTypeRepository.findById(parentType).orElseThrow(EntityNotFoundException.withId(parentType));
-
-        if (parentNoteType.getSubType(newCaseNoteType.getType()).isPresent()) {
-            throw new EntityExistsException(newCaseNoteType.getType());
-        }
-        parentNoteType.getSubTypes().add(
-            CaseNoteType.builder()
-                .type(newCaseNoteType.getType())
-                .description(newCaseNoteType.getDescription())
-                .active(newCaseNoteType.isActive())
-                .parentType(parentNoteType)
-                .sensitive(newCaseNoteType.isSensitive())
-                .restrictedUse(newCaseNoteType.isRestrictedUse())
-                .build()
-        );
-
-        return transform(parentNoteType, true, true, true);
-    }
-
-    @Transactional
-    @PreAuthorize("hasAnyRole('MAINTAIN_REF_DATA', 'SYSTEM_USER')")
     public CaseNoteTypeDto updateCaseNoteType(final String parentType, @NotNull @Valid final UpdateCaseNoteType body) {
-        final var parentNoteType =
-            parentCaseNoteTypeRepository.findById(parentType).orElseThrow(EntityNotFoundException.withId(parentType));
-        parentNoteType.update(body.getDescription(), body.isActive());
+        final var parentNoteType = parentCaseNoteTypeRepository.findById(parentType)
+            .orElseThrow(EntityNotFoundException.withId(parentType));
+        parentNoteType.update(body.getDescription());
         return transform(parentNoteType, true, true, true);
     }
 

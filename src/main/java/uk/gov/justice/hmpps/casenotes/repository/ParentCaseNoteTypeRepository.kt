@@ -5,4 +5,4 @@ import org.springframework.stereotype.Repository
 import uk.gov.justice.hmpps.casenotes.model.ParentNoteType
 
 @Repository
-interface ParentCaseNoteTypeRepository : JpaRepository<ParentNoteType?, String?>
+interface ParentCaseNoteTypeRepository : JpaRepository<ParentNoteType, String>

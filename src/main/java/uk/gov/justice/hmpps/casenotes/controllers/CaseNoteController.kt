@@ -28,11 +28,14 @@ import uk.gov.justice.hmpps.casenotes.dto.CaseNoteFilter
 import uk.gov.justice.hmpps.casenotes.dto.CaseNoteTypeDto
 import uk.gov.justice.hmpps.casenotes.dto.ErrorResponse
 import uk.gov.justice.hmpps.casenotes.dto.NewCaseNote
-import uk.gov.justice.hmpps.casenotes.dto.NewCaseNoteType
 import uk.gov.justice.hmpps.casenotes.dto.UpdateCaseNote
 import uk.gov.justice.hmpps.casenotes.dto.UpdateCaseNoteType
 import uk.gov.justice.hmpps.casenotes.services.CaseNoteEventPusher
 import uk.gov.justice.hmpps.casenotes.services.CaseNoteService
+import uk.gov.justice.hmpps.casenotes.types.CaseNoteType
+import uk.gov.justice.hmpps.casenotes.types.CaseNoteTypeService
+import uk.gov.justice.hmpps.casenotes.types.CreateParentType
+import uk.gov.justice.hmpps.casenotes.types.CreateSubType
 
 @Tag(name = "case-notes", description = "Case Note Controller")
 @RestController
@@ -42,6 +45,7 @@ class CaseNoteController(
   private val telemetryClient: TelemetryClient,
   private val securityUserContext: SecurityUserContext,
   private val caseNoteEventPusher: CaseNoteEventPusher,
+  private val caseNoteTypeService: CaseNoteTypeService,
 ) {
   @Operation(summary = "Retrieves a case note")
   @ApiResponses(
@@ -187,7 +191,7 @@ class CaseNoteController(
   )
   @ResponseStatus(HttpStatus.CREATED)
   @PostMapping("/types")
-  fun createCaseNoteType(@RequestBody body: NewCaseNoteType): CaseNoteTypeDto = caseNoteService.createCaseNoteType(body)
+  fun createCaseNoteType(@RequestBody body: CreateParentType): CaseNoteType = caseNoteTypeService.createParentType(body)
 
   @Operation(summary = "Add New Case Note Sub Type", description = "Creates a new case note sub type")
   @ApiResponses(
@@ -208,8 +212,8 @@ class CaseNoteController(
   fun createCaseNoteSubType(
     @Parameter(description = "Parent Case Note Type", required = true, example = "GEN")
     @PathVariable parentType: String,
-    @RequestBody body: NewCaseNoteType,
-  ): CaseNoteTypeDto = caseNoteService.createCaseNoteSubType(parentType, body)
+    @RequestBody body: CreateSubType,
+  ): CaseNoteType = caseNoteTypeService.createSubType(parentType, body)
 
   @Operation(summary = "Update Case Note Type", description = "Creates a new case note type")
   @ApiResponses(

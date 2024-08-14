@@ -3,6 +3,7 @@ package uk.gov.justice.hmpps.casenotes.model;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.EqualsAndHashCode;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 import org.springframework.data.annotation.CreatedBy;
@@ -26,6 +27,7 @@ import java.time.LocalDateTime;
 @Table(name = "CASE_NOTE_TYPE")
 @NoArgsConstructor
 @AllArgsConstructor
+@Getter
 @EntityListeners(AuditingEntityListener.class)
 @Builder(toBuilder = true)
 @EqualsAndHashCode(of = {"parentType", "type"})
@@ -78,49 +80,5 @@ public class CaseNoteType {
         this.active = active;
         this.sensitive = sensitive;
         this.restrictedUse = restrictedUse;
-    }
-
-    public Long getId() {
-        return this.id;
-    }
-
-    public ParentNoteType getParentType() {
-        return this.parentType;
-    }
-
-    public String getType() {
-        return this.type;
-    }
-
-    public String getDescription() {
-        return this.description;
-    }
-
-    public boolean isActive() {
-        return this.active;
-    }
-
-    public boolean isSensitive() {
-        return this.sensitive;
-    }
-
-    public boolean isRestrictedUse() {
-        return this.restrictedUse;
-    }
-
-    public LocalDateTime getCreateDateTime() {
-        return this.createDateTime;
-    }
-
-    public String getCreateUserId() {
-        return this.createUserId;
-    }
-
-    public LocalDateTime getModifyDateTime() {
-        return this.modifyDateTime;
-    }
-
-    public String getModifyUserId() {
-        return this.modifyUserId;
     }
 }

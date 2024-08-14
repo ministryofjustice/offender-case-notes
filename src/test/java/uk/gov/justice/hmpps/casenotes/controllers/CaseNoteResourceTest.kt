@@ -495,8 +495,7 @@ class CaseNoteResourceTest : ResourceTest() {
       .bodyValue(
         """{
             "type": "NEWTYPE1",
-            "description": "A New Type 1",
-            "active": false
+            "description": "A New Type 1"
             }
         """.trimIndent(),
       )
@@ -509,11 +508,7 @@ class CaseNoteResourceTest : ResourceTest() {
     webTestClient.put().uri("/case-notes/types/NEWTYPE1")
       .headers(addBearerToken(token))
       .bodyValue(
-        """{ 
-            "description": "Change The Desc",
-            "active": true
-            }
-        """.trimIndent(),
+        """{ "description": "Change The Desc" }""",
       )
       .exchange()
       .expectStatus().isOk
