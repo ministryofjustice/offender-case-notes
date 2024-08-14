@@ -1,6 +1,6 @@
 plugins {
   id("uk.gov.justice.hmpps.gradle-spring-boot") version "6.0.2"
-  kotlin("plugin.spring") version "2.0.0"
+  kotlin("plugin.spring") version "2.0.10"
 }
 
 configurations {
@@ -22,8 +22,8 @@ dependencies {
   implementation("org.springframework.boot:spring-boot-starter-oauth2-resource-server")
   implementation("org.springframework.boot:spring-boot-starter-oauth2-client")
   implementation("org.springframework.boot:spring-boot-starter-webflux")
-  implementation("uk.gov.justice.service.hmpps:hmpps-sqs-spring-boot-starter:4.1.0")
-  implementation("io.sentry:sentry-spring-boot-starter-jakarta:7.13.0")
+  implementation("uk.gov.justice.service.hmpps:hmpps-sqs-spring-boot-starter:4.3.0")
+  implementation("io.sentry:sentry-spring-boot-starter-jakarta:7.14.0")
 
   implementation("javax.activation:activation:1.1.1")
   implementation("javax.transaction:javax.transaction-api:1.3")
@@ -38,8 +38,8 @@ dependencies {
   implementation("com.pauldijou:jwt-core_2.11:5.0.0")
   implementation("com.google.guava:guava:33.2.1-jre")
 
-  implementation(platform("com.amazonaws:aws-java-sdk-bom:1.12.767"))
-  implementation("software.amazon.awssdk:sns:2.26.29")
+  implementation(platform("com.amazonaws:aws-java-sdk-bom:1.12.768"))
+  implementation("software.amazon.awssdk:sns:2.27.4")
 
   testAnnotationProcessor("org.projectlombok:lombok:1.18.34")
   testCompileOnly("org.projectlombok:lombok:1.18.34")
@@ -52,8 +52,8 @@ dependencies {
   testImplementation("org.testcontainers:localstack:1.20.1")
   testImplementation("io.jsonwebtoken:jjwt-impl:0.12.6")
   testImplementation("io.jsonwebtoken:jjwt-jackson:0.12.6")
-  testImplementation("org.awaitility:awaitility:4.2.1")
-  testImplementation("org.awaitility:awaitility-kotlin:4.2.1")
+  testImplementation("org.awaitility:awaitility:4.2.2")
+  testImplementation("org.awaitility:awaitility-kotlin:4.2.2")
 
   testImplementation("org.springframework.security.oauth:spring-security-oauth2:2.5.2.RELEASE")
   testImplementation("org.springframework.security:spring-security-jwt:1.1.1.RELEASE")
