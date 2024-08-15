@@ -1,7 +1,7 @@
 {
   "offenderIdentifier": "A1234BC",
   "type": "POM",
-  "typeDescription": "POM Notes",
+  "typeDescription": "POM Activity",
   "subType": "GEN",
   "subTypeDescription": "General POM Note",
   "authorUserId": "1111",
