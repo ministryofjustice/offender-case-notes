@@ -6,6 +6,7 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
+import org.hibernate.annotations.Immutable;
 import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedBy;
@@ -23,6 +24,7 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import java.time.LocalDateTime;
 
+@Immutable
 @Entity
 @Table(name = "CASE_NOTE_TYPE")
 @NoArgsConstructor
@@ -74,6 +76,8 @@ public class CaseNoteType {
 
     @LastModifiedBy
     private String modifyUserId;
+
+    private boolean syncToNomis;
 
     public void update(final String description, final boolean active, final boolean sensitive, final boolean restrictedUse) {
         this.description = description;

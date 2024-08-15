@@ -1,4 +1,4 @@
-package uk.gov.justice.hmpps.casenotes.types
+package uk.gov.justice.hmpps.casenotes.types.internal
 
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
@@ -9,7 +9,8 @@ import jakarta.persistence.Id
 import jakarta.persistence.JoinColumn
 import jakarta.persistence.ManyToOne
 import jakarta.persistence.Table
-import org.springframework.data.jpa.repository.JpaRepository
+import uk.gov.justice.hmpps.casenotes.types.CaseNoteType
+import uk.gov.justice.hmpps.casenotes.types.asActiveYn
 
 @Entity
 @Table(name = "case_note_type")
@@ -34,10 +35,17 @@ class SubType(
   @Column(name = "restricted_use", nullable = false)
   var restrictedUse: Boolean = true,
 
-  @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
+  @Id
   @Column(name = "case_note_type_id", nullable = false)
   val id: Long? = null,
-) : SimpleAudited()
+) : SimpleAudited() {
+  @Column(insertable = false, updatable = false)
+  val syncToNomis: Boolean = false
 
-interface SubTypeRepository : JpaRepository<SubType, String>
+  @Column(insertable = false, updatable = false)
+  val dpsUserSelectable: Boolean = true
+}
+
+fun SubType.toModel(): CaseNoteType =
+  CaseNoteType(type, description, active.asActiveYn(), SOURCE, sensitive, restrictedUse)

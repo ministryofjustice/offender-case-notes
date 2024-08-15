@@ -30,7 +30,6 @@ import org.springframework.web.util.UriComponentsBuilder
 import reactor.core.publisher.Mono
 import uk.gov.justice.hmpps.casenotes.dto.BookingIdentifier
 import uk.gov.justice.hmpps.casenotes.dto.CaseNoteFilter
-import uk.gov.justice.hmpps.casenotes.dto.CaseNoteTypeDto
 import uk.gov.justice.hmpps.casenotes.dto.NewCaseNote
 import uk.gov.justice.hmpps.casenotes.dto.NomisCaseNote
 import uk.gov.justice.hmpps.casenotes.dto.OffenderBooking
@@ -68,36 +67,6 @@ class ExternalApiServiceTest {
     whenever(requestBodyUriSpec.uri(any<String>(), any<Any>(), any<Any>())).thenReturn(requestBodySpec)
     whenever(requestHeadersSpec.retrieve()).thenReturn(responseSpecMock)
     whenever(requestBodySpec.retrieve()).thenReturn(responseSpecMock)
-  }
-
-  @Nested
-  inner class getCaseNoteTypes {
-    @Test
-    fun `test calls Prison API`() {
-      val result = listOf(CaseNoteTypeDto())
-      whenever(responseSpecMock.bodyToMono(any<ParameterizedTypeReference<*>>())).thenReturn(
-        Mono.just(result),
-      )
-      assertThat(externalApiService.getCaseNoteTypes()).isSameAs(result)
-
-      verify(prisonApiWebClient).get()
-      verify(requestHeadersUriSpec).uri("/api/reference-domains/caseNoteTypes")
-    }
-  }
-
-  @Nested
-  inner class getUserCaseNoteTypes {
-    @Test
-    fun `test calls Prison API`() {
-      val result = listOf(CaseNoteTypeDto())
-      whenever(responseSpecMock.bodyToMono(any<ParameterizedTypeReference<*>>())).thenReturn(
-        Mono.just(result),
-      )
-      assertThat(externalApiService.getUserCaseNoteTypes()).isSameAs(result)
-
-      verify(prisonApiWebClient).get()
-      verify(requestHeadersUriSpec).uri("/api/users/me/caseNoteTypes")
-    }
   }
 
   @Nested

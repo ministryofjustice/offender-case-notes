@@ -24,18 +24,14 @@ import uk.gov.justice.hmpps.casenotes.config.SecurityUserContext;
 import uk.gov.justice.hmpps.casenotes.dto.CaseNote;
 import uk.gov.justice.hmpps.casenotes.dto.CaseNoteAmendment;
 import uk.gov.justice.hmpps.casenotes.dto.CaseNoteFilter;
-import uk.gov.justice.hmpps.casenotes.dto.CaseNoteTypeDto;
 import uk.gov.justice.hmpps.casenotes.dto.NewCaseNote;
 import uk.gov.justice.hmpps.casenotes.dto.NomisCaseNote;
 import uk.gov.justice.hmpps.casenotes.dto.UpdateCaseNote;
-import uk.gov.justice.hmpps.casenotes.dto.UpdateCaseNoteType;
 import uk.gov.justice.hmpps.casenotes.filters.OffenderCaseNoteFilter;
 import uk.gov.justice.hmpps.casenotes.model.OffenderCaseNote;
-import uk.gov.justice.hmpps.casenotes.model.ParentNoteType;
 import uk.gov.justice.hmpps.casenotes.repository.CaseNoteTypeRepository;
 import uk.gov.justice.hmpps.casenotes.repository.OffenderCaseNoteAmendmentRepository;
 import uk.gov.justice.hmpps.casenotes.repository.OffenderCaseNoteRepository;
-import uk.gov.justice.hmpps.casenotes.repository.ParentCaseNoteTypeRepository;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -59,10 +55,8 @@ public class CaseNoteService {
     private final OffenderCaseNoteRepository repository;
     private final OffenderCaseNoteAmendmentRepository amendmentRepository;
     private final CaseNoteTypeRepository caseNoteTypeRepository;
-    private final ParentCaseNoteTypeRepository parentCaseNoteTypeRepository;
     private final SecurityUserContext securityUserContext;
     private final ExternalApiService externalApiService;
-    private final CaseNoteTypeMerger caseNoteTypeMerger;
     private final TelemetryClient telemetryClient;
     private final EntityManager entityManager;
 
@@ -223,9 +217,8 @@ public class CaseNoteService {
         @NotNull @Valid final NewCaseNote newCaseNote
     ) {
         final var type = caseNoteTypeRepository.findCaseNoteTypeByParentTypeTypeAndType(
-            newCaseNote.getType(),
-            newCaseNote.getSubType()
-        );
+            newCaseNote.getType(), newCaseNote.getSubType()
+            ).filter(it -> !it.isSyncToNomis()).orElse(null);
 
         // If we don't have the type locally then won't be secure, so delegate to prison-api
         if (type == null) {
@@ -307,62 +300,6 @@ public class CaseNoteService {
         return mapper(offenderCaseNote);
     }
 
-    public List<CaseNoteTypeDto> getCaseNoteTypes() {
-        final var caseNoteTypes = externalApiService.getCaseNoteTypes();
-        return caseNoteTypeMerger.mergeAndSortList(
-            caseNoteTypes,
-            getCaseNoteTypes(true, isAllowedToViewOrCreateSensitiveCaseNote(), null)
-        );
-    }
-
-    public List<CaseNoteTypeDto> getUserCaseNoteTypes() {
-        final var userCaseNoteTypes = externalApiService.getUserCaseNoteTypes();
-        return caseNoteTypeMerger.mergeAndSortList(
-            userCaseNoteTypes,
-            getCaseNoteTypes(false, null, isAllowedToCreateRestrictedCaseNote())
-        );
-    }
-
-
-    private List<CaseNoteTypeDto> getCaseNoteTypes(
-        final boolean allTypes,
-        final Boolean sensitiveAllowed,
-        final Boolean restrictedAllowed
-    ) {
-        return parentCaseNoteTypeRepository.findAll().stream()
-            .filter(t -> allTypes || t.isActive())
-            .map(st -> transform(st, allTypes, sensitiveAllowed, restrictedAllowed))
-            .filter(pt -> !pt.getSubCodes().isEmpty())
-            .collect(Collectors.toList());
-    }
-
-    private CaseNoteTypeDto transform(
-        final ParentNoteType parentNoteType,
-        final boolean allTypes,
-        final Boolean sensitiveAllowed,
-        final Boolean restrictedAllowed
-    ) {
-        return CaseNoteTypeDto.builder()
-            .code(parentNoteType.getType())
-            .description(parentNoteType.getDescription())
-            .activeFlag(parentNoteType.isActive() ? "Y" : "N")
-            .source(SERVICE_NAME)
-            .subCodes(parentNoteType.getSubTypes().stream()
-                .filter(t -> allTypes || t.isActive())
-                .filter(t -> restrictedAllowed == null || (restrictedAllowed || !t.isRestrictedUse()))
-                .filter(t -> sensitiveAllowed == null || (sensitiveAllowed || !t.isSensitive()))
-                .map(st -> CaseNoteTypeDto.builder()
-                    .code(st.getType())
-                    .description(st.getDescription())
-                    .source(SERVICE_NAME)
-                    .activeFlag(st.isActive() ? "Y" : "N")
-                    .sensitive(st.isSensitive())
-                    .restrictedUse(st.isRestrictedUse())
-                    .build())
-                .toList())
-            .build();
-    }
-
     public CaseNote getCaseNote(final String offenderIdentifier, final String caseNoteIdentifier) {
         if (isNotSensitiveCaseNote(caseNoteIdentifier)) {
             return mapper(externalApiService.getOffenderCaseNote(
@@ -382,31 +319,6 @@ public class CaseNoteService {
 
     private boolean isNotSensitiveCaseNote(final String caseNoteIdentifier) {
         return NumberUtils.isDigits(caseNoteIdentifier);
-    }
-
-    @Transactional
-    @PreAuthorize("hasAnyRole('MAINTAIN_REF_DATA', 'SYSTEM_USER')")
-    public CaseNoteTypeDto updateCaseNoteType(final String parentType, @NotNull @Valid final UpdateCaseNoteType body) {
-        final var parentNoteType = parentCaseNoteTypeRepository.findById(parentType)
-            .orElseThrow(EntityNotFoundException.withId(parentType));
-        parentNoteType.update(body.getDescription());
-        return transform(parentNoteType, true, true, true);
-    }
-
-    @Transactional
-    @PreAuthorize("hasAnyRole('MAINTAIN_REF_DATA', 'SYSTEM_USER')")
-    public CaseNoteTypeDto updateCaseNoteSubType(
-        final String parentType,
-        final String subType,
-        @NotNull @Valid final UpdateCaseNoteType body
-    ) {
-
-        final var parentNoteType =
-            parentCaseNoteTypeRepository.findById(parentType).orElseThrow(EntityNotFoundException.withId(parentType));
-        final var existingSubType =
-            parentNoteType.getSubType(subType).orElseThrow(EntityNotFoundException.withId(parentType + " " + subType));
-        existingSubType.update(body.getDescription(), body.isActive(), body.isSensitive(), body.isRestrictedUse());
-        return transform(parentNoteType, true, true, true);
     }
 
     @Transactional

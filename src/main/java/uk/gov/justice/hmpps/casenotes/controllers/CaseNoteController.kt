@@ -25,17 +25,11 @@ import org.springframework.web.bind.annotation.RestController
 import uk.gov.justice.hmpps.casenotes.config.SecurityUserContext
 import uk.gov.justice.hmpps.casenotes.dto.CaseNote
 import uk.gov.justice.hmpps.casenotes.dto.CaseNoteFilter
-import uk.gov.justice.hmpps.casenotes.dto.CaseNoteTypeDto
 import uk.gov.justice.hmpps.casenotes.dto.ErrorResponse
 import uk.gov.justice.hmpps.casenotes.dto.NewCaseNote
 import uk.gov.justice.hmpps.casenotes.dto.UpdateCaseNote
-import uk.gov.justice.hmpps.casenotes.dto.UpdateCaseNoteType
 import uk.gov.justice.hmpps.casenotes.services.CaseNoteEventPusher
 import uk.gov.justice.hmpps.casenotes.services.CaseNoteService
-import uk.gov.justice.hmpps.casenotes.types.CaseNoteType
-import uk.gov.justice.hmpps.casenotes.types.CaseNoteTypeService
-import uk.gov.justice.hmpps.casenotes.types.CreateParentType
-import uk.gov.justice.hmpps.casenotes.types.CreateSubType
 
 @Tag(name = "case-notes", description = "Case Note Controller")
 @RestController
@@ -45,7 +39,6 @@ class CaseNoteController(
   private val telemetryClient: TelemetryClient,
   private val securityUserContext: SecurityUserContext,
   private val caseNoteEventPusher: CaseNoteEventPusher,
-  private val caseNoteTypeService: CaseNoteTypeService,
 ) {
   @Operation(summary = "Retrieves a case note")
   @ApiResponses(
@@ -134,132 +127,6 @@ class CaseNoteController(
     telemetryClient.trackEvent("CaseNoteUpdated", createEventProperties(it), null)
     caseNoteEventPusher.sendEvent(it)
   }
-
-  @ApiResponses(
-    ApiResponse(
-      responseCode = "200",
-      description = "OK",
-    ),
-    ApiResponse(
-      responseCode = "404",
-      description = "Case notes types not found",
-      content = [
-        Content(
-          mediaType = "application/json",
-          schema = Schema(implementation = ErrorResponse::class),
-        ),
-      ],
-    ),
-  )
-  @Operation(summary = "Retrieves a list of case note types")
-  @GetMapping("/types")
-  fun getCaseNoteTypes(): List<CaseNoteTypeDto> = caseNoteService.caseNoteTypes
-
-  @ApiResponses(
-    ApiResponse(
-      responseCode = "200",
-      description = "OK",
-    ),
-    ApiResponse(
-      responseCode = "404",
-      description = "Case notes types not found",
-      content = [
-        Content(
-          mediaType = "application/json",
-          schema = Schema(implementation = ErrorResponse::class),
-        ),
-      ],
-    ),
-  )
-  @Operation(summary = "Retrieves a list of case note types for this user")
-  @GetMapping("/types-for-user")
-  fun getUserCaseNoteTypes(): List<CaseNoteTypeDto> = caseNoteService.userCaseNoteTypes
-
-  @Operation(summary = "Add New Case Note Type", description = "Creates a new case note type")
-  @ApiResponses(
-    value = [
-      ApiResponse(
-        responseCode = "201",
-        description = "The Case Note Type has been recorded. The updated object is returned including the status.",
-      ),
-      ApiResponse(
-        responseCode = "409",
-        description = "The case note type has already been recorded. The current unmodified object (including status) is returned.",
-        content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))],
-      ),
-    ],
-  )
-  @ResponseStatus(HttpStatus.CREATED)
-  @PostMapping("/types")
-  fun createCaseNoteType(@RequestBody body: CreateParentType): CaseNoteType = caseNoteTypeService.createParentType(body)
-
-  @Operation(summary = "Add New Case Note Sub Type", description = "Creates a new case note sub type")
-  @ApiResponses(
-    value = [
-      ApiResponse(
-        responseCode = "201",
-        description = "The Case Note Sub Type has been recorded. The updated object is returned including the status.",
-      ),
-      ApiResponse(
-        responseCode = "409",
-        description = "The case note sub type has already been recorded. The current unmodified object (including status) is returned.",
-        content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))],
-      ),
-    ],
-  )
-  @ResponseStatus(HttpStatus.CREATED)
-  @PostMapping("/types/{parentType}")
-  fun createCaseNoteSubType(
-    @Parameter(description = "Parent Case Note Type", required = true, example = "GEN")
-    @PathVariable parentType: String,
-    @RequestBody body: CreateSubType,
-  ): CaseNoteType = caseNoteTypeService.createSubType(parentType, body)
-
-  @Operation(summary = "Update Case Note Type", description = "Creates a new case note type")
-  @ApiResponses(
-    value = [
-      ApiResponse(
-        responseCode = "200",
-        description = "The case note type has been updated. The updated object is returned.",
-      ),
-      ApiResponse(
-        responseCode = "404",
-        description = "The case note type is not found",
-        content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))],
-      ),
-    ],
-  )
-  @ResponseStatus(HttpStatus.OK)
-  @PutMapping("/types/{parentType}")
-  fun updateCaseNoteType(
-    @Parameter(description = "Parent Case Note Type", required = true, example = "OBS")
-    @PathVariable parentType: String,
-    @RequestBody body: UpdateCaseNoteType,
-  ): CaseNoteTypeDto = caseNoteService.updateCaseNoteType(parentType, body)
-
-  @Operation(summary = "Update Case Note Sub Type", description = "Creates a new case note sub type")
-  @ApiResponses(
-    value = [
-      ApiResponse(
-        responseCode = "200",
-        description = "The case note sub type update has been updated. The updated object is returned.",
-      ),
-      ApiResponse(
-        responseCode = "404",
-        description = "The case note sub type is not found",
-        content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))],
-      ),
-    ],
-  )
-  @ResponseStatus(HttpStatus.OK)
-  @PutMapping("/types/{parentType}/{subType}")
-  fun updateCaseNoteSubType(
-    @Parameter(description = "Parent Case Note Type", required = true, example = "OBS")
-    @PathVariable parentType: String,
-    @Parameter(description = "Sub Case Note Type", required = true, example = "GEN")
-    @PathVariable subType: String,
-    @RequestBody body: UpdateCaseNoteType,
-  ): CaseNoteTypeDto = caseNoteService.updateCaseNoteSubType(parentType, subType, body)
 
   @Operation(summary = "Deletes a case note")
   @ApiResponses(
