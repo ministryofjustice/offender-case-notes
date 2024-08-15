@@ -14,7 +14,7 @@ import org.springframework.web.reactive.function.client.WebClientResponseExcepti
 import uk.gov.justice.hmpps.casenotes.dto.ErrorResponse
 import uk.gov.justice.hmpps.casenotes.services.EntityNotFoundException
 
-@RestControllerAdvice(basePackages = ["uk.gov.justice.hmpps.casenotes.controllers"])
+@RestControllerAdvice(basePackages = ["uk.gov.justice.hmpps.casenotes.controllers", "uk.gov.justice.hmpps.casenotes.types"])
 @Slf4j
 class ControllerAdvice {
 

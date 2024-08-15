@@ -49,7 +49,6 @@ import uk.gov.justice.hmpps.casenotes.model.ParentNoteType
 import uk.gov.justice.hmpps.casenotes.repository.CaseNoteTypeRepository
 import uk.gov.justice.hmpps.casenotes.repository.OffenderCaseNoteAmendmentRepository
 import uk.gov.justice.hmpps.casenotes.repository.OffenderCaseNoteRepository
-import uk.gov.justice.hmpps.casenotes.repository.ParentCaseNoteTypeRepository
 import java.time.LocalDateTime
 import java.util.Optional
 import java.util.UUID
@@ -59,10 +58,8 @@ class CaseNoteServiceTest {
   private val repository: OffenderCaseNoteRepository = mock()
   private val amendmentRepository: OffenderCaseNoteAmendmentRepository = mock()
   private val caseNoteTypeRepository: CaseNoteTypeRepository = mock()
-  private val parentCaseNoteTypeRepository: ParentCaseNoteTypeRepository = mock()
   private val securityUserContext: SecurityUserContext = mock()
   private val externalApiService: ExternalApiService = mock()
-  private val caseNoteTypeMerger: CaseNoteTypeMerger = mock()
   private val telemetryClient: TelemetryClient = mock()
   private var caseNoteService: CaseNoteService = mock()
   private var entityManager: EntityManager = mock()
@@ -76,10 +73,8 @@ class CaseNoteServiceTest {
       repository,
       amendmentRepository,
       caseNoteTypeRepository,
-      parentCaseNoteTypeRepository,
       securityUserContext,
       externalApiService,
-      caseNoteTypeMerger,
       telemetryClient,
       entityManager,
     )
@@ -94,7 +89,7 @@ class CaseNoteServiceTest {
           any<String>(),
           any<String>(),
         ),
-      ).thenReturn(null)
+      ).thenReturn(Optional.empty())
       val nomisCaseNote: NomisCaseNote = createNomisCaseNote()
       whenever(externalApiService.createCaseNote(any<String>(), any())).thenReturn(nomisCaseNote)
 
@@ -126,7 +121,7 @@ class CaseNoteServiceTest {
           any<String>(),
           any<String>(),
         ),
-      ).thenReturn(CaseNoteType.builder().build())
+      ).thenReturn(Optional.of(CaseNoteType.builder().build()))
       whenever(securityUserContext.isOverrideRole(any<String>(), any<String>())).thenReturn(false)
 
       assertThatThrownBy {
@@ -157,7 +152,7 @@ class CaseNoteServiceTest {
 
       @BeforeEach
       fun beforeEach() {
-        whenever(caseNoteTypeRepository.findCaseNoteTypeByParentTypeTypeAndType(any(), any())).thenReturn(noteType)
+        whenever(caseNoteTypeRepository.findCaseNoteTypeByParentTypeTypeAndType(any(), any())).thenReturn(Optional.of(noteType))
         whenever(securityUserContext.isOverrideRole(any<String>(), any<String>())).thenReturn(true)
         whenever(securityUserContext.getCurrentUser()).thenReturn(UserIdUser("someuser", "userId"))
         whenever(repository.saveAndFlush(any<OffenderCaseNote>())).thenAnswer { i ->

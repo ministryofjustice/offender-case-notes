@@ -50,7 +50,7 @@
       {
         "code": "OLDONE",
         "description": "Active Old POM Note",
-        "activeFlag": "Y",
+        "activeFlag": "N",
         "source": "OCNS",
         "sensitive": true,
         "restrictedUse": true
@@ -67,7 +67,7 @@
   },
   {
     "code": "POM",
-    "description": "POM Notes",
+    "description": "POM Activity",
     "activeFlag": "Y",
     "source": "OCNS",
     "subCodes": [

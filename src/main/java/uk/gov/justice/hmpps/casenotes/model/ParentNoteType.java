@@ -3,8 +3,10 @@ package uk.gov.justice.hmpps.casenotes.model;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.EqualsAndHashCode;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
+import org.hibernate.annotations.Immutable;
 import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedBy;
@@ -23,14 +25,16 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+@Immutable
 @Entity
 @Table(name = "CASE_NOTE_PARENT_TYPE")
 @NoArgsConstructor
 @AllArgsConstructor
+@Getter
 @EntityListeners(AuditingEntityListener.class)
 @Builder(toBuilder = true)
 @EqualsAndHashCode(of = {"type"})
-@ToString(of = {"type", "description", "active"})
+@ToString(of = {"type", "description"})
 public class ParentNoteType {
 
     @Id()
@@ -39,10 +43,6 @@ public class ParentNoteType {
 
     @Column(name = "DESCRIPTION", nullable = false)
     private String description;
-
-    @Column(name = "ACTIVE", nullable = false)
-    @Builder.Default
-    private boolean active = true;
 
     @CreatedDate
     @Column(nullable = false)
@@ -61,45 +61,4 @@ public class ParentNoteType {
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "parentType")
     @Builder.Default
     private List<CaseNoteType> subTypes = new ArrayList<>();
-
-    public Optional<CaseNoteType> getSubType(final String subType) {
-        return getSubTypes().stream().filter(t -> t.getType().equalsIgnoreCase(subType)).findFirst();
-    }
-
-    public void update(final String description, final boolean active) {
-        this.description = description;
-        this.active = active;
-    }
-
-    public String getType() {
-        return this.type;
-    }
-
-    public String getDescription() {
-        return this.description;
-    }
-
-    public boolean isActive() {
-        return this.active;
-    }
-
-    public LocalDateTime getCreateDateTime() {
-        return this.createDateTime;
-    }
-
-    public String getCreateUserId() {
-        return this.createUserId;
-    }
-
-    public LocalDateTime getModifyDateTime() {
-        return this.modifyDateTime;
-    }
-
-    public String getModifyUserId() {
-        return this.modifyUserId;
-    }
-
-    public List<CaseNoteType> getSubTypes() {
-        return this.subTypes;
-    }
 }

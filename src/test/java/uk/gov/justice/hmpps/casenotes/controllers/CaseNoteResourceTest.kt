@@ -9,11 +9,20 @@ import com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo
 import com.github.tomakehurst.wiremock.matching.ExactMatchMultiValuePattern
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import org.mockito.kotlin.any
+import org.mockito.kotlin.eq
+import org.mockito.kotlin.verify
+import org.springframework.boot.test.mock.mockito.SpyBean
 import uk.gov.justice.hmpps.casenotes.dto.CaseNote
 import uk.gov.justice.hmpps.casenotes.health.wiremock.Elite2Extension.Companion.elite2Api
 import uk.gov.justice.hmpps.casenotes.health.wiremock.OAuthExtension.Companion.oAuthApi
+import uk.gov.justice.hmpps.casenotes.services.ExternalApiService
 
 class CaseNoteResourceTest : ResourceTest() {
+
+  @SpyBean
+  lateinit var externalApiService: ExternalApiService
+
   @Test
   fun testGetCaseNoteTypesNormal() {
     elite2Api.subGetCaseNoteTypes()
@@ -371,6 +380,29 @@ class CaseNoteResourceTest : ResourceTest() {
   }
 
   @Test
+  fun `create a case note with type sync to nomis is sent to prison api`() {
+    oAuthApi.subGetUserDetails("SECURE_CASENOTE_USER")
+    elite2Api.subGetOffender("N1234CT")
+    elite2Api.subCreateCaseNote("N1234CT")
+
+    // create the case note
+    webTestClient.post().uri("/case-notes/{offenderIdentifier}", "N1234CT")
+      .headers(addBearerAuthorisation("SECURE_CASENOTE_USER", CASENOTES_ROLES))
+      .bodyValue(
+        CREATE_CASE_NOTE_BY_TYPE.format(
+          "ACP",
+          "ASSESSMENT",
+          "This is should not be created",
+        ),
+      )
+      .exchange()
+      .expectStatus().isCreated
+      .expectBody().jsonPath("source").isEqualTo("INST")
+
+    verify(externalApiService).createCaseNote(eq("N1234CT"), any())
+  }
+
+  @Test
   fun testCanCreateCaseNote_SecureWithPomRole() {
     oAuthApi.subGetUserDetails("SECURE_CASENOTE_USER")
     elite2Api.subGetOffender("A1234AD")
@@ -495,8 +527,7 @@ class CaseNoteResourceTest : ResourceTest() {
       .bodyValue(
         """{
             "type": "NEWTYPE1",
-            "description": "A New Type 1",
-            "active": false
+            "description": "A New Type 1"
             }
         """.trimIndent(),
       )
@@ -509,11 +540,7 @@ class CaseNoteResourceTest : ResourceTest() {
     webTestClient.put().uri("/case-notes/types/NEWTYPE1")
       .headers(addBearerToken(token))
       .bodyValue(
-        """{ 
-            "description": "Change The Desc",
-            "active": true
-            }
-        """.trimIndent(),
+        """{ "description": "Change The Desc" }""",
       )
       .exchange()
       .expectStatus().isOk
