@@ -3,7 +3,7 @@
     {
       "offenderIdentifier": "A1234AC",
       "type": "POM",
-      "typeDescription": "POM Notes",
+      "typeDescription": "POM Activity",
       "subType": "GEN",
       "subTypeDescription": "General POM Note",
       "source": "OCNS",

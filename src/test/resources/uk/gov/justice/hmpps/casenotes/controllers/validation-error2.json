@@ -1,4 +1,4 @@
 {
   "status": 400,
-  "developerMessage": "updateCaseNoteType.body.description: length must be between 0 and 80"
+  "developerMessage": "updateParentType.updateParentType.description: length must be between 0 and 80"
 }
