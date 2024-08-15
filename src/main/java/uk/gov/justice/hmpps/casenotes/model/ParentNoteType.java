@@ -6,6 +6,7 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
+import org.hibernate.annotations.Immutable;
 import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedBy;
@@ -24,6 +25,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+@Immutable
 @Entity
 @Table(name = "CASE_NOTE_PARENT_TYPE")
 @NoArgsConstructor
@@ -59,16 +61,4 @@ public class ParentNoteType {
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "parentType")
     @Builder.Default
     private List<CaseNoteType> subTypes = new ArrayList<>();
-
-    public Optional<CaseNoteType> getSubType(final String subType) {
-        return subTypes.stream().filter(t -> t.getType().equalsIgnoreCase(subType)).findFirst();
-    }
-
-    public void update(final String description) {
-        this.description = description;
-    }
-
-    public boolean isActive() {
-        return subTypes.stream().anyMatch(CaseNoteType::isActive);
-    }
 }

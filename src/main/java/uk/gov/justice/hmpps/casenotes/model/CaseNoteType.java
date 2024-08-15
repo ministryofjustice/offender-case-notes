@@ -78,11 +78,4 @@ public class CaseNoteType {
     private String modifyUserId;
 
     private boolean syncToNomis;
-
-    public void update(final String description, final boolean active, final boolean sensitive, final boolean restrictedUse) {
-        this.description = description;
-        this.active = active;
-        this.sensitive = sensitive;
-        this.restrictedUse = restrictedUse;
-    }
 }
