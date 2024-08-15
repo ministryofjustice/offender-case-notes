@@ -27,7 +27,7 @@ class CaseNoteTypeController(
   private val readCaseNoteType: ReadCaseNoteType,
   private val writeCaseNoteType: WriteCaseNoteType,
 ) {
-  @Operation(summary = "Add New Case Note Type", description = "Creates a new case note type")
+  @Operation(summary = "Add New Case Note Type")
   @ApiResponses(
     value = [
       ApiResponse(
@@ -45,7 +45,7 @@ class CaseNoteTypeController(
   @PostMapping("/types")
   fun createCaseNoteType(@RequestBody body: CreateParentType): CaseNoteType = writeCaseNoteType.createParentType(body)
 
-  @Operation(summary = "Add New Case Note Sub Type", description = "Creates a new case note sub type")
+  @Operation(summary = "Add New Case Note Sub Type")
   @ApiResponses(
     value = [
       ApiResponse(
@@ -67,7 +67,7 @@ class CaseNoteTypeController(
     @RequestBody body: CreateSubType,
   ): CaseNoteType = writeCaseNoteType.createSubType(parentType, body)
 
-  @Operation(summary = "Update Case Note Type", description = "Creates a new case note type")
+  @Operation(summary = "Update Case Note Type")
   @ApiResponses(
     value = [
       ApiResponse(
@@ -89,7 +89,7 @@ class CaseNoteTypeController(
     @RequestBody body: UpdateParentType,
   ): CaseNoteType = writeCaseNoteType.updateParentType(parentType, body)
 
-  @Operation(summary = "Update Case Note Sub Type", description = "Creates a new case note sub type")
+  @Operation(summary = "Update Case Note Sub Type")
   @ApiResponses(
     value = [
       ApiResponse(
