@@ -7,19 +7,22 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import uk.gov.justice.hmpps.casenotes.dto.SARCaseNoteAmendment;
-import uk.gov.justice.hmpps.casenotes.dto. SubjectAccessRequestData;
+import uk.gov.justice.hmpps.casenotes.dto.SubjectAccessRequestData;
 import uk.gov.justice.hmpps.casenotes.filters.SAROffenderCaseNoteAmendmentFilter;
 import uk.gov.justice.hmpps.casenotes.filters.SAROffenderCaseNoteFilter;
 import uk.gov.justice.hmpps.casenotes.model.OffenderCaseNote;
 import uk.gov.justice.hmpps.casenotes.model.OffenderCaseNoteAmendment;
+import uk.gov.justice.hmpps.casenotes.repository.CaseNoteTypeRepository;
 import uk.gov.justice.hmpps.casenotes.repository.OffenderCaseNoteAmendmentRepository;
 import uk.gov.justice.hmpps.casenotes.repository.OffenderCaseNoteRepository;
+
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
 import static java.lang.String.valueOf;
+import static java.util.Comparator.comparing;
 
 @Service
 @Transactional(readOnly = true)
@@ -53,6 +56,7 @@ public class SubjectAccessRequestService {
 
         sensitiveCaseNotes = offenderCaseNoteList.stream()
                 .map(this::toSubjectAccessRequestContent)
+                .sorted(comparing(SubjectAccessRequestData::getCreationDateTime).reversed())
                 .toList();
         log.debug("{} Case notes for Subject access request fetched for offender identifier {}", sensitiveCaseNotes.size(), offenderIdentifier);
         telemetryClient.trackEvent("SAROffenderCaseNotes", Map.of("offenderNo", offenderIdentifier, "fromDate", valueOf(fromDate),"toDate", valueOf(toDate),"count", valueOf(sensitiveCaseNotes.size())), null);
@@ -75,6 +79,6 @@ public class SubjectAccessRequestService {
                                 .additionalNoteText(a.getNoteText())
                                 .creationDateTime(a.getCreateDateTime())
                                 .build()
-                ).collect(Collectors.toList())).build();
+                ).sorted(comparing(SARCaseNoteAmendment::getCreationDateTime).reversed()).toList()).build();
     }
 }
