@@ -343,6 +343,22 @@ class CaseNoteResourceTest : ResourceTest() {
   }
 
   @Test
+  fun `request with username longer than 64 characters fails with validation exception`() {
+    val username = "A_VERY_LONG_USERNAME_THAT_EXCEEDS_THE_SIXTY_FOUR_CHARACTERS_LIMIT"
+    oAuthApi.subGetUserDetails(username)
+    elite2Api.subCreateCaseNote("A1234AE")
+
+    // create the case note
+    webTestClient.post().uri("/case-notes/{offenderIdentifier}", "A1234AE")
+      .headers(addBearerAuthorisation(username, CASENOTES_ROLES))
+      .bodyValue(CREATE_NORMAL_CASE_NOTE_WITHOUT_LOC.format("This is another case note"))
+      .exchange()
+      .expectStatus().isBadRequest
+      .expectBody()
+      .json("""{"developerMessage": "username for audit exceeds 64 characters"}""")
+  }
+
+  @Test
   fun testCanCreateCaseNote_Normal() {
     oAuthApi.subGetUserDetails("SECURE_CASENOTE_USER")
     elite2Api.subCreateCaseNote("A1234AE")

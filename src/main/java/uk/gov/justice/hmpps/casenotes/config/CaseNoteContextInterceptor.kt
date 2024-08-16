@@ -2,6 +2,7 @@ package uk.gov.justice.hmpps.casenotes.config
 
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
+import jakarta.validation.ValidationException
 import org.springframework.context.annotation.Configuration
 import org.springframework.http.HttpMethod.DELETE
 import org.springframework.http.HttpMethod.PATCH
@@ -58,7 +59,7 @@ class CaseNoteContextInterceptor(private val externalApiService: ExternalApiServ
       ?: throw AccessDeniedException("User is not authenticated")
 
   private fun HttpServletRequest.username(): String = when (source()) {
-    Source.DPS -> authentication().name
+    Source.DPS -> authentication().name?.takeIf { it.length <= 64 } ?: throw ValidationException("username for audit exceeds 64 characters")
     Source.NOMIS -> getHeader(USERNAME)?.trim() ?: Source.NOMIS.name
   }
 
