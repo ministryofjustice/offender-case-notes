@@ -7,8 +7,6 @@ import org.springframework.data.domain.Pageable
 import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Service
 import org.springframework.web.reactive.function.client.WebClient
-import org.springframework.web.reactive.function.client.bodyToFlux
-import org.springframework.web.reactive.function.client.bodyToMono
 import uk.gov.justice.hmpps.casenotes.dto.BookingIdentifier
 import uk.gov.justice.hmpps.casenotes.dto.CaseNoteFilter
 import uk.gov.justice.hmpps.casenotes.dto.NewCaseNote
@@ -16,7 +14,6 @@ import uk.gov.justice.hmpps.casenotes.dto.NomisCaseNote
 import uk.gov.justice.hmpps.casenotes.dto.OffenderBooking
 import uk.gov.justice.hmpps.casenotes.dto.UpdateCaseNote
 import uk.gov.justice.hmpps.casenotes.dto.UserDetails
-import uk.gov.justice.hmpps.casenotes.types.CaseNoteType
 import java.time.format.DateTimeFormatter
 import java.util.Optional
 
@@ -26,16 +23,6 @@ class ExternalApiService(
   private val oauthApiWebClient: WebClient,
   private val elite2ClientCredentialsWebClient: WebClient,
 ) {
-
-  fun getCaseNoteTypes(): List<CaseNoteType> = getCaseNoteTypes("/api/reference-domains/caseNoteTypes")
-  fun getUserCaseNoteTypes(): List<CaseNoteType> = getCaseNoteTypes("/api/users/me/caseNoteTypes")
-
-  private fun getCaseNoteTypes(url: String): List<CaseNoteType> =
-    elite2ApiWebClient.get().uri(url)
-      .retrieve()
-      .bodyToFlux<CaseNoteType>()
-      .collectList()
-      .block()!!
 
   fun getMergedIdentifiersByBookingId(bookingId: Long): List<BookingIdentifier> =
     elite2ClientCredentialsWebClient.get()
@@ -102,7 +89,8 @@ class ExternalApiService(
       .joinToString(separator = "&", prefix = "&")
 
     if (filter.getTypesAndSubTypes().isNotEmpty()) {
-      val typeSubTypesParams = filter.getTypesAndSubTypes().joinToString(separator = "&", prefix = "&") { "typeSubTypes={typeSubTypes}" }
+      val typeSubTypesParams =
+        filter.getTypesAndSubTypes().joinToString(separator = "&", prefix = "&") { "typeSubTypes={typeSubTypes}" }
       return "$params$typeSubTypesParams$sortParams"
     }
 

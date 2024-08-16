@@ -26,16 +26,13 @@ abstract class HealthCheck(private val webClient: WebClient) : HealthIndicator {
 }
 
 @Component
-class Elite2ApiHealth
-constructor(@Qualifier("elite2ApiHealthWebClient") webClient: WebClient) : HealthCheck(webClient)
+class Elite2ApiHealth(@Qualifier("elite2ApiHealthWebClient") webClient: WebClient) : HealthCheck(webClient)
 
 @Component
-class OAuthApiHealth
-constructor(@Qualifier("oauthApiHealthWebClient") webClient: WebClient) : HealthCheck(webClient)
+class OAuthApiHealth(@Qualifier("oauthApiHealthWebClient") webClient: WebClient) : HealthCheck(webClient)
 
 @Component
-class TokenVerificationApiHealth
-constructor(
+class TokenVerificationApiHealth(
   @Qualifier("tokenVerificationApiHealthWebClient") webClient: WebClient,
   @Value("\${tokenverification.enabled:false}") private val tokenVerificationEnabled: Boolean,
 ) : HealthCheck(webClient) {

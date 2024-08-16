@@ -54,7 +54,7 @@ class ParentType(
 fun CreateSubType.asEntity(parent: ParentType) = SubType(parent, type, description, active, sensitive, restrictedUse)
 
 fun ParentType.toModel(): CaseNoteType =
-  CaseNoteType(type, description, isActive().asActiveYn(), SOURCE, subCodes = getSubtypes().map(SubType::toModel).sorted())
+  CaseNoteType(type, description, isActive().asActiveYn(), subCodes = getSubtypes().map(SubType::toModel).sorted())
 
 interface ParentTypeRepository : JpaRepository<ParentType, String> {
   @Query(
@@ -64,8 +64,13 @@ interface ParentTypeRepository : JpaRepository<ParentType, String> {
     where (st.active = true or :activeOnly = false) 
     and (:includeSensitive = true or st.sensitive = false) 
     and (:includeRestricted = true or st.restrictedUse = false)
-    and st.syncToNomis is false
+    and (st.dpsUserSelectable = true or :dpsUserSelectableOnly = false)
     """,
   )
-  fun findAllWithParams(activeOnly: Boolean, includeSensitive: Boolean, includeRestricted: Boolean): List<ParentType>
+  fun findAllWithParams(
+    activeOnly: Boolean,
+    includeSensitive: Boolean,
+    includeRestricted: Boolean,
+    dpsUserSelectableOnly: Boolean,
+  ): List<ParentType>
 }

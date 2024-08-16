@@ -14,8 +14,6 @@ import uk.gov.justice.hmpps.casenotes.types.CreateSubType
 import uk.gov.justice.hmpps.casenotes.types.UpdateParentType
 import uk.gov.justice.hmpps.casenotes.types.UpdateSubType
 
-const val SOURCE = "OCNS"
-
 @Validated
 @Transactional
 @Service

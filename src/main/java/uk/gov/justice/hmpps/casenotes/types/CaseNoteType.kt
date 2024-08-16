@@ -12,9 +12,6 @@ data class CaseNoteType(
   @Schema(required = true, description = "Active indicator flag.", example = "Y", allowableValues = ["Y,N"])
   val activeFlag: ActiveYn = ActiveYn.Y,
 
-  @Schema(description = "Source of Case Note Type, legacy case note are null", example = "OCNS")
-  val source: String? = null,
-
   @Schema(description = "Indicates the type of note is sensitive", example = "true")
   val sensitive: Boolean = false,
 

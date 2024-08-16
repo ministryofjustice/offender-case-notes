@@ -30,7 +30,7 @@ class CaseNoteAwsEventPusherTest {
     whenever(objectMapper.writeValueAsString(any())).thenReturn("messageAsJson")
     whenever(hmppsQueueService.findByTopicId("domainevents")).thenReturn(HmppsTopic("id", "topicUrn", snsClient))
 
-    var publishResponse = PublishResponse.builder().messageId("Hello").build()
+    val publishResponse = PublishResponse.builder().messageId("Hello").build()
     val completableFuture = CompletableFuture<PublishResponse>()
     completableFuture.complete(publishResponse)
 
@@ -58,7 +58,7 @@ class CaseNoteAwsEventPusherTest {
   fun `send event sends to the sns client1`() {
     whenever(objectMapper.writeValueAsString(any())).thenReturn("messageAsJson")
     whenever(hmppsQueueService.findByTopicId("domainevents")).thenReturn(HmppsTopic("id", "topicArn", snsClient))
-    var publishResponse = PublishResponse.builder().messageId("Hello").build()
+    val publishResponse = PublishResponse.builder().messageId("Hello").build()
     val completableFuture = CompletableFuture<PublishResponse>()
     completableFuture.complete(publishResponse)
 

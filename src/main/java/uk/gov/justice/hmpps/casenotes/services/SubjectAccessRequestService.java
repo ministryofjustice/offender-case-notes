@@ -12,7 +12,6 @@ import uk.gov.justice.hmpps.casenotes.filters.SAROffenderCaseNoteAmendmentFilter
 import uk.gov.justice.hmpps.casenotes.filters.SAROffenderCaseNoteFilter;
 import uk.gov.justice.hmpps.casenotes.model.OffenderCaseNote;
 import uk.gov.justice.hmpps.casenotes.model.OffenderCaseNoteAmendment;
-import uk.gov.justice.hmpps.casenotes.repository.CaseNoteTypeRepository;
 import uk.gov.justice.hmpps.casenotes.repository.OffenderCaseNoteAmendmentRepository;
 import uk.gov.justice.hmpps.casenotes.repository.OffenderCaseNoteRepository;
 
