@@ -26,11 +26,11 @@ class QueueHealthCheckNegativeTest : QueueListenerIntegrationTest() {
         .credentialsProvider(
           StaticCredentialsProvider.create(
             object : AwsCredentials {
-              override fun accessKeyId(): String? {
+              override fun accessKeyId(): String {
                 return "FAKE"
               }
 
-              override fun secretAccessKey(): String? {
+              override fun secretAccessKey(): String {
                 return "FAKE"
               }
             },

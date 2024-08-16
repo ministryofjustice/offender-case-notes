@@ -224,7 +224,7 @@ public class OffenderCaseNoteRepositoryTest extends IntegrationTest {
 
         TestTransaction.flagForCommit();
         TestTransaction.end();
-        assertThat(repository.findById(persistedEntity.getId()).isEmpty());
+        assertThat(repository.findById(persistedEntity.getId())).isEmpty();
 
         final var sql = String.format("SELECT COUNT(*) FROM offender_case_note Where offender_case_note_id = '%s'", persistedEntity.getId().toString());
         final var caseNoteCountAfter = jdbcTemplate.queryForObject(sql, Integer.class);
@@ -253,7 +253,7 @@ public class OffenderCaseNoteRepositoryTest extends IntegrationTest {
         TestTransaction.end();
         TestTransaction.start();
 
-        assertThat(repository.findById(persistedEntity.getId()).isEmpty());
+        assertThat(repository.findById(persistedEntity.getId())).isEmpty();
         TestTransaction.end();
 
         final var sql = String.format("SELECT COUNT(*) FROM offender_case_note Where offender_case_note_id = '%s'", persistedEntity.getId().toString());
@@ -289,7 +289,7 @@ public class OffenderCaseNoteRepositoryTest extends IntegrationTest {
         TestTransaction.flagForCommit();
         TestTransaction.end();
         TestTransaction.start();
-        assertThat(repository.findById(persistedEntity.getId()).isEmpty());
+        assertThat(repository.findById(persistedEntity.getId())).isEmpty();
         TestTransaction.end();
 
         final var caseNoteCountAfter = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM offender_case_note_amendment", Integer.class);

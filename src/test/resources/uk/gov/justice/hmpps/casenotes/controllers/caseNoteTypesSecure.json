@@ -1,43 +1,2136 @@
 [
   {
-    "code": "KA",
-    "description": "Key worker",
+    "code": "ACP",
+    "description": "Accredited Programme",
     "activeFlag": "Y",
     "subCodes": [
       {
-        "code": "KS",
-        "description": "Key worker Session",
+        "code": "ASSESSMENT",
+        "description": "Assessment",
         "activeFlag": "Y",
         "sensitive": false,
-        "restrictedUse": false
+        "restrictedUse": false,
+        "subCodes": []
       },
       {
-        "code": "KE",
-        "description": "Key worker Entry",
+        "code": "CONS_WRK",
+        "description": "Consolidation Work",
         "activeFlag": "Y",
         "sensitive": false,
-        "restrictedUse": false
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "DS",
+        "description": "De-Selection",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "GEN_VISIT",
+        "description": "General Visit",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "GS",
+        "description": "Group Session",
+        "activeFlag": "N",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "IA",
+        "description": "Initial Approach",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "OT",
+        "description": "Other",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "POEM",
+        "description": "Post Programme Evaluation Measure",
+        "activeFlag": "N",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "POS5",
+        "description": "Post Programme OM Session five",
+        "activeFlag": "N",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "POS4",
+        "description": "Post Programme OM Session four",
+        "activeFlag": "N",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "POS1",
+        "description": "Post Programme OM Session one",
+        "activeFlag": "N",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "POS6",
+        "description": "Post Programme OM Session six",
+        "activeFlag": "N",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "POS3",
+        "description": "Post Programme OM Session three",
+        "activeFlag": "N",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "POS2",
+        "description": "Post Programme OM Session two",
+        "activeFlag": "N",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "PPREP",
+        "description": "Post Programme Report",
+        "activeFlag": "N",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "PPREPC",
+        "description": "Post Programme Report Completed",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "PPR",
+        "description": "Post Programme Review meeting",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "PPRM",
+        "description": "Post Programme Review Meeting",
+        "activeFlag": "N",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "PPS5",
+        "description": "Pre Programme OM Session five",
+        "activeFlag": "N",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "PPS4",
+        "description": "Pre Programme OM Session four",
+        "activeFlag": "N",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "PPS1",
+        "description": "Pre Programme OM Session one",
+        "activeFlag": "N",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "PPS6",
+        "description": "Pre Programme OM Session six",
+        "activeFlag": "N",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "PPS3",
+        "description": "Pre Programme OM Session three",
+        "activeFlag": "N",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "PPS2",
+        "description": "Pre Programme OM Session two",
+        "activeFlag": "N",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "PPEM",
+        "description": "Pre-Programme Evaluation Measure",
+        "activeFlag": "N",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "PROG_FIN",
+        "description": "Programme Finish",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "PROG_START",
+        "description": "Programme Start",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "RC",
+        "description": "Re-Commitment",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "RE-VISIT",
+        "description": "Re-Visit",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "RF",
+        "description": "Referral",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "SOU",
+        "description": "Statement Of Understanding Signed",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "TSP_SESSION",
+        "description": "TSP 'Catch up' Session",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
       }
     ]
   },
   {
-    "code": "OBS",
-    "description": "Observation",
+    "code": "ACHIEVEMENTS",
+    "description": "Achievements",
     "activeFlag": "Y",
     "subCodes": [
       {
-        "code": "GEN",
+        "code": "APAS",
+        "description": "APAS",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "CHAPLAINCY",
+        "description": "Chaplaincy",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "CIAS",
+        "description": "CIAS",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "EDUCATION",
+        "description": "Education",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "GYM",
+        "description": "Gym",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "HCC",
+        "description": "HCC",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "H&S",
+        "description": "Health and Safety",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "IMB",
+        "description": "IMB",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "LNG & SKILLS",
+        "description": "Learning and Skills",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "OMU",
+        "description": "Offender Management Unit",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "OTHER",
+        "description": "Other",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "REGIMES",
+        "description": "Regimes",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "RESIDENCE",
+        "description": "Residence",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "SAFER CUST",
+        "description": "Safer Custody",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "SEG UNIT",
+        "description": "Segregation Unit",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "CARATS",
+        "description": "Substance Misuse",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "VIOLENCE RED",
+        "description": "Violence Reduction",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "VISITS",
+        "description": "Visits",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "WORKSHOPS",
+        "description": "Workshops / Work Areas",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      }
+    ]
+  },
+  {
+    "code": "ATR",
+    "description": "Alcohol Treatment Requirement",
+    "activeFlag": "Y",
+    "subCodes": [
+      {
+        "code": "TCOUN",
+        "description": "Alcohol Counselling Session",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "AREH-C",
+        "description": "Alcohol Rehab - community",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "AREH-R",
+        "description": "Alcohol Rehab - residential",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "ATEST",
+        "description": "Alcohol Test",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "ATREA",
+        "description": "Alcohol Treatment Session",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "ATRIATP",
+        "description": "Initial Appointment with treatment provi",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "ATRRTO",
+        "description": "Report to Office",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "ATRRTTP",
+        "description": "Report To Treatment Provider",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      }
+    ]
+  },
+  {
+    "code": "ALERT",
+    "description": "Alert",
+    "activeFlag": "Y",
+    "subCodes": [
+      {
+        "code": "ACTIVE",
+        "description": "Made Active",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "INACTIVE",
+        "description": "Made Inactive",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      }
+    ]
+  },
+  {
+    "code": "APP",
+    "description": "Appointment",
+    "activeFlag": "N",
+    "subCodes": [
+      {
+        "code": "OUTCOME",
+        "description": "Outcome of Schedule",
+        "activeFlag": "N",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      }
+    ]
+  },
+  {
+    "code": "BR",
+    "description": "Breach",
+    "activeFlag": "Y",
+    "subCodes": [
+      {
+        "code": "BRP",
+        "description": "Breach Report Sent to Breach Unit/Court",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "CCD",
+        "description": "Confirm Court Date",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      }
+    ]
+  },
+  {
+    "code": "CNOTE",
+    "description": "Case Note",
+    "activeFlag": "N",
+    "subCodes": [
+      {
+        "code": "FWD",
+        "description": "Forwarded",
+        "activeFlag": "N",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      }
+    ]
+  },
+  {
+    "code": "CHAP",
+    "description": "Chaplaincy",
+    "activeFlag": "Y",
+    "subCodes": [
+      {
+        "code": "BERSERILL",
+        "description": "Bereavement/Serious illness",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "COMLINKS",
+        "description": "Community Links",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "FAITH",
+        "description": "Faith Specific Action",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "FAMMAR",
+        "description": "Family Contacts/Marriage",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "GPS",
+        "description": "General Pastoral Support",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "HSY",
+        "description": "Healthcare / Statutory",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "OPV",
+        "description": "OPV Requests",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "RECSTAT",
+        "description": "Reception/Statutory Duty",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "SSY",
+        "description": "Segregation / Statutory",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      }
+    ]
+  },
+  {
+    "code": "COMMS",
+    "description": "Communication",
+    "activeFlag": "Y",
+    "subCodes": [
+      {
+        "code": "CHAPLAINCY",
+        "description": "Chaplaincy",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "COM_IN",
+        "description": "Communication IN",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "COM_OUT",
+        "description": "Communication OUT",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "CUST",
+        "description": "Custody",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "FINANCE",
+        "description": "Finance",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "MAIL ROOM",
+        "description": "Mail Room",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "OMU",
+        "description": "Offender Management Unit",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "OTHER",
+        "description": "Other",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "PIPE",
+        "description": "PIPE Unit",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "RESIDENCE",
+        "description": "Residence",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "SAFER CUST",
+        "description": "Safer Custody",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "SECURITY",
+        "description": "Security",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "SEG UNIT",
+        "description": "Segregation Unit",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      }
+    ]
+  },
+  {
+    "code": "CAB",
+    "description": "Conduct & Behaviour",
+    "activeFlag": "Y",
+    "subCodes": [
+      {
+        "code": "APAS",
+        "description": "APAS",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "CHAPLAINCY",
+        "description": "Chaplaincy",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "CIAS",
+        "description": "CIAS",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "CUST",
+        "description": "Custody",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "DIVERSITY",
+        "description": "Diversity",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "EDUCATION",
+        "description": "Education",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "EQUALITIES",
+        "description": "Equalities",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "GYM",
+        "description": "Gym",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "HCC",
+        "description": "HCC",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "IMB",
+        "description": "IMB",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "LNG & SKILLS",
+        "description": "Learning and Skills",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "MDT",
+        "description": "MDT",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "OMU",
+        "description": "Offender Management Unit",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "OTHER",
+        "description": "Other",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "RECEPTION",
+        "description": "Reception",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "REGIMES",
+        "description": "Regimes",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "RESIDENCE",
+        "description": "Residence",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "SAFER CUST",
+        "description": "Safer Custody",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "SEG UNIT",
+        "description": "Segregation Unit",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "CARATS",
+        "description": "Substance Misuse",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "VID LINK",
+        "description": "Video Link",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "VISITS",
+        "description": "Visits",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "WORKSHOPS",
+        "description": "Workshops / Work Areas",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      }
+    ]
+  },
+  {
+    "code": "CRT",
+    "description": "Court",
+    "activeFlag": "Y",
+    "subCodes": [
+      {
+        "code": "CRTPSI",
+        "description": "Post Sentence Interview",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      }
+    ]
+  },
+  {
+    "code": "CVM",
+    "description": "Custodial Violence Management Model",
+    "activeFlag": "Y",
+    "subCodes": [
+      {
+        "code": "CVMC",
+        "description": "Alerts Closed",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "CVMO",
+        "description": "Alerts Open",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "CVMB",
+        "description": "Behaviour Monitoring",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "CVMDOC",
+        "description": "CVM Document Saved",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "CVMG",
         "description": "General",
         "activeFlag": "Y",
         "sensitive": false,
-        "restrictedUse": false
+        "restrictedUse": false,
+        "subCodes": []
       },
       {
-        "code": "SPECIAL",
-        "description": "Special",
+        "code": "CVMI",
+        "description": "Intervention Care Plan",
         "activeFlag": "Y",
         "sensitive": false,
-        "restrictedUse": false
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "CVMK",
+        "description": "Key Worker Entry",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "CVMM",
+        "description": "Monitoring Care Plan",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "CVMR",
+        "description": "Referral",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "CVMV",
+        "description": "Violence Reduction Investigation Report",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      }
+    ]
+  },
+  {
+    "code": "CUSP",
+    "description": "Custody Support Plan CuSP (YCS Only)",
+    "activeFlag": "Y",
+    "subCodes": [
+      {
+        "code": "CUSP C",
+        "description": "CuSP Cancelled",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "CUSP I",
+        "description": "CuSP Check-in",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "CUSP E",
+        "description": "CuSP Engaged",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "CUSP M",
+        "description": "CuSP Management Check",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "CUSP R",
+        "description": "CuSP Refused",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "CUSP S",
+        "description": "CuSP Significant Event Review",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      }
+    ]
+  },
+  {
+    "code": "DRR",
+    "description": "Drug Rehabilitation Requirement",
+    "activeFlag": "Y",
+    "subCodes": [
+      {
+        "code": "DCOUN",
+        "description": "Drug Counselling Session",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "DREH-R",
+        "description": "Drug Rehab - residential",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "DTEST",
+        "description": "Drug Test",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "DTREA",
+        "description": "Drug Treatment Session",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "DRRIATP",
+        "description": "Initial Appointment w.Treatment Provider",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "ITP",
+        "description": "Initial Appointment with Treatment Provi",
+        "activeFlag": "N",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "DRRRTO",
+        "description": "Report to Office",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "DRRRTTP",
+        "description": "Report To Treatment Provider",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      }
+    ]
+  },
+  {
+    "code": "DSPD",
+    "description": "DSPD Offender",
+    "activeFlag": "N",
+    "subCodes": [
+      {
+        "code": "OMREF",
+        "description": "Offender Manager Referral sent",
+        "activeFlag": "N",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      }
+    ]
+  },
+  {
+    "code": "EARNED_HDC",
+    "description": "Earned HDC Scheme",
+    "activeFlag": "Y",
+    "subCodes": [
+      {
+        "code": "ACTIVITY_ATT",
+        "description": "Activity Attendance at Private Prison",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      }
+    ]
+  },
+  {
+    "code": "ETE",
+    "description": "Education, Training and Employment",
+    "activeFlag": "Y",
+    "subCodes": [
+      {
+        "code": "ETERTO",
+        "description": "Report to Office",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "ETERTTP",
+        "description": "Report to Third Party",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      }
+    ]
+  },
+  {
+    "code": "EN",
+    "description": "Enforcement",
+    "activeFlag": "Y",
+    "subCodes": [
+      {
+        "code": "CSUA2",
+        "description": "ACO Warning Letter",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "CSUA",
+        "description": "Confirm 2nd UA/UB + Breach Action Taken",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "CFUA",
+        "description": "Confirm First Warning",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "FTA1LTR",
+        "description": "Explanation Letter following 1st FTA/FTC",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "FTA2LTR",
+        "description": "Explanation Letter following 2nd FTA/FTC",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "FTA3LTR",
+        "description": "Explanation Letter following 3rd FTA/FTC",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "RW1",
+        "description": "Rescind Warning",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "RW2",
+        "description": "Rescind Warning following Second FTA/FTC",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "RW3",
+        "description": "Rescind Warning following Third FTA/ FTC",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      }
+    ]
+  },
+  {
+    "code": "ESS",
+    "description": "Enhanced Service Support",
+    "activeFlag": "Y",
+    "subCodes": [
+      {
+        "code": "ESS4",
+        "description": "Enhanced Serv Supp Referral Not Accepted",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "ESS3",
+        "description": "Enhanced Service Supp Referral Accepted",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "ESS5",
+        "description": "Enhanced Service Supp Referral Withdrawn",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "ESS2",
+        "description": "Enhanced Service Support Contact",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "ESS1",
+        "description": "Enhanced Service Support Session",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      }
+    ]
+  },
+  {
+    "code": "IEP ENTRY",
+    "description": "Entry Level IEP information",
+    "activeFlag": "N",
+    "subCodes": [
+      {
+        "code": "ENTRY ASSESS",
+        "description": "Entry Level IEP Assessment information",
+        "activeFlag": "N",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "ENTRY REVIEW",
+        "description": "Entry Level IEP Review Information",
+        "activeFlag": "N",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "ENTRY WARN",
+        "description": "Entry Level IEP Warning Information",
+        "activeFlag": "N",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      }
+    ]
+  },
+  {
+    "code": "GEN",
+    "description": "General",
+    "activeFlag": "Y",
+    "subCodes": [
+      {
+        "code": "HIST",
+        "description": "History Sheet Entry",
+        "activeFlag": "N",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "HIS",
+        "description": "History Sheet Entry",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "OSE",
+        "description": "Offender Supervisor Entry",
+        "activeFlag": "N",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "RESET",
+        "description": "Resettlement",
+        "activeFlag": "N",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "WELFCHK",
+        "description": "Well--Being Check",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      }
+    ]
+  },
+  {
+    "code": "ISFL",
+    "description": "Incentivised Substance Free Living Areas",
+    "activeFlag": "Y",
+    "subCodes": [
+      {
+        "code": "ISFLN",
+        "description": "Negative",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "ISFLP",
+        "description": "Positive",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "ISFLR",
+        "description": "Reward",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      }
+    ]
+  },
+  {
+    "code": "INTERVENTION",
+    "description": "Interventions",
+    "activeFlag": "Y",
+    "subCodes": [
+      {
+        "code": "ACTIVITY",
+        "description": "Activities",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "APAS",
+        "description": "APAS",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "CUST",
+        "description": "Custody",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "DIVERSITY",
+        "description": "Diversity",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "FINANCE",
+        "description": "Finance",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "HCC",
+        "description": "HCC",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "MAIL ROOM",
+        "description": "Mail Room",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "OCA",
+        "description": "OCA",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "OMU",
+        "description": "Offender Management Unit",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "OTHER",
+        "description": "Other",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "RESIDENCE",
+        "description": "Residence",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "SECURITY",
+        "description": "Security",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "SEG UNIT",
+        "description": "Segregation Unit",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "CARATS",
+        "description": "Substance Misuse",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "VIOLENCE RED",
+        "description": "Violence Reduction",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "VISITS",
+        "description": "Visits",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      }
+    ]
+  },
+  {
+    "code": "KA",
+    "description": "Key Worker Activity",
+    "activeFlag": "Y",
+    "subCodes": [
+      {
+        "code": "KE",
+        "description": "Key Worker Entry",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "KS",
+        "description": "Key Worker Session",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      }
+    ]
+  },
+  {
+    "code": "LAB_ALLOC",
+    "description": "Labour Allocation",
+    "activeFlag": "Y",
+    "subCodes": [
+      {
+        "code": "LAB_APP",
+        "description": "Labour Application",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      }
+    ]
+  },
+  {
+    "code": "LTR",
+    "description": "Letter",
+    "activeFlag": "Y",
+    "subCodes": [
+      {
+        "code": "FO",
+        "description": "From Offender",
+        "activeFlag": "N",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "LTRFO",
+        "description": "From Offender",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "LTRFTP",
+        "description": "From Third Party",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "FTP",
+        "description": "From Third Party",
+        "activeFlag": "N",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "LTRTO",
+        "description": "To Offender",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "TO",
+        "description": "To Offender",
+        "activeFlag": "N",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "LTRTTP",
+        "description": "To Third Party",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "TTP",
+        "description": "To Third Party",
+        "activeFlag": "N",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      }
+    ]
+  },
+  {
+    "code": "MCHECK",
+    "description": "Management Check",
+    "activeFlag": "Y",
+    "subCodes": [
+      {
+        "code": "MCHECK",
+        "description": "Management Check",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      }
+    ]
+  },
+  {
+    "code": "MHT",
+    "description": "Mental Health Treatment Requirement",
+    "activeFlag": "Y",
+    "subCodes": [
+      {
+        "code": "MHTIATP",
+        "description": "Initial Appointment w.Treatment Provider",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "ITP",
+        "description": "Initial Appointment with Treatment Provi",
+        "activeFlag": "N",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "MHTRTO",
+        "description": "Report to Office",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "MHTRTTP",
+        "description": "Report To Treatment Provider",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      }
+    ]
+  },
+  {
+    "code": "MIGRATION",
+    "description": "Migration",
+    "activeFlag": "Y",
+    "subCodes": [
+      {
+        "code": "OBS_GEN",
+        "description": "General Entry",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      }
+    ]
+  },
+  {
+    "code": "MOVED_CELL",
+    "description": "Moved Cell",
+    "activeFlag": "N",
+    "subCodes": [
+      {
+        "code": "ADM",
+        "description": "Administrative",
+        "activeFlag": "N",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "BEH",
+        "description": "Behaviour",
+        "activeFlag": "N",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "CLA",
+        "description": "Classification or re-classification",
+        "activeFlag": "N",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "CON",
+        "description": "Conflict with other prisoners",
+        "activeFlag": "N",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "GM",
+        "description": "General moves",
+        "activeFlag": "N",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "HOSP",
+        "description": "Healthcare",
+        "activeFlag": "N",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "LN",
+        "description": "Local needs",
+        "activeFlag": "N",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "PCM",
+        "description": "Maintenance of the prison or cell",
+        "activeFlag": "N",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "RAIM",
+        "description": "Reception and induction moves",
+        "activeFlag": "N",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "SPP",
+        "description": "Security of the prison or other people",
+        "activeFlag": "N",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "SS",
+        "description": "Someone�s safety",
+        "activeFlag": "N",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "VP",
+        "description": "Vulnerable prisoner",
+        "activeFlag": "N",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      }
+    ]
+  },
+  {
+    "code": "NCS",
+    "description": "National Career Service",
+    "activeFlag": "Y",
+    "subCodes": [
+      {
+        "code": "FOLLOW-UP",
+        "description": "Follow-up",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "IND",
+        "description": "Induction",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "PRE-RELEASE",
+        "description": "Pre-release",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      }
+    ]
+  },
+  {
+    "code": "NEG",
+    "description": "Negative Behaviour",
+    "activeFlag": "Y",
+    "subCodes": [
+      {
+        "code": "BEHAVEWARN",
+        "description": "Behaviour Warning",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "NEG_GEN",
+        "description": "General Entry",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "IEP_WARN",
+        "description": "Incentive Warning",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "WORKWARN",
+        "description": "Work Effort Warning",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      }
+    ]
+  },
+  {
+    "code": "OBSERVE",
+    "description": "Observations",
+    "activeFlag": "Y",
+    "subCodes": [
+      {
+        "code": "APAS",
+        "description": "APAS",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "CHAPLAINCY",
+        "description": "Chaplaincy",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "EDUCATION",
+        "description": "Education",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "OBS_GEN",
+        "description": "General Entry",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "GYM",
+        "description": "Gym",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "HCC",
+        "description": "HCC",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "IMB",
+        "description": "IMB",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "LNG & SKILLS",
+        "description": "Learning and Skills",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "NEWS",
+        "description": "News from Home",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "OMU",
+        "description": "Offender Management Unit",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "OTHER",
+        "description": "Other",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "RECEPTION",
+        "description": "Reception",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "RESIDENCE",
+        "description": "Residence",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "SAFER CUST",
+        "description": "Safer Custody",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "SECURITY",
+        "description": "Security",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "SEG UNIT",
+        "description": "Segregation Unit",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "CARATS",
+        "description": "Substance Misuse",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "THREAT_PR",
+        "description": "Threats to Prisoners",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "THREAT_ST",
+        "description": "Threats to Staff",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "VID LINK",
+        "description": "Video Link",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "VISITS",
+        "description": "Visits",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "WORKSHOPS",
+        "description": "Workshops / Work Areas",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
       }
     ]
   },
@@ -45,55 +2138,227 @@
     "code": "OLDPOM",
     "description": "OLDPOM Notes",
     "activeFlag": "N",
-    "source": "OCNS",
     "subCodes": [
       {
         "code": "OLDONE",
         "description": "Active Old POM Note",
         "activeFlag": "N",
-        "source": "OCNS",
         "sensitive": true,
-        "restrictedUse": true
+        "restrictedUse": true,
+        "subCodes": []
       },
       {
         "code": "OLDTWO",
         "description": "Inactive Old POM Note",
         "activeFlag": "N",
-        "source": "OCNS",
         "sensitive": true,
-        "restrictedUse": true
+        "restrictedUse": true,
+        "subCodes": []
       }
     ]
   },
   {
-    "code": "POM",
-    "description": "POM Activity",
+    "code": "OM",
+    "description": "Offender Management",
     "activeFlag": "Y",
-    "source": "OCNS",
     "subCodes": [
       {
-        "code": "GEN",
-        "description": "General POM Note",
+        "code": "ASSIGN_OM",
+        "description": "Assign/Reassign Offender Manager",
         "activeFlag": "Y",
-        "source": "OCNS",
-        "sensitive": true,
-        "restrictedUse": true
-      },
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      }
+    ]
+  },
+  {
+    "code": "OMU",
+    "description": "Offender Management Unit",
+    "activeFlag": "N",
+    "subCodes": [
       {
-        "code": "OLD",
-        "description": "Inactive POM Note",
+        "code": "MAP",
+        "description": "MAPPA",
         "activeFlag": "N",
-        "source": "OCNS",
-        "sensitive": true,
-        "restrictedUse": true
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
       },
       {
-        "code": "SPECIAL",
-        "description": "Special POM Note",
+        "code": "PSS",
+        "description": "Planned Supervision Session",
+        "activeFlag": "N",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "SPOMO",
+        "description": "SPO Management Oversight",
+        "activeFlag": "N",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "VLC",
+        "description": "Victim Liaison Contact",
+        "activeFlag": "N",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      }
+    ]
+  },
+  {
+    "code": "OPD",
+    "description": "Offender Personality Disorder Pathway",
+    "activeFlag": "Y",
+    "subCodes": [
+      {
+        "code": "OPDAJ",
+        "description": "OPD Activity - Joint Working with OM/Psy",
         "activeFlag": "Y",
-        "source": "OCNS",
-        "sensitive": true,
-        "restrictedUse": true
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "OPDAMI",
+        "description": "OPD Activity - Motivational Interviewing",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "OPDAOA",
+        "description": "OPD Activity - Other Activity",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "OPDCC",
+        "description": "OPD Case Consultation",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "OPDCFL1",
+        "description": "OPD Case Formulation Level 1",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "OPDCFL2",
+        "description": "OPD Case Formulation Level 2",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "OPDCFL3",
+        "description": "OPD Case Formulation Level 3",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "OPDCLNG",
+        "description": "OPD Case Formulation Not Graded",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "OPDOC",
+        "description": "OPD Other Contact",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "OPDPLS",
+        "description": "OPD Pathway - Left Service",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "OPDPRNA",
+        "description": "OPD Pathway - Referral Not Accepted",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "OPDPRW",
+        "description": "OPD Pathway - Referral Withdrawn",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "OPDPREP",
+        "description": "OPD Pathway - Review of Existing Plan",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "OPDPPES",
+        "description": "OPD Pathway Plan - Engaged In Service",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "OPDPPR",
+        "description": "OPD Pathway Plan - Recommendation",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "OPDPPREF",
+        "description": "OPD Pathway Plan - Referral",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "OPDPPRA",
+        "description": "OPD Pathway Plan - Referral Accepted",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "OPDRMP",
+        "description": "OPD Risk Management Plan",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
       }
     ]
   },
@@ -101,31 +2366,1133 @@
     "code": "OMIC",
     "description": "OMIC Type",
     "activeFlag": "Y",
-    "source": "OCNS",
     "subCodes": [
       {
         "code": "GEN",
         "description": "General OMIC Note",
         "activeFlag": "Y",
-        "source": "OCNS",
         "sensitive": true,
-        "restrictedUse": true
-      },
-      {
-        "code": "SPECIAL",
-        "description": "Special OMIC Note",
-        "activeFlag": "Y",
-        "source": "OCNS",
-        "sensitive": true,
-        "restrictedUse": true
+        "restrictedUse": true,
+        "subCodes": []
       },
       {
         "code": "OMIC_OPEN",
         "description": "Open Case Note",
         "activeFlag": "Y",
-        "source": "OCNS",
         "sensitive": false,
-        "restrictedUse": true
+        "restrictedUse": true,
+        "subCodes": []
+      },
+      {
+        "code": "SPECIAL",
+        "description": "Special OMIC Note",
+        "activeFlag": "Y",
+        "sensitive": true,
+        "restrictedUse": true,
+        "subCodes": []
+      }
+    ]
+  },
+  {
+    "code": "PADVIS",
+    "description": "Personal Advisor",
+    "activeFlag": "Y",
+    "subCodes": [
+      {
+        "code": "PAV",
+        "description": "Visit",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      }
+    ]
+  },
+  {
+    "code": "PA",
+    "description": "Planned Appointments",
+    "activeFlag": "Y",
+    "subCodes": [
+      {
+        "code": "PACC",
+        "description": "Case conference",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "CRI",
+        "description": "Court Report Interview",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "HV",
+        "description": "Home Visit",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "APV",
+        "description": "Hostel or Approved Premises Visit",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "PAIAOM",
+        "description": "Initial Appointment with OM",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "INI",
+        "description": "Initial Appointment with OM",
+        "activeFlag": "N",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "MM",
+        "description": "MAPPA meeting",
+        "activeFlag": "N",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "MAPPA",
+        "description": "MAPPA meeting",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "PV",
+        "description": "Prison Visit",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "PARTO",
+        "description": "Report to Office",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "PARTTP",
+        "description": "Report to Third Party",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "WTP",
+        "description": "With Third Party",
+        "activeFlag": "N",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      }
+    ]
+  },
+  {
+    "code": "POM",
+    "description": "POM Activity",
+    "activeFlag": "Y",
+    "subCodes": [
+      {
+        "code": "GEN",
+        "description": "General POM Note",
+        "activeFlag": "Y",
+        "sensitive": true,
+        "restrictedUse": true,
+        "subCodes": []
+      },
+      {
+        "code": "OLD",
+        "description": "Inactive POM Note",
+        "activeFlag": "N",
+        "sensitive": true,
+        "restrictedUse": true,
+        "subCodes": []
+      },
+      {
+        "code": "POME",
+        "description": "POM Entry",
+        "activeFlag": "N",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "SPECIAL",
+        "description": "Special POM Note",
+        "activeFlag": "Y",
+        "sensitive": true,
+        "restrictedUse": true,
+        "subCodes": []
+      }
+    ]
+  },
+  {
+    "code": "POS",
+    "description": "Positive Behaviour",
+    "activeFlag": "Y",
+    "subCodes": [
+      {
+        "code": "POS_GEN",
+        "description": "General Entry",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "IEP_ENC",
+        "description": "Incentive Encouragement",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "QUAL_ATT",
+        "description": "Quality Attitude",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "QUAL_WK",
+        "description": "Quality Work",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      }
+    ]
+  },
+  {
+    "code": "PRISON",
+    "description": "Prison",
+    "activeFlag": "Y",
+    "subCodes": [
+      {
+        "code": "RELEASE",
+        "description": "Release",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      }
+    ]
+  },
+  {
+    "code": "TRANSFER",
+    "description": "Prison Transfer",
+    "activeFlag": "Y",
+    "subCodes": [
+      {
+        "code": "FROMTOL",
+        "description": "From/ To Location",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      }
+    ]
+  },
+  {
+    "code": "REC",
+    "description": "Recall",
+    "activeFlag": "Y",
+    "subCodes": [
+      {
+        "code": "RECRP",
+        "description": "Recall Report Prepared",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      }
+    ]
+  },
+  {
+    "code": "ROTL",
+    "description": "Release on Temporary Licence",
+    "activeFlag": "Y",
+    "subCodes": [
+      {
+        "code": "BOARD",
+        "description": "Board",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "RGEH",
+        "description": "General",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      }
+    ]
+  },
+  {
+    "code": "REPORT",
+    "description": "Report",
+    "activeFlag": "Y",
+    "subCodes": [
+      {
+        "code": "APAS",
+        "description": "APAS",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "BRCOMP",
+        "description": "Breach Report Completed",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "CIAS",
+        "description": "CIAS",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "REPORT_COMPL",
+        "description": "Court Report Completed",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "REPORT_DONE",
+        "description": "Court Report Completed",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "CRTREPREQ",
+        "description": "Court Report Request",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "REPORT_DUE",
+        "description": "Court Report Requested",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "CRTREV",
+        "description": "Court Review Report Completed",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "CUST",
+        "description": "Custody",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "DEFSENT",
+        "description": "Deferred Sentence Report Completed",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "DIVERSITY",
+        "description": "Diversity",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "DRRASS",
+        "description": "DRR Suitability Assessment Completed",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "EDUCATION",
+        "description": "Education",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "FTPSR",
+        "description": "Fast Track PSR Completed",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "FINANCE",
+        "description": "Finance",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "GYM",
+        "description": "Gym",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "HCC",
+        "description": "HCC",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "H&S",
+        "description": "Health and Safety",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "LNG & SKILLS",
+        "description": "Learning and Skills",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "MAIL ROOM",
+        "description": "Mail Room",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "MDT",
+        "description": "MDT",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "OCA",
+        "description": "OCA",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "OMU",
+        "description": "Offender Management Unit",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "OTHER",
+        "description": "Other",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "PRCOMP",
+        "description": "Parole Report Completed",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "POE",
+        "description": "Personal Officer Entry",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "LSP1F",
+        "description": "Post Sentence Report LSP1F Completed",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "REGIMES",
+        "description": "Regimes",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "RESIDENCE",
+        "description": "Residence",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "SAFER CUST",
+        "description": "Safer Custody",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "SECURITY",
+        "description": "Security",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "SEG UNIT",
+        "description": "Segregation Unit",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "STDPSR",
+        "description": "Standard Delivery PSR Completed",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "CARATS",
+        "description": "Substance Misuse",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "VIOLENCE RED",
+        "description": "Violence Reduction",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "WORKSHOPS",
+        "description": "Workshops / Work Areas",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      }
+    ]
+  },
+  {
+    "code": "REPORTS",
+    "description": "Reports",
+    "activeFlag": "Y",
+    "subCodes": [
+      {
+        "code": "CHAPLAINCY",
+        "description": "Chaplaincy",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "REP_GEN",
+        "description": "General Report",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "REP_IEP",
+        "description": "Incentive Level Review",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "REP_WNG",
+        "description": "Wing Conduct Report",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      }
+    ]
+  },
+  {
+    "code": "REQUIREMENT",
+    "description": "Requirement",
+    "activeFlag": "Y",
+    "subCodes": [
+      {
+        "code": "REQTERM",
+        "description": "Requirement Terminated",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      }
+    ]
+  },
+  {
+    "code": "RESET",
+    "description": "Resettlement",
+    "activeFlag": "Y",
+    "subCodes": [
+      {
+        "code": "ACCOM",
+        "description": "Accommodation",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "ATB",
+        "description": "Attitudes, Thinking and Behaviour",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "BCST",
+        "description": "BCST",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "CHDFAMCOM",
+        "description": "Children, Families and Communities",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "DRUG_ALCOHOL",
+        "description": "Drugs and Alcohol",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "ED_SKL_WRK",
+        "description": "Education, Skills and Work",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "FINANCE_ID",
+        "description": "Finance and ID",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "GEN",
+        "description": "General",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "HEALTH",
+        "description": "Health",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "INR",
+        "description": "Immediate Needs Report",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "PRR",
+        "description": "Pre-Release Report",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      }
+    ]
+  },
+  {
+    "code": "RESTA",
+    "description": "Restorative Approach",
+    "activeFlag": "Y",
+    "subCodes": [
+      {
+        "code": "ADJRA",
+        "description": "Adjudication",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "METRA",
+        "description": "Meeting",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      }
+    ]
+  },
+  {
+    "code": "RESTJ",
+    "description": "Restorative Justice",
+    "activeFlag": "Y",
+    "subCodes": [
+      {
+        "code": "COMRJ",
+        "description": "Communication",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "VISRJ",
+        "description": "Visit",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      }
+    ]
+  },
+  {
+    "code": "RESTP",
+    "description": "Restorative Practice",
+    "activeFlag": "Y",
+    "subCodes": [
+      {
+        "code": "RESTG",
+        "description": "General",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "RESM",
+        "description": "Mediation",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "RESTP",
+        "description": "Programme Work",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      }
+    ]
+  },
+  {
+    "code": "SENTENCE",
+    "description": "Sentence",
+    "activeFlag": "Y",
+    "subCodes": [
+      {
+        "code": "IMPOSED",
+        "description": "Imposed",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "SENTERM",
+        "description": "Terminated",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      }
+    ]
+  },
+  {
+    "code": "SEQ",
+    "description": "Sequencing",
+    "activeFlag": "Y",
+    "subCodes": [
+      {
+        "code": "EDU",
+        "description": "Education",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "GEN EM",
+        "description": "General Employment",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "PROG",
+        "description": "Programmes",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "RES",
+        "description": "Residential",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "VOC TR",
+        "description": "Vocational Training",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      }
+    ]
+  },
+  {
+    "code": "SC",
+    "description": "Social Care",
+    "activeFlag": "Y",
+    "subCodes": [
+      {
+        "code": "SC",
+        "description": "Social Care",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      }
+    ]
+  },
+  {
+    "code": "SA",
+    "description": "Specified Activity Requirement",
+    "activeFlag": "Y",
+    "subCodes": [
+      {
+        "code": "SAITP",
+        "description": "Initial Appointment with Activity Provid",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "ITP",
+        "description": "Initial Appointment with Treatment Provi",
+        "activeFlag": "N",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "SARTO",
+        "description": "Report to Office",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "SARTTP",
+        "description": "Report to Third Party",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      }
+    ]
+  },
+  {
+    "code": "SUPERVISION",
+    "description": "Supervision",
+    "activeFlag": "Y",
+    "subCodes": [
+      {
+        "code": "SUPREQTERM",
+        "description": "Terminated",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      }
+    ]
+  },
+  {
+    "code": "SUPPLAN",
+    "description": "Supervision Plan",
+    "activeFlag": "Y",
+    "subCodes": [
+      {
+        "code": "ISPCOMP",
+        "description": "Initial Sentence Plan Completed",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "RSPCOMP",
+        "description": "Review Sentence Plan Completed",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "TSPCOMP",
+        "description": "Termination Sentence Plan Completed",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      }
+    ]
+  },
+  {
+    "code": "TC",
+    "description": "Telephone call",
+    "activeFlag": "Y",
+    "subCodes": [
+      {
+        "code": "TCFO",
+        "description": "From Offender",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "FO",
+        "description": "From Offender",
+        "activeFlag": "N",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "FTP",
+        "description": "From Third Party",
+        "activeFlag": "N",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "TCFTP",
+        "description": "From Third Party",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "TO",
+        "description": "To Offender",
+        "activeFlag": "N",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "TCTO",
+        "description": "To Offender",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "TTP",
+        "description": "To Third Party",
+        "activeFlag": "N",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "TCTTP",
+        "description": "To Third Party",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      }
+    ]
+  },
+  {
+    "code": "TRNG",
+    "description": "Training",
+    "activeFlag": "Y",
+    "subCodes": [
+      {
+        "code": "TRNGALL",
+        "description": "ALLOCATED (State Course in Case Notes)",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "TRNGCOM",
+        "description": "COMPLETED (State Course in Case Notes)",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "TRNGREM",
+        "description": "REMOVED(Put Reason/Course in Case Notes)",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      }
+    ]
+  },
+  {
+    "code": "UW",
+    "description": "Unpaid Work",
+    "activeFlag": "Y",
+    "subCodes": [
+      {
+        "code": "PSI",
+        "description": "Post Sentence Interview",
+        "activeFlag": "N",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "UWTERM",
+        "description": "Terminated",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      }
+    ]
+  },
+  {
+    "code": "UPC",
+    "description": "Unplanned contact",
+    "activeFlag": "Y",
+    "subCodes": [
+      {
+        "code": "UPCRTO",
+        "description": "Report to Office",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
+      },
+      {
+        "code": "UPCRTTP",
+        "description": "Unscheduled Visit to Third Party",
+        "activeFlag": "Y",
+        "sensitive": false,
+        "restrictedUse": false,
+        "subCodes": []
       }
     ]
   }

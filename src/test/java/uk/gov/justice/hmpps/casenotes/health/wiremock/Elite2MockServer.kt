@@ -10,7 +10,6 @@ import org.junit.jupiter.api.extension.AfterAllCallback
 import org.junit.jupiter.api.extension.BeforeAllCallback
 import org.junit.jupiter.api.extension.BeforeEachCallback
 import org.junit.jupiter.api.extension.ExtensionContext
-import uk.gov.justice.hmpps.casenotes.dto.CaseNoteTypeDto
 import uk.gov.justice.hmpps.casenotes.dto.NomisCaseNote
 import uk.gov.justice.hmpps.casenotes.utils.JsonHelper.objectMapper
 import java.time.LocalDateTime
@@ -35,67 +34,6 @@ class Elite2Extension : BeforeAllCallback, AfterAllCallback, BeforeEachCallback 
 }
 
 class Elite2MockServer : WireMockServer(WIREMOCK_PORT) {
-  fun subGetCaseNoteTypes() {
-    val getCaseNoteTypes = "$API_PREFIX/reference-domains/caseNoteTypes"
-    stubFor(
-      get(WireMock.urlPathEqualTo(getCaseNoteTypes))
-        .willReturn(
-          aResponse()
-            .withHeader("Content-Type", "application/json")
-            .withBody(
-              objectMapper.writeValueAsString(
-                listOf(
-                  CaseNoteTypeDto.builder().code("KA").description("Key worker")
-                    .subCodes(
-                      listOf(
-                        CaseNoteTypeDto.builder().code("KS").description("Key worker Session").build(),
-                        CaseNoteTypeDto.builder().code("KE").description("Key worker Entry").build(),
-                      ),
-                    ).build(),
-                  CaseNoteTypeDto.builder().code("OBS").description("Observation")
-                    .subCodes(
-                      listOf(
-                        CaseNoteTypeDto.builder().code("GEN").description("General").build(),
-                        CaseNoteTypeDto.builder().code("SPECIAL").description("Special").build(),
-                      ),
-                    ).build(),
-                ),
-              ),
-            )
-            .withStatus(200),
-        ),
-    )
-  }
-
-  fun subUserCaseNoteTypes() {
-    val getCaseNoteTypes = "$API_PREFIX/users/me/caseNoteTypes"
-    stubFor(
-      get(WireMock.urlPathEqualTo(getCaseNoteTypes))
-        .willReturn(
-          aResponse()
-            .withHeader("Content-Type", "application/json")
-            .withBody(
-              objectMapper.writeValueAsString(
-                listOf(
-                  CaseNoteTypeDto.builder().code("KA").description("Key worker")
-                    .subCodes(
-                      listOf(
-                        CaseNoteTypeDto.builder().code("KS").description("Key worker Session").build(),
-                      ),
-                    ).build(),
-                  CaseNoteTypeDto.builder().code("OBS").description("Observation")
-                    .subCodes(
-                      listOf(
-                        CaseNoteTypeDto.builder().code("GEN").description("General").build(),
-                      ),
-                    ).build(),
-                ),
-              ),
-            )
-            .withStatus(200),
-        ),
-    )
-  }
 
   fun subGetOffender(offenderIdentifier: String) {
     val getCaseNoteTypes = "$API_PREFIX/bookings/offenderNo/$offenderIdentifier"

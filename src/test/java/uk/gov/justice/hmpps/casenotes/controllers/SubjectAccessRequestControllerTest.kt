@@ -1,5 +1,3 @@
-@file:Suppress("ClassName")
-
 package uk.gov.justice.hmpps.casenotes.controllers
 
 import org.junit.jupiter.api.Test

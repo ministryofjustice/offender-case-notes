@@ -48,4 +48,4 @@ class SubType(
 }
 
 fun SubType.toModel(): CaseNoteType =
-  CaseNoteType(type, description, active.asActiveYn(), SOURCE, sensitive, restrictedUse)
+  CaseNoteType(type, description, active.asActiveYn(), sensitive, restrictedUse)

@@ -25,7 +25,6 @@ class CaseNoteResourceTest : ResourceTest() {
 
   @Test
   fun testGetCaseNoteTypesNormal() {
-    elite2Api.subGetCaseNoteTypes()
     webTestClient.get().uri("/case-notes/types")
       .headers(addBearerAuthorisation("API_TEST_USER"))
       .exchange()
@@ -36,7 +35,6 @@ class CaseNoteResourceTest : ResourceTest() {
 
   @Test
   fun testGetCaseNoteClientTokenNoUserId() {
-    elite2Api.subGetCaseNoteTypes()
     webTestClient.get().uri("/case-notes/types")
       .headers(addBearerToken(jwtHelper.createJwt("API_TEST_USER", userId = null)))
       .exchange()
@@ -47,7 +45,6 @@ class CaseNoteResourceTest : ResourceTest() {
 
   @Test
   fun testGetCaseNoteTypesSecure() {
-    elite2Api.subGetCaseNoteTypes()
     webTestClient.get().uri("/case-notes/types")
       .headers(addBearerAuthorisation("SECURE_CASENOTE_USER", CASENOTES_ROLES))
       .exchange()
@@ -58,7 +55,6 @@ class CaseNoteResourceTest : ResourceTest() {
 
   @Test
   fun testGetCaseNoteTypesSecurePomRole() {
-    elite2Api.subGetCaseNoteTypes()
     webTestClient.get().uri("/case-notes/types")
       .headers(addBearerAuthorisation("SECURE_CASENOTE_USER", POM_ROLE))
       .exchange()
@@ -69,7 +65,6 @@ class CaseNoteResourceTest : ResourceTest() {
 
   @Test
   fun testUserCaseNoteTypesNormal() {
-    elite2Api.subUserCaseNoteTypes()
     webTestClient.get().uri("/case-notes/types-for-user")
       .headers(addBearerAuthorisation("API_TEST_USER"))
       .exchange()
@@ -80,7 +75,6 @@ class CaseNoteResourceTest : ResourceTest() {
 
   @Test
   fun testUserCaseNoteTypesSecure() {
-    elite2Api.subUserCaseNoteTypes()
     webTestClient.get().uri("/case-notes/types-for-user")
       .headers(addBearerAuthorisation("SECURE_CASENOTE_USER", CASENOTES_ROLES))
       .exchange()
@@ -91,7 +85,6 @@ class CaseNoteResourceTest : ResourceTest() {
 
   @Test
   fun testUserCaseNoteTypesSecurePomRole() {
-    elite2Api.subUserCaseNoteTypes()
     webTestClient.get().uri("/case-notes/types-for-user")
       .headers(addBearerAuthorisation("SECURE_CASENOTE_USER", POM_ROLE))
       .exchange()
