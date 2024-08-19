@@ -7,7 +7,6 @@ import org.junit.jupiter.params.provider.ValueSource
 import uk.gov.justice.hmpps.casenotes.types.ActiveYn
 import uk.gov.justice.hmpps.casenotes.types.CaseNoteType
 import uk.gov.justice.hmpps.casenotes.types.SelectableBy.DPS_USER
-import uk.gov.justice.hmpps.casenotes.types.TypeInclude.INACTIVE
 import uk.gov.justice.hmpps.casenotes.types.TypeInclude.RESTRICTED
 import uk.gov.justice.hmpps.casenotes.types.TypeInclude.SENSITIVE
 import uk.gov.justice.hmpps.casenotes.utils.ROLE_ADD_SENSITIVE_CASE_NOTES
@@ -21,25 +20,25 @@ class ReadCaseNoteTypeIntTest : ResourceTest() {
   }
 
   @Test
-  fun `default request provides active, non secure and non restricted types`() {
+  fun `default request provides inactive, active, non secure and non restricted types`() {
     val types = getCaseNoteTypes(
       "API_TEST_USER",
     ).successList<CaseNoteType>()
     assertThat(types.withoutSubTypes()).isEmpty()
-    assertThat(types.inactive()).isEmpty()
+    assertThat(types.inactive()).isNotEmpty()
     assertThat(types.sensitiveOrRestricted()).isEmpty()
     assertThat(types.filter { it.code == "READ_TEST" }).isEmpty()
     assertThat(types.filter { it.code == "NOT_DPS" }).isNotEmpty()
   }
 
   @Test
-  fun `can request inactive types`() {
+  fun `can request only active types`() {
     val types = getCaseNoteTypes(
       "API_TEST_USER",
-      requestParams = mapOf("include" to listOf(INACTIVE.name)),
+      requestParams = mapOf("include" to listOf()),
     ).successList<CaseNoteType>()
     assertThat(types.withoutSubTypes()).isEmpty()
-    assertThat(types.inactive()).isNotEmpty()
+    assertThat(types.inactive()).isEmpty()
     assertThat(types.sensitiveOrRestricted()).isEmpty()
     assertThat(types.filter { it.code == "READ_TEST" }).isEmpty()
   }
@@ -88,7 +87,7 @@ class ReadCaseNoteTypeIntTest : ResourceTest() {
   fun `can filter types to only those selectable by dps user`() {
     val types = getCaseNoteTypes(
       username = "API_TEST_USER",
-      requestParams = mapOf("selectableBy" to listOf(DPS_USER.name)),
+      requestParams = mapOf("include" to listOf(), "selectableBy" to listOf(DPS_USER.name)),
     ).successList<CaseNoteType>()
     assertThat(types.withoutSubTypes()).isEmpty()
     assertThat(types.inactive()).isEmpty()
@@ -103,6 +102,7 @@ class ReadCaseNoteTypeIntTest : ResourceTest() {
     val types = getCaseNoteTypes(
       "POM_TEST_USER",
       listOf("ROLE_$role"),
+      mapOf("include" to listOf()),
     ).successList<CaseNoteType>()
     assertThat(types.withoutSubTypes()).isEmpty()
     assertThat(types.sensitive()).isNotEmpty()
