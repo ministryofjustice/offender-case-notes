@@ -1508,6 +1508,23 @@
     ]
   },
   {
+    "code": "READ_TEST",
+    "description": "Parent Type for testing",
+    "activeFlag": "Y",
+    "sensitive": false,
+    "restrictedUse": false,
+    "subCodes": [
+      {
+        "code": "ACT_SEN",
+        "description": "Active & Sensitive",
+        "activeFlag": "Y",
+        "sensitive": true,
+        "restrictedUse": false,
+        "subCodes": []
+      }
+    ]
+  },
+  {
     "code": "PADVIS",
     "description": "Personal Advisor",
     "activeFlag": "Y",

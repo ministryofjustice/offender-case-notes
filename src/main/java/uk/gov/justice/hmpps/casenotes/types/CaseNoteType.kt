@@ -10,16 +10,19 @@ data class CaseNoteType(
   val description: String,
 
   @Schema(required = true, description = "Active indicator flag.", example = "Y", allowableValues = ["Y,N"])
-  val activeFlag: ActiveYn = ActiveYn.Y,
+  val activeFlag: ActiveYn,
 
   @Schema(description = "Indicates the type of note is sensitive", example = "true")
-  val sensitive: Boolean = false,
+  val sensitive: Boolean,
 
   @Schema(
     description = "Indicates the type of note can only be created by a sub-set of users (e.g. POMs)",
     example = "true",
   )
-  val restrictedUse: Boolean = false,
+  val restrictedUse: Boolean,
+
+  @Schema(description = "Shows the actors that can select this case note type")
+  val selectableBy: List<SelectableBy>,
 
   @Schema(description = "List of case note sub types")
   val subCodes: List<CaseNoteType> = listOf(),

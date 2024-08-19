@@ -54,7 +54,15 @@ class ParentType(
 fun CreateSubType.asEntity(parent: ParentType) = SubType(parent, type, description, active, sensitive, restrictedUse)
 
 fun ParentType.toModel(): CaseNoteType =
-  CaseNoteType(type, description, isActive().asActiveYn(), subCodes = getSubtypes().map(SubType::toModel).sorted())
+  CaseNoteType(
+    type,
+    description,
+    isActive().asActiveYn(),
+    sensitive = false,
+    restrictedUse = false,
+    selectableBy = listOf(),
+    subCodes = getSubtypes().map(SubType::toModel).sorted(),
+  )
 
 interface ParentTypeRepository : JpaRepository<ParentType, String> {
   @Query(

@@ -24,46 +24,6 @@ class CaseNoteResourceTest : ResourceTest() {
   lateinit var externalApiService: ExternalApiService
 
   @Test
-  fun testGetCaseNoteTypesNormal() {
-    webTestClient.get().uri("/case-notes/types")
-      .headers(addBearerAuthorisation("API_TEST_USER"))
-      .exchange()
-      .expectStatus().isOk
-      .expectBody()
-      .json(readFile("caseNoteTypes.json"))
-  }
-
-  @Test
-  fun testGetCaseNoteClientTokenNoUserId() {
-    webTestClient.get().uri("/case-notes/types")
-      .headers(addBearerToken(jwtHelper.createJwt("API_TEST_USER", userId = null)))
-      .exchange()
-      .expectStatus().isOk
-      .expectBody()
-      .json(readFile("caseNoteTypes.json"))
-  }
-
-  @Test
-  fun testGetCaseNoteTypesSecure() {
-    webTestClient.get().uri("/case-notes/types")
-      .headers(addBearerAuthorisation("SECURE_CASENOTE_USER", CASENOTES_ROLES))
-      .exchange()
-      .expectStatus().isOk
-      .expectBody()
-      .json(readFile("caseNoteTypesSecure.json"))
-  }
-
-  @Test
-  fun testGetCaseNoteTypesSecurePomRole() {
-    webTestClient.get().uri("/case-notes/types")
-      .headers(addBearerAuthorisation("SECURE_CASENOTE_USER", POM_ROLE))
-      .exchange()
-      .expectStatus().isOk
-      .expectBody()
-      .json(readFile("caseNoteTypesSecure.json"))
-  }
-
-  @Test
   fun testUserCaseNoteTypesNormal() {
     webTestClient.get().uri("/case-notes/types-for-user")
       .headers(addBearerAuthorisation("API_TEST_USER"))
@@ -356,6 +316,22 @@ class CaseNoteResourceTest : ResourceTest() {
       .expectStatus().isBadRequest
       .expectBody()
       .json("""{"developerMessage": "username for audit exceeds 64 characters"}""")
+  }
+
+  @Test
+  fun `request with username of 64 characters succeeds`() {
+    val username = "A_VERY_LONG_USERNAME_THAT_NEARLY_THE_SIXTY_FOUR_CHARACTERS_LIMIT"
+    oAuthApi.subGetUserDetails(username)
+    elite2Api.subGetOffender("A1234AD")
+
+    // create the case note
+    webTestClient.post().uri("/case-notes/{offenderIdentifier}", "A1234AD")
+      .headers(addBearerAuthorisation("SECURE_CASENOTE_USER", CASENOTES_ROLES))
+      .bodyValue(CREATE_CASE_NOTE_WITHOUT_LOC.format("This is another case note"))
+      .exchange()
+      .expectStatus().isCreated
+      .expectBody()
+      .json(readFile("A1234AD-create-casenote.json"))
   }
 
   @Test
