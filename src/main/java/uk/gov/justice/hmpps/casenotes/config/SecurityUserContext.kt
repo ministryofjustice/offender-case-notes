@@ -18,6 +18,8 @@ class SecurityUserContext {
   fun getCurrentUser(): UserIdUser = getAuthorisedUser()
     ?: throw IllegalStateException("Current user not set but is required")
 
+  fun hasAnyRole(vararg roles: String): Boolean = hasMatchingRole(roles.toList())
+
   fun isOverrideRole(vararg overrideRoles: String): Boolean =
     hasMatchingRole(if (overrideRoles.isEmpty()) listOf("SYSTEM_USER") else overrideRoles.toList())
 

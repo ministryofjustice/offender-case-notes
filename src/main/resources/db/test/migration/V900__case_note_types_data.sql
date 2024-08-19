@@ -28,6 +28,27 @@ VALUES ('OMIC', 'SPECIAL', 'Special OMIC Note', true, now(), 'SYSTEM');
 INSERT INTO CASE_NOTE_TYPE (PARENT_TYPE, SUB_TYPE, DESCRIPTION, ACTIVE, SENSITIVE, CREATE_DATE_TIME, CREATE_USER_ID)
 VALUES ('OMIC', 'OMIC_OPEN', 'Open Case Note', true, false, now(), 'SYSTEM');
 
+insert into case_note_parent_type (note_type, description, create_date_time, create_user_id)
+values ('READ_TEST', 'Parent Type for testing', now(), 'SYSTEM');
+
+insert into case_note_type (parent_type, sub_type, description, active, sensitive, restricted_use, create_date_time, create_user_id)
+values ('READ_TEST', 'ACT_SEN', 'Active & Sensitive', true, true, false, now(), 'SYSTEM');
+
+insert into case_note_type (parent_type, sub_type, description, active, sensitive, restricted_use, create_date_time, create_user_id)
+values ('READ_TEST', 'INA_SEN', 'Inactive & Sensitive', false, true, false, now(), 'SYSTEM');
+
+insert into case_note_type (parent_type, sub_type, description, active, sensitive, restricted_use, create_date_time, create_user_id)
+values ('READ_TEST', 'ACT_RES', 'Active & Restricted', true, false, true, now(), 'SYSTEM');
+
+insert into case_note_type (parent_type, sub_type, description, active, sensitive, restricted_use, create_date_time, create_user_id)
+values ('READ_TEST', 'INA_RES', 'Inactive & Restricted', false, false, true, now(), 'SYSTEM');
+
+insert into case_note_parent_type (note_type, description, create_date_time, create_user_id)
+values ('NOT_DPS', 'Non DPS Parent', now(), 'SYSTEM');
+
+insert into case_note_type (parent_type, sub_type, description, active, sensitive, restricted_use, dps_user_selectable, create_date_time, create_user_id)
+values ('NOT_DPS', 'NOT_SEL', 'Not Dps User Selectable', true, false, false, false, now(), 'SYSTEM');
+
 --Insert statement OFFENDER_CASE_NOTE
 
 INSERT INTO OFFENDER_CASE_NOTE (OFFENDER_CASE_NOTE_ID, OFFENDER_IDENTIFIER, LOCATION_ID, AUTHOR_USERNAME, AUTHOR_NAME, CASE_NOTE_TYPE_ID,OCCURRENCE_DATE_TIME,

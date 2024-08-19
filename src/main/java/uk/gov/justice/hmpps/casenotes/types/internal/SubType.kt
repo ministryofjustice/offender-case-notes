@@ -10,6 +10,7 @@ import jakarta.persistence.JoinColumn
 import jakarta.persistence.ManyToOne
 import jakarta.persistence.Table
 import uk.gov.justice.hmpps.casenotes.types.CaseNoteType
+import uk.gov.justice.hmpps.casenotes.types.SelectableBy
 import uk.gov.justice.hmpps.casenotes.types.asActiveYn
 
 @Entity
@@ -48,4 +49,11 @@ class SubType(
 }
 
 fun SubType.toModel(): CaseNoteType =
-  CaseNoteType(type, description, active.asActiveYn(), sensitive, restrictedUse)
+  CaseNoteType(
+    type,
+    description,
+    active.asActiveYn(),
+    sensitive,
+    restrictedUse,
+    if (dpsUserSelectable) listOf(SelectableBy.DPS_USER) else listOf(),
+  )
