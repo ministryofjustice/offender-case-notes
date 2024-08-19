@@ -143,6 +143,7 @@ class CaseNoteTypeController(
   INACTIVE -> if this is present the returned results will include inactive types, otherwise only active types will be returned.
   SENSITIVE -> if this is present the returned results will include sensitive types, otherwise only non-sensitive types will be returned.
   RESTRICTED -> if this is present the returned results will include restricted types, otherwise only non-restricted types will be returned.
+  If an include param is not provided, the defaults will provide the same result as though you had provided INACTIVE ie providing types that are both active and inactive.
   """,
   )
   @GetMapping("/types")
