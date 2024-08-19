@@ -18,9 +18,6 @@ import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestController
 import uk.gov.justice.hmpps.casenotes.dto.ErrorResponse
-import uk.gov.justice.hmpps.casenotes.types.TypeInclude.INACTIVE
-import uk.gov.justice.hmpps.casenotes.types.TypeInclude.RESTRICTED
-import uk.gov.justice.hmpps.casenotes.types.TypeInclude.SENSITIVE
 import uk.gov.justice.hmpps.casenotes.types.internal.ReadCaseNoteType
 import uk.gov.justice.hmpps.casenotes.types.internal.WriteCaseNoteType
 
@@ -137,7 +134,7 @@ class CaseNoteTypeController(
   @GetMapping("/types")
   fun getCaseNoteTypes(
     @RequestParam selectableBy: SelectableBy = SelectableBy.ALL,
-    @RequestParam include: Set<TypeInclude> = setOf(INACTIVE, SENSITIVE, RESTRICTED),
+    @RequestParam include: Set<TypeInclude> = setOf(),
   ): List<CaseNoteType> = readCaseNoteType.getCaseNoteTypes(selectableBy, include)
 
   @ApiResponses(

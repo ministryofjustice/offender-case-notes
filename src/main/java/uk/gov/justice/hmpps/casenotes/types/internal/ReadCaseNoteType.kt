@@ -21,8 +21,8 @@ class ReadCaseNoteType(
   fun getCaseNoteTypes(selectableBy: SelectableBy, include: Set<TypeInclude>): List<CaseNoteType> =
     parentTypeRepository.findAllWithParams(
       activeOnly = INACTIVE !in include,
-      includeSensitive = SENSITIVE in include && canViewSensitiveTypes(),
-      includeRestricted = RESTRICTED in include && canViewRestrictedTypes(),
+      includeSensitive = SENSITIVE in include || canViewSensitiveTypes(),
+      includeRestricted = RESTRICTED in include || canViewRestrictedTypes(),
       dpsUserSelectableOnly = selectableBy == SelectableBy.DPS_USER,
     ).map { it.toModel() }.sorted()
 
