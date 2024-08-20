@@ -4,7 +4,6 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.ValueSource
-import uk.gov.justice.hmpps.casenotes.types.ActiveYn
 import uk.gov.justice.hmpps.casenotes.types.CaseNoteType
 import uk.gov.justice.hmpps.casenotes.types.SelectableBy.DPS_USER
 import uk.gov.justice.hmpps.casenotes.types.TypeInclude.INACTIVE
