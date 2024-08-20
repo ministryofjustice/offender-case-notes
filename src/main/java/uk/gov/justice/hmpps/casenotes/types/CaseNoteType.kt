@@ -10,7 +10,7 @@ data class CaseNoteType(
   val description: String,
 
   @Schema(required = true, description = "Active indicator flag.", example = "Y", allowableValues = ["Y,N"])
-  val activeFlag: ActiveYn,
+  val active: Boolean,
 
   @Schema(description = "Indicates the type of note is sensitive", example = "true")
   val sensitive: Boolean,
@@ -31,11 +31,11 @@ data class CaseNoteType(
     val dif = description.compareTo(other.description, ignoreCase = true)
     return if (dif == 0) code.compareTo(other.code) else dif
   }
+
+  val activeFlag: ActiveYn = if (active) ActiveYn.Y else ActiveYn.N
 }
 
 enum class ActiveYn {
   Y,
   N,
 }
-
-fun Boolean.asActiveYn() = if (this) ActiveYn.Y else ActiveYn.N

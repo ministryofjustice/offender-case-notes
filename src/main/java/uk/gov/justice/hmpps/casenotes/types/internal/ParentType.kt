@@ -14,7 +14,6 @@ import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Query
 import uk.gov.justice.hmpps.casenotes.types.CaseNoteType
 import uk.gov.justice.hmpps.casenotes.types.CreateSubType
-import uk.gov.justice.hmpps.casenotes.types.asActiveYn
 
 @Entity
 @Table(name = "case_note_parent_type")
@@ -57,7 +56,7 @@ fun ParentType.toModel(): CaseNoteType =
   CaseNoteType(
     type,
     description,
-    isActive().asActiveYn(),
+    isActive(),
     sensitive = false,
     restrictedUse = false,
     selectableBy = listOf(),
