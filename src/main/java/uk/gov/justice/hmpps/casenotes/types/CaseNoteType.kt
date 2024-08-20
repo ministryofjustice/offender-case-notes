@@ -9,7 +9,7 @@ data class CaseNoteType(
   @Schema(required = true, description = "Case Note description.", example = "Observations")
   val description: String,
 
-  @Schema(required = true, description = "Active indicator flag.", example = "Y", allowableValues = ["Y,N"])
+  @Schema(required = true, description = "Indicates if the type is active or not")
   val active: Boolean,
 
   @Schema(description = "Indicates the type of note is sensitive", example = "true")
@@ -32,6 +32,7 @@ data class CaseNoteType(
     return if (dif == 0) code.compareTo(other.code) else dif
   }
 
+  @Deprecated("to be replaced with 'active' boolean")
   val activeFlag: ActiveYn = if (active) ActiveYn.Y else ActiveYn.N
 }
 

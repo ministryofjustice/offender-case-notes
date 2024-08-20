@@ -7,6 +7,7 @@ import org.junit.jupiter.params.provider.ValueSource
 import uk.gov.justice.hmpps.casenotes.types.ActiveYn
 import uk.gov.justice.hmpps.casenotes.types.CaseNoteType
 import uk.gov.justice.hmpps.casenotes.types.SelectableBy.DPS_USER
+import uk.gov.justice.hmpps.casenotes.types.TypeInclude.INACTIVE
 import uk.gov.justice.hmpps.casenotes.types.TypeInclude.RESTRICTED
 import uk.gov.justice.hmpps.casenotes.types.TypeInclude.SENSITIVE
 import uk.gov.justice.hmpps.casenotes.utils.ROLE_ADD_SENSITIVE_CASE_NOTES
@@ -57,7 +58,7 @@ class ReadCaseNoteTypeIntTest : ResourceTest() {
     assertThat(parent.subCodes).hasSize(1)
     with(parent.subCodes.first()) {
       assertThat(code).isEqualTo("ACT_SEN")
-      assertThat(activeFlag).isEqualTo(ActiveYn.Y)
+      assertThat(active).isTrue()
       assertThat(sensitive).isTrue()
       assertThat(restrictedUse).isFalse()
     }
@@ -77,7 +78,7 @@ class ReadCaseNoteTypeIntTest : ResourceTest() {
     assertThat(parent.subCodes).hasSize(1)
     with(parent.subCodes.first()) {
       assertThat(code).isEqualTo("ACT_RES")
-      assertThat(activeFlag).isEqualTo(ActiveYn.Y)
+      assertThat(active).isTrue()
       assertThat(sensitive).isFalse()
       assertThat(restrictedUse).isTrue()
     }
@@ -96,6 +97,26 @@ class ReadCaseNoteTypeIntTest : ResourceTest() {
     assertThat(types.filter { it.code == "NOT_DPS" }).isEmpty()
   }
 
+  @Test
+  fun `types have consistent order`() {
+    val types = getCaseNoteTypes(
+      username = "API_TEST_USER",
+      requestParams = mapOf("include" to listOf(INACTIVE.name)),
+    ).successList<CaseNoteType>()
+    assertThat(types.withoutSubTypes()).isEmpty()
+    val parent = types.first { it.code == "LTR" }
+    assertThat(parent.subCodes.map { it.code }).containsExactly(
+      "FO",
+      "LTRFO",
+      "FTP",
+      "LTRFTP",
+      "LTRTO",
+      "TO",
+      "LTRTTP",
+      "TTP",
+    )
+  }
+
   @ParameterizedTest
   @ValueSource(strings = [ROLE_ADD_SENSITIVE_CASE_NOTES, ROLE_POM])
   fun `with appropriate role - default is to view sensitive and restricted`(role: String) {
@@ -112,7 +133,7 @@ class ReadCaseNoteTypeIntTest : ResourceTest() {
     assertThat(parent.subCodes).hasSize(2)
   }
 
-  private fun List<CaseNoteType>.inactive() = flatMap { it.subCodes }.filter { it.activeFlag == ActiveYn.N }
+  private fun List<CaseNoteType>.inactive() = flatMap { it.subCodes }.filter { !it.active }
   private fun List<CaseNoteType>.withoutSubTypes() = filter { it.subCodes.isEmpty() }
   private fun List<CaseNoteType>.sensitiveOrRestricted() =
     flatMap { it.subCodes }.filter { it.sensitive || it.restrictedUse }
