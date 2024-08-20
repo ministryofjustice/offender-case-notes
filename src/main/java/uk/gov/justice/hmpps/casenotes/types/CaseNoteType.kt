@@ -27,7 +27,10 @@ data class CaseNoteType(
   @Schema(description = "List of case note sub types")
   val subCodes: List<CaseNoteType> = listOf(),
 ) : Comparable<CaseNoteType> {
-  override fun compareTo(other: CaseNoteType): Int = description.compareTo(other.description, ignoreCase = true)
+  override fun compareTo(other: CaseNoteType): Int {
+    val dif = description.compareTo(other.description, ignoreCase = true)
+    return if (dif == 0) code.compareTo(other.code) else dif
+  }
 }
 
 enum class ActiveYn {
