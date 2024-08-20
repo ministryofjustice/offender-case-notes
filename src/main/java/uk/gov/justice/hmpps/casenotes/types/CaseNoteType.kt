@@ -9,8 +9,8 @@ data class CaseNoteType(
   @Schema(required = true, description = "Case Note description.", example = "Observations")
   val description: String,
 
-  @Schema(required = true, description = "Active indicator flag.", example = "Y", allowableValues = ["Y,N"])
-  val activeFlag: ActiveYn,
+  @Schema(required = true, description = "Indicates if the type is active or not")
+  val active: Boolean,
 
   @Schema(description = "Indicates the type of note is sensitive", example = "true")
   val sensitive: Boolean,
@@ -27,12 +27,16 @@ data class CaseNoteType(
   @Schema(description = "List of case note sub types")
   val subCodes: List<CaseNoteType> = listOf(),
 ) : Comparable<CaseNoteType> {
-  override fun compareTo(other: CaseNoteType): Int = description.compareTo(other.description, ignoreCase = true)
+  override fun compareTo(other: CaseNoteType): Int {
+    val dif = description.compareTo(other.description, ignoreCase = true)
+    return if (dif == 0) code.compareTo(other.code) else dif
+  }
+
+  @Deprecated("to be replaced with 'active' boolean")
+  val activeFlag: ActiveYn = if (active) ActiveYn.Y else ActiveYn.N
 }
 
 enum class ActiveYn {
   Y,
   N,
 }
-
-fun Boolean.asActiveYn() = if (this) ActiveYn.Y else ActiveYn.N
