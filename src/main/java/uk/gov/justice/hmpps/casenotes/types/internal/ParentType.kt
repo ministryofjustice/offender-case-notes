@@ -68,15 +68,13 @@ interface ParentTypeRepository : JpaRepository<ParentType, String> {
     """
     select pt from ParentType pt 
     join fetch pt.subTypes st 
-    where (st.active = true or :activeOnly = false) 
-    and (:includeSensitive = true or st.sensitive = false) 
+    where (:includeInactive = true or st.active = true)
     and (:includeRestricted = true or st.restrictedUse = false)
-    and (st.dpsUserSelectable = true or :dpsUserSelectableOnly = false)
+    and (:dpsUserSelectableOnly = false or st.dpsUserSelectable = true)
     """,
   )
   fun findAllWithParams(
-    activeOnly: Boolean,
-    includeSensitive: Boolean,
+    includeInactive: Boolean,
     includeRestricted: Boolean,
     dpsUserSelectableOnly: Boolean,
   ): List<ParentType>
