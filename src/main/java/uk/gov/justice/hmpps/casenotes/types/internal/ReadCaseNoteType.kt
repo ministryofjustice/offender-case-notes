@@ -22,7 +22,7 @@ class ReadCaseNoteType(
     parentTypeRepository.findAllWithParams(
       activeOnly = INACTIVE !in include,
       includeSensitive = SENSITIVE in include || canViewSensitiveTypes(),
-      includeRestricted = RESTRICTED in include || canViewRestrictedTypes(),
+      includeRestricted = RESTRICTED in include,
       dpsUserSelectableOnly = selectableBy == SelectableBy.DPS_USER,
     ).map { it.toModel() }.sorted()
 

@@ -20,14 +20,15 @@ class ReadCaseNoteTypeIntTest : ResourceTest() {
   }
 
   @Test
-  fun `default request provides inactive, active, non secure and non restricted types`() {
+  fun `default request provides inactive, active, non secure and restricted types`() {
     val types = getCaseNoteTypes(
       "API_TEST_USER",
     ).successList<CaseNoteType>()
     assertThat(types.withoutSubTypes()).isEmpty()
     assertThat(types.inactive()).isNotEmpty()
-    assertThat(types.sensitiveOrRestricted()).isEmpty()
-    assertThat(types.filter { it.code == "READ_TEST" }).isEmpty()
+    assertThat(types.sensitive()).isEmpty()
+    assertThat(types.restricted()).isNotEmpty()
+    assertThat(types.filter { it.code == "READ_TEST" }).isNotEmpty()
     assertThat(types.filter { it.code == "NOT_DPS" }).isNotEmpty()
   }
 
