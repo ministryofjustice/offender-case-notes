@@ -13,7 +13,7 @@ class ReadCaseNoteTypeIntTest : ResourceTest() {
   }
 
   @Test
-  fun `default request provides inactive, active, non secure and restricted types`() {
+  fun `default request provides inactive, active and restricted types`() {
     val types = getCaseNoteTypes(
       "API_TEST_USER",
     ).successList<CaseNoteType>()
