@@ -44,11 +44,9 @@ class CaseNoteTypeController(private val readCaseNoteType: ReadCaseNoteType) {
   Going forward user roles will not affect the results returned from this endpoint.
   This has been replaced with optional request params to replicate the same functionality.
   Setting a value for 'selectableBy' will allow the choice of filtering those that are selectable by dps users only or to include all types regardless.
-  Additionally, a list of values are available for the include filter: 
-  INACTIVE -> if this is present the returned results will include inactive types, otherwise only active types will be returned.
-  SENSITIVE -> if this is present the returned results will include sensitive types, otherwise only non-sensitive types will be returned.
-  RESTRICTED -> if this is present the returned results will include restricted types, otherwise only non-restricted types will be returned.
-  If an include param is not provided, the defaults will provide the same result as though you had provided INACTIVE ie providing types that are both active and inactive.
+  Additionally, the following properties allow filtering: 
+  includeInactive -> if this is true the returned results will include inactive types, otherwise only active types will be returned.
+  includeRestricted -> if this is true the returned results will include restricted use types, otherwise only non-restricted types will be returned.
   """,
   )
   @GetMapping("/types")
