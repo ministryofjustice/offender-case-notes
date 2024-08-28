@@ -85,6 +85,5 @@ class CaseNoteTypeController(private val readCaseNoteType: ReadCaseNoteType) {
     """,
   )
   @GetMapping("/types-for-user")
-  @PreAuthorize("hasAnyRole('PRISONER_CASE_NOTES__RO', 'PRISONER_CASE_NOTES__RW')")
   fun getUserCaseNoteTypes(): List<CaseNoteType> = readCaseNoteType.getUserCaseNoteTypes()
 }
