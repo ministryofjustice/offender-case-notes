@@ -4,13 +4,14 @@ import com.github.tomakehurst.wiremock.client.WireMock.equalTo
 import com.github.tomakehurst.wiremock.client.WireMock.postRequestedFor
 import com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo
 import org.junit.jupiter.api.Test
+import uk.gov.justice.hmpps.casenotes.config.SecurityUserContext.Companion.ROLE_CASE_NOTES_READ
 import uk.gov.justice.hmpps.casenotes.health.wiremock.TokenVerificationExtension.Companion.tokenVerificationApi
 import wiremock.org.eclipse.jetty.http.HttpHeader
 
 class TokenVerificationResourceTest : ResourceTest() {
   @Test
   fun `test jwt gets passed through to token verification`() {
-    val jwt = jwtHelper.createJwt("API_TEST_USER")
+    val jwt = jwtHelper.createJwt("API_TEST_USER", roles = listOf(ROLE_CASE_NOTES_READ))
 
     webTestClient.get().uri("/case-notes/types")
       .headers(addBearerToken(jwt))
