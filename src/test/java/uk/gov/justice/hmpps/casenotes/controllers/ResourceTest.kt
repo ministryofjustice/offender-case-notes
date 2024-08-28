@@ -15,9 +15,6 @@ import uk.gov.justice.hmpps.casenotes.health.IntegrationTest
 import uk.gov.justice.hmpps.casenotes.health.wiremock.Elite2Extension
 import uk.gov.justice.hmpps.casenotes.health.wiremock.OAuthExtension
 import uk.gov.justice.hmpps.casenotes.health.wiremock.TokenVerificationExtension
-import uk.gov.justice.hmpps.casenotes.types.CreateSubType
-import uk.gov.justice.hmpps.casenotes.types.internal.ParentType
-import uk.gov.justice.hmpps.casenotes.types.internal.ParentTypeRepository
 import uk.gov.justice.hmpps.casenotes.utils.JwtAuthHelper
 import java.util.function.Consumer
 
@@ -29,9 +26,6 @@ abstract class ResourceTest : IntegrationTest() {
 
   @Autowired
   internal lateinit var jwtHelper: JwtAuthHelper
-
-  @Autowired
-  internal lateinit var parentTypeRepository: ParentTypeRepository
 
   fun addBearerAuthorisation(user: String, roles: List<String> = listOf()): Consumer<HttpHeaders> {
     val jwt = jwtHelper.createJwt(user, roles = roles)
@@ -50,10 +44,4 @@ abstract class ResourceTest : IntegrationTest() {
     expectStatus().isEqualTo(status)
       .expectBodyList(T::class.java)
       .returnResult().responseBody!!
-
-  fun givenParentType(parentTypeCode: String, subTypes: Set<CreateSubType>): ParentType {
-    val pt = ParentType("PT1", "Description of PT1")
-    subTypes.forEach { pt.addSubType(it) }
-    return parentTypeRepository.save(pt)
-  }
 }

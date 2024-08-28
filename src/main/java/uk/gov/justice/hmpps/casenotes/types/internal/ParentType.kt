@@ -3,7 +3,6 @@ package uk.gov.justice.hmpps.casenotes.types.internal
 import jakarta.persistence.CascadeType
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
-import jakarta.persistence.EntityExistsException
 import jakarta.persistence.EntityListeners
 import jakarta.persistence.Id
 import jakarta.persistence.OneToMany
@@ -13,7 +12,6 @@ import org.springframework.data.domain.Persistable
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Query
 import uk.gov.justice.hmpps.casenotes.types.CaseNoteType
-import uk.gov.justice.hmpps.casenotes.types.CreateSubType
 
 @Entity
 @Table(name = "case_note_parent_type")
@@ -37,20 +35,7 @@ class ParentType(
   fun isActive() = subTypes.any { it.active }
 
   fun getSubtypes(): Set<SubType> = subTypes.toSet()
-
-  fun addSubType(createSubType: CreateSubType): SubType {
-    if (subTypes.any { it.type == createSubType.type }) {
-      throw EntityExistsException(createSubType.type)
-    }
-    val subType = createSubType.asEntity(this)
-    subTypes.add(subType)
-    return subType
-  }
-
-  fun findSubType(code: String): SubType? = subTypes.find { it.type == code && !it.syncToNomis }
 }
-
-fun CreateSubType.asEntity(parent: ParentType) = SubType(parent, type, description, active, sensitive, restrictedUse)
 
 fun ParentType.toModel(): CaseNoteType =
   CaseNoteType(
