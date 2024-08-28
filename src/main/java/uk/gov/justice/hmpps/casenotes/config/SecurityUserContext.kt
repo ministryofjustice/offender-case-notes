@@ -35,4 +35,9 @@ class SecurityUserContext {
     } == true
 
   data class UserIdUser(val username: String, val userId: String)
+
+  companion object {
+    const val ROLE_CASE_NOTES_READ = "ROLE_PRISONER_CASE_NOTES__RO"
+    const val ROLE_CASE_NOTES_WRITE = "ROLE_PRISONER_CASE_NOTES__RW"
+  }
 }

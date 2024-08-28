@@ -6,10 +6,13 @@ import io.swagger.v3.oas.annotations.media.Schema
 import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.responses.ApiResponses
 import io.swagger.v3.oas.annotations.tags.Tag
+import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
+import uk.gov.justice.hmpps.casenotes.config.SecurityUserContext.Companion.ROLE_CASE_NOTES_READ
+import uk.gov.justice.hmpps.casenotes.config.SecurityUserContext.Companion.ROLE_CASE_NOTES_WRITE
 import uk.gov.justice.hmpps.casenotes.dto.ErrorResponse
 import uk.gov.justice.hmpps.casenotes.types.internal.ReadCaseNoteType
 
@@ -49,6 +52,7 @@ class CaseNoteTypeController(private val readCaseNoteType: ReadCaseNoteType) {
   """,
   )
   @GetMapping("/types")
+  @PreAuthorize("hasAnyRole('$ROLE_CASE_NOTES_READ', '$ROLE_CASE_NOTES_WRITE')")
   fun getCaseNoteTypes(
     @RequestParam(required = false) selectableBy: SelectableBy = SelectableBy.ALL,
     @RequestParam(required = false) includeInactive: Boolean = true,
