@@ -2,6 +2,10 @@ package uk.gov.justice.hmpps.casenotes.controllers
 
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.ValueSource
+import uk.gov.justice.hmpps.casenotes.config.SecurityUserContext.Companion.ROLE_CASE_NOTES_READ
+import uk.gov.justice.hmpps.casenotes.config.SecurityUserContext.Companion.ROLE_CASE_NOTES_WRITE
 import uk.gov.justice.hmpps.casenotes.types.CaseNoteType
 import uk.gov.justice.hmpps.casenotes.types.SelectableBy.DPS_USER
 
@@ -13,10 +17,20 @@ class ReadCaseNoteTypeIntTest : ResourceTest() {
   }
 
   @Test
+  fun `403 forbidden - does not have the right role`() {
+    getCaseNoteTypes(roles = listOf("ANY_OTHER_ROLE")).expectStatus().isForbidden
+  }
+
+  @ParameterizedTest
+  @ValueSource(strings = [ROLE_CASE_NOTES_READ, ROLE_CASE_NOTES_WRITE])
+  fun `read and write case note roles can read types`(role: String) {
+    val types = getCaseNoteTypes(roles = listOf(role)).successList<CaseNoteType>()
+    assertThat(types.withoutSubTypes()).isEmpty()
+  }
+
+  @Test
   fun `default request provides inactive, active and restricted types`() {
-    val types = getCaseNoteTypes(
-      "API_TEST_USER",
-    ).successList<CaseNoteType>()
+    val types = getCaseNoteTypes().successList<CaseNoteType>()
     assertThat(types.withoutSubTypes()).isEmpty()
     assertThat(types.inactive()).isNotEmpty()
     assertThat(types.restricted()).isNotEmpty()
@@ -27,11 +41,7 @@ class ReadCaseNoteTypeIntTest : ResourceTest() {
   @Test
   fun `can request only active types`() {
     val types = getCaseNoteTypes(
-      "API_TEST_USER",
-      requestParams = mapOf(
-        "includeInactive" to listOf("false"),
-        "includeRestricted" to listOf("false"),
-      ),
+      requestParams = mapOf("includeInactive" to listOf("false"), "includeRestricted" to listOf("false")),
     ).successList<CaseNoteType>()
     assertThat(types.withoutSubTypes()).isEmpty()
     assertThat(types.inactive()).isEmpty()
@@ -43,7 +53,6 @@ class ReadCaseNoteTypeIntTest : ResourceTest() {
   @Test
   fun `can request restricted types`() {
     val types = getCaseNoteTypes(
-      "API_TEST_USER",
       requestParams = mapOf("includeRestricted" to listOf("true"), "includeInactive" to listOf("false")),
     ).successList<CaseNoteType>()
     assertThat(types.withoutSubTypes()).isEmpty()
@@ -62,7 +71,6 @@ class ReadCaseNoteTypeIntTest : ResourceTest() {
   @Test
   fun `can filter types to only those selectable by dps user`() {
     val types = getCaseNoteTypes(
-      username = "API_TEST_USER",
       requestParams = mapOf(
         "includeInactive" to listOf("false"),
         "includeRestricted" to listOf("false"),
@@ -78,10 +86,8 @@ class ReadCaseNoteTypeIntTest : ResourceTest() {
 
   @Test
   fun `types have consistent order`() {
-    val types = getCaseNoteTypes(
-      username = "API_TEST_USER",
-      requestParams = mapOf("includeInactive" to listOf("true")),
-    ).successList<CaseNoteType>()
+    val types = getCaseNoteTypes(requestParams = mapOf("includeInactive" to listOf("true")))
+      .successList<CaseNoteType>()
     assertThat(types.withoutSubTypes()).isEmpty()
     val parent = types.first { it.code == "LTR" }
     assertThat(parent.subCodes.map { it.code }).containsExactly(
@@ -106,8 +112,8 @@ class ReadCaseNoteTypeIntTest : ResourceTest() {
     flatMap { it.subCodes }.filter { DPS_USER !in it.selectableBy }
 
   private fun getCaseNoteTypes(
-    username: String,
-    roles: List<String> = listOf(),
+    username: String = "API_TEST_USER",
+    roles: List<String> = listOf(ROLE_CASE_NOTES_READ),
     requestParams: Map<String, List<String>> = mapOf(),
   ) = webTestClient.get().uri { builder ->
     builder.path(BASE_URL)
