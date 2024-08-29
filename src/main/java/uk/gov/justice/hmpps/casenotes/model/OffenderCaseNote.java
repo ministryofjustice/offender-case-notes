@@ -102,6 +102,8 @@ public class OffenderCaseNote {
 
     private boolean systemGenerated;
 
+    private Long legacyId;
+
     public void addAmendment(final String noteText, final String authorUsername, final String authorName, final String authorUserId) {
 
         final var amendment = OffenderCaseNoteAmendment.builder()

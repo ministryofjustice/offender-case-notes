@@ -25,28 +25,24 @@ interface OffenderCaseNoteRepository :
 
   @Modifying
   @Query(
-    "UPDATE OFFENDER_CASE_NOTE ocn SET offender_identifier = ?2 WHERE ocn.offender_identifier = ?1",
+    "update offender_case_note set offender_identifier = :new where offender_identifier = :old",
     nativeQuery = true,
-    // see https://github.com/spring-projects/spring-data-jpa/issues/2812. Remove after upgrade past 2.7.9. Not used.
-    countQuery = "select 1",
   )
-  fun updateOffenderIdentifier(oldOffenderIdentifier: String, newOffenderIdentifier: String): Int
+  fun updateOffenderIdentifier(old: String, new: String): Int
 
   @Modifying
-  @Query(
-    value = "DELETE FROM OFFENDER_CASE_NOTE ocn WHERE ocn.offender_identifier = ?1",
-    nativeQuery = true,
-    // see https://github.com/spring-projects/spring-data-jpa/issues/2812. Remove after upgrade past 2.7.9. Not used.
-    countQuery = "select 1",
-  )
+  @Query("delete from offender_case_note ocn WHERE ocn.offender_identifier = :offenderIdentifier", nativeQuery = true)
   fun deleteOffenderCaseNoteByOffenderIdentifier(offenderIdentifier: String): Int
 
   @Modifying
   @Query(
-    value = "DELETE FROM offender_case_note_amendment ocna where offender_case_note_id in (select offender_case_note_id from offender_case_note where offender_identifier = ?1)",
+    """
+        delete from offender_case_note_amendment ocna where offender_case_note_id in 
+            (select offender_case_note_id from offender_case_note where offender_identifier = :offenderIdentifier)
+      """,
     nativeQuery = true,
-    // see https://github.com/spring-projects/spring-data-jpa/issues/2812. Remove after upgrade past 2.7.9. Not used.
-    countQuery = "select 1",
   )
   fun deleteOffenderCaseNoteAmendmentsByOffenderIdentifier(offenderIdentifier: String): Int
+
+  fun findByLegacyId(legacyId: Long): OffenderCaseNote?
 }

@@ -78,6 +78,9 @@ data class CaseNote(
 
   @Schema(required = true, description = "Flag to indicate if the case note was system generated or not")
   val systemGenerated: Boolean,
+
+  @Schema(description = "A temporary field that holds the legacy (nomis) id for services that have a dependency on the legacy id")
+  val legacyId: Long?,
 ) {
 
   class Builder internal constructor() {
@@ -98,90 +101,78 @@ data class CaseNote(
     private var sensitive = false
     private var amendments: List<CaseNoteAmendment> = listOf()
     private var systemGenerated = false
+    private var legacyId: Long? = null
 
-    fun caseNoteId(caseNoteId: String): Builder {
+    fun caseNoteId(caseNoteId: String): Builder = apply {
       this.caseNoteId = caseNoteId
-      return this
     }
 
-    fun offenderIdentifier(offenderIdentifier: String): Builder {
+    fun offenderIdentifier(offenderIdentifier: String): Builder = apply {
       this.offenderIdentifier = offenderIdentifier
-      return this
     }
 
-    fun type(@NotBlank type: String): Builder {
+    fun type(@NotBlank type: String): Builder = apply {
       this.type = type
-      return this
     }
 
-    fun typeDescription(@NotBlank typeDescription: String): Builder {
+    fun typeDescription(@NotBlank typeDescription: String): Builder = apply {
       this.typeDescription = typeDescription
-      return this
     }
 
-    fun subType(@NotBlank subType: String): Builder {
+    fun subType(@NotBlank subType: String): Builder = apply {
       this.subType = subType
-      return this
     }
 
-    fun subTypeDescription(@NotBlank subTypeDescription: String): Builder {
+    fun subTypeDescription(@NotBlank subTypeDescription: String): Builder = apply {
       this.subTypeDescription = subTypeDescription
-      return this
     }
 
-    fun source(@NotBlank source: String): Builder {
+    fun source(@NotBlank source: String): Builder = apply {
       this.source = source
-      return this
     }
 
-    fun creationDateTime(creationDateTime: LocalDateTime): Builder {
+    fun creationDateTime(creationDateTime: LocalDateTime): Builder = apply {
       this.creationDateTime = creationDateTime
-      return this
     }
 
-    fun occurrenceDateTime(occurrenceDateTime: LocalDateTime): Builder {
+    fun occurrenceDateTime(occurrenceDateTime: LocalDateTime): Builder = apply {
       this.occurrenceDateTime = occurrenceDateTime
-      return this
     }
 
-    fun authorName(authorName: String): Builder {
+    fun authorName(authorName: String): Builder = apply {
       this.authorName = authorName
-      return this
     }
 
-    fun authorUserId(authorUserId: String): Builder {
+    fun authorUserId(authorUserId: String): Builder = apply {
       this.authorUserId = authorUserId
-      return this
     }
 
-    fun text(@NotBlank text: String): Builder {
+    fun text(@NotBlank text: String): Builder = apply {
       this.text = text
-      return this
     }
 
-    fun locationId(locationId: String?): Builder {
+    fun locationId(locationId: String?): Builder = apply {
       this.locationId = locationId
-      return this
     }
 
-    fun eventId(eventId: Int): Builder {
+    fun eventId(eventId: Int): Builder = apply {
       this.eventId = eventId
-      return this
     }
 
-    fun sensitive(sensitive: Boolean): Builder {
+    fun sensitive(sensitive: Boolean): Builder = apply {
       this.sensitive = sensitive
-      return this
     }
 
-    fun amendments(amendments: List<CaseNoteAmendment>): Builder {
+    fun amendments(amendments: List<CaseNoteAmendment>): Builder = apply {
       this.amendments = amendments
-      return this
     }
 
-    fun systemGenerated(systemGenerated: Boolean): Builder {
+    fun systemGenerated(systemGenerated: Boolean): Builder = apply {
       this.systemGenerated = systemGenerated
-      return this
+    }
+
+    fun legacyId(legacyId: Number?): Builder = apply {
+      this.legacyId = legacyId?.toLong()
     }
 
     fun build(): CaseNote {
@@ -203,6 +194,7 @@ data class CaseNote(
         sensitive,
         amendments,
         systemGenerated,
+        legacyId,
       )
     }
   }

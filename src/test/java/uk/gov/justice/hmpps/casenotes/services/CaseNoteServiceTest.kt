@@ -112,6 +112,7 @@ class CaseNoteServiceTest {
           "eventId",
           "sensitive",
           "systemGenerated",
+          "legacyId",
         )
         .isEqualTo(nomisCaseNote)
       assertThat(caseNote.text).isEqualTo("original")
@@ -120,6 +121,7 @@ class CaseNoteServiceTest {
       assertThat(caseNote.caseNoteId).isEqualTo("12345")
       assertThat(caseNote.eventId).isEqualTo(12345)
       assertThat(caseNote.systemGenerated).isTrue()
+      assertThat(caseNote.legacyId).isEqualTo(12345)
       Mockito.verify(caseNoteTypeRepository).findCaseNoteTypeByParentTypeTypeAndType("ACP", "POS1")
     }
 
@@ -152,6 +154,7 @@ class CaseNoteServiceTest {
           "eventId",
           "sensitive",
           "systemGenerated",
+          "legacyId",
         )
         .isEqualTo(nomisCaseNote)
       assertThat(caseNote.text).isEqualTo("original")
@@ -160,6 +163,7 @@ class CaseNoteServiceTest {
       assertThat(caseNote.caseNoteId).isEqualTo("12345")
       assertThat(caseNote.eventId).isEqualTo(12345)
       assertThat(caseNote.systemGenerated).isFalse()
+      assertThat(caseNote.legacyId).isEqualTo(12345)
       Mockito.verify(caseNoteTypeRepository).findCaseNoteTypeByParentTypeTypeAndType("ACP", "POS1")
     }
 
@@ -435,6 +439,7 @@ class CaseNoteServiceTest {
         "eventId",
         "sensitive",
         "systemGenerated",
+        "legacyId",
       )
       .isEqualTo(nomisCaseNote)
     assertThat(caseNote.text).isEqualTo("original")
@@ -442,6 +447,7 @@ class CaseNoteServiceTest {
     assertThat(caseNote.locationId).isEqualTo("agency")
     assertThat(caseNote.caseNoteId).isEqualTo("12345")
     assertThat(caseNote.eventId).isEqualTo(12345)
+    assertThat(caseNote.legacyId).isEqualTo(12345)
     assertThat(caseNote.systemGenerated).isEqualTo(false)
   }
 
@@ -471,6 +477,7 @@ class CaseNoteServiceTest {
         "sensitive",
         "amendments",
         "systemGenerated",
+        "legacyId",
       )
       .isEqualTo(nomisCaseNote)
     assertThat(caseNote.text).isEqualTo("original")
@@ -478,6 +485,7 @@ class CaseNoteServiceTest {
     assertThat(caseNote.locationId).isEqualTo("agency")
     assertThat(caseNote.caseNoteId).isEqualTo("12345")
     assertThat(caseNote.eventId).isEqualTo(12345)
+    assertThat(caseNote.legacyId).isEqualTo(12345)
     assertThat(caseNote.amendments.get(0).additionalNoteText).isEqualTo("additional details")
     assertThat(caseNote.amendments.get(0).authorUserName).isEqualTo("AAA11B")
     assertThat(caseNote.amendments.get(0).creationDateTime).isEqualTo("2019-03-24T11:22")
@@ -502,6 +510,7 @@ class CaseNoteServiceTest {
           "eventId",
           "sensitive",
           "systemGenerated",
+          "legacyId",
         )
         .isEqualTo(nomisCaseNote)
 
@@ -510,6 +519,7 @@ class CaseNoteServiceTest {
       assertThat(caseNote.locationId).isEqualTo("agency")
       assertThat(caseNote.caseNoteId).isEqualTo("12345")
       assertThat(caseNote.eventId).isEqualTo(12345)
+      assertThat(caseNote.legacyId).isEqualTo(12345)
     }
 
     @Test
