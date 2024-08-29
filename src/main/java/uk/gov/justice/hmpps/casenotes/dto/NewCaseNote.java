@@ -43,4 +43,6 @@ public class NewCaseNote {
     @NotBlank
     private String text;
 
+    @Schema(description = "Boolean flag to indicate if case not is system generated")
+    private Boolean systemGenerated;
 }

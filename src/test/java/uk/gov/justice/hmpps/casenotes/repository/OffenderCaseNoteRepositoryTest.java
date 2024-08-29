@@ -497,7 +497,8 @@ public class OffenderCaseNoteRepositoryTest extends IntegrationTest {
                 .caseNoteType(genType)
                 .noteText("HELLO")
                 .createUserId("SYS")
-                .modifyUserId("SYS");
+                .modifyUserId("SYS")
+                .systemGenerated(false);
 
     }
 }

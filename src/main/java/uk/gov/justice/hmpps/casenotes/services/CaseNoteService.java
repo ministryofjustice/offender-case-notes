@@ -40,6 +40,8 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
+import static java.lang.Boolean.TRUE;
+import static java.lang.Long.parseLong;
 import static java.lang.String.format;
 import static java.lang.String.valueOf;
 import static org.springframework.data.domain.Sort.Direction.ASC;
@@ -168,6 +170,8 @@ public class CaseNoteService {
             .sensitive(cn.getCaseNoteType().isSensitive())
             .text(cn.getNoteText())
             .creationDateTime(cn.getCreateDateTime())
+            .systemGenerated(cn.isSystemGenerated())
+            .legacyId(cn.getLegacyId())
             .amendments(cn.getAmendments().stream().map(
                 a -> CaseNoteAmendment.builder()
                     .authorUserName(a.getAuthorUsername())
@@ -198,6 +202,8 @@ public class CaseNoteService {
             .sensitive(false)
             .text(cn.getOriginalNoteText())
             .creationDateTime(cn.getCreationDateTime())
+            .systemGenerated(cn.getSource().equalsIgnoreCase("AUTO"))
+            .legacyId(cn.getCaseNoteId())
             .amendments(cn.getAmendments().stream().map(
                 a -> CaseNoteAmendment.builder()
                     .authorName(a.getAuthorName())
@@ -218,10 +224,19 @@ public class CaseNoteService {
     ) {
         final var type = caseNoteTypeRepository.findCaseNoteTypeByParentTypeTypeAndType(
             newCaseNote.getType(), newCaseNote.getSubType()
-            ).filter(it -> !it.isSyncToNomis()).orElse(null);
+        ).orElseThrow(() ->
+            new IllegalArgumentException(format(
+                "Unknown Case Note Type %s/%s",
+                newCaseNote.getType(),
+                newCaseNote.getSubType()
+            ))
+        );
 
         // If we don't have the type locally then won't be secure, so delegate to prison-api
-        if (type == null) {
+        if (type.isSyncToNomis()) {
+            if (newCaseNote.getSystemGenerated() == null) {
+                newCaseNote.setSystemGenerated(!type.isDpsUserSelectable());
+            }
             return mapper(externalApiService.createCaseNote(offenderIdentifier, newCaseNote), offenderIdentifier);
         }
 
@@ -253,6 +268,7 @@ public class CaseNoteService {
             .caseNoteType(type)
             .offenderIdentifier(offenderIdentifier)
             .locationId(locationId)
+            .systemGenerated(TRUE.equals(newCaseNote.getSystemGenerated()))
             .build();
 
         // save and flush to activate database event id generation
@@ -268,48 +284,56 @@ public class CaseNoteService {
         @NotNull final String caseNoteIdentifier,
         @NotNull @Valid final UpdateCaseNote amendCaseNote
     ) {
-        if (isNotSensitiveCaseNote(caseNoteIdentifier)) {
+        final boolean isLegacy = isLegacyId(caseNoteIdentifier);
+        final var offenderCaseNote = getCaseNote(caseNoteIdentifier, isLegacy);
+        if (isLegacy && offenderCaseNote == null) {
             return mapper(externalApiService.amendOffenderCaseNote(
                 offenderIdentifier,
                 NumberUtils.toLong(caseNoteIdentifier),
                 amendCaseNote
             ), offenderIdentifier);
+        } else {
+            if (offenderCaseNote.getCaseNoteType().isRestrictedUse() && !isAllowedToCreateRestrictedCaseNote()) {
+                throw new AccessDeniedException("User not allowed to amend this case note type [" + offenderCaseNote.getCaseNoteType() + "]");
+            }
+
+            if (!offenderIdentifier.equals(offenderCaseNote.getOffenderIdentifier())) {
+                throw EntityNotFoundException.withId(offenderIdentifier);
+            }
+
+            final var username = securityUserContext.getCurrentUser().getUsername();
+            final var userDetails = externalApiService.getUserDetails(username);
+            final var authorName = userDetails
+                .map(user -> isNullOrEmpty(user.getName()) ? username : user.getName())
+                .orElse(username);
+            final var authorUserId = userDetails
+                .map(user -> isNullOrEmpty(user.getUserId()) ? username : user.getUserId())
+                .orElse(username);
+
+            offenderCaseNote.addAmendment(amendCaseNote.getText(), username, authorName, authorUserId);
+            repository.save(offenderCaseNote);
+            return mapper(offenderCaseNote);
         }
+    }
 
-        final var offenderCaseNote = repository.findById(UUID.fromString(caseNoteIdentifier))
-            .orElseThrow(() -> EntityNotFoundException.withId(caseNoteIdentifier));
-        if (offenderCaseNote.getCaseNoteType().isRestrictedUse() && !isAllowedToCreateRestrictedCaseNote()) {
-            throw new AccessDeniedException("User not allowed to amend this case note type [" + offenderCaseNote.getCaseNoteType() + "]");
+    private OffenderCaseNote getCaseNote(final String caseNoteIdentifier, boolean isLegacy) {
+        if (isLegacy) {
+            return repository.findByLegacyId(parseLong(caseNoteIdentifier));
+        } else {
+            return repository.findById(UUID.fromString(caseNoteIdentifier))
+                .orElseThrow(() -> EntityNotFoundException.withId(caseNoteIdentifier));
         }
-
-        if (!offenderIdentifier.equals(offenderCaseNote.getOffenderIdentifier())) {
-            throw EntityNotFoundException.withId(offenderIdentifier);
-        }
-
-        final var username = securityUserContext.getCurrentUser().getUsername();
-        final var userDetails = externalApiService.getUserDetails(username);
-        final var authorName = userDetails
-            .map(user -> isNullOrEmpty(user.getName()) ? username : user.getName())
-            .orElse(username);
-        final var authorUserId = userDetails
-            .map(user -> isNullOrEmpty(user.getUserId()) ? username : user.getUserId())
-            .orElse(username);
-
-        offenderCaseNote.addAmendment(amendCaseNote.getText(), username, authorName, authorUserId);
-        repository.save(offenderCaseNote);
-        return mapper(offenderCaseNote);
     }
 
     public CaseNote getCaseNote(final String offenderIdentifier, final String caseNoteIdentifier) {
-        if (isNotSensitiveCaseNote(caseNoteIdentifier)) {
+        final boolean isLegacy = isLegacyId(caseNoteIdentifier);
+        final OffenderCaseNote caseNote = getCaseNote(caseNoteIdentifier, isLegacy);
+        if (isLegacy && caseNote == null) {
             return mapper(externalApiService.getOffenderCaseNote(
                 offenderIdentifier,
                 NumberUtils.toLong(caseNoteIdentifier)
             ), offenderIdentifier);
         }
-
-        final var caseNote = repository.findById(UUID.fromString(caseNoteIdentifier))
-            .orElseThrow(() -> EntityNotFoundException.withId(caseNoteIdentifier));
 
         if (caseNote.getCaseNoteType().isSensitive() && !isAllowedToViewOrCreateSensitiveCaseNote()) {
             throw new AccessDeniedException("User not allowed to view sensitive case notes");
@@ -317,7 +341,7 @@ public class CaseNoteService {
         return mapper(caseNote);
     }
 
-    private boolean isNotSensitiveCaseNote(final String caseNoteIdentifier) {
+    private boolean isLegacyId(final String caseNoteIdentifier) {
         return NumberUtils.isDigits(caseNoteIdentifier);
     }
 
@@ -337,7 +361,7 @@ public class CaseNoteService {
     @Transactional
     @PreAuthorize("hasRole('DELETE_SENSITIVE_CASE_NOTES')")
     public void softDeleteCaseNote(final String offenderIdentifier, final String caseNoteId) {
-        if (isNotSensitiveCaseNote(caseNoteId)) {
+        if (isLegacyId(caseNoteId)) {
             throw new ValidationException("Case note id not a sensitive case note, please delete through NOMIS");
         }
         final var caseNote = repository.findById(UUID.fromString(caseNoteId))
