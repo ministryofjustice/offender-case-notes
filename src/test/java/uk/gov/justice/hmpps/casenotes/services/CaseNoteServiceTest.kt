@@ -84,7 +84,7 @@ class CaseNoteServiceTest {
   @Nested
   inner class CreateCaseNote {
     @Test
-    fun `non sensitive case note stored in NOMIS`() {
+    fun `non sensitive system generated case note stored in NOMIS`() {
       whenever(
         caseNoteTypeRepository.findCaseNoteTypeByParentTypeTypeAndType(
           any<String>(),
@@ -120,6 +120,46 @@ class CaseNoteServiceTest {
       assertThat(caseNote.caseNoteId).isEqualTo("12345")
       assertThat(caseNote.eventId).isEqualTo(12345)
       assertThat(caseNote.systemGenerated).isTrue()
+      Mockito.verify(caseNoteTypeRepository).findCaseNoteTypeByParentTypeTypeAndType("ACP", "POS1")
+    }
+
+    @Test
+    fun `non sensitive and non system generated case note stored in NOMIS`() {
+      whenever(
+        caseNoteTypeRepository.findCaseNoteTypeByParentTypeTypeAndType(
+          any<String>(),
+          any<String>(),
+        ),
+      ).thenReturn(Optional.of(CaseNoteType.builder().syncToNomis(true).dpsUserSelectable(true).build()))
+      val nomisCaseNote: NomisCaseNote = createNomisCaseNote()
+      nomisCaseNote.source = "INST"
+
+      val caseNoteCaptor = argumentCaptor<NewCaseNote>()
+      whenever(externalApiService.createCaseNote(any<String>(), caseNoteCaptor.capture())).thenReturn(nomisCaseNote)
+
+      val caseNote = caseNoteService.createCaseNote("12345", NewCaseNote.builder().type("ACP").subType("POS1").build())
+
+      val sent = caseNoteCaptor.firstValue
+      assertThat(sent.systemGenerated).isEqualTo(false)
+
+      assertThat(caseNote).usingRecursiveComparison()
+        .ignoringFields(
+          "authorUsername",
+          "locationId",
+          "text",
+          "caseNoteId",
+          "authorUserId",
+          "eventId",
+          "sensitive",
+          "systemGenerated",
+        )
+        .isEqualTo(nomisCaseNote)
+      assertThat(caseNote.text).isEqualTo("original")
+      assertThat(caseNote.authorUserId).isEqualTo("23456")
+      assertThat(caseNote.locationId).isEqualTo("agency")
+      assertThat(caseNote.caseNoteId).isEqualTo("12345")
+      assertThat(caseNote.eventId).isEqualTo(12345)
+      assertThat(caseNote.systemGenerated).isFalse()
       Mockito.verify(caseNoteTypeRepository).findCaseNoteTypeByParentTypeTypeAndType("ACP", "POS1")
     }
 
@@ -174,7 +214,7 @@ class CaseNoteServiceTest {
       }
 
       @Test
-      fun `sensitive case note stored outside NOMIS in dedicated database`() {
+      fun `sensitive user created case note stored outside NOMIS in dedicated database`() {
         RequestContextHolder.getRequestAttributes()!!
           .setAttribute(
             CaseNoteRequestContext::class.simpleName!!,
@@ -206,9 +246,52 @@ class CaseNoteServiceTest {
             .authorName("John Smith")
             .authorUserId("4321")
             .source("OCNS")
+            .systemGenerated(false)
             .amendments(emptyList())
             .creationDateTime(now)
             .eventId(1234)
+            .build(),
+        )
+      }
+
+      @Test
+      fun `sensitive system generated case note stored outside NOMIS in dedicated database`() {
+        RequestContextHolder.getRequestAttributes()!!
+          .setAttribute(
+            CaseNoteRequestContext::class.simpleName!!,
+            defaultContext.copy(userDisplayName = "John Smith", userId = "4321"),
+            0,
+          )
+
+        val createdNote: CaseNote = caseNoteService.createCaseNote(
+          "A1234AA",
+          NewCaseNote.builder()
+            .type("someparent")
+            .subType("sometype")
+            .occurrenceDateTime(now)
+            .text("HELLO")
+            .systemGenerated(true)
+            .build(),
+        )
+
+        assertThat(createdNote).isEqualTo(
+          CaseNote.builder()
+            .caseNoteId(caseNoteId.toString())
+            .offenderIdentifier("A1234AA")
+            .sensitive(true)
+            .type("someparent")
+            .typeDescription("description of parent")
+            .subType("sometype")
+            .subTypeDescription("description of some type")
+            .text("HELLO")
+            .occurrenceDateTime(now)
+            .authorName("John Smith")
+            .authorUserId("4321")
+            .source("OCNS")
+            .amendments(emptyList())
+            .creationDateTime(now)
+            .eventId(1234)
+            .systemGenerated(true)
             .build(),
         )
       }
