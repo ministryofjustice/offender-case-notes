@@ -84,6 +84,97 @@ class CaseNoteServiceTest {
   @Nested
   inner class CreateCaseNote {
     @Test
+    fun `non sensitive explicit non system generated case note stored in NOMIS`() {
+      whenever(
+        caseNoteTypeRepository.findCaseNoteTypeByParentTypeTypeAndType(
+          any<String>(),
+          any<String>(),
+        ),
+      ).thenReturn(Optional.of(CaseNoteType.builder().syncToNomis(true).dpsUserSelectable(false).build()))
+      val nomisCaseNote: NomisCaseNote = createNomisCaseNote()
+      nomisCaseNote.source = "INT"
+
+      val caseNoteCaptor = argumentCaptor<NewCaseNote>()
+      whenever(externalApiService.createCaseNote(any<String>(), caseNoteCaptor.capture())).thenReturn(nomisCaseNote)
+
+      val caseNote = caseNoteService.createCaseNote(
+        "12345",
+        NewCaseNote.builder().type("ACP").subType("POS1").systemGenerated(false).build(),
+      )
+
+      val sent = caseNoteCaptor.firstValue
+      assertThat(sent.systemGenerated).isEqualTo(false)
+
+      assertThat(caseNote).usingRecursiveComparison()
+        .ignoringFields(
+          "authorUsername",
+          "locationId",
+          "text",
+          "caseNoteId",
+          "authorUserId",
+          "eventId",
+          "sensitive",
+          "systemGenerated",
+          "legacyId",
+        )
+        .isEqualTo(nomisCaseNote)
+      assertThat(caseNote.text).isEqualTo("original")
+      assertThat(caseNote.authorUserId).isEqualTo("23456")
+      assertThat(caseNote.locationId).isEqualTo("agency")
+      assertThat(caseNote.caseNoteId).isEqualTo("12345")
+      assertThat(caseNote.eventId).isEqualTo(12345)
+      assertThat(caseNote.systemGenerated).isFalse()
+      assertThat(caseNote.legacyId).isEqualTo(12345)
+      Mockito.verify(caseNoteTypeRepository).findCaseNoteTypeByParentTypeTypeAndType("ACP", "POS1")
+    }
+
+    @Test
+    fun `non sensitive explicit system generated case note stored in NOMIS`() {
+      whenever(
+        caseNoteTypeRepository.findCaseNoteTypeByParentTypeTypeAndType(
+          any<String>(),
+          any<String>(),
+        ),
+      ).thenReturn(Optional.of(CaseNoteType.builder().syncToNomis(true).dpsUserSelectable(false).build()))
+      val nomisCaseNote: NomisCaseNote = createNomisCaseNote()
+      nomisCaseNote.caseNoteId = 6574632
+      nomisCaseNote.source = "AUTO"
+
+      val caseNoteCaptor = argumentCaptor<NewCaseNote>()
+      whenever(externalApiService.createCaseNote(any<String>(), caseNoteCaptor.capture())).thenReturn(nomisCaseNote)
+
+      val caseNote = caseNoteService.createCaseNote(
+        "12345",
+        NewCaseNote.builder().type("ACP").subType("POS1").systemGenerated(true).build(),
+      )
+
+      val sent = caseNoteCaptor.firstValue
+      assertThat(sent.systemGenerated).isEqualTo(true)
+
+      assertThat(caseNote).usingRecursiveComparison()
+        .ignoringFields(
+          "authorUsername",
+          "locationId",
+          "text",
+          "caseNoteId",
+          "authorUserId",
+          "eventId",
+          "sensitive",
+          "systemGenerated",
+          "legacyId",
+        )
+        .isEqualTo(nomisCaseNote)
+      assertThat(caseNote.text).isEqualTo("original")
+      assertThat(caseNote.authorUserId).isEqualTo("23456")
+      assertThat(caseNote.locationId).isEqualTo("agency")
+      assertThat(caseNote.caseNoteId).isEqualTo("6574632")
+      assertThat(caseNote.eventId).isEqualTo(6574632)
+      assertThat(caseNote.systemGenerated).isTrue()
+      assertThat(caseNote.legacyId).isEqualTo(6574632)
+      Mockito.verify(caseNoteTypeRepository).findCaseNoteTypeByParentTypeTypeAndType("ACP", "POS1")
+    }
+
+    @Test
     fun `non sensitive system generated case note stored in NOMIS`() {
       whenever(
         caseNoteTypeRepository.findCaseNoteTypeByParentTypeTypeAndType(
@@ -205,7 +296,11 @@ class CaseNoteServiceTest {
 
       @BeforeEach
       fun beforeEach() {
-        whenever(caseNoteTypeRepository.findCaseNoteTypeByParentTypeTypeAndType(any(), any())).thenReturn(Optional.of(noteType))
+        whenever(caseNoteTypeRepository.findCaseNoteTypeByParentTypeTypeAndType(any(), any())).thenReturn(
+          Optional.of(
+            noteType,
+          ),
+        )
         whenever(securityUserContext.isOverrideRole(any<String>(), any<String>())).thenReturn(true)
         whenever(securityUserContext.getCurrentUser()).thenReturn(UserIdUser("someuser", "userId"))
         whenever(repository.saveAndFlush(any<OffenderCaseNote>())).thenAnswer { i ->
