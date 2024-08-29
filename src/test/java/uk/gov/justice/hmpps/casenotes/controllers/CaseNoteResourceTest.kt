@@ -737,7 +737,7 @@ class CaseNoteResourceTest : ResourceTest() {
     private const val CREATE_CASE_NOTE_WITHOUT_LOC =
       """{"type": "POM", "subType": "GEN", "text": "%s"}"""
     private const val CREATE_NORMAL_CASE_NOTE_WITHOUT_LOC =
-      """{"type": "BOB", "subType": "SMITH", "text": "%s"}"""
+      """{"type": "ACP", "subType": "POS1", "text": "%s"}"""
     private const val CREATE_CASE_NOTE_BY_TYPE =
       """{"type": "%s", "subType": "%s", "text": "%s"}"""
     private val POM_ROLE = listOf("ROLE_POM")

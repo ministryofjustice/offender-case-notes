@@ -40,6 +40,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
+import static java.lang.Boolean.TRUE;
 import static java.lang.String.format;
 import static java.lang.String.valueOf;
 import static org.springframework.data.domain.Sort.Direction.ASC;
@@ -168,6 +169,7 @@ public class CaseNoteService {
             .sensitive(cn.getCaseNoteType().isSensitive())
             .text(cn.getNoteText())
             .creationDateTime(cn.getCreateDateTime())
+            .systemGenerated(cn.isSystemGenerated())
             .amendments(cn.getAmendments().stream().map(
                 a -> CaseNoteAmendment.builder()
                     .authorUserName(a.getAuthorUsername())
@@ -198,6 +200,7 @@ public class CaseNoteService {
             .sensitive(false)
             .text(cn.getOriginalNoteText())
             .creationDateTime(cn.getCreationDateTime())
+            .systemGenerated(cn.getSource().equalsIgnoreCase("AUTO"))
             .amendments(cn.getAmendments().stream().map(
                 a -> CaseNoteAmendment.builder()
                     .authorName(a.getAuthorName())
@@ -218,10 +221,18 @@ public class CaseNoteService {
     ) {
         final var type = caseNoteTypeRepository.findCaseNoteTypeByParentTypeTypeAndType(
             newCaseNote.getType(), newCaseNote.getSubType()
-            ).filter(it -> !it.isSyncToNomis()).orElse(null);
+        ).orElseThrow(() ->
+            new IllegalArgumentException(format("Unknown Case Note Type %s/%s",
+                newCaseNote.getType(),
+                newCaseNote.getSubType()
+            ))
+        );
 
         // If we don't have the type locally then won't be secure, so delegate to prison-api
-        if (type == null) {
+        if (type.isSyncToNomis()) {
+            if (newCaseNote.getSystemGenerated() == null) {
+                newCaseNote.setSystemGenerated(!type.isDpsUserSelectable());
+            }
             return mapper(externalApiService.createCaseNote(offenderIdentifier, newCaseNote), offenderIdentifier);
         }
 
@@ -253,6 +264,7 @@ public class CaseNoteService {
             .caseNoteType(type)
             .offenderIdentifier(offenderIdentifier)
             .locationId(locationId)
+            .systemGenerated(TRUE.equals(newCaseNote.getSystemGenerated()))
             .build();
 
         // save and flush to activate database event id generation

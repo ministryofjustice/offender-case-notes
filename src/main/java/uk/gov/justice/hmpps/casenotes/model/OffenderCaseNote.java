@@ -100,6 +100,8 @@ public class OffenderCaseNote {
     @Column(columnDefinition = "serial", insertable = false, updatable = false)
     private Integer eventId;
 
+    private boolean systemGenerated;
+
     public void addAmendment(final String noteText, final String authorUsername, final String authorName, final String authorUserId) {
 
         final var amendment = OffenderCaseNoteAmendment.builder()

@@ -75,6 +75,9 @@ data class CaseNote(
 
   @Schema(required = true, description = "Ordered list of amendments to the case note (oldest first)")
   val amendments: List<CaseNoteAmendment> = listOf(),
+
+  @Schema(required = true, description = "Flag to indicate if the case note was system generated or not")
+  val systemGenerated: Boolean,
 ) {
 
   class Builder internal constructor() {
@@ -94,6 +97,7 @@ data class CaseNote(
     private var eventId: Int = 0
     private var sensitive = false
     private var amendments: List<CaseNoteAmendment> = listOf()
+    private var systemGenerated = false
 
     fun caseNoteId(caseNoteId: String): Builder {
       this.caseNoteId = caseNoteId
@@ -175,6 +179,11 @@ data class CaseNote(
       return this
     }
 
+    fun systemGenerated(systemGenerated: Boolean): Builder {
+      this.systemGenerated = systemGenerated
+      return this
+    }
+
     fun build(): CaseNote {
       return CaseNote(
         caseNoteId!!,
@@ -193,6 +202,7 @@ data class CaseNote(
         eventId,
         sensitive,
         amendments,
+        systemGenerated,
       )
     }
   }

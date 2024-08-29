@@ -16,6 +16,7 @@ import org.mockito.Captor
 import org.mockito.Mockito
 import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.any
+import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
@@ -89,11 +90,17 @@ class CaseNoteServiceTest {
           any<String>(),
           any<String>(),
         ),
-      ).thenReturn(Optional.empty())
+      ).thenReturn(Optional.of(CaseNoteType.builder().syncToNomis(true).dpsUserSelectable(false).build()))
       val nomisCaseNote: NomisCaseNote = createNomisCaseNote()
-      whenever(externalApiService.createCaseNote(any<String>(), any())).thenReturn(nomisCaseNote)
+      nomisCaseNote.source = "AUTO"
 
-      val caseNote = caseNoteService.createCaseNote("12345", NewCaseNote.builder().type("type").subType("SUB").build())
+      val caseNoteCaptor = argumentCaptor<NewCaseNote>()
+      whenever(externalApiService.createCaseNote(any<String>(), caseNoteCaptor.capture())).thenReturn(nomisCaseNote)
+
+      val caseNote = caseNoteService.createCaseNote("12345", NewCaseNote.builder().type("ACP").subType("POS1").build())
+
+      val sent = caseNoteCaptor.firstValue
+      assertThat(sent.systemGenerated).isEqualTo(true)
 
       assertThat(caseNote).usingRecursiveComparison()
         .ignoringFields(
@@ -104,6 +111,7 @@ class CaseNoteServiceTest {
           "authorUserId",
           "eventId",
           "sensitive",
+          "systemGenerated",
         )
         .isEqualTo(nomisCaseNote)
       assertThat(caseNote.text).isEqualTo("original")
@@ -111,7 +119,8 @@ class CaseNoteServiceTest {
       assertThat(caseNote.locationId).isEqualTo("agency")
       assertThat(caseNote.caseNoteId).isEqualTo("12345")
       assertThat(caseNote.eventId).isEqualTo(12345)
-      Mockito.verify(caseNoteTypeRepository).findCaseNoteTypeByParentTypeTypeAndType("type", "SUB")
+      assertThat(caseNote.systemGenerated).isTrue()
+      Mockito.verify(caseNoteTypeRepository).findCaseNoteTypeByParentTypeTypeAndType("ACP", "POS1")
     }
 
     @Test
@@ -342,6 +351,7 @@ class CaseNoteServiceTest {
         "authorUserId",
         "eventId",
         "sensitive",
+        "systemGenerated",
       )
       .isEqualTo(nomisCaseNote)
     assertThat(caseNote.text).isEqualTo("original")
@@ -349,6 +359,7 @@ class CaseNoteServiceTest {
     assertThat(caseNote.locationId).isEqualTo("agency")
     assertThat(caseNote.caseNoteId).isEqualTo("12345")
     assertThat(caseNote.eventId).isEqualTo(12345)
+    assertThat(caseNote.systemGenerated).isEqualTo(false)
   }
 
   @Test
@@ -376,6 +387,7 @@ class CaseNoteServiceTest {
         "eventId",
         "sensitive",
         "amendments",
+        "systemGenerated",
       )
       .isEqualTo(nomisCaseNote)
     assertThat(caseNote.text).isEqualTo("original")
@@ -406,6 +418,7 @@ class CaseNoteServiceTest {
           "authorUserId",
           "eventId",
           "sensitive",
+          "systemGenerated",
         )
         .isEqualTo(nomisCaseNote)
 
