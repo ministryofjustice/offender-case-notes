@@ -5,7 +5,7 @@ import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.ValueSource
 import org.springframework.test.context.TestPropertySource
 import uk.gov.justice.hmpps.casenotes.config.SecurityUserContext
-import uk.gov.justice.hmpps.casenotes.dto.CaseNote
+import uk.gov.justice.hmpps.casenotes.notes.CaseNote
 import uk.gov.justice.hmpps.casenotes.utils.NomisIdGenerator
 import uk.gov.justice.hmpps.casenotes.utils.verifyAgainst
 import java.util.UUID

@@ -34,10 +34,7 @@ import uk.gov.justice.hmpps.casenotes.config.CaseNoteRequestContext
 import uk.gov.justice.hmpps.casenotes.config.SecurityUserContext
 import uk.gov.justice.hmpps.casenotes.config.SecurityUserContext.UserIdUser
 import uk.gov.justice.hmpps.casenotes.config.Source
-import uk.gov.justice.hmpps.casenotes.dto.CaseNote
-import uk.gov.justice.hmpps.casenotes.dto.CaseNoteAmendment
 import uk.gov.justice.hmpps.casenotes.dto.CaseNoteFilter
-import uk.gov.justice.hmpps.casenotes.dto.NewCaseNote
 import uk.gov.justice.hmpps.casenotes.dto.NomisCaseNote
 import uk.gov.justice.hmpps.casenotes.dto.NomisCaseNoteAmendment
 import uk.gov.justice.hmpps.casenotes.dto.UpdateCaseNote
@@ -48,6 +45,9 @@ import uk.gov.justice.hmpps.casenotes.model.OffenderCaseNote
 import uk.gov.justice.hmpps.casenotes.model.OffenderCaseNote.AmendmentComparator
 import uk.gov.justice.hmpps.casenotes.model.OffenderCaseNoteAmendment
 import uk.gov.justice.hmpps.casenotes.model.ParentNoteType
+import uk.gov.justice.hmpps.casenotes.notes.CaseNote
+import uk.gov.justice.hmpps.casenotes.notes.CaseNoteAmendment
+import uk.gov.justice.hmpps.casenotes.notes.CreateCaseNoteRequest
 import uk.gov.justice.hmpps.casenotes.repository.CaseNoteTypeRepository
 import uk.gov.justice.hmpps.casenotes.repository.OffenderCaseNoteAmendmentRepository
 import uk.gov.justice.hmpps.casenotes.repository.OffenderCaseNoteRepository
@@ -96,12 +96,12 @@ class CaseNoteServiceTest {
       val nomisCaseNote: NomisCaseNote = createNomisCaseNote()
       nomisCaseNote.source = "INT"
 
-      val caseNoteCaptor = argumentCaptor<NewCaseNote>()
+      val caseNoteCaptor = argumentCaptor<CreateCaseNoteRequest>()
       whenever(externalApiService.createCaseNote(any<String>(), caseNoteCaptor.capture())).thenReturn(nomisCaseNote)
 
       val caseNote = caseNoteService.createCaseNote(
         "12345",
-        NewCaseNote.builder().type("ACP").subType("POS1").systemGenerated(false).build(),
+        createCaseNoteRequest(systemGenerated = false),
       )
 
       val sent = caseNoteCaptor.firstValue
@@ -142,12 +142,12 @@ class CaseNoteServiceTest {
       nomisCaseNote.caseNoteId = 6574632
       nomisCaseNote.source = "AUTO"
 
-      val caseNoteCaptor = argumentCaptor<NewCaseNote>()
+      val caseNoteCaptor = argumentCaptor<CreateCaseNoteRequest>()
       whenever(externalApiService.createCaseNote(any<String>(), caseNoteCaptor.capture())).thenReturn(nomisCaseNote)
 
       val caseNote = caseNoteService.createCaseNote(
         "12345",
-        NewCaseNote.builder().type("ACP").subType("POS1").systemGenerated(true).build(),
+        createCaseNoteRequest(systemGenerated = true),
       )
 
       val sent = caseNoteCaptor.firstValue
@@ -187,10 +187,10 @@ class CaseNoteServiceTest {
       val nomisCaseNote: NomisCaseNote = createNomisCaseNote()
       nomisCaseNote.source = "AUTO"
 
-      val caseNoteCaptor = argumentCaptor<NewCaseNote>()
+      val caseNoteCaptor = argumentCaptor<CreateCaseNoteRequest>()
       whenever(externalApiService.createCaseNote(any<String>(), caseNoteCaptor.capture())).thenReturn(nomisCaseNote)
 
-      val caseNote = caseNoteService.createCaseNote("12345", NewCaseNote.builder().type("ACP").subType("POS1").build())
+      val caseNote = caseNoteService.createCaseNote("12345", createCaseNoteRequest())
 
       val sent = caseNoteCaptor.firstValue
       assertThat(sent.systemGenerated).isEqualTo(true)
@@ -229,10 +229,10 @@ class CaseNoteServiceTest {
       val nomisCaseNote: NomisCaseNote = createNomisCaseNote()
       nomisCaseNote.source = "INST"
 
-      val caseNoteCaptor = argumentCaptor<NewCaseNote>()
+      val caseNoteCaptor = argumentCaptor<CreateCaseNoteRequest>()
       whenever(externalApiService.createCaseNote(any<String>(), caseNoteCaptor.capture())).thenReturn(nomisCaseNote)
 
-      val caseNote = caseNoteService.createCaseNote("12345", NewCaseNote.builder().type("ACP").subType("POS1").build())
+      val caseNote = caseNoteService.createCaseNote("12345", createCaseNoteRequest())
 
       val sent = caseNoteCaptor.firstValue
       assertThat(sent.systemGenerated).isEqualTo(false)
@@ -273,7 +273,7 @@ class CaseNoteServiceTest {
       assertThatThrownBy {
         caseNoteService.createCaseNote(
           "12345",
-          NewCaseNote.builder().type("type").subType("SUB").build(),
+          createCaseNoteRequest(),
         )
       }.isInstanceOf(AccessDeniedException::class.java)
 
@@ -332,12 +332,12 @@ class CaseNoteServiceTest {
 
         val createdNote: CaseNote = caseNoteService.createCaseNote(
           "A1234AA",
-          NewCaseNote.builder()
-            .type("someparent")
-            .subType("sometype")
-            .occurrenceDateTime(now)
-            .text("HELLO")
-            .build(),
+          createCaseNoteRequest(
+            type = "someparent",
+            subType = "sometype",
+            occurrenceDateTime = now,
+            text = "HELLO",
+          ),
         )
 
         assertThat(createdNote).isEqualTo(
@@ -358,6 +358,7 @@ class CaseNoteServiceTest {
             .amendments(emptyList())
             .creationDateTime(now)
             .eventId(1234)
+            .locationId("MDI")
             .build(),
         )
       }
@@ -373,13 +374,13 @@ class CaseNoteServiceTest {
 
         val createdNote: CaseNote = caseNoteService.createCaseNote(
           "A1234AA",
-          NewCaseNote.builder()
-            .type("someparent")
-            .subType("sometype")
-            .occurrenceDateTime(now)
-            .text("HELLO")
-            .systemGenerated(true)
-            .build(),
+          createCaseNoteRequest(
+            type = "someparent",
+            subType = "sometype",
+            occurrenceDateTime = now,
+            text = "HELLO",
+            systemGenerated = true,
+          ),
         )
 
         assertThat(createdNote).isEqualTo(
@@ -399,6 +400,7 @@ class CaseNoteServiceTest {
             .amendments(emptyList())
             .creationDateTime(now)
             .eventId(1234)
+            .locationId("MDI")
             .systemGenerated(true)
             .build(),
         )
@@ -415,12 +417,12 @@ class CaseNoteServiceTest {
 
         val createdNote: CaseNote = caseNoteService.createCaseNote(
           "A1234AA",
-          NewCaseNote.builder()
-            .type("someparent")
-            .subType("sometype")
-            .occurrenceDateTime(now)
-            .text("HELLO")
-            .build(),
+          createCaseNoteRequest(
+            type = "someparent",
+            subType = "sometype",
+            occurrenceDateTime = now,
+            text = "HELLO",
+          ),
         )
 
         assertThat(createdNote.authorName).isEqualTo("someuser")
@@ -438,12 +440,12 @@ class CaseNoteServiceTest {
 
         val createdNote: CaseNote = caseNoteService.createCaseNote(
           "A1234AA",
-          NewCaseNote.builder()
-            .type("someparent")
-            .subType("sometype")
-            .occurrenceDateTime(now)
-            .text("HELLO")
-            .build(),
+          createCaseNoteRequest(
+            type = "someparent",
+            subType = "sometype",
+            occurrenceDateTime = now,
+            text = "HELLO",
+          ),
         )
 
         assertThat(createdNote.authorName).isEqualTo("someuser")
@@ -460,12 +462,12 @@ class CaseNoteServiceTest {
 
         val createdNote: CaseNote = caseNoteService.createCaseNote(
           "A1234AA",
-          NewCaseNote.builder()
-            .type("someparent")
-            .subType("sometype")
-            .occurrenceDateTime(now)
-            .text("HELLO")
-            .build(),
+          createCaseNoteRequest(
+            type = "someparent",
+            subType = "sometype",
+            occurrenceDateTime = now,
+            text = "HELLO",
+          ),
         )
 
         assertThat(createdNote.authorUserId).isEqualTo("someuser")
@@ -1067,4 +1069,13 @@ class CaseNoteServiceTest {
 
     return Optional.of(amendment)
   }
+
+  private fun createCaseNoteRequest(
+    locationId: String? = "MDI",
+    type: String = "ACP",
+    subType: String = "POS1",
+    occurrenceDateTime: LocalDateTime = LocalDateTime.now(),
+    text: String = "Some text for the note",
+    systemGenerated: Boolean? = null,
+  ) = CreateCaseNoteRequest(locationId, type, subType, occurrenceDateTime, text, systemGenerated)
 }

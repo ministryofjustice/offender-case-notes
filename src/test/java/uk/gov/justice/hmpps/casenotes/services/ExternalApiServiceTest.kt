@@ -26,18 +26,16 @@ import org.springframework.web.reactive.function.client.WebClient.RequestBodyUri
 import org.springframework.web.reactive.function.client.WebClient.RequestHeadersSpec
 import org.springframework.web.reactive.function.client.WebClient.RequestHeadersUriSpec
 import org.springframework.web.reactive.function.client.WebClient.ResponseSpec
-import org.springframework.web.reactive.function.client.bodyToFlux
-import org.springframework.web.reactive.function.client.bodyToMono
 import org.springframework.web.util.UriComponentsBuilder
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 import uk.gov.justice.hmpps.casenotes.dto.BookingIdentifier
 import uk.gov.justice.hmpps.casenotes.dto.CaseNoteFilter
-import uk.gov.justice.hmpps.casenotes.dto.NewCaseNote
 import uk.gov.justice.hmpps.casenotes.dto.NomisCaseNote
 import uk.gov.justice.hmpps.casenotes.dto.OffenderBooking
 import uk.gov.justice.hmpps.casenotes.dto.UpdateCaseNote
 import uk.gov.justice.hmpps.casenotes.dto.UserDetails
+import uk.gov.justice.hmpps.casenotes.notes.CreateCaseNoteRequest
 import java.time.LocalDateTime
 import java.util.Optional
 
@@ -66,7 +64,14 @@ class ExternalApiServiceTest {
     whenever(requestHeadersUriSpec.uri(any<String>(), any<Any>())).thenReturn(requestHeadersSpec)
     whenever(requestBodyUriSpec.uri(any<String>(), any<Any>())).thenReturn(requestBodySpec)
     whenever(requestHeadersUriSpec.uri(any<String>(), any<Any>(), any<Any>())).thenReturn(requestHeadersSpec)
-    whenever(requestHeadersUriSpec.uri(any<String>(), any<Any>(), any<Any>(), any<Any>())).thenReturn(requestHeadersSpec)
+    whenever(
+      requestHeadersUriSpec.uri(
+        any<String>(),
+        any<Any>(),
+        any<Any>(),
+        any<Any>(),
+      ),
+    ).thenReturn(requestHeadersSpec)
     whenever(requestBodyUriSpec.uri(any<String>(), any<Any>(), any<Any>())).thenReturn(requestBodySpec)
     whenever(requestHeadersSpec.retrieve()).thenReturn(responseSpecMock)
     whenever(requestBodySpec.retrieve()).thenReturn(responseSpecMock)
@@ -323,7 +328,11 @@ class ExternalApiServiceTest {
           val components = UriComponentsBuilder.fromUriString(it).build()
           assertThat(components.path).isEqualTo("/api/offenders/{offenderIdentifier}/case-notes/v2")
           assertThat(components.queryParams).containsExactlyInAnyOrderEntriesOf(
-            mapOf("size" to listOf("10"), "page" to listOf("0"), "typeSubTypes" to listOf("{typeSubTypes}", "{typeSubTypes}")),
+            mapOf(
+              "size" to listOf("10"),
+              "page" to listOf("0"),
+              "typeSubTypes" to listOf("{typeSubTypes}", "{typeSubTypes}"),
+            ),
           )
         },
         eq("AA123B"),
@@ -426,7 +435,7 @@ class ExternalApiServiceTest {
       whenever(responseSpecMock.bodyToMono(any<ParameterizedTypeReference<NomisCaseNote>>())).thenReturn(
         Mono.just(result),
       )
-      val postData = NewCaseNote()
+      val postData = CreateCaseNoteRequest("MDI", "ACP", "POS1", LocalDateTime.now(), "Some text", false)
       whenever(prisonApiWebClient.post()).thenReturn(requestBodyUriSpec)
       whenever(requestBodySpec.bodyValue(any())).thenReturn(requestHeadersSpec)
 

@@ -1,8 +1,8 @@
 package uk.gov.justice.hmpps.casenotes.utils
 
 import org.assertj.core.api.Assertions.assertThat
-import uk.gov.justice.hmpps.casenotes.dto.CaseNote
-import uk.gov.justice.hmpps.casenotes.dto.CaseNoteAmendment
+import uk.gov.justice.hmpps.casenotes.notes.CaseNote
+import uk.gov.justice.hmpps.casenotes.notes.CaseNoteAmendment
 import uk.gov.justice.hmpps.casenotes.notes.internal.Amendment
 import uk.gov.justice.hmpps.casenotes.notes.internal.Note
 

@@ -21,19 +21,20 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 import uk.gov.justice.hmpps.casenotes.config.CaseNoteRequestContext;
 import uk.gov.justice.hmpps.casenotes.config.SecurityUserContext;
-import uk.gov.justice.hmpps.casenotes.dto.CaseNote;
-import uk.gov.justice.hmpps.casenotes.dto.CaseNoteAmendment;
 import uk.gov.justice.hmpps.casenotes.dto.CaseNoteFilter;
-import uk.gov.justice.hmpps.casenotes.dto.NewCaseNote;
 import uk.gov.justice.hmpps.casenotes.dto.NomisCaseNote;
 import uk.gov.justice.hmpps.casenotes.dto.UpdateCaseNote;
 import uk.gov.justice.hmpps.casenotes.filters.OffenderCaseNoteFilter;
 import uk.gov.justice.hmpps.casenotes.model.OffenderCaseNote;
+import uk.gov.justice.hmpps.casenotes.notes.CaseNote;
+import uk.gov.justice.hmpps.casenotes.notes.CaseNoteAmendment;
+import uk.gov.justice.hmpps.casenotes.notes.CreateCaseNoteRequest;
 import uk.gov.justice.hmpps.casenotes.repository.CaseNoteTypeRepository;
 import uk.gov.justice.hmpps.casenotes.repository.OffenderCaseNoteAmendmentRepository;
 import uk.gov.justice.hmpps.casenotes.repository.OffenderCaseNoteRepository;
 
 import java.time.LocalDateTime;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -43,7 +44,7 @@ import static com.google.common.base.Strings.isNullOrEmpty;
 import static java.lang.Boolean.TRUE;
 import static java.lang.String.format;
 import static java.lang.String.valueOf;
-import static org.springframework.data.domain.Sort.Direction.ASC;
+import static java.util.Comparator.comparing;
 
 @Service
 @Transactional(readOnly = true)
@@ -127,29 +128,17 @@ public class CaseNoteService {
             .collect(Collectors.toList());
     }
 
-    @SuppressWarnings("unchecked")
     private static List<CaseNote> sortByFieldName(
         final List<CaseNote> list,
         final String fieldName,
         final Sort.Direction direction
     ) {
-        try {
-            final var field = CaseNote.class.getDeclaredField(fieldName);
-            field.setAccessible(true);
+        final Comparator<CaseNote> compare = fieldName.equalsIgnoreCase("creationDateTime") ?
+            comparing(CaseNote::getCreationDateTime) : comparing(CaseNote::getOccurrenceDateTime);
 
-            return list.stream()
-                .sorted((first, second) -> {
-                    try {
-                        return direction == ASC ? ((Comparable<Object>) field.get(first)).compareTo(field.get(second))
-                            : ((Comparable<Object>) field.get(second)).compareTo(field.get(first));
-                    } catch (IllegalAccessException e) {
-                        throw new RuntimeException("Error", e);
-                    }
-                })
-                .collect(Collectors.toList());
-        } catch (final NoSuchFieldException e) {
-            return list;
-        }
+        final var sort = direction == Direction.ASC ? compare : compare.reversed();
+
+        return list.stream().sorted(sort).toList();
     }
 
     private CaseNote mapper(final OffenderCaseNote cn) {
@@ -220,7 +209,7 @@ public class CaseNoteService {
     @Transactional
     public CaseNote createCaseNote(
         @NotNull final String offenderIdentifier,
-        @NotNull @Valid final NewCaseNote newCaseNote
+        @NotNull @Valid final CreateCaseNoteRequest newCaseNote
     ) {
         final var type = caseNoteTypeRepository.findByParentTypeAndType(
             newCaseNote.getType(), newCaseNote.getSubType()

@@ -14,10 +14,10 @@ import org.mockito.kotlin.eq
 import org.mockito.kotlin.verify
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.mock.mockito.SpyBean
-import uk.gov.justice.hmpps.casenotes.dto.CaseNote
 import uk.gov.justice.hmpps.casenotes.health.wiremock.Elite2Extension.Companion.elite2Api
 import uk.gov.justice.hmpps.casenotes.health.wiremock.OAuthExtension.Companion.oAuthApi
 import uk.gov.justice.hmpps.casenotes.model.OffenderCaseNote
+import uk.gov.justice.hmpps.casenotes.notes.CaseNote
 import uk.gov.justice.hmpps.casenotes.repository.CaseNoteTypeRepository
 import uk.gov.justice.hmpps.casenotes.repository.OffenderCaseNoteRepository
 import uk.gov.justice.hmpps.casenotes.services.ExternalApiService
@@ -455,7 +455,7 @@ class CaseNoteResourceTest : ResourceTest() {
         CREATE_CASE_NOTE_BY_TYPE.format(
           "ACP",
           "ASSESSMENT",
-          "This is should not be created",
+          "This should not be created in dps",
         ),
       )
       .exchange()

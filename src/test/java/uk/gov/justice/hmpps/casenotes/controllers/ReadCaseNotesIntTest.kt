@@ -8,7 +8,7 @@ import org.springframework.test.context.TestPropertySource
 import org.springframework.test.web.reactive.server.WebTestClient
 import uk.gov.justice.hmpps.casenotes.config.SecurityUserContext.Companion.ROLE_CASE_NOTES_READ
 import uk.gov.justice.hmpps.casenotes.config.SecurityUserContext.Companion.ROLE_CASE_NOTES_WRITE
-import uk.gov.justice.hmpps.casenotes.dto.CaseNote
+import uk.gov.justice.hmpps.casenotes.notes.CaseNote
 import uk.gov.justice.hmpps.casenotes.utils.NomisIdGenerator.prisonNumber
 import uk.gov.justice.hmpps.casenotes.utils.verifyAgainst
 import java.time.LocalDateTime

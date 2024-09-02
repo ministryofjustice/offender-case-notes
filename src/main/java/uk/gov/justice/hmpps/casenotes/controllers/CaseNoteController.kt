@@ -25,12 +25,13 @@ import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestController
 import uk.gov.justice.hmpps.casenotes.config.SecurityUserContext
 import uk.gov.justice.hmpps.casenotes.config.ServiceConfig
-import uk.gov.justice.hmpps.casenotes.dto.CaseNote
 import uk.gov.justice.hmpps.casenotes.dto.CaseNoteFilter
 import uk.gov.justice.hmpps.casenotes.dto.ErrorResponse
-import uk.gov.justice.hmpps.casenotes.dto.NewCaseNote
 import uk.gov.justice.hmpps.casenotes.dto.UpdateCaseNote
+import uk.gov.justice.hmpps.casenotes.notes.CaseNote
+import uk.gov.justice.hmpps.casenotes.notes.CreateCaseNoteRequest
 import uk.gov.justice.hmpps.casenotes.notes.internal.ReadCaseNote
+import uk.gov.justice.hmpps.casenotes.notes.internal.WriteCaseNote
 import uk.gov.justice.hmpps.casenotes.services.CaseNoteEventPusher
 import uk.gov.justice.hmpps.casenotes.services.CaseNoteService
 
@@ -43,6 +44,7 @@ class CaseNoteController(
   private val serviceConfig: ServiceConfig,
   private val caseNoteService: CaseNoteService,
   private val find: ReadCaseNote,
+  private val save: WriteCaseNote,
   private val telemetryClient: TelemetryClient,
   private val securityUserContext: SecurityUserContext,
   private val caseNoteEventPusher: CaseNoteEventPusher,
@@ -71,7 +73,10 @@ class CaseNoteController(
     }
   }
 
-  @Operation(summary = "Retrieves a list of case notes")
+  @Operation(
+    summary = "Retrieves a list of case notes",
+    description = "Sorting can be applied on occurrenceDateTime (default) or creationDateTime. Any other sort parameter will have the default result (occurrenceDateTime,desc)",
+  )
   @ApiResponses(
     ApiResponse(responseCode = "200", description = "OK"),
     ApiResponse(
@@ -114,10 +119,18 @@ class CaseNoteController(
   fun createCaseNote(
     @Parameter(description = "Offender Identifier", required = true, example = "A1234AA")
     @PathVariable offenderIdentifier: String,
-    @RequestBody newCaseNote: NewCaseNote,
-  ): CaseNote = caseNoteService.createCaseNote(offenderIdentifier, newCaseNote).also {
-    telemetryClient.trackEvent("CaseNoteCreated", createEventProperties(it), null)
-    caseNoteEventPusher.sendEvent(it)
+    @RequestBody request: CreateCaseNoteRequest,
+    @RequestHeader(CASELOAD_ID) caseloadId: String? = null,
+  ): CaseNote {
+    val caseNote = if (caseloadId in serviceConfig.activePrisons) {
+      save.note(offenderIdentifier, request)
+    } else {
+      caseNoteService.createCaseNote(offenderIdentifier, request)
+    }
+
+    telemetryClient.trackEvent("CaseNoteCreated", createEventProperties(caseNote), null)
+    caseNoteEventPusher.sendEvent(caseNote)
+    return caseNote
   }
 
   @Operation(

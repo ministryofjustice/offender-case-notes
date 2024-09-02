@@ -15,11 +15,11 @@ import reactor.core.publisher.Mono
 import reactor.util.retry.Retry
 import uk.gov.justice.hmpps.casenotes.dto.BookingIdentifier
 import uk.gov.justice.hmpps.casenotes.dto.CaseNoteFilter
-import uk.gov.justice.hmpps.casenotes.dto.NewCaseNote
 import uk.gov.justice.hmpps.casenotes.dto.NomisCaseNote
 import uk.gov.justice.hmpps.casenotes.dto.OffenderBooking
 import uk.gov.justice.hmpps.casenotes.dto.UpdateCaseNote
 import uk.gov.justice.hmpps.casenotes.dto.UserDetails
+import uk.gov.justice.hmpps.casenotes.notes.CreateCaseNoteRequest
 import java.time.Duration
 import java.time.format.DateTimeFormatter
 import java.util.Optional
@@ -107,7 +107,7 @@ class ExternalApiService(
     return "$params$sortParams"
   }
 
-  fun createCaseNote(offenderIdentifier: String, newCaseNote: NewCaseNote): NomisCaseNote =
+  fun createCaseNote(offenderIdentifier: String, newCaseNote: CreateCaseNoteRequest): NomisCaseNote =
     elite2ApiWebClient.post().uri("/api/offenders/{offenderNo}/case-notes", offenderIdentifier)
       .bodyValue(newCaseNote)
       .retrieve()
