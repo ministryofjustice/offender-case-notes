@@ -1,4 +1,4 @@
-package uk.gov.justice.hmpps.casenotes.types.internal
+package uk.gov.justice.hmpps.casenotes.audit
 
 import jakarta.persistence.Column
 import jakarta.persistence.MappedSuperclass

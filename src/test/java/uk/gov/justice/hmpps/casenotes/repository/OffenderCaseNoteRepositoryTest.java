@@ -48,7 +48,7 @@ public class OffenderCaseNoteRepositoryTest extends IntegrationTest {
         final var jwt = Jwt.withTokenValue("some").subject("anonymous").header("head", "something").build();
         SecurityContextHolder.getContext().setAuthentication(
                 new AuthAwareAuthenticationToken(jwt, "userId", Collections.emptyList()));
-        genType = caseNoteTypeRepository.findCaseNoteTypeByParentTypeTypeAndType(PARENT_TYPE, SUB_TYPE).get();
+        genType = caseNoteTypeRepository.findByParentTypeAndType(PARENT_TYPE, SUB_TYPE).get();
     }
 
     @Test

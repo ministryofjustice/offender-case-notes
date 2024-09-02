@@ -19,23 +19,30 @@ import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.PutMapping
 import org.springframework.web.bind.annotation.RequestBody
+import org.springframework.web.bind.annotation.RequestHeader
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestController
 import uk.gov.justice.hmpps.casenotes.config.SecurityUserContext
+import uk.gov.justice.hmpps.casenotes.config.ServiceConfig
 import uk.gov.justice.hmpps.casenotes.dto.CaseNote
 import uk.gov.justice.hmpps.casenotes.dto.CaseNoteFilter
 import uk.gov.justice.hmpps.casenotes.dto.ErrorResponse
 import uk.gov.justice.hmpps.casenotes.dto.NewCaseNote
 import uk.gov.justice.hmpps.casenotes.dto.UpdateCaseNote
+import uk.gov.justice.hmpps.casenotes.notes.internal.ReadCaseNote
 import uk.gov.justice.hmpps.casenotes.services.CaseNoteEventPusher
 import uk.gov.justice.hmpps.casenotes.services.CaseNoteService
+
+const val CASELOAD_ID = "CaseloadId"
 
 @Tag(name = "case-notes", description = "Case Note Controller")
 @RestController
 @RequestMapping("case-notes")
 class CaseNoteController(
+  private val serviceConfig: ServiceConfig,
   private val caseNoteService: CaseNoteService,
+  private val find: ReadCaseNote,
   private val telemetryClient: TelemetryClient,
   private val securityUserContext: SecurityUserContext,
   private val caseNoteEventPusher: CaseNoteEventPusher,
@@ -55,7 +62,14 @@ class CaseNoteController(
     @PathVariable offenderIdentifier: String,
     @Parameter(description = "Case Note Id", required = true, example = "518b2200-6489-4c77-8514-10cf80ccd488")
     @PathVariable caseNoteIdentifier: String,
-  ): CaseNote = caseNoteService.getCaseNote(offenderIdentifier, caseNoteIdentifier)
+    @RequestHeader(CASELOAD_ID) caseloadId: String? = null,
+  ): CaseNote {
+    return if (caseloadId in serviceConfig.activePrisons) {
+      find.caseNote(offenderIdentifier, caseNoteIdentifier)
+    } else {
+      caseNoteService.getCaseNote(offenderIdentifier, caseNoteIdentifier)
+    }
+  }
 
   @Operation(summary = "Retrieves a list of case notes")
   @ApiResponses(
@@ -70,9 +84,16 @@ class CaseNoteController(
   fun getCaseNotes(
     @Parameter(description = "Offender Identifier", required = true, example = "A1234AA")
     @PathVariable offenderIdentifier: String,
-    @Parameter(description = "Optionally specify a case note filter") filter: CaseNoteFilter?,
-    @PageableDefault(sort = ["occurrenceDateTime"], direction = Sort.Direction.DESC) pageable: Pageable?,
-  ): Page<CaseNote> = caseNoteService.getCaseNotes(offenderIdentifier, filter, pageable)
+    @Parameter(description = "Optionally specify a case note filter") filter: CaseNoteFilter,
+    @PageableDefault(sort = ["occurrenceDateTime"], direction = Sort.Direction.DESC) pageable: Pageable,
+    @RequestHeader(CASELOAD_ID) caseloadId: String? = null,
+  ): Page<CaseNote> {
+    return if (caseloadId in serviceConfig.activePrisons) {
+      find.caseNotes(offenderIdentifier, filter, pageable)
+    } else {
+      caseNoteService.getCaseNotes(offenderIdentifier, filter, pageable)
+    }
+  }
 
   @Operation(summary = "Add Case Note for offender", description = "Creates a note for a specific type/subType")
   @ApiResponses(

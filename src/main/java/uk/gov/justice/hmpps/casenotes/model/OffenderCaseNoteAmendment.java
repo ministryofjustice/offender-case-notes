@@ -58,7 +58,7 @@ public class OffenderCaseNoteAmendment {
     @Column(nullable = false)
     private String authorUserId;
 
-    @Column(nullable = false)
+    @Column(name = "note_text", nullable = false)
     private String noteText;
 
     @CreatedDate

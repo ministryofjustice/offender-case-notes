@@ -55,7 +55,7 @@ class CaseNoteTypeController(private val readCaseNoteType: ReadCaseNoteType) {
     @RequestParam(required = false) selectableBy: SelectableBy = SelectableBy.ALL,
     @RequestParam(required = false) includeInactive: Boolean = true,
     @RequestParam(required = false) includeRestricted: Boolean = true,
-  ): List<CaseNoteType> = readCaseNoteType.getCaseNoteTypes(selectableBy, includeInactive, includeRestricted)
+  ): List<ParentType> = readCaseNoteType.getCaseNoteTypes(selectableBy, includeInactive, includeRestricted)
 
   @ApiResponses(
     ApiResponse(
@@ -83,5 +83,5 @@ class CaseNoteTypeController(private val readCaseNoteType: ReadCaseNoteType) {
     """,
   )
   @GetMapping("/types-for-user")
-  fun getUserCaseNoteTypes(): List<CaseNoteType> = readCaseNoteType.getUserCaseNoteTypes()
+  fun getUserCaseNoteTypes(): List<ParentType> = readCaseNoteType.getUserCaseNoteTypes()
 }

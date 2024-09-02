@@ -12,7 +12,7 @@ class CaseNoteFilter(
   @Schema(description = "Filter by Case Note Type. Cannot be used in conjunction with typeSubTypes.", example = "KA")
   val type: String? = null,
 
-  @Schema(description = "Filter by Case Note Sub Type. Must used in conjunction with type, and cannot be used in conjunction with typeSubTypes.", example = "KS")
+  @Schema(description = "Filter by Case Note Sub Type. Must be used in conjunction with type, and cannot be used in conjunction with typeSubTypes.", example = "KS")
   val subType: String? = null,
 
   @Schema(description = "Filter case notes from this date", example = "2017-10-31T01:30:00")
@@ -43,7 +43,7 @@ class CaseNoteFilter(
       }
       return if (subType.isNullOrEmpty()) listOf(type) else listOf("$type+$subType")
     } else if (!subType.isNullOrEmpty()) {
-      throw ValidationException("SubType must used in conjunction with type.")
+      throw ValidationException("SubType must be used in conjunction with type.")
     }
 
     return typeSubTypes ?: emptyList()

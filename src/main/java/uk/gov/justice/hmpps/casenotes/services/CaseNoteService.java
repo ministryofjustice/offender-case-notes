@@ -41,7 +41,6 @@ import java.util.stream.Collectors;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static java.lang.Boolean.TRUE;
-import static java.lang.Long.parseLong;
 import static java.lang.String.format;
 import static java.lang.String.valueOf;
 import static org.springframework.data.domain.Sort.Direction.ASC;
@@ -173,14 +172,14 @@ public class CaseNoteService {
             .systemGenerated(cn.isSystemGenerated())
             .legacyId(cn.getLegacyId())
             .amendments(cn.getAmendments().stream().map(
-                a -> CaseNoteAmendment.builder()
-                    .authorUserName(a.getAuthorUsername())
-                    .authorUserId(a.getAuthorUserId())
-                    .authorName(a.getAuthorName())
-                    .additionalNoteText(a.getNoteText())
-                    .caseNoteAmendmentId(a.getId())
-                    .creationDateTime(a.getCreateDateTime())
-                    .build()
+                a -> new CaseNoteAmendment(
+                    a.getId(),
+                    a.getCreateDateTime(),
+                    a.getAuthorUsername(),
+                    a.getAuthorName(),
+                    a.getAuthorUserId(),
+                    a.getNoteText()
+                )
             ).toList())
             .locationId(cn.getLocationId())
             .build();
@@ -205,13 +204,14 @@ public class CaseNoteService {
             .systemGenerated(cn.getSource().equalsIgnoreCase("AUTO"))
             .legacyId(cn.getCaseNoteId())
             .amendments(cn.getAmendments().stream().map(
-                a -> CaseNoteAmendment.builder()
-                    .authorName(a.getAuthorName())
-                    .authorUserId(a.getAuthorUserId())
-                    .authorUserName(a.getAuthorUsername())
-                    .additionalNoteText(a.getAdditionalNoteText())
-                    .creationDateTime(a.getCreationDateTime())
-                    .build()
+                a -> new CaseNoteAmendment(
+                    a.getCaseNoteAmendmentId(),
+                    a.getCreationDateTime(),
+                    a.getAuthorUsername(),
+                    a.getAuthorName(),
+                    a.getAuthorUserId(),
+                    a.getAdditionalNoteText()
+                )
             ).toList())
             .locationId(cn.getAgencyId())
             .build();
@@ -222,7 +222,7 @@ public class CaseNoteService {
         @NotNull final String offenderIdentifier,
         @NotNull @Valid final NewCaseNote newCaseNote
     ) {
-        final var type = caseNoteTypeRepository.findCaseNoteTypeByParentTypeTypeAndType(
+        final var type = caseNoteTypeRepository.findByParentTypeAndType(
             newCaseNote.getType(), newCaseNote.getSubType()
         ).orElseThrow(() ->
             new IllegalArgumentException(format(
@@ -286,7 +286,7 @@ public class CaseNoteService {
     ) {
         final boolean isLegacy = isLegacyId(caseNoteIdentifier);
         final var offenderCaseNote = getCaseNote(caseNoteIdentifier, isLegacy);
-        if (isLegacy && offenderCaseNote == null) {
+        if (isLegacy) {
             return mapper(externalApiService.amendOffenderCaseNote(
                 offenderIdentifier,
                 NumberUtils.toLong(caseNoteIdentifier),
@@ -311,24 +311,19 @@ public class CaseNoteService {
                 .orElse(username);
 
             offenderCaseNote.addAmendment(amendCaseNote.getText(), username, authorName, authorUserId);
-            repository.save(offenderCaseNote);
-            return mapper(offenderCaseNote);
+            return mapper(repository.save(offenderCaseNote));
         }
     }
 
     private OffenderCaseNote getCaseNote(final String caseNoteIdentifier, boolean isLegacy) {
-        if (isLegacy) {
-            return repository.findByLegacyId(parseLong(caseNoteIdentifier));
-        } else {
-            return repository.findById(UUID.fromString(caseNoteIdentifier))
-                .orElseThrow(() -> EntityNotFoundException.withId(caseNoteIdentifier));
-        }
+        return isLegacy ? null : repository.findById(UUID.fromString(caseNoteIdentifier))
+            .orElseThrow(() -> EntityNotFoundException.withId(caseNoteIdentifier));
     }
 
     public CaseNote getCaseNote(final String offenderIdentifier, final String caseNoteIdentifier) {
         final boolean isLegacy = isLegacyId(caseNoteIdentifier);
         final OffenderCaseNote caseNote = getCaseNote(caseNoteIdentifier, isLegacy);
-        if (isLegacy && caseNote == null) {
+        if (isLegacy) {
             return mapper(externalApiService.getOffenderCaseNote(
                 offenderIdentifier,
                 NumberUtils.toLong(caseNoteIdentifier)

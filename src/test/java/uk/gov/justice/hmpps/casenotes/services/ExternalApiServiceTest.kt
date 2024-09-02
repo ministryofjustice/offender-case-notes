@@ -26,7 +26,10 @@ import org.springframework.web.reactive.function.client.WebClient.RequestBodyUri
 import org.springframework.web.reactive.function.client.WebClient.RequestHeadersSpec
 import org.springframework.web.reactive.function.client.WebClient.RequestHeadersUriSpec
 import org.springframework.web.reactive.function.client.WebClient.ResponseSpec
+import org.springframework.web.reactive.function.client.bodyToFlux
+import org.springframework.web.reactive.function.client.bodyToMono
 import org.springframework.web.util.UriComponentsBuilder
+import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 import uk.gov.justice.hmpps.casenotes.dto.BookingIdentifier
 import uk.gov.justice.hmpps.casenotes.dto.CaseNoteFilter
@@ -74,10 +77,10 @@ class ExternalApiServiceTest {
     @Test
     fun `test calls Prison API`() {
       val result = listOf(BookingIdentifier(type = "MERGED", value = "AB12345C"))
-      whenever(responseSpecMock.bodyToMono(any<ParameterizedTypeReference<*>>())).thenReturn(
-        Mono.just(result),
+      whenever(responseSpecMock.bodyToFlux(any<ParameterizedTypeReference<BookingIdentifier>>())).thenReturn(
+        Flux.fromIterable(result),
       )
-      assertThat(externalApiService.getMergedIdentifiersByBookingId(12345)).isSameAs(result)
+      assertThat(externalApiService.getMergedIdentifiersByBookingId(12345)).containsExactlyElementsOf(result)
 
       verify(prisonApiClientCredentialsWebClient).get()
       verify(requestHeadersUriSpec).uri("/api/bookings/{bookingId}/identifiers?type={type}", 12345L, "MERGED")
@@ -89,7 +92,7 @@ class ExternalApiServiceTest {
     @Test
     fun `test calls Prison API`() {
       val result = OffenderBooking(bookingId = 12345L, offenderNo = "AA123B", agencyId = "LSI")
-      whenever(responseSpecMock.bodyToMono(any<Class<*>>())).thenReturn(
+      whenever(responseSpecMock.bodyToMono(any<ParameterizedTypeReference<OffenderBooking>>())).thenReturn(
         Mono.just(result),
       )
       assertThat(externalApiService.getBooking(12345)).isSameAs(result)
@@ -104,7 +107,8 @@ class ExternalApiServiceTest {
     @Test
     fun `test calls HMPPS Auth`() {
       val userDetails = UserDetails(name = "Joe")
-      whenever(responseSpecMock.bodyToMono(any<Class<*>>())).thenReturn(Mono.just(userDetails))
+      whenever(responseSpecMock.bodyToMono(any<ParameterizedTypeReference<UserDetails>>()))
+        .thenReturn(Mono.just(userDetails))
       assertThat(externalApiService.getUserDetails("user")).isEqualTo(Optional.of(userDetails))
 
       verify(authWebClient).get()
@@ -113,7 +117,7 @@ class ExternalApiServiceTest {
 
     @Test
     fun `test calls HMPPS Auth and returns empty if no response`() {
-      whenever(responseSpecMock.bodyToMono(any<Class<*>>())).thenReturn(Mono.empty())
+      whenever(responseSpecMock.bodyToMono(any<ParameterizedTypeReference<UserDetails>>())).thenReturn(Mono.empty())
       assertThat(externalApiService.getUserDetails("user")).isEmpty
 
       verify(authWebClient).get()
@@ -125,7 +129,7 @@ class ExternalApiServiceTest {
   inner class getOffenderLocation {
     @Test
     fun `test calls Prison API`() {
-      whenever(responseSpecMock.bodyToMono(any<Class<*>>())).thenReturn(
+      whenever(responseSpecMock.bodyToMono(any<ParameterizedTypeReference<OffenderBooking>>())).thenReturn(
         Mono.just(OffenderBooking(agencyId = "MDI", bookingId = 12345L, offenderNo = "AA123B")),
       )
       assertThat(externalApiService.getOffenderLocation("AA123B")).isEqualTo("MDI")
@@ -419,7 +423,7 @@ class ExternalApiServiceTest {
     fun `test calls Prison API`() {
       val result = NomisCaseNote()
 
-      whenever(responseSpecMock.bodyToMono(any<Class<*>>())).thenReturn(
+      whenever(responseSpecMock.bodyToMono(any<ParameterizedTypeReference<NomisCaseNote>>())).thenReturn(
         Mono.just(result),
       )
       val postData = NewCaseNote()
@@ -439,7 +443,7 @@ class ExternalApiServiceTest {
     @Test
     fun `test calls Prison API`() {
       val result = NomisCaseNote()
-      whenever(responseSpecMock.bodyToMono(any<Class<*>>())).thenReturn(
+      whenever(responseSpecMock.bodyToMono(any<ParameterizedTypeReference<NomisCaseNote>>())).thenReturn(
         Mono.just(result),
       )
       assertThat(externalApiService.getOffenderCaseNote("AA123B", 12345)).isSameAs(result)
@@ -454,7 +458,7 @@ class ExternalApiServiceTest {
     @Test
     fun `test calls Prison API`() {
       val result = NomisCaseNote()
-      whenever(responseSpecMock.bodyToMono(any<Class<*>>())).thenReturn(
+      whenever(responseSpecMock.bodyToMono(any<ParameterizedTypeReference<NomisCaseNote>>())).thenReturn(
         Mono.just(result),
       )
       val postData = UpdateCaseNote()

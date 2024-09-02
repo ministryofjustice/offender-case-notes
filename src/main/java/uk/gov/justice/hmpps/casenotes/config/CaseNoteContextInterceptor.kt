@@ -32,7 +32,8 @@ class CaseNoteContextInterceptor(private val externalApiService: ExternalApiServ
   override fun preHandle(request: HttpServletRequest, response: HttpServletResponse, handler: Any): Boolean {
     if (request.method in listOf(POST.name(), PUT.name(), PATCH.name(), DELETE.name())) {
       val source = request.source()
-      val context = request.userDetails()?.let {
+      val username = request.username(source)
+      val context = userDetails(username)?.let {
         CaseNoteRequestContext(
           it.username!!,
           it.name ?: it.username,
@@ -41,7 +42,7 @@ class CaseNoteContextInterceptor(private val externalApiService: ExternalApiServ
           source,
         )
       } ?: when (source) {
-        Source.DPS -> CaseNoteRequestContext(request.username(), request.username(), request.username())
+        Source.DPS -> CaseNoteRequestContext(username)
         Source.NOMIS -> NOMIS_CONTEXT
       }
 
@@ -58,13 +59,15 @@ class CaseNoteContextInterceptor(private val externalApiService: ExternalApiServ
     SecurityContextHolder.getContext().authentication as AuthAwareAuthenticationToken?
       ?: throw AccessDeniedException("User is not authenticated")
 
-  private fun HttpServletRequest.username(): String = when (source()) {
-    Source.DPS -> authentication().name?.takeIf { it.length <= 64 } ?: throw ValidationException("username for audit exceeds 64 characters")
+  private fun HttpServletRequest.username(source: Source): String = when (source) {
+    Source.DPS -> authentication().name?.takeIf { it.length <= 64 }
+      ?: throw ValidationException("username for audit exceeds 64 characters")
+
     Source.NOMIS -> getHeader(USERNAME)?.trim() ?: Source.NOMIS.name
   }
 
-  private fun HttpServletRequest.userDetails(): UserDetails? =
-    externalApiService.getUserDetails(username()).orElse(null)
+  private fun userDetails(username: String): UserDetails? =
+    externalApiService.getUserDetails(username).orElse(null)
 
   companion object {
     private const val USERNAME = "Username"
