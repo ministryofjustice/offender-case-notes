@@ -21,6 +21,8 @@ import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor
 import uk.gov.justice.hmpps.casenotes.audit.AuditedEntityListener
 import uk.gov.justice.hmpps.casenotes.audit.SimpleAudited
+import uk.gov.justice.hmpps.casenotes.config.CaseNoteRequestContext
+import uk.gov.justice.hmpps.casenotes.dto.AmendCaseNoteRequest
 import uk.gov.justice.hmpps.casenotes.notes.internal.Note.Companion.AMENDMENTS
 import uk.gov.justice.hmpps.casenotes.notes.internal.Note.Companion.AUTHOR_USERNAME
 import uk.gov.justice.hmpps.casenotes.notes.internal.Note.Companion.LOCATION_ID
@@ -87,6 +89,10 @@ class Note(
   var legacyId: Long? = null
 
   fun amendments() = amendments.toSortedSet()
+  fun addAmendment(request: AmendCaseNoteRequest) = apply {
+    val context = CaseNoteRequestContext.get()
+    amendments.add(Amendment(this, context.username, context.userDisplayName, context.userId, request.text))
+  }
 
   companion object {
     val TYPE = Note::type.name
@@ -103,12 +109,18 @@ class Note(
   }
 }
 
-interface CaseNoteRepository : JpaSpecificationExecutor<Note>, JpaRepository<Note, UUID> {
+interface NoteRepository : JpaSpecificationExecutor<Note>, JpaRepository<Note, UUID>, RefreshRepository<Note, UUID> {
   @EntityGraph(attributePaths = ["type.category", "amendments"])
   fun findByIdAndPrisonNumber(id: UUID, prisonNumber: String): Note?
 
   @EntityGraph(attributePaths = ["type.category", "amendments"])
   fun findByLegacyIdAndPrisonNumber(legacyId: Long, prisonNumber: String): Note?
+}
+
+fun NoteRepository.saveAndRefresh(note: Note): Note {
+  val saved = saveAndFlush(note)
+  refresh(saved)
+  return saved
 }
 
 fun matchesPrisonNumber(prisonNumber: String) =

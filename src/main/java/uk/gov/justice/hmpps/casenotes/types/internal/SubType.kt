@@ -27,13 +27,13 @@ class SubType(
   val description: String,
 
   @Column(name = "active", nullable = false)
-  val active: Boolean = true,
+  val active: Boolean,
 
   @Column(name = "sensitive", nullable = false)
-  val sensitive: Boolean = true,
+  val sensitive: Boolean,
 
   @Column(name = "restricted_use", nullable = false)
-  val restrictedUse: Boolean = true,
+  val restrictedUse: Boolean,
 
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   @Id

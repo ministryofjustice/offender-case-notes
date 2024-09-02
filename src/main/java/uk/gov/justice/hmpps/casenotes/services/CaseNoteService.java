@@ -23,7 +23,7 @@ import uk.gov.justice.hmpps.casenotes.config.CaseNoteRequestContext;
 import uk.gov.justice.hmpps.casenotes.config.SecurityUserContext;
 import uk.gov.justice.hmpps.casenotes.dto.CaseNoteFilter;
 import uk.gov.justice.hmpps.casenotes.dto.NomisCaseNote;
-import uk.gov.justice.hmpps.casenotes.dto.UpdateCaseNote;
+import uk.gov.justice.hmpps.casenotes.dto.AmendCaseNoteRequest;
 import uk.gov.justice.hmpps.casenotes.filters.OffenderCaseNoteFilter;
 import uk.gov.justice.hmpps.casenotes.model.OffenderCaseNote;
 import uk.gov.justice.hmpps.casenotes.notes.CaseNote;
@@ -33,7 +33,6 @@ import uk.gov.justice.hmpps.casenotes.repository.CaseNoteTypeRepository;
 import uk.gov.justice.hmpps.casenotes.repository.OffenderCaseNoteAmendmentRepository;
 import uk.gov.justice.hmpps.casenotes.repository.OffenderCaseNoteRepository;
 
-import java.time.LocalDateTime;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
@@ -253,7 +252,7 @@ public class CaseNoteService {
             .authorUsername(context.getUsername())
             .authorUserId(context.getUserId())
             .authorName(context.getUserDisplayName())
-            .occurrenceDateTime(newCaseNote.getOccurrenceDateTime() == null ? LocalDateTime.now() : newCaseNote.getOccurrenceDateTime())
+            .occurrenceDateTime(newCaseNote.getOccurrenceDateTime())
             .caseNoteType(type)
             .offenderIdentifier(offenderIdentifier)
             .locationId(locationId)
@@ -271,7 +270,7 @@ public class CaseNoteService {
     public CaseNote amendCaseNote(
         @NotNull final String offenderIdentifier,
         @NotNull final String caseNoteIdentifier,
-        @NotNull @Valid final UpdateCaseNote amendCaseNote
+        @NotNull @Valid final AmendCaseNoteRequest amendCaseNoteRequest
     ) {
         final boolean isLegacy = isLegacyId(caseNoteIdentifier);
         final var offenderCaseNote = getCaseNote(caseNoteIdentifier, isLegacy);
@@ -279,7 +278,7 @@ public class CaseNoteService {
             return mapper(externalApiService.amendOffenderCaseNote(
                 offenderIdentifier,
                 NumberUtils.toLong(caseNoteIdentifier),
-                amendCaseNote
+                amendCaseNoteRequest
             ), offenderIdentifier);
         } else {
             if (offenderCaseNote.getCaseNoteType().isRestrictedUse() && !isAllowedToCreateRestrictedCaseNote()) {
@@ -290,16 +289,13 @@ public class CaseNoteService {
                 throw EntityNotFoundException.withId(offenderIdentifier);
             }
 
-            final var username = securityUserContext.getCurrentUser().getUsername();
-            final var userDetails = externalApiService.getUserDetails(username);
-            final var authorName = userDetails
-                .map(user -> isNullOrEmpty(user.getName()) ? username : user.getName())
-                .orElse(username);
-            final var authorUserId = userDetails
-                .map(user -> isNullOrEmpty(user.getUserId()) ? username : user.getUserId())
-                .orElse(username);
-
-            offenderCaseNote.addAmendment(amendCaseNote.getText(), username, authorName, authorUserId);
+            final var context = CaseNoteRequestContext.Companion.get();
+            offenderCaseNote.addAmendment(
+                amendCaseNoteRequest.getText(),
+                context.getUsername(),
+                context.getUserDisplayName(),
+                context.getUserId()
+            );
             return mapper(repository.save(offenderCaseNote));
         }
     }

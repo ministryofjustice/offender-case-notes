@@ -28,17 +28,17 @@ import org.springframework.data.domain.Sort.Direction
 import org.springframework.data.jpa.domain.Specification
 import org.springframework.mock.web.MockHttpServletRequest
 import org.springframework.security.access.AccessDeniedException
+import org.springframework.web.context.request.RequestAttributes
 import org.springframework.web.context.request.RequestContextHolder
 import org.springframework.web.context.request.ServletRequestAttributes
 import uk.gov.justice.hmpps.casenotes.config.CaseNoteRequestContext
 import uk.gov.justice.hmpps.casenotes.config.SecurityUserContext
 import uk.gov.justice.hmpps.casenotes.config.SecurityUserContext.UserIdUser
 import uk.gov.justice.hmpps.casenotes.config.Source
+import uk.gov.justice.hmpps.casenotes.dto.AmendCaseNoteRequest
 import uk.gov.justice.hmpps.casenotes.dto.CaseNoteFilter
 import uk.gov.justice.hmpps.casenotes.dto.NomisCaseNote
 import uk.gov.justice.hmpps.casenotes.dto.NomisCaseNoteAmendment
-import uk.gov.justice.hmpps.casenotes.dto.UpdateCaseNote
-import uk.gov.justice.hmpps.casenotes.dto.UserDetails
 import uk.gov.justice.hmpps.casenotes.filters.OffenderCaseNoteFilter
 import uk.gov.justice.hmpps.casenotes.model.CaseNoteType
 import uk.gov.justice.hmpps.casenotes.model.OffenderCaseNote
@@ -66,6 +66,7 @@ class CaseNoteServiceTest {
   private val telemetryClient: TelemetryClient = mock()
   private var caseNoteService: CaseNoteService = mock()
   private var entityManager: EntityManager = mock()
+  private val requestAttributes: RequestAttributes = mock()
 
   @Captor
   lateinit var filterCaptor: ArgumentCaptor<OffenderCaseNoteFilter>
@@ -80,6 +81,10 @@ class CaseNoteServiceTest {
       externalApiService,
       telemetryClient,
       entityManager,
+    )
+    RequestContextHolder.setRequestAttributes(requestAttributes)
+    whenever(requestAttributes.getAttribute(CaseNoteRequestContext::class.simpleName!!, 0)).thenReturn(
+      CaseNoteRequestContext("user", "author", "12345"),
     )
   }
 
@@ -601,13 +606,17 @@ class CaseNoteServiceTest {
   }
 
   @Nested
-  inner class AmendCaseNote {
+  inner class AmendCaseNoteRequest {
     @Test
     fun `amend non sensitive case note`() {
       val nomisCaseNote: NomisCaseNote = createNomisCaseNote()
       whenever(externalApiService.amendOffenderCaseNote(any<String>(), any<Long>(), any())).thenReturn(nomisCaseNote)
 
-      val caseNote: CaseNote = caseNoteService.amendCaseNote("12345", "21455", UpdateCaseNote("text"))
+      val caseNote: CaseNote = caseNoteService.amendCaseNote(
+        "12345",
+        "21455",
+        AmendCaseNoteRequest("text"),
+      )
 
       assertThat(caseNote).usingRecursiveComparison()
         .ignoringFields(
@@ -642,7 +651,7 @@ class CaseNoteServiceTest {
         caseNoteService.amendCaseNote(
           "12345",
           UUID.randomUUID().toString(),
-          UpdateCaseNote("text"),
+          AmendCaseNoteRequest("text"),
         )
       }
         .isInstanceOf(AccessDeniedException::class.java)
@@ -654,7 +663,13 @@ class CaseNoteServiceTest {
     fun `cannot amend case note with unknown id`() {
       val caseNoteIdentifier: String = UUID.randomUUID().toString()
 
-      assertThatThrownBy { caseNoteService.amendCaseNote("12345", caseNoteIdentifier, UpdateCaseNote("text")) }
+      assertThatThrownBy {
+        caseNoteService.amendCaseNote(
+          "12345",
+          caseNoteIdentifier,
+          AmendCaseNoteRequest("text"),
+        )
+      }
         .isInstanceOf(EntityNotFoundException::class.java)
         .hasMessage(String.format("Resource with id [%s] not found.", caseNoteIdentifier))
     }
@@ -671,7 +686,7 @@ class CaseNoteServiceTest {
         caseNoteService.amendCaseNote(
           "12345",
           UUID.randomUUID().toString(),
-          UpdateCaseNote("text"),
+          AmendCaseNoteRequest("text"),
         )
       }
         .isInstanceOf(EntityNotFoundException::class.java).hasMessage("Resource with id [12345] not found.")
@@ -687,6 +702,7 @@ class CaseNoteServiceTest {
           CaseNoteType.builder().type("sometype").description("Type Description")
             .parentType(ParentNoteType.builder().type("ParentType").description("Parent Type Description").build())
             .createDateTime(LocalDateTime.MIN)
+            .restrictedUse(false)
             .build()
         val offenderCaseNote: OffenderCaseNote = createOffenderCaseNote(noteType)
         whenever(repository.findById(any())).thenReturn(Optional.of(offenderCaseNote))
@@ -699,23 +715,20 @@ class CaseNoteServiceTest {
             )
             .build()
         }
-        whenever(securityUserContext.isOverrideRole(any<String>(), any<String>())).thenReturn(true)
-        whenever(securityUserContext.getCurrentUser()).thenReturn(UserIdUser("user", "userId"))
+        RequestContextHolder.setRequestAttributes(requestAttributes)
+        whenever(requestAttributes.getAttribute(CaseNoteRequestContext::class.simpleName!!, 0)).thenReturn(
+          CaseNoteRequestContext("user", "author", "12345"),
+        )
       }
 
       @Test
       fun `can amend sensitive case note`() {
-        whenever(externalApiService.getUserDetails(any<String>())).thenReturn(
-          Optional.of(
-            UserDetails(
-              name = "author",
-              userId = "12345",
-            ),
-          ),
-        )
-
         val caseNote: CaseNote =
-          caseNoteService.amendCaseNote("A1234AC", caseNoteIdentifier.toString(), UpdateCaseNote("text"))
+          caseNoteService.amendCaseNote(
+            "A1234AC",
+            caseNoteIdentifier.toString(),
+            AmendCaseNoteRequest("text"),
+          )
 
         assertThat(caseNote.amendments).hasSize(1)
 
@@ -734,16 +747,20 @@ class CaseNoteServiceTest {
             "authorName",
             "authorUserName",
             "authorUserId",
-          )
-          .isEqualTo(expected)
+          ).isEqualTo(expected)
       }
 
       @Test
       fun `sensitive case note amendment defaults author details to username where user details not returned`() {
-        whenever(externalApiService.getUserDetails(any<String>())).thenReturn(Optional.empty())
-
+        whenever(requestAttributes.getAttribute(CaseNoteRequestContext::class.simpleName!!, 0)).thenReturn(
+          CaseNoteRequestContext("user"),
+        )
         val caseNote: CaseNote =
-          caseNoteService.amendCaseNote("A1234AC", caseNoteIdentifier.toString(), UpdateCaseNote("text"))
+          caseNoteService.amendCaseNote(
+            "A1234AC",
+            caseNoteIdentifier.toString(),
+            AmendCaseNoteRequest("text"),
+          )
 
         assertThat(caseNote.amendments[0].authorName).isEqualTo("user")
         assertThat(caseNote.amendments[0].authorUserId).isEqualTo("user")
@@ -751,20 +768,32 @@ class CaseNoteServiceTest {
 
       @Test
       fun `sensitive case note amendment defaults author name to username where user name not returned`() {
-        whenever(externalApiService.getUserDetails(any<String>())).thenReturn(Optional.of(UserDetails(name = null)))
+        whenever(requestAttributes.getAttribute(CaseNoteRequestContext::class.simpleName!!, 0)).thenReturn(
+          CaseNoteRequestContext("user"),
+        )
 
         val caseNote: CaseNote =
-          caseNoteService.amendCaseNote("A1234AC", caseNoteIdentifier.toString(), UpdateCaseNote("text"))
+          caseNoteService.amendCaseNote(
+            "A1234AC",
+            caseNoteIdentifier.toString(),
+            AmendCaseNoteRequest("text"),
+          )
 
         assertThat(caseNote.amendments[0].authorName).isEqualTo("user")
       }
 
       @Test
       fun `sensitive case note amendment defaults author name to username where user id not returned`() {
-        whenever(externalApiService.getUserDetails(any<String>())).thenReturn(Optional.of(UserDetails(userId = null)))
+        whenever(requestAttributes.getAttribute(CaseNoteRequestContext::class.simpleName!!, 0)).thenReturn(
+          CaseNoteRequestContext("user"),
+        )
 
         val caseNote: CaseNote =
-          caseNoteService.amendCaseNote("A1234AC", caseNoteIdentifier.toString(), UpdateCaseNote("text"))
+          caseNoteService.amendCaseNote(
+            "A1234AC",
+            caseNoteIdentifier.toString(),
+            AmendCaseNoteRequest("text"),
+          )
 
         assertThat(caseNote.amendments[0].authorUserId).isEqualTo("user")
       }

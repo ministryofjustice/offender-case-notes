@@ -21,19 +21,21 @@ import org.springframework.web.bind.annotation.PutMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestHeader
 import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestController
 import uk.gov.justice.hmpps.casenotes.config.SecurityUserContext
 import uk.gov.justice.hmpps.casenotes.config.ServiceConfig
+import uk.gov.justice.hmpps.casenotes.dto.AmendCaseNoteRequest
 import uk.gov.justice.hmpps.casenotes.dto.CaseNoteFilter
 import uk.gov.justice.hmpps.casenotes.dto.ErrorResponse
-import uk.gov.justice.hmpps.casenotes.dto.UpdateCaseNote
 import uk.gov.justice.hmpps.casenotes.notes.CaseNote
 import uk.gov.justice.hmpps.casenotes.notes.CreateCaseNoteRequest
 import uk.gov.justice.hmpps.casenotes.notes.internal.ReadCaseNote
 import uk.gov.justice.hmpps.casenotes.notes.internal.WriteCaseNote
 import uk.gov.justice.hmpps.casenotes.services.CaseNoteEventPusher
 import uk.gov.justice.hmpps.casenotes.services.CaseNoteService
+import uk.gov.justice.hmpps.casenotes.services.ExternalApiService
 
 const val CASELOAD_ID = "CaseloadId"
 
@@ -48,6 +50,7 @@ class CaseNoteController(
   private val telemetryClient: TelemetryClient,
   private val securityUserContext: SecurityUserContext,
   private val caseNoteEventPusher: CaseNoteEventPusher,
+  private val externalApiService: ExternalApiService,
 ) {
   @Operation(summary = "Retrieves a case note")
   @ApiResponses(
@@ -119,13 +122,20 @@ class CaseNoteController(
   fun createCaseNote(
     @Parameter(description = "Offender Identifier", required = true, example = "A1234AA")
     @PathVariable offenderIdentifier: String,
-    @RequestBody request: CreateCaseNoteRequest,
+    @RequestBody createCaseNote: CreateCaseNoteRequest,
+    @Parameter(description = "Boolean to indicate that the user creating the case note has privileges to use restricted use case note types")
+    @RequestParam(required = false, defaultValue = "false") useRestrictedType: Boolean,
     @RequestHeader(CASELOAD_ID) caseloadId: String? = null,
   ): CaseNote {
     val caseNote = if (caseloadId in serviceConfig.activePrisons) {
-      save.note(offenderIdentifier, request)
+      val request = if (createCaseNote.locationId == null) {
+        createCaseNote.copy(locationId = externalApiService.getOffenderLocation(offenderIdentifier))
+      } else {
+        createCaseNote
+      }
+      save.note(offenderIdentifier, request, useRestrictedType)
     } else {
-      caseNoteService.createCaseNote(offenderIdentifier, request)
+      caseNoteService.createCaseNote(offenderIdentifier, createCaseNote)
     }
 
     telemetryClient.trackEvent("CaseNoteCreated", createEventProperties(caseNote), null)
@@ -156,10 +166,18 @@ class CaseNoteController(
     @PathVariable offenderIdentifier: String,
     @Parameter(description = "Case Note Id", required = true, example = "518b2200-6489-4c77-8514-10cf80ccd488")
     @PathVariable caseNoteIdentifier: String,
-    @RequestBody amendedText: UpdateCaseNote,
-  ): CaseNote = caseNoteService.amendCaseNote(offenderIdentifier, caseNoteIdentifier, amendedText).also {
-    telemetryClient.trackEvent("CaseNoteUpdated", createEventProperties(it), null)
-    caseNoteEventPusher.sendEvent(it)
+    @RequestBody amendedText: AmendCaseNoteRequest,
+    @RequestParam(required = false, defaultValue = "false") useRestrictedType: Boolean,
+    @RequestHeader(CASELOAD_ID) caseloadId: String? = null,
+  ): CaseNote {
+    val caseNote = if (caseloadId in serviceConfig.activePrisons) {
+      save.amendment(offenderIdentifier, caseNoteIdentifier, amendedText, useRestrictedType)
+    } else {
+      caseNoteService.amendCaseNote(offenderIdentifier, caseNoteIdentifier, amendedText)
+    }
+    telemetryClient.trackEvent("CaseNoteUpdated", createEventProperties(caseNote), null)
+    caseNoteEventPusher.sendEvent(caseNote)
+    return caseNote
   }
 
   @Operation(summary = "Deletes a case note")

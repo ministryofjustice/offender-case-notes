@@ -29,11 +29,11 @@ import org.springframework.web.reactive.function.client.WebClient.ResponseSpec
 import org.springframework.web.util.UriComponentsBuilder
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
+import uk.gov.justice.hmpps.casenotes.dto.AmendCaseNoteRequest
 import uk.gov.justice.hmpps.casenotes.dto.BookingIdentifier
 import uk.gov.justice.hmpps.casenotes.dto.CaseNoteFilter
 import uk.gov.justice.hmpps.casenotes.dto.NomisCaseNote
 import uk.gov.justice.hmpps.casenotes.dto.OffenderBooking
-import uk.gov.justice.hmpps.casenotes.dto.UpdateCaseNote
 import uk.gov.justice.hmpps.casenotes.dto.UserDetails
 import uk.gov.justice.hmpps.casenotes.notes.CreateCaseNoteRequest
 import java.time.LocalDateTime
@@ -470,7 +470,7 @@ class ExternalApiServiceTest {
       whenever(responseSpecMock.bodyToMono(any<ParameterizedTypeReference<NomisCaseNote>>())).thenReturn(
         Mono.just(result),
       )
-      val postData = UpdateCaseNote()
+      val postData = AmendCaseNoteRequest("text")
       whenever(prisonApiWebClient.put()).thenReturn(requestBodyUriSpec)
       whenever(requestBodySpec.bodyValue(any())).thenReturn(requestHeadersSpec)
       assertThat(externalApiService.amendOffenderCaseNote("AA123B", 12345, postData)).isSameAs(result)

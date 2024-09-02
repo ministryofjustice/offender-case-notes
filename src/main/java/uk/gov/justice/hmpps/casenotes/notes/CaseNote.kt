@@ -206,3 +206,5 @@ data class CaseNote(
     }
   }
 }
+
+fun String.asLegacyId() = toLongOrNull()

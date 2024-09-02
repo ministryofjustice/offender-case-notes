@@ -13,11 +13,11 @@ import org.springframework.web.reactive.function.client.bodyToFlux
 import org.springframework.web.reactive.function.client.bodyToMono
 import reactor.core.publisher.Mono
 import reactor.util.retry.Retry
+import uk.gov.justice.hmpps.casenotes.dto.AmendCaseNoteRequest
 import uk.gov.justice.hmpps.casenotes.dto.BookingIdentifier
 import uk.gov.justice.hmpps.casenotes.dto.CaseNoteFilter
 import uk.gov.justice.hmpps.casenotes.dto.NomisCaseNote
 import uk.gov.justice.hmpps.casenotes.dto.OffenderBooking
-import uk.gov.justice.hmpps.casenotes.dto.UpdateCaseNote
 import uk.gov.justice.hmpps.casenotes.dto.UserDetails
 import uk.gov.justice.hmpps.casenotes.notes.CreateCaseNoteRequest
 import java.time.Duration
@@ -126,7 +126,7 @@ class ExternalApiService(
   fun amendOffenderCaseNote(
     offenderIdentifier: String,
     caseNoteIdentifier: Long,
-    caseNote: UpdateCaseNote,
+    caseNote: AmendCaseNoteRequest,
   ): NomisCaseNote = elite2ApiWebClient.put()
     .uri("/api/offenders/{offenderNo}/case-notes/{caseNoteIdentifier}", offenderIdentifier, caseNoteIdentifier)
     .bodyValue(caseNote)

@@ -12,6 +12,7 @@ import uk.gov.justice.hmpps.casenotes.config.SecurityUserContext.Companion.ROLE_
 import uk.gov.justice.hmpps.casenotes.config.SecurityUserContext.Companion.ROLE_CASE_NOTES_WRITE
 import uk.gov.justice.hmpps.casenotes.dto.CaseNoteFilter
 import uk.gov.justice.hmpps.casenotes.notes.CaseNote
+import uk.gov.justice.hmpps.casenotes.notes.asLegacyId
 import uk.gov.justice.hmpps.casenotes.services.EntityNotFoundException
 import java.util.UUID.fromString
 
@@ -19,20 +20,18 @@ import java.util.UUID.fromString
 @Transactional(readOnly = true)
 @PreAuthorize("hasAnyRole('$ROLE_CASE_NOTES_READ', '$ROLE_CASE_NOTES_WRITE')")
 class ReadCaseNote(
-  private val caseNoteRepository: CaseNoteRepository,
+  private val noteRepository: NoteRepository,
 ) {
   fun caseNotes(prisonNumber: String, filter: CaseNoteFilter, pageable: Pageable): Page<CaseNote> =
-    caseNoteRepository.findAll(filter.asSpecification(prisonNumber), pageable.forSpecification()).map { it.toModel() }
+    noteRepository.findAll(filter.asSpecification(prisonNumber), pageable.forSpecification()).map { it.toModel() }
 
   fun caseNote(prisonNumber: String, caseNoteId: String): CaseNote {
     val caseNote = when (val legacyId = caseNoteId.asLegacyId()) {
-      null -> caseNoteRepository.findByIdAndPrisonNumber(fromString(caseNoteId), prisonNumber)
-      else -> caseNoteRepository.findByLegacyIdAndPrisonNumber(legacyId, prisonNumber)
+      null -> noteRepository.findByIdAndPrisonNumber(fromString(caseNoteId), prisonNumber)
+      else -> noteRepository.findByLegacyIdAndPrisonNumber(legacyId, prisonNumber)
     } ?: throw EntityNotFoundException.withId(caseNoteId)
     return caseNote.toModel()
   }
-
-  private fun String.asLegacyId() = toLongOrNull()
 
   companion object {
     const val SOURCE = "OCNS"

@@ -17,9 +17,9 @@ import uk.gov.justice.hmpps.casenotes.health.wiremock.Elite2Extension
 import uk.gov.justice.hmpps.casenotes.health.wiremock.OAuthExtension
 import uk.gov.justice.hmpps.casenotes.health.wiremock.TokenVerificationExtension
 import uk.gov.justice.hmpps.casenotes.notes.internal.Amendment
-import uk.gov.justice.hmpps.casenotes.notes.internal.CaseNoteRepository
 import uk.gov.justice.hmpps.casenotes.notes.internal.Category
 import uk.gov.justice.hmpps.casenotes.notes.internal.Note
+import uk.gov.justice.hmpps.casenotes.notes.internal.NoteRepository
 import uk.gov.justice.hmpps.casenotes.notes.internal.Type
 import uk.gov.justice.hmpps.casenotes.types.internal.ParentTypeRepository
 import uk.gov.justice.hmpps.casenotes.types.internal.SubType
@@ -45,7 +45,7 @@ abstract class ResourceTest : IntegrationTest() {
   internal lateinit var transactionTemplate: TransactionTemplate
 
   @Autowired
-  internal lateinit var caseNoteRepository: CaseNoteRepository
+  internal lateinit var noteRepository: NoteRepository
 
   fun addBearerAuthorisation(user: String, roles: List<String> = listOf()): Consumer<HttpHeaders> {
     val jwt = jwtHelper.createJwt(user, roles = roles)
@@ -120,9 +120,11 @@ abstract class ResourceTest : IntegrationTest() {
     category = Category(parentType.code, parentType.description),
     code,
     description,
+    active,
     sensitive,
+    restrictedUse,
     id!!,
   )
 
-  fun givenCaseNote(note: Note): Note = caseNoteRepository.save(note)
+  fun givenCaseNote(note: Note): Note = noteRepository.save(note)
 }

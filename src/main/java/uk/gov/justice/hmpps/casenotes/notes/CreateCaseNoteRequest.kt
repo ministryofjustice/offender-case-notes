@@ -9,7 +9,7 @@ data class CreateCaseNoteRequest(
   @Schema(
     required = true,
     example = "MDI",
-    description = "Location where case note was made, if blank it will be looked up in Nomis",
+    description = "Location where case note was made",
   )
   val locationId:
   @Length(max = 6)
