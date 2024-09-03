@@ -2,7 +2,6 @@ package uk.gov.justice.hmpps.casenotes.config
 
 import io.netty.channel.ChannelOption.CONNECT_TIMEOUT_MILLIS
 import io.netty.channel.ChannelOption.SO_KEEPALIVE
-import io.netty.channel.epoll.EpollChannelOption
 import io.netty.channel.socket.nio.NioChannelOption
 import io.netty.handler.timeout.ReadTimeoutHandler
 import io.netty.handler.timeout.WriteTimeoutHandler
@@ -75,7 +74,6 @@ class WebClientConfiguration(
           .option(CONNECT_TIMEOUT_MILLIS, 1000)
           .option(SO_KEEPALIVE, true)
           .option(NioChannelOption.of(TCP_KEEPINTERVAL), 60)
-          .option(EpollChannelOption.TCP_KEEPINTVL, 60)
           .warmupWithHealthPing(tokenVerificationApiBaseUrl),
       ),
     ).build()

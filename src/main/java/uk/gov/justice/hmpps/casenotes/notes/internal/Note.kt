@@ -22,7 +22,7 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor
 import uk.gov.justice.hmpps.casenotes.audit.AuditedEntityListener
 import uk.gov.justice.hmpps.casenotes.audit.SimpleAudited
 import uk.gov.justice.hmpps.casenotes.config.CaseNoteRequestContext
-import uk.gov.justice.hmpps.casenotes.dto.AmendCaseNoteRequest
+import uk.gov.justice.hmpps.casenotes.notes.AmendCaseNoteRequest
 import uk.gov.justice.hmpps.casenotes.notes.internal.Note.Companion.AMENDMENTS
 import uk.gov.justice.hmpps.casenotes.notes.internal.Note.Companion.AUTHOR_USERNAME
 import uk.gov.justice.hmpps.casenotes.notes.internal.Note.Companion.LOCATION_ID

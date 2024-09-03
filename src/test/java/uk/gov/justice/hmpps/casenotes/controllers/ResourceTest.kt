@@ -7,11 +7,9 @@ import org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDO
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
-import org.springframework.test.annotation.DirtiesContext
-import org.springframework.test.annotation.DirtiesContext.ClassMode.BEFORE_CLASS
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.web.reactive.server.WebTestClient
-import org.springframework.transaction.support.TransactionTemplate
+import uk.gov.justice.hmpps.casenotes.dto.ErrorResponse
 import uk.gov.justice.hmpps.casenotes.health.IntegrationTest
 import uk.gov.justice.hmpps.casenotes.health.wiremock.Elite2Extension
 import uk.gov.justice.hmpps.casenotes.health.wiremock.OAuthExtension
@@ -29,7 +27,9 @@ import uk.gov.justice.hmpps.casenotes.utils.setByName
 import java.time.LocalDateTime
 import java.util.function.Consumer
 
-@DirtiesContext(classMode = BEFORE_CLASS)
+internal const val ACTIVE_PRISON = "MDI"
+internal const val USERNAME = "TestUser"
+
 @ActiveProfiles("test", "noqueue", "token-verification")
 @SpringBootTest(webEnvironment = RANDOM_PORT)
 @ExtendWith(Elite2Extension::class, OAuthExtension::class, TokenVerificationExtension::class)
@@ -40,9 +40,6 @@ abstract class ResourceTest : IntegrationTest() {
 
   @Autowired
   internal lateinit var jwtHelper: JwtAuthHelper
-
-  @Autowired
-  internal lateinit var transactionTemplate: TransactionTemplate
 
   @Autowired
   internal lateinit var noteRepository: NoteRepository
@@ -60,6 +57,11 @@ abstract class ResourceTest : IntegrationTest() {
 
   fun readFile(file: String): String = this.javaClass.getResource(file)!!.readText()
 
+  internal final fun WebTestClient.ResponseSpec.errorResponse(status: HttpStatus): ErrorResponse =
+    expectStatus().isEqualTo(status)
+      .expectBody(ErrorResponse::class.java)
+      .returnResult().responseBody!!
+
   internal final inline fun <reified T> WebTestClient.ResponseSpec.success(status: HttpStatus = HttpStatus.OK): T =
     expectStatus().isEqualTo(status)
       .expectBody(T::class.java)
@@ -70,12 +72,18 @@ abstract class ResourceTest : IntegrationTest() {
       .expectBodyList(T::class.java)
       .returnResult().responseBody!!
 
-  fun givenRandomType(sensitive: Boolean? = null): SubType =
+  fun givenRandomType(active: Boolean? = null, sensitive: Boolean? = null, restricted: Boolean? = null): SubType =
     parentTypeRepository.findAllWithParams(
       includeInactive = true,
       includeRestricted = true,
       dpsUserSelectableOnly = false,
-    ).flatMap { it.getSubtypes() }.filter { sensitive == null || it.sensitive == sensitive }.random()
+    ).flatMap { it.getSubtypes() }
+      .filter {
+        (active == null || it.active == active) &&
+          (sensitive == null || it.sensitive == sensitive) &&
+          (restricted == null || it.restrictedUse == restricted)
+      }
+      .random()
 
   fun generateCaseNote(
     prisonNumber: String = NomisIdGenerator.prisonNumber(),

@@ -3,16 +3,12 @@ package uk.gov.justice.hmpps.casenotes.controllers
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.ValueSource
-import org.springframework.test.context.TestPropertySource
 import uk.gov.justice.hmpps.casenotes.config.SecurityUserContext
 import uk.gov.justice.hmpps.casenotes.notes.CaseNote
 import uk.gov.justice.hmpps.casenotes.utils.NomisIdGenerator
 import uk.gov.justice.hmpps.casenotes.utils.verifyAgainst
 import java.util.UUID
 
-private const val ACTIVE_PRISONS = "MDI"
-
-@TestPropertySource(properties = ["service.active-prisons=$ACTIVE_PRISONS"])
 class ReadCaseNoteIntTest : ResourceTest() {
   @Test
   fun `401 unauthorised`() {
@@ -54,10 +50,10 @@ class ReadCaseNoteIntTest : ResourceTest() {
     prisonNumber: String,
     caseNoteId: String,
     roles: List<String> = listOf(SecurityUserContext.ROLE_CASE_NOTES_READ),
-    username: String = "API_TEST_USER",
+    username: String = USERNAME,
   ) = webTestClient.get().uri(urlToTest(prisonNumber, caseNoteId))
     .headers(addBearerAuthorisation(username, roles))
-    .header(CASELOAD_ID, ACTIVE_PRISONS)
+    .header(CASELOAD_ID, ACTIVE_PRISON)
     .exchange()
 
   private fun urlToTest(prisonNumber: String, caseNoteId: String) = "/case-notes/$prisonNumber/$caseNoteId"

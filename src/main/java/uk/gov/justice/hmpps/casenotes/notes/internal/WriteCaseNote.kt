@@ -9,7 +9,7 @@ import org.springframework.transaction.annotation.Transactional
 import org.springframework.validation.annotation.Validated
 import uk.gov.justice.hmpps.casenotes.config.CaseNoteRequestContext
 import uk.gov.justice.hmpps.casenotes.config.SecurityUserContext.Companion.ROLE_CASE_NOTES_WRITE
-import uk.gov.justice.hmpps.casenotes.dto.AmendCaseNoteRequest
+import uk.gov.justice.hmpps.casenotes.notes.AmendCaseNoteRequest
 import uk.gov.justice.hmpps.casenotes.notes.CaseNote
 import uk.gov.justice.hmpps.casenotes.notes.CreateCaseNoteRequest
 import uk.gov.justice.hmpps.casenotes.notes.asLegacyId
@@ -47,7 +47,7 @@ class WriteCaseNote(
 
     caseNote.type.validateRestrictedUse(useRestrictedType)
 
-    return caseNote.addAmendment(request).toModel()
+    return noteRepository.saveAndFlush(caseNote.addAmendment(request)).toModel()
   }
 
   private fun Type.validateRestrictedUse(useRestrictedType: Boolean) = apply {

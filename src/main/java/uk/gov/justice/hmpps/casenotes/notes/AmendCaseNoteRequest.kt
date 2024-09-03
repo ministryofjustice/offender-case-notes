@@ -1,4 +1,4 @@
-package uk.gov.justice.hmpps.casenotes.dto
+package uk.gov.justice.hmpps.casenotes.notes
 
 import io.swagger.v3.oas.annotations.media.Schema
 import jakarta.validation.constraints.NotBlank

@@ -4,7 +4,6 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.ValueSource
-import org.springframework.test.context.TestPropertySource
 import org.springframework.test.web.reactive.server.WebTestClient
 import uk.gov.justice.hmpps.casenotes.config.SecurityUserContext.Companion.ROLE_CASE_NOTES_READ
 import uk.gov.justice.hmpps.casenotes.config.SecurityUserContext.Companion.ROLE_CASE_NOTES_WRITE
@@ -13,9 +12,6 @@ import uk.gov.justice.hmpps.casenotes.utils.NomisIdGenerator.prisonNumber
 import uk.gov.justice.hmpps.casenotes.utils.verifyAgainst
 import java.time.LocalDateTime
 
-private const val ACTIVE_PRISONS = "MDI"
-
-@TestPropertySource(properties = ["service.active-prisons=$ACTIVE_PRISONS"])
 class ReadCaseNotesIntTest : ResourceTest() {
   @Test
   fun `401 unauthorised`() {
@@ -68,8 +64,8 @@ class ReadCaseNotesIntTest : ResourceTest() {
   @Test
   fun `can filter sensitive case notes`() {
     val prisonNumber = prisonNumber()
-    val sensitiveType = givenRandomType(true)
-    val nonSensitiveType = givenRandomType(false)
+    val sensitiveType = givenRandomType(sensitive = true)
+    val nonSensitiveType = givenRandomType(sensitive = false)
     val caseNote = givenCaseNote(generateCaseNote(prisonNumber, nonSensitiveType))
     givenCaseNote(generateCaseNote(prisonNumber, sensitiveType))
     assertThat(getCaseNotes(prisonNumber).page().totalElements).isEqualTo(2)
@@ -136,7 +132,7 @@ class ReadCaseNotesIntTest : ResourceTest() {
     prisonNumber: String,
     queryParams: Map<String, List<String>> = mapOf(),
     roles: List<String> = listOf(ROLE_CASE_NOTES_READ),
-    username: String = "API_TEST_USER",
+    username: String = USERNAME,
   ) = webTestClient.get().uri { ub ->
     ub.path(urlToTest(prisonNumber))
     queryParams.forEach {
@@ -144,7 +140,7 @@ class ReadCaseNotesIntTest : ResourceTest() {
     }
     ub.build()
   }.headers(addBearerAuthorisation(username, roles))
-    .header(CASELOAD_ID, ACTIVE_PRISONS)
+    .header(CASELOAD_ID, ACTIVE_PRISON)
     .exchange()
 
   private fun urlToTest(prisonNumber: String) = "/case-notes/$prisonNumber"

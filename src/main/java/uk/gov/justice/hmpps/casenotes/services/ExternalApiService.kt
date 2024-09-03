@@ -4,6 +4,7 @@ import org.springframework.core.ParameterizedTypeReference
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageImpl
 import org.springframework.data.domain.Pageable
+import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Service
 import org.springframework.web.reactive.function.client.WebClient
@@ -13,12 +14,12 @@ import org.springframework.web.reactive.function.client.bodyToFlux
 import org.springframework.web.reactive.function.client.bodyToMono
 import reactor.core.publisher.Mono
 import reactor.util.retry.Retry
-import uk.gov.justice.hmpps.casenotes.dto.AmendCaseNoteRequest
 import uk.gov.justice.hmpps.casenotes.dto.BookingIdentifier
 import uk.gov.justice.hmpps.casenotes.dto.CaseNoteFilter
 import uk.gov.justice.hmpps.casenotes.dto.NomisCaseNote
 import uk.gov.justice.hmpps.casenotes.dto.OffenderBooking
 import uk.gov.justice.hmpps.casenotes.dto.UserDetails
+import uk.gov.justice.hmpps.casenotes.notes.AmendCaseNoteRequest
 import uk.gov.justice.hmpps.casenotes.notes.CreateCaseNoteRequest
 import java.time.Duration
 import java.time.format.DateTimeFormatter
@@ -48,8 +49,13 @@ class ExternalApiService(
 
   fun getUserDetails(currentUsername: String): Optional<UserDetails> =
     oauthApiWebClient.get().uri("/api/user/{username}", currentUsername)
-      .retrieve()
-      .bodyToMono<UserDetails>()
+      .exchangeToMono {
+        if (it.statusCode() == HttpStatus.NOT_FOUND) {
+          Mono.empty()
+        } else {
+          it.bodyToMono<UserDetails>()
+        }
+      }
       .retryOnTransientException()
       .blockOptional()
 

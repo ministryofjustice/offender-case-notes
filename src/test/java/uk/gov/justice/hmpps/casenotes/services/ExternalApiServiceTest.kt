@@ -29,15 +29,13 @@ import org.springframework.web.reactive.function.client.WebClient.ResponseSpec
 import org.springframework.web.util.UriComponentsBuilder
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
-import uk.gov.justice.hmpps.casenotes.dto.AmendCaseNoteRequest
 import uk.gov.justice.hmpps.casenotes.dto.BookingIdentifier
 import uk.gov.justice.hmpps.casenotes.dto.CaseNoteFilter
 import uk.gov.justice.hmpps.casenotes.dto.NomisCaseNote
 import uk.gov.justice.hmpps.casenotes.dto.OffenderBooking
-import uk.gov.justice.hmpps.casenotes.dto.UserDetails
+import uk.gov.justice.hmpps.casenotes.notes.AmendCaseNoteRequest
 import uk.gov.justice.hmpps.casenotes.notes.CreateCaseNoteRequest
 import java.time.LocalDateTime
-import java.util.Optional
 
 class ExternalApiServiceTest {
   private val responseSpecMock: ResponseSpec = mock()
@@ -104,29 +102,6 @@ class ExternalApiServiceTest {
 
       verify(prisonApiClientCredentialsWebClient).get()
       verify(requestHeadersUriSpec).uri("/api/bookings/{bookingId}?basicInfo=true", 12345L)
-    }
-  }
-
-  @Nested
-  inner class getUserDetails {
-    @Test
-    fun `test calls HMPPS Auth`() {
-      val userDetails = UserDetails(name = "Joe")
-      whenever(responseSpecMock.bodyToMono(any<ParameterizedTypeReference<UserDetails>>()))
-        .thenReturn(Mono.just(userDetails))
-      assertThat(externalApiService.getUserDetails("user")).isEqualTo(Optional.of(userDetails))
-
-      verify(authWebClient).get()
-      verify(requestHeadersUriSpec).uri("/api/user/{username}", "user")
-    }
-
-    @Test
-    fun `test calls HMPPS Auth and returns empty if no response`() {
-      whenever(responseSpecMock.bodyToMono(any<ParameterizedTypeReference<UserDetails>>())).thenReturn(Mono.empty())
-      assertThat(externalApiService.getUserDetails("user")).isEmpty
-
-      verify(authWebClient).get()
-      verify(requestHeadersUriSpec).uri("/api/user/{username}", "user")
     }
   }
 

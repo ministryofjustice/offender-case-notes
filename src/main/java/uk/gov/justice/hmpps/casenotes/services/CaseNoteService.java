@@ -23,7 +23,7 @@ import uk.gov.justice.hmpps.casenotes.config.CaseNoteRequestContext;
 import uk.gov.justice.hmpps.casenotes.config.SecurityUserContext;
 import uk.gov.justice.hmpps.casenotes.dto.CaseNoteFilter;
 import uk.gov.justice.hmpps.casenotes.dto.NomisCaseNote;
-import uk.gov.justice.hmpps.casenotes.dto.AmendCaseNoteRequest;
+import uk.gov.justice.hmpps.casenotes.notes.AmendCaseNoteRequest;
 import uk.gov.justice.hmpps.casenotes.filters.OffenderCaseNoteFilter;
 import uk.gov.justice.hmpps.casenotes.model.OffenderCaseNote;
 import uk.gov.justice.hmpps.casenotes.notes.CaseNote;
@@ -39,7 +39,6 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-import static com.google.common.base.Strings.isNullOrEmpty;
 import static java.lang.Boolean.TRUE;
 import static java.lang.String.format;
 import static java.lang.String.valueOf;

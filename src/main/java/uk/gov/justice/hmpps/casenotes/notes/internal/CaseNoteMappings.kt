@@ -26,4 +26,4 @@ internal fun Note.toModel() = CaseNote(
 )
 
 internal fun Amendment.toModel() =
-  CaseNoteAmendment(id!!, createDateTime, authorUsername, authorName, authorUserId, text)
+  CaseNoteAmendment(requireNotNull(id), createDateTime, authorUsername, authorName, authorUserId, text)
