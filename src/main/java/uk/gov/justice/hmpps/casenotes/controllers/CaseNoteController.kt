@@ -133,7 +133,7 @@ class CaseNoteController(
       } else {
         createCaseNote
       }
-      save.note(offenderIdentifier, request, useRestrictedType)
+      save.createNote(offenderIdentifier, request, useRestrictedType)
     } else {
       caseNoteService.createCaseNote(offenderIdentifier, createCaseNote)
     }
@@ -171,7 +171,7 @@ class CaseNoteController(
     @RequestHeader(CASELOAD_ID) caseloadId: String? = null,
   ): CaseNote {
     val caseNote = if (caseloadId in serviceConfig.activePrisons) {
-      save.amendment(offenderIdentifier, caseNoteIdentifier, amendedText, useRestrictedType)
+      save.createAmendment(offenderIdentifier, caseNoteIdentifier, amendedText, useRestrictedType)
     } else {
       caseNoteService.amendCaseNote(offenderIdentifier, caseNoteIdentifier, amendedText)
     }
@@ -196,7 +196,14 @@ class CaseNoteController(
     @PathVariable offenderIdentifier: String,
     @Parameter(description = "Case Note Id", required = true, example = "518b2200-6489-4c77-8514-10cf80ccd488")
     @PathVariable caseNoteId: String,
-  ) = caseNoteService.softDeleteCaseNote(offenderIdentifier, caseNoteId)
+    @RequestHeader(CASELOAD_ID) caseloadId: String? = null,
+  ) {
+    if (caseloadId in serviceConfig.activePrisons) {
+      save.deleteNote(offenderIdentifier, caseNoteId)
+    } else {
+      caseNoteService.softDeleteCaseNote(offenderIdentifier, caseNoteId)
+    }
+  }
 
   @Operation(summary = "Deletes a case note amendment")
   @ApiResponses(
@@ -213,8 +220,15 @@ class CaseNoteController(
     @Parameter(description = "Offender Identifier", required = true, example = "A1234AA")
     @PathVariable offenderIdentifier: String,
     @Parameter(description = "Case Note Amendment Id", required = true, example = "1")
-    @PathVariable caseNoteAmendmentId: Long?,
-  ) = caseNoteService.softDeleteCaseNoteAmendment(offenderIdentifier, caseNoteAmendmentId)
+    @PathVariable caseNoteAmendmentId: Long,
+    @RequestHeader(CASELOAD_ID) caseloadId: String? = null,
+  ) {
+    if (caseloadId in serviceConfig.activePrisons) {
+      save.deleteAmendment(offenderIdentifier, caseNoteAmendmentId)
+    } else {
+      caseNoteService.softDeleteCaseNoteAmendment(offenderIdentifier, caseNoteAmendmentId)
+    }
+  }
 
   private fun createEventProperties(caseNote: CaseNote): Map<String, String> {
     return java.util.Map.of(

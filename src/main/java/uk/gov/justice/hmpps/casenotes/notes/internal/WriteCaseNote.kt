@@ -1,7 +1,10 @@
 package uk.gov.justice.hmpps.casenotes.notes.internal
 
+import com.microsoft.applicationinsights.TelemetryClient
 import jakarta.validation.Valid
 import jakarta.validation.ValidationException
+import org.springframework.data.jpa.domain.AbstractPersistable_.id
+import org.springframework.data.repository.findByIdOrNull
 import org.springframework.security.access.AccessDeniedException
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.stereotype.Service
@@ -23,8 +26,10 @@ import java.util.UUID.fromString
 class WriteCaseNote(
   private val typeRepository: TypeRepository,
   private val noteRepository: NoteRepository,
+  private val amendmentRepository: AmendmentRepository,
+  private val telemetryClient: TelemetryClient,
 ) {
-  fun note(prisonNumber: String, @Valid request: CreateCaseNoteRequest, useRestrictedType: Boolean): CaseNote {
+  fun createNote(prisonNumber: String, @Valid request: CreateCaseNoteRequest, useRestrictedType: Boolean): CaseNote {
     val type = typeRepository.findByCategoryCodeAndCode(request.type, request.subType)
       ?.validateRestrictedUse(useRestrictedType)
       ?: throw IllegalArgumentException("Unknown case note type ${request.type}/${request.subType}")
@@ -34,21 +39,53 @@ class WriteCaseNote(
     return noteRepository.saveAndRefresh(request.toEntity(prisonNumber, type, CaseNoteRequestContext.get())).toModel()
   }
 
-  fun amendment(
+  fun createAmendment(
     prisonNumber: String,
     caseNoteId: String,
     @Valid request: AmendCaseNoteRequest,
     useRestrictedType: Boolean,
   ): CaseNote {
-    val caseNote = when (val legacyId = caseNoteId.asLegacyId()) {
-      null -> noteRepository.findByIdAndPrisonNumber(fromString(caseNoteId), prisonNumber)
-      else -> noteRepository.findByLegacyIdAndPrisonNumber(legacyId, prisonNumber)
-    }?.takeIf { it.prisonNumber == prisonNumber } ?: throw EntityNotFoundException.withId(caseNoteId)
-
-    caseNote.type.validateRestrictedUse(useRestrictedType)
+    val caseNote = getCaseNote(prisonNumber, caseNoteId).also {
+      it.type.validateRestrictedUse(useRestrictedType)
+    }
 
     return noteRepository.saveAndFlush(caseNote.addAmendment(request)).toModel()
   }
+
+  fun deleteNote(prisonNumber: String, caseNoteId: String) {
+    getCaseNote(prisonNumber, caseNoteId).also(noteRepository::delete)
+    telemetryClient.trackEvent(
+      "CaseNoteSoftDelete",
+      mapOf(
+        "userName" to CaseNoteRequestContext.get().username,
+        "prisonNumber" to prisonNumber,
+        "caseNoteId" to caseNoteId,
+      ),
+      null,
+    )
+  }
+
+  fun deleteAmendment(prisonNumber: String, amendmentId: Long) {
+    amendmentRepository.findByIdOrNull(amendmentId)?.also {
+      amendmentRepository.delete(it)
+      telemetryClient.trackEvent(
+        "CaseNoteAmendmentSoftDelete",
+        mapOf(
+          "userName" to CaseNoteRequestContext.get().username,
+          "prisonNumber" to prisonNumber,
+          "caseNoteId" to it.note.id.toString(),
+          "amendmentId" to amendmentId.toString(),
+        ),
+        null,
+      )
+    }
+  }
+
+  private fun getCaseNote(prisonNumber: String, caseNoteId: String): Note =
+    when (val legacyId = caseNoteId.asLegacyId()) {
+      null -> noteRepository.findByIdAndPrisonNumber(fromString(caseNoteId), prisonNumber)
+      else -> noteRepository.findByLegacyIdAndPrisonNumber(legacyId, prisonNumber)
+    }?.takeIf { it.prisonNumber == prisonNumber } ?: throw EntityNotFoundException.withId(caseNoteId)
 
   private fun Type.validateRestrictedUse(useRestrictedType: Boolean) = apply {
     if (restrictedUse && !useRestrictedType) {
