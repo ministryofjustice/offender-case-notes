@@ -1,4 +1,4 @@
-package uk.gov.justice.hmpps.casenotes.notes.internal
+package uk.gov.justice.hmpps.casenotes.domain
 
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
@@ -10,7 +10,7 @@ import jakarta.persistence.ManyToOne
 import jakarta.persistence.Table
 import org.hibernate.annotations.SoftDelete
 import org.springframework.data.jpa.repository.JpaRepository
-import uk.gov.justice.hmpps.casenotes.audit.SimpleAudited
+import uk.gov.justice.hmpps.casenotes.domain.audit.SimpleAudited
 
 @Entity
 @SoftDelete(columnName = "soft_deleted")

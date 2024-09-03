@@ -31,8 +31,8 @@ import uk.gov.justice.hmpps.casenotes.dto.ErrorResponse
 import uk.gov.justice.hmpps.casenotes.notes.AmendCaseNoteRequest
 import uk.gov.justice.hmpps.casenotes.notes.CaseNote
 import uk.gov.justice.hmpps.casenotes.notes.CreateCaseNoteRequest
-import uk.gov.justice.hmpps.casenotes.notes.internal.ReadCaseNote
-import uk.gov.justice.hmpps.casenotes.notes.internal.WriteCaseNote
+import uk.gov.justice.hmpps.casenotes.notes.ReadCaseNote
+import uk.gov.justice.hmpps.casenotes.notes.WriteCaseNote
 import uk.gov.justice.hmpps.casenotes.services.CaseNoteEventPusher
 import uk.gov.justice.hmpps.casenotes.services.CaseNoteService
 import uk.gov.justice.hmpps.casenotes.services.ExternalApiService

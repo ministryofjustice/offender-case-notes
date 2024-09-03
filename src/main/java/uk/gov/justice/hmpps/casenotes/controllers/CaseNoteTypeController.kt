@@ -1,4 +1,4 @@
-package uk.gov.justice.hmpps.casenotes.types
+package uk.gov.justice.hmpps.casenotes.controllers
 
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.media.Content
@@ -11,7 +11,9 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
 import uk.gov.justice.hmpps.casenotes.dto.ErrorResponse
-import uk.gov.justice.hmpps.casenotes.types.internal.ReadCaseNoteType
+import uk.gov.justice.hmpps.casenotes.types.CaseNoteType
+import uk.gov.justice.hmpps.casenotes.types.ReadCaseNoteType
+import uk.gov.justice.hmpps.casenotes.types.SelectableBy
 
 @Tag(name = "case-note-types", description = "Case Note Types Controller")
 @RestController
@@ -52,7 +54,7 @@ class CaseNoteTypeController(private val readCaseNoteType: ReadCaseNoteType) {
     @RequestParam(required = false) selectableBy: SelectableBy = SelectableBy.ALL,
     @RequestParam(required = false) includeInactive: Boolean = true,
     @RequestParam(required = false) includeRestricted: Boolean = true,
-  ): List<ParentType> = readCaseNoteType.getCaseNoteTypes(selectableBy, includeInactive, includeRestricted)
+  ): List<CaseNoteType> = readCaseNoteType.getCaseNoteTypes(selectableBy, includeInactive, includeRestricted)
 
   @ApiResponses(
     ApiResponse(
@@ -80,5 +82,5 @@ class CaseNoteTypeController(private val readCaseNoteType: ReadCaseNoteType) {
     """,
   )
   @GetMapping("/types-for-user")
-  fun getUserCaseNoteTypes(): List<ParentType> = readCaseNoteType.getUserCaseNoteTypes()
+  fun getUserCaseNoteTypes(): List<CaseNoteType> = readCaseNoteType.getUserCaseNoteTypes()
 }

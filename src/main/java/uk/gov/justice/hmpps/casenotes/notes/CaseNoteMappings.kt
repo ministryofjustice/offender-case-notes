@@ -1,14 +1,14 @@
-package uk.gov.justice.hmpps.casenotes.notes.internal
+package uk.gov.justice.hmpps.casenotes.notes
 
-import uk.gov.justice.hmpps.casenotes.notes.CaseNote
-import uk.gov.justice.hmpps.casenotes.notes.CaseNoteAmendment
-import uk.gov.justice.hmpps.casenotes.notes.internal.ReadCaseNote.Companion.SOURCE
+import uk.gov.justice.hmpps.casenotes.domain.Amendment
+import uk.gov.justice.hmpps.casenotes.domain.Note
+import uk.gov.justice.hmpps.casenotes.notes.ReadCaseNote.Companion.SOURCE
 
 internal fun Note.toModel() = CaseNote(
   caseNoteId = id.toString(),
   offenderIdentifier = prisonNumber,
-  type = type.category.code,
-  typeDescription = type.category.description,
+  type = type.parent.code,
+  typeDescription = type.parent.description,
   subType = type.code,
   subTypeDescription = type.description,
   source = SOURCE,

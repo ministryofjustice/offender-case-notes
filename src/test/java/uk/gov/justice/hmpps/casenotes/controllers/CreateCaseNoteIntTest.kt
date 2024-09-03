@@ -6,10 +6,10 @@ import org.junit.jupiter.api.Test
 import org.springframework.http.HttpStatus
 import uk.gov.justice.hmpps.casenotes.config.SecurityUserContext.Companion.ROLE_CASE_NOTES_READ
 import uk.gov.justice.hmpps.casenotes.config.SecurityUserContext.Companion.ROLE_CASE_NOTES_WRITE
+import uk.gov.justice.hmpps.casenotes.domain.Note
 import uk.gov.justice.hmpps.casenotes.health.wiremock.OAuthExtension.Companion.oAuthApi
 import uk.gov.justice.hmpps.casenotes.notes.CaseNote
 import uk.gov.justice.hmpps.casenotes.notes.CreateCaseNoteRequest
-import uk.gov.justice.hmpps.casenotes.notes.internal.Note
 import uk.gov.justice.hmpps.casenotes.utils.NomisIdGenerator.prisonNumber
 import uk.gov.justice.hmpps.casenotes.utils.verifyAgainst
 import java.time.LocalDateTime
@@ -57,14 +57,14 @@ class CreateCaseNoteIntTest : ResourceTest() {
   @Test
   fun `cannot create a restricted case note without passing useRestrictedType`() {
     val type = givenRandomType(restricted = true)
-    val request = createCaseNoteRequest(type = type.parentType.code, subType = type.code)
+    val request = createCaseNoteRequest(type = type.parent.code, subType = type.code)
     createCaseNote(prisonNumber(), request, params = mapOf()).errorResponse(HttpStatus.FORBIDDEN)
   }
 
   @Test
   fun `cannot create a case note with an inactive type`() {
     val type = givenRandomType(active = false, restricted = false)
-    val request = createCaseNoteRequest(type = type.parentType.code, subType = type.code)
+    val request = createCaseNoteRequest(type = type.parent.code, subType = type.code)
     val response = createCaseNote(prisonNumber(), request, params = mapOf()).errorResponse(HttpStatus.BAD_REQUEST)
 
     with(response) {
@@ -101,7 +101,7 @@ class CreateCaseNoteIntTest : ResourceTest() {
   private fun urlToTest(prisonNumber: String) = "/case-notes/$prisonNumber"
 
   private fun Note.verifyAgainst(request: CreateCaseNoteRequest) {
-    assertThat(type.category.code).isEqualTo(request.type)
+    assertThat(type.parent.code).isEqualTo(request.type)
     assertThat(type.code).isEqualTo(request.subType)
     assertThat(text).isEqualTo(request.text)
   }

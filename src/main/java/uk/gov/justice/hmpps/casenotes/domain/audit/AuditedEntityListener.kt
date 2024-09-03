@@ -1,4 +1,4 @@
-package uk.gov.justice.hmpps.casenotes.audit
+package uk.gov.justice.hmpps.casenotes.domain.audit
 
 import jakarta.persistence.PreUpdate
 import uk.gov.justice.hmpps.casenotes.config.CaseNoteRequestContext

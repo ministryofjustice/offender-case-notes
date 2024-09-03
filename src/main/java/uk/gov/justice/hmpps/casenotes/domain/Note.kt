@@ -1,4 +1,4 @@
-package uk.gov.justice.hmpps.casenotes.notes.internal
+package uk.gov.justice.hmpps.casenotes.domain
 
 import com.fasterxml.uuid.Generators
 import jakarta.persistence.CascadeType
@@ -19,17 +19,17 @@ import org.springframework.data.jpa.domain.Specification
 import org.springframework.data.jpa.repository.EntityGraph
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor
-import uk.gov.justice.hmpps.casenotes.audit.AuditedEntityListener
-import uk.gov.justice.hmpps.casenotes.audit.SimpleAudited
 import uk.gov.justice.hmpps.casenotes.config.CaseNoteRequestContext
+import uk.gov.justice.hmpps.casenotes.domain.Note.Companion.AMENDMENTS
+import uk.gov.justice.hmpps.casenotes.domain.Note.Companion.AUTHOR_USERNAME
+import uk.gov.justice.hmpps.casenotes.domain.Note.Companion.LOCATION_ID
+import uk.gov.justice.hmpps.casenotes.domain.Note.Companion.OCCURRED_AT
+import uk.gov.justice.hmpps.casenotes.domain.Note.Companion.PRISON_NUMBER
+import uk.gov.justice.hmpps.casenotes.domain.Note.Companion.TYPE
+import uk.gov.justice.hmpps.casenotes.domain.SubType.Companion.PARENT
+import uk.gov.justice.hmpps.casenotes.domain.audit.AuditedEntityListener
+import uk.gov.justice.hmpps.casenotes.domain.audit.SimpleAudited
 import uk.gov.justice.hmpps.casenotes.notes.AmendCaseNoteRequest
-import uk.gov.justice.hmpps.casenotes.notes.internal.Note.Companion.AMENDMENTS
-import uk.gov.justice.hmpps.casenotes.notes.internal.Note.Companion.AUTHOR_USERNAME
-import uk.gov.justice.hmpps.casenotes.notes.internal.Note.Companion.LOCATION_ID
-import uk.gov.justice.hmpps.casenotes.notes.internal.Note.Companion.OCCURRED_AT
-import uk.gov.justice.hmpps.casenotes.notes.internal.Note.Companion.PRISON_NUMBER
-import uk.gov.justice.hmpps.casenotes.notes.internal.Note.Companion.TYPE
-import uk.gov.justice.hmpps.casenotes.types.internal.ParentType
 import java.time.LocalDateTime
 import java.util.SortedSet
 import java.util.TreeSet
@@ -45,7 +45,7 @@ class Note(
 
   @ManyToOne
   @JoinColumn(name = "case_note_type_id", nullable = false)
-  val type: Type,
+  val type: SubType,
 
   @Column(name = "occurrence_date_time", nullable = false)
   val occurredAt: LocalDateTime,
@@ -110,10 +110,10 @@ class Note(
 }
 
 interface NoteRepository : JpaSpecificationExecutor<Note>, JpaRepository<Note, UUID>, RefreshRepository<Note, UUID> {
-  @EntityGraph(attributePaths = ["type.category", "amendments"])
+  @EntityGraph(attributePaths = ["type.parent", "amendments"])
   fun findByIdAndPrisonNumber(id: UUID, prisonNumber: String): Note?
 
-  @EntityGraph(attributePaths = ["type.category", "amendments"])
+  @EntityGraph(attributePaths = ["type.parent", "amendments"])
   fun findByLegacyIdAndPrisonNumber(legacyId: Long, prisonNumber: String): Note?
 }
 
@@ -141,13 +141,28 @@ fun occurredBefore(to: LocalDateTime) =
 fun occurredAfter(from: LocalDateTime) =
   Specification<Note> { csip, _, cb -> cb.greaterThanOrEqualTo(csip[OCCURRED_AT], from) }
 
-fun matchesOnType(includeSensitive: Boolean) =
+fun matchesOnType(includeSensitive: Boolean, typeMap: Map<String, Set<String>>) =
   Specification<Note> { cn, _, cb ->
-    val type = cn.fetch<Note, Type>(TYPE, JoinType.INNER) as Join<Note, Type>
-    type.fetch<Type, ParentType>(Type.CATEGORY, JoinType.INNER)
-    if (includeSensitive) {
+    @Suppress("UNCHECKED_CAST")
+    val subType = cn.fetch<Note, SubType>(TYPE, JoinType.INNER) as Join<Note, SubType>
+
+    @Suppress("UNCHECKED_CAST")
+    val parentType = subType.fetch<SubType, Type>(PARENT, JoinType.INNER) as Join<SubType, Type>
+
+    val typePredicate = typeMap.entries.map {
+      val matchParent = cb.equal(parentType.get<String>(Type.CODE), it.key)
+      if (it.value.isEmpty()) {
+        matchParent
+      } else {
+        cb.and(matchParent, subType.get<String>(SubType.CODE).`in`(it.value))
+      }
+    }.toTypedArray().let { if (it.isEmpty()) cb.conjunction() else cb.or(*it) }
+
+    val sensitivePredicate = if (includeSensitive) {
       cb.conjunction()
     } else {
-      cb.equal(type.get<Boolean>(Type.SENSITIVE), false)
+      cb.equal(subType.get<Boolean>(SubType.SENSITIVE), false)
     }
+
+    cb.and(typePredicate, sensitivePredicate)
   }

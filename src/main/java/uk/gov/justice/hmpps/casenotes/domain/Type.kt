@@ -1,4 +1,4 @@
-package uk.gov.justice.hmpps.casenotes.types.internal
+package uk.gov.justice.hmpps.casenotes.domain
 
 import jakarta.persistence.CascadeType
 import jakarta.persistence.Column
@@ -13,30 +13,27 @@ import org.springframework.data.jpa.repository.Query
 @Immutable
 @Entity
 @Table(name = "case_note_parent_type")
-class ParentType(
+class Type(
   @Id @Column(name = "note_type", nullable = false)
   val code: String,
 
   @Column(name = "description", nullable = false)
   val description: String,
 
-  @OneToMany(cascade = [CascadeType.ALL], mappedBy = "parentType")
+  @OneToMany(cascade = [CascadeType.ALL], mappedBy = "parent")
   private val subTypes: MutableSet<SubType> = mutableSetOf(),
 ) {
   fun getSubtypes(): Set<SubType> = subTypes.toSet()
+
+  companion object {
+    val CODE = Type::code.name
+  }
 }
 
-fun ParentType.toModel(): uk.gov.justice.hmpps.casenotes.types.ParentType =
-  uk.gov.justice.hmpps.casenotes.types.ParentType(
-    code,
-    description,
-    subCodes = getSubtypes().map(SubType::toModel).sorted(),
-  )
-
-interface ParentTypeRepository : JpaRepository<ParentType, String> {
+interface ParentTypeRepository : JpaRepository<Type, String> {
   @Query(
     """
-    select pt from ParentType pt 
+    select pt from Type pt 
     join fetch pt.subTypes st 
     where (:includeInactive = true or st.active = true)
     and (:includeRestricted = true or st.restrictedUse = false)
@@ -47,5 +44,5 @@ interface ParentTypeRepository : JpaRepository<ParentType, String> {
     includeInactive: Boolean,
     includeRestricted: Boolean,
     dpsUserSelectableOnly: Boolean,
-  ): List<ParentType>
+  ): List<Type>
 }

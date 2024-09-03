@@ -40,6 +40,4 @@ interface OffenderCaseNoteRepository :
     nativeQuery = true,
   )
   fun deleteOffenderCaseNoteAmendmentsByOffenderIdentifier(offenderIdentifier: String): Int
-
-  fun findByLegacyId(legacyId: Long): OffenderCaseNote?
 }

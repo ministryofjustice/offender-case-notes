@@ -1,4 +1,4 @@
-package uk.gov.justice.hmpps.casenotes.notes.internal
+package uk.gov.justice.hmpps.casenotes.domain
 
 import jakarta.persistence.EntityManager
 import org.springframework.transaction.annotation.Transactional

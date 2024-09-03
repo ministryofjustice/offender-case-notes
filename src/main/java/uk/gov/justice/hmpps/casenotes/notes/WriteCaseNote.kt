@@ -1,9 +1,8 @@
-package uk.gov.justice.hmpps.casenotes.notes.internal
+package uk.gov.justice.hmpps.casenotes.notes
 
 import com.microsoft.applicationinsights.TelemetryClient
 import jakarta.validation.Valid
 import jakarta.validation.ValidationException
-import org.springframework.data.jpa.domain.AbstractPersistable_.id
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.security.access.AccessDeniedException
 import org.springframework.security.access.prepost.PreAuthorize
@@ -12,10 +11,12 @@ import org.springframework.transaction.annotation.Transactional
 import org.springframework.validation.annotation.Validated
 import uk.gov.justice.hmpps.casenotes.config.CaseNoteRequestContext
 import uk.gov.justice.hmpps.casenotes.config.SecurityUserContext.Companion.ROLE_CASE_NOTES_WRITE
-import uk.gov.justice.hmpps.casenotes.notes.AmendCaseNoteRequest
-import uk.gov.justice.hmpps.casenotes.notes.CaseNote
-import uk.gov.justice.hmpps.casenotes.notes.CreateCaseNoteRequest
-import uk.gov.justice.hmpps.casenotes.notes.asLegacyId
+import uk.gov.justice.hmpps.casenotes.domain.AmendmentRepository
+import uk.gov.justice.hmpps.casenotes.domain.Note
+import uk.gov.justice.hmpps.casenotes.domain.NoteRepository
+import uk.gov.justice.hmpps.casenotes.domain.SubType
+import uk.gov.justice.hmpps.casenotes.domain.SubTypeRepository
+import uk.gov.justice.hmpps.casenotes.domain.saveAndRefresh
 import uk.gov.justice.hmpps.casenotes.services.EntityNotFoundException
 import java.util.UUID.fromString
 
@@ -24,13 +25,13 @@ import java.util.UUID.fromString
 @Transactional
 @PreAuthorize("hasAnyRole('$ROLE_CASE_NOTES_WRITE')")
 class WriteCaseNote(
-  private val typeRepository: TypeRepository,
+  private val subTypeRepository: SubTypeRepository,
   private val noteRepository: NoteRepository,
   private val amendmentRepository: AmendmentRepository,
   private val telemetryClient: TelemetryClient,
 ) {
   fun createNote(prisonNumber: String, @Valid request: CreateCaseNoteRequest, useRestrictedType: Boolean): CaseNote {
-    val type = typeRepository.findByCategoryCodeAndCode(request.type, request.subType)
+    val type = subTypeRepository.findByParentCodeAndCode(request.type, request.subType)
       ?.validateRestrictedUse(useRestrictedType)
       ?: throw IllegalArgumentException("Unknown case note type ${request.type}/${request.subType}")
 
@@ -87,7 +88,7 @@ class WriteCaseNote(
       else -> noteRepository.findByLegacyIdAndPrisonNumber(legacyId, prisonNumber)
     }?.takeIf { it.prisonNumber == prisonNumber } ?: throw EntityNotFoundException.withId(caseNoteId)
 
-  private fun Type.validateRestrictedUse(useRestrictedType: Boolean) = apply {
+  private fun SubType.validateRestrictedUse(useRestrictedType: Boolean) = apply {
     if (restrictedUse && !useRestrictedType) {
       throw AccessDeniedException("Case note type is for restricted use, but useRestrictedType was not set")
     }
@@ -95,7 +96,7 @@ class WriteCaseNote(
 
   private fun CreateCaseNoteRequest.toEntity(
     prisonNumber: String,
-    type: Type,
+    type: SubType,
     context: CaseNoteRequestContext,
   ) = Note(
     prisonNumber,
@@ -107,5 +108,5 @@ class WriteCaseNote(
     context.userDisplayName,
     text,
     systemGenerated ?: false,
-  )
+  ).apply { new = true }
 }

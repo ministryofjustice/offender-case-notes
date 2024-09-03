@@ -11,14 +11,14 @@ interface CodedValue : Comparable<CodedValue> {
   }
 }
 
-data class ParentType(
+data class CaseNoteType(
   override val code: String,
   override val description: String,
   @Schema(description = "List of case note sub types")
-  val subCodes: List<CaseNoteType> = listOf(),
+  val subCodes: List<CaseNoteSubType> = listOf(),
 ) : CodedValue
 
-data class CaseNoteType(
+data class CaseNoteSubType(
   @Schema(required = true, description = "Case Note Code", example = "OBSERVE")
   override val code: String,
 

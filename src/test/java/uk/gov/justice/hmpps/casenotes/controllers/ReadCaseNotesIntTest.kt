@@ -128,6 +128,16 @@ class ReadCaseNotesIntTest : ResourceTest() {
     assertThat(response2.content.map { it.text }).containsExactly("THREE", "FIVE", "SEVEN")
   }
 
+  @Test
+  fun `can filter by parent types`() {
+    val prisonNumber = prisonNumber()
+  }
+
+  @Test
+  fun `can filter by types`() {
+    val prisonNumber = prisonNumber()
+  }
+
   private fun getCaseNotes(
     prisonNumber: String,
     queryParams: Map<String, List<String>> = mapOf(),

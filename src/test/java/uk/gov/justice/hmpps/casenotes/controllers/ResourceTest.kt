@@ -9,18 +9,16 @@ import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.web.reactive.server.WebTestClient
+import uk.gov.justice.hmpps.casenotes.domain.Amendment
+import uk.gov.justice.hmpps.casenotes.domain.Note
+import uk.gov.justice.hmpps.casenotes.domain.NoteRepository
+import uk.gov.justice.hmpps.casenotes.domain.ParentTypeRepository
+import uk.gov.justice.hmpps.casenotes.domain.SubType
 import uk.gov.justice.hmpps.casenotes.dto.ErrorResponse
 import uk.gov.justice.hmpps.casenotes.health.IntegrationTest
 import uk.gov.justice.hmpps.casenotes.health.wiremock.Elite2Extension
 import uk.gov.justice.hmpps.casenotes.health.wiremock.OAuthExtension
 import uk.gov.justice.hmpps.casenotes.health.wiremock.TokenVerificationExtension
-import uk.gov.justice.hmpps.casenotes.notes.internal.Amendment
-import uk.gov.justice.hmpps.casenotes.notes.internal.Category
-import uk.gov.justice.hmpps.casenotes.notes.internal.Note
-import uk.gov.justice.hmpps.casenotes.notes.internal.NoteRepository
-import uk.gov.justice.hmpps.casenotes.notes.internal.Type
-import uk.gov.justice.hmpps.casenotes.types.internal.ParentTypeRepository
-import uk.gov.justice.hmpps.casenotes.types.internal.SubType
 import uk.gov.justice.hmpps.casenotes.utils.JwtAuthHelper
 import uk.gov.justice.hmpps.casenotes.utils.NomisIdGenerator
 import uk.gov.justice.hmpps.casenotes.utils.setByName
@@ -72,18 +70,19 @@ abstract class ResourceTest : IntegrationTest() {
       .expectBodyList(T::class.java)
       .returnResult().responseBody!!
 
-  fun givenRandomType(active: Boolean? = null, sensitive: Boolean? = null, restricted: Boolean? = null): SubType =
+  fun getAllTypes(): List<SubType> =
     parentTypeRepository.findAllWithParams(
       includeInactive = true,
       includeRestricted = true,
       dpsUserSelectableOnly = false,
     ).flatMap { it.getSubtypes() }
-      .filter {
-        (active == null || it.active == active) &&
-          (sensitive == null || it.sensitive == sensitive) &&
-          (restricted == null || it.restrictedUse == restricted)
-      }
-      .random()
+
+  fun givenRandomType(active: Boolean? = null, sensitive: Boolean? = null, restricted: Boolean? = null): SubType =
+    getAllTypes().filter {
+      (active == null || it.active == active) &&
+        (sensitive == null || it.sensitive == sensitive) &&
+        (restricted == null || it.restrictedUse == restricted)
+    }.random()
 
   fun generateCaseNote(
     prisonNumber: String = NomisIdGenerator.prisonNumber(),
@@ -99,7 +98,7 @@ abstract class ResourceTest : IntegrationTest() {
     createdAt: LocalDateTime? = null,
   ) = Note(
     prisonNumber,
-    type.asType(),
+    type,
     occurredAt,
     locationId,
     authorUsername,
@@ -123,16 +122,6 @@ abstract class ResourceTest : IntegrationTest() {
     val amendment = Amendment(this, authorUsername, authorName, authorUserId, text, id)
     setByName("amendments", (amendments() + amendment).toSortedSet())
   }
-
-  private fun SubType.asType() = Type(
-    category = Category(parentType.code, parentType.description),
-    code,
-    description,
-    active,
-    sensitive,
-    restrictedUse,
-    id!!,
-  )
 
   fun givenCaseNote(note: Note): Note = noteRepository.save(note)
 }
