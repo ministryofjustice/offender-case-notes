@@ -61,7 +61,7 @@ private fun Pageable.forSpecification(): Pageable {
 }
 
 private fun String.asTypePair(): Pair<String, String?> {
-  val split = this.split("+")
+  val split = this.trim().replaceFirst(" ", "+").split("+")
   return when (split.size) {
     1 -> Pair(split[0], null)
     else -> Pair(split[0], split[1])

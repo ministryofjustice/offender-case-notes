@@ -70,7 +70,11 @@ abstract class ResourceTest : IntegrationTest() {
       .expectBodyList(T::class.java)
       .returnResult().responseBody!!
 
-  fun getAllTypes(): List<SubType> =
+  fun getAllTypes(
+    includeInactive: Boolean = true,
+    includeRestricted: Boolean = true,
+    dpsSelectableOnly: Boolean = false,
+  ): List<SubType> =
     parentTypeRepository.findAllWithParams(
       includeInactive = true,
       includeRestricted = true,
