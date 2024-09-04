@@ -14,7 +14,7 @@ import org.springframework.web.reactive.function.client.WebClientResponseExcepti
 import uk.gov.justice.hmpps.casenotes.dto.ErrorResponse
 import uk.gov.justice.hmpps.casenotes.services.EntityNotFoundException
 
-@RestControllerAdvice(basePackages = ["uk.gov.justice.hmpps.casenotes.controllers", "uk.gov.justice.hmpps.casenotes.types"])
+@RestControllerAdvice
 @Slf4j
 class ControllerAdvice {
 
@@ -22,7 +22,7 @@ class ControllerAdvice {
   fun handleAccessDeniedException(e: AccessDeniedException): ResponseEntity<ErrorResponse> {
     return ResponseEntity
       .status(HttpStatus.FORBIDDEN)
-      .body(ErrorResponse(status = (HttpStatus.FORBIDDEN.value())))
+      .body(ErrorResponse(status = (HttpStatus.FORBIDDEN.value()), developerMessage = e.message))
   }
 
   @ExceptionHandler(WebClientResponseException::class)
@@ -36,27 +36,27 @@ class ControllerAdvice {
   fun handleEntityExistsException(e: Exception): ResponseEntity<ErrorResponse> {
     return ResponseEntity
       .status(HttpStatus.CONFLICT)
-      .body(ErrorResponse(status = (HttpStatus.CONFLICT.value()), developerMessage = (e.message)))
+      .body(ErrorResponse(status = (HttpStatus.CONFLICT.value()), developerMessage = e.message))
   }
 
   @ExceptionHandler(EntityNotFoundException::class)
   fun handleEntityNotFoundException(e: Exception): ResponseEntity<ErrorResponse> {
     return ResponseEntity
       .status(HttpStatus.NOT_FOUND)
-      .body(ErrorResponse(status = (HttpStatus.NOT_FOUND.value()), developerMessage = (e.message)))
+      .body(ErrorResponse(status = (HttpStatus.NOT_FOUND.value()), developerMessage = e.message))
   }
 
   @ExceptionHandler(MissingServletRequestParameterException::class, ValidationException::class)
   fun handleValidationException(e: Exception): ResponseEntity<ErrorResponse> {
     return ResponseEntity
       .status(HttpStatus.BAD_REQUEST)
-      .body(ErrorResponse(status = (HttpStatus.BAD_REQUEST.value()), developerMessage = (e.message)))
+      .body(ErrorResponse(status = (HttpStatus.BAD_REQUEST.value()), developerMessage = e.message))
   }
 
   @ExceptionHandler(WebClientException::class, Exception::class)
   fun handleException(e: Exception): ResponseEntity<ErrorResponse> {
     return ResponseEntity
       .status(HttpStatus.INTERNAL_SERVER_ERROR)
-      .body(ErrorResponse(status = (HttpStatus.INTERNAL_SERVER_ERROR.value()), developerMessage = (e.message)))
+      .body(ErrorResponse(status = (HttpStatus.INTERNAL_SERVER_ERROR.value()), developerMessage = e.message))
   }
 }

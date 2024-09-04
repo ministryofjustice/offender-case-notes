@@ -27,16 +27,15 @@ import org.springframework.web.reactive.function.client.WebClient.RequestHeaders
 import org.springframework.web.reactive.function.client.WebClient.RequestHeadersUriSpec
 import org.springframework.web.reactive.function.client.WebClient.ResponseSpec
 import org.springframework.web.util.UriComponentsBuilder
+import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 import uk.gov.justice.hmpps.casenotes.dto.BookingIdentifier
 import uk.gov.justice.hmpps.casenotes.dto.CaseNoteFilter
-import uk.gov.justice.hmpps.casenotes.dto.NewCaseNote
 import uk.gov.justice.hmpps.casenotes.dto.NomisCaseNote
 import uk.gov.justice.hmpps.casenotes.dto.OffenderBooking
-import uk.gov.justice.hmpps.casenotes.dto.UpdateCaseNote
-import uk.gov.justice.hmpps.casenotes.dto.UserDetails
+import uk.gov.justice.hmpps.casenotes.notes.AmendCaseNoteRequest
+import uk.gov.justice.hmpps.casenotes.notes.CreateCaseNoteRequest
 import java.time.LocalDateTime
-import java.util.Optional
 
 class ExternalApiServiceTest {
   private val responseSpecMock: ResponseSpec = mock()
@@ -63,7 +62,14 @@ class ExternalApiServiceTest {
     whenever(requestHeadersUriSpec.uri(any<String>(), any<Any>())).thenReturn(requestHeadersSpec)
     whenever(requestBodyUriSpec.uri(any<String>(), any<Any>())).thenReturn(requestBodySpec)
     whenever(requestHeadersUriSpec.uri(any<String>(), any<Any>(), any<Any>())).thenReturn(requestHeadersSpec)
-    whenever(requestHeadersUriSpec.uri(any<String>(), any<Any>(), any<Any>(), any<Any>())).thenReturn(requestHeadersSpec)
+    whenever(
+      requestHeadersUriSpec.uri(
+        any<String>(),
+        any<Any>(),
+        any<Any>(),
+        any<Any>(),
+      ),
+    ).thenReturn(requestHeadersSpec)
     whenever(requestBodyUriSpec.uri(any<String>(), any<Any>(), any<Any>())).thenReturn(requestBodySpec)
     whenever(requestHeadersSpec.retrieve()).thenReturn(responseSpecMock)
     whenever(requestBodySpec.retrieve()).thenReturn(responseSpecMock)
@@ -74,10 +80,10 @@ class ExternalApiServiceTest {
     @Test
     fun `test calls Prison API`() {
       val result = listOf(BookingIdentifier(type = "MERGED", value = "AB12345C"))
-      whenever(responseSpecMock.bodyToMono(any<ParameterizedTypeReference<*>>())).thenReturn(
-        Mono.just(result),
+      whenever(responseSpecMock.bodyToFlux(any<ParameterizedTypeReference<BookingIdentifier>>())).thenReturn(
+        Flux.fromIterable(result),
       )
-      assertThat(externalApiService.getMergedIdentifiersByBookingId(12345)).isSameAs(result)
+      assertThat(externalApiService.getMergedIdentifiersByBookingId(12345)).containsExactlyElementsOf(result)
 
       verify(prisonApiClientCredentialsWebClient).get()
       verify(requestHeadersUriSpec).uri("/api/bookings/{bookingId}/identifiers?type={type}", 12345L, "MERGED")
@@ -89,7 +95,7 @@ class ExternalApiServiceTest {
     @Test
     fun `test calls Prison API`() {
       val result = OffenderBooking(bookingId = 12345L, offenderNo = "AA123B", agencyId = "LSI")
-      whenever(responseSpecMock.bodyToMono(any<Class<*>>())).thenReturn(
+      whenever(responseSpecMock.bodyToMono(any<ParameterizedTypeReference<OffenderBooking>>())).thenReturn(
         Mono.just(result),
       )
       assertThat(externalApiService.getBooking(12345)).isSameAs(result)
@@ -100,32 +106,10 @@ class ExternalApiServiceTest {
   }
 
   @Nested
-  inner class getUserDetails {
-    @Test
-    fun `test calls HMPPS Auth`() {
-      val userDetails = UserDetails(name = "Joe")
-      whenever(responseSpecMock.bodyToMono(any<Class<*>>())).thenReturn(Mono.just(userDetails))
-      assertThat(externalApiService.getUserDetails("user")).isEqualTo(Optional.of(userDetails))
-
-      verify(authWebClient).get()
-      verify(requestHeadersUriSpec).uri("/api/user/{username}", "user")
-    }
-
-    @Test
-    fun `test calls HMPPS Auth and returns empty if no response`() {
-      whenever(responseSpecMock.bodyToMono(any<Class<*>>())).thenReturn(Mono.empty())
-      assertThat(externalApiService.getUserDetails("user")).isEmpty
-
-      verify(authWebClient).get()
-      verify(requestHeadersUriSpec).uri("/api/user/{username}", "user")
-    }
-  }
-
-  @Nested
   inner class getOffenderLocation {
     @Test
     fun `test calls Prison API`() {
-      whenever(responseSpecMock.bodyToMono(any<Class<*>>())).thenReturn(
+      whenever(responseSpecMock.bodyToMono(any<ParameterizedTypeReference<OffenderBooking>>())).thenReturn(
         Mono.just(OffenderBooking(agencyId = "MDI", bookingId = 12345L, offenderNo = "AA123B")),
       )
       assertThat(externalApiService.getOffenderLocation("AA123B")).isEqualTo("MDI")
@@ -319,7 +303,11 @@ class ExternalApiServiceTest {
           val components = UriComponentsBuilder.fromUriString(it).build()
           assertThat(components.path).isEqualTo("/api/offenders/{offenderIdentifier}/case-notes/v2")
           assertThat(components.queryParams).containsExactlyInAnyOrderEntriesOf(
-            mapOf("size" to listOf("10"), "page" to listOf("0"), "typeSubTypes" to listOf("{typeSubTypes}", "{typeSubTypes}")),
+            mapOf(
+              "size" to listOf("10"),
+              "page" to listOf("0"),
+              "typeSubTypes" to listOf("{typeSubTypes}", "{typeSubTypes}"),
+            ),
           )
         },
         eq("AA123B"),
@@ -419,10 +407,10 @@ class ExternalApiServiceTest {
     fun `test calls Prison API`() {
       val result = NomisCaseNote()
 
-      whenever(responseSpecMock.bodyToMono(any<Class<*>>())).thenReturn(
+      whenever(responseSpecMock.bodyToMono(any<ParameterizedTypeReference<NomisCaseNote>>())).thenReturn(
         Mono.just(result),
       )
-      val postData = NewCaseNote()
+      val postData = CreateCaseNoteRequest("MDI", "ACP", "POS1", LocalDateTime.now(), "Some text", false)
       whenever(prisonApiWebClient.post()).thenReturn(requestBodyUriSpec)
       whenever(requestBodySpec.bodyValue(any())).thenReturn(requestHeadersSpec)
 
@@ -439,7 +427,7 @@ class ExternalApiServiceTest {
     @Test
     fun `test calls Prison API`() {
       val result = NomisCaseNote()
-      whenever(responseSpecMock.bodyToMono(any<Class<*>>())).thenReturn(
+      whenever(responseSpecMock.bodyToMono(any<ParameterizedTypeReference<NomisCaseNote>>())).thenReturn(
         Mono.just(result),
       )
       assertThat(externalApiService.getOffenderCaseNote("AA123B", 12345)).isSameAs(result)
@@ -454,10 +442,10 @@ class ExternalApiServiceTest {
     @Test
     fun `test calls Prison API`() {
       val result = NomisCaseNote()
-      whenever(responseSpecMock.bodyToMono(any<Class<*>>())).thenReturn(
+      whenever(responseSpecMock.bodyToMono(any<ParameterizedTypeReference<NomisCaseNote>>())).thenReturn(
         Mono.just(result),
       )
-      val postData = UpdateCaseNote()
+      val postData = AmendCaseNoteRequest("text")
       whenever(prisonApiWebClient.put()).thenReturn(requestBodyUriSpec)
       whenever(requestBodySpec.bodyValue(any())).thenReturn(requestHeadersSpec)
       assertThat(externalApiService.amendOffenderCaseNote("AA123B", 12345, postData)).isSameAs(result)

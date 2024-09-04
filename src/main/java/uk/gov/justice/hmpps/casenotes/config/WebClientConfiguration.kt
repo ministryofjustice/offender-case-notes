@@ -1,8 +1,11 @@
 package uk.gov.justice.hmpps.casenotes.config
 
-import io.netty.channel.ChannelOption
+import io.netty.channel.ChannelOption.CONNECT_TIMEOUT_MILLIS
+import io.netty.channel.ChannelOption.SO_KEEPALIVE
+import io.netty.channel.socket.nio.NioChannelOption
 import io.netty.handler.timeout.ReadTimeoutHandler
 import io.netty.handler.timeout.WriteTimeoutHandler
+import jdk.net.ExtendedSocketOptions.TCP_KEEPINTERVAL
 import org.hibernate.validator.constraints.URL
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Qualifier
@@ -23,8 +26,10 @@ import org.springframework.web.reactive.function.client.ExchangeFunction
 import org.springframework.web.reactive.function.client.WebClient
 import org.springframework.web.reactive.function.client.WebClient.Builder
 import reactor.netty.http.client.HttpClient
+import reactor.netty.http.client.HttpClient.create
 import uk.gov.justice.hmpps.casenotes.utils.UserContext
 import java.time.Duration
+import java.time.Duration.ofSeconds
 
 @Configuration
 class WebClientConfiguration(
@@ -35,6 +40,7 @@ class WebClientConfiguration(
   /** OAUTH2 API Rest URL endpoint ("http://localhost:8100") */
   @Value("\${tokenverification.api.base.url}") private val tokenVerificationApiBaseUrl: @URL String,
   @Value("\${api.health-timeout:1s}") private val healthTimeout: Duration,
+  @Value("\${api.response-timeout:10s}") private val responseTimeout: Duration,
 ) {
 
   @Bean
@@ -52,7 +58,7 @@ class WebClientConfiguration(
   @Bean
   fun tokenVerificationApiWebClient(builder: Builder): WebClient = builder.baseUrl(tokenVerificationApiBaseUrl)
     .clientConnector(
-      ReactorClientHttpConnector(HttpClient.create().warmupWithHealthPing(tokenVerificationApiBaseUrl)),
+      ReactorClientHttpConnector(create().warmupWithHealthPing(tokenVerificationApiBaseUrl)),
     )
     .build()
 
@@ -63,14 +69,19 @@ class WebClientConfiguration(
   private fun createForwardAuthWebClient(builder: Builder, url: @URL String): WebClient = builder.baseUrl(url)
     .filter(addAuthHeaderFilterFunction())
     .clientConnector(
-      ReactorClientHttpConnector(HttpClient.create().warmupWithHealthPing(tokenVerificationApiBaseUrl)),
-    )
-    .build()
+      ReactorClientHttpConnector(
+        create().responseTimeout(ofSeconds(responseTimeout.toSeconds()))
+          .option(CONNECT_TIMEOUT_MILLIS, 1000)
+          .option(SO_KEEPALIVE, true)
+          .option(NioChannelOption.of(TCP_KEEPINTERVAL), 60)
+          .warmupWithHealthPing(tokenVerificationApiBaseUrl),
+      ),
+    ).build()
 
   private fun createHealthClient(builder: Builder, url: @URL String): WebClient {
-    val httpClient = HttpClient.create()
+    val httpClient = create()
       .warmupWithHealthPing(url)
-      .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, healthTimeout.toMillis().toInt())
+      .option(CONNECT_TIMEOUT_MILLIS, healthTimeout.toMillis().toInt())
       .doOnConnected { connection ->
         connection.addHandlerLast(ReadTimeoutHandler(healthTimeout.toSeconds().toInt()))
           .addHandlerLast(WriteTimeoutHandler(healthTimeout.toSeconds().toInt()))
@@ -127,7 +138,7 @@ class WebClientConfiguration(
     warmup().block()
     log.info("Warming up web client for {} halfway through, now calling health ping", baseUrl)
     try {
-      baseUrl("$baseUrl/health/ping").get().response().block(Duration.ofSeconds(30))
+      baseUrl("$baseUrl/health/ping").get().response().block(ofSeconds(30))
     } catch (e: RuntimeException) {
       log.error("Caught exception during warm up, carrying on regardless", e)
     }

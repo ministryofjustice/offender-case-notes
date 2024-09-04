@@ -7,10 +7,12 @@ data class CaseNoteRequestContext(
   val username: String,
   val userDisplayName: String,
   val userId: String,
-  val activeCaseLoadId: String? = null,
+  val activeCaseloadId: String? = null,
   val source: Source = Source.DPS,
   val requestAt: LocalDateTime = LocalDateTime.now(),
 ) {
+  constructor(username: String) : this(username, username, username)
+
   companion object {
     private const val SYS_USER = "SYS"
     private const val SYS_DISPLAY_NAME = "Sys"

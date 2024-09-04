@@ -52,6 +52,8 @@ class OffenderCaseNoteFilter(
     }
 
     root.fetch<Any, Any>("amendments", JoinType.LEFT)
+    val type = root.fetch<Any, Any>("caseNoteType", JoinType.INNER)
+    type.fetch<Any, Any>("parentType", JoinType.INNER)
     return cb.and(*predicateBuilder.toTypedArray())
   }
 

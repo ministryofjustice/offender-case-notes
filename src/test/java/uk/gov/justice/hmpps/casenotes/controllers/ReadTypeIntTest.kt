@@ -9,7 +9,7 @@ import uk.gov.justice.hmpps.casenotes.config.SecurityUserContext.Companion.ROLE_
 import uk.gov.justice.hmpps.casenotes.types.CaseNoteType
 import uk.gov.justice.hmpps.casenotes.types.SelectableBy.DPS_USER
 
-class ReadCaseNoteTypeIntTest : ResourceTest() {
+class ReadTypeIntTest : ResourceTest() {
 
   @Test
   fun `401 unauthorised`() {

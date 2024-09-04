@@ -4,16 +4,24 @@ import org.springframework.core.ParameterizedTypeReference
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageImpl
 import org.springframework.data.domain.Pageable
+import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Service
 import org.springframework.web.reactive.function.client.WebClient
+import org.springframework.web.reactive.function.client.WebClientRequestException
+import org.springframework.web.reactive.function.client.WebClientResponseException
+import org.springframework.web.reactive.function.client.bodyToFlux
+import org.springframework.web.reactive.function.client.bodyToMono
+import reactor.core.publisher.Mono
+import reactor.util.retry.Retry
 import uk.gov.justice.hmpps.casenotes.dto.BookingIdentifier
 import uk.gov.justice.hmpps.casenotes.dto.CaseNoteFilter
-import uk.gov.justice.hmpps.casenotes.dto.NewCaseNote
 import uk.gov.justice.hmpps.casenotes.dto.NomisCaseNote
 import uk.gov.justice.hmpps.casenotes.dto.OffenderBooking
-import uk.gov.justice.hmpps.casenotes.dto.UpdateCaseNote
 import uk.gov.justice.hmpps.casenotes.dto.UserDetails
+import uk.gov.justice.hmpps.casenotes.notes.AmendCaseNoteRequest
+import uk.gov.justice.hmpps.casenotes.notes.CreateCaseNoteRequest
+import java.time.Duration
 import java.time.format.DateTimeFormatter
 import java.util.Optional
 
@@ -28,27 +36,34 @@ class ExternalApiService(
     elite2ClientCredentialsWebClient.get()
       .uri("/api/bookings/{bookingId}/identifiers?type={type}", bookingId, "MERGED")
       .retrieve()
-      .bodyToMono(
-        object : ParameterizedTypeReference<List<BookingIdentifier>>() {},
-      )
+      .bodyToFlux<BookingIdentifier>()
+      .collectList()
       .block()!!
 
   fun getBooking(bookingId: Long): OffenderBooking =
     elite2ClientCredentialsWebClient.get().uri("/api/bookings/{bookingId}?basicInfo=true", bookingId)
       .retrieve()
-      .bodyToMono(OffenderBooking::class.java)
+      .bodyToMono<OffenderBooking>()
+      .retryOnTransientException()
       .block()!!
 
   fun getUserDetails(currentUsername: String): Optional<UserDetails> =
     oauthApiWebClient.get().uri("/api/user/{username}", currentUsername)
-      .retrieve()
-      .bodyToMono(UserDetails::class.java)
+      .exchangeToMono {
+        if (it.statusCode() == HttpStatus.NOT_FOUND) {
+          Mono.empty()
+        } else {
+          it.bodyToMono<UserDetails>()
+        }
+      }
+      .retryOnTransientException()
       .blockOptional()
 
   fun getOffenderLocation(offenderIdentifier: String): String =
     elite2ApiWebClient.get().uri("/api/bookings/offenderNo/{offenderNo}", offenderIdentifier)
       .retrieve()
-      .bodyToMono(OffenderBooking::class.java)
+      .bodyToMono<OffenderBooking>()
+      .retryOnTransientException()
       .map { it.agencyId }
       .block()!!
 
@@ -62,6 +77,7 @@ class ExternalApiService(
     return elite2ApiWebClient.get().uri(url, offenderIdentifier, *filter.getTypesAndSubTypes().toTypedArray())
       .retrieve()
       .toEntity(object : ParameterizedTypeReference<RestResponsePage<NomisCaseNote>>() {})
+      .retryOnTransientException()
       .map { e: ResponseEntity<RestResponsePage<NomisCaseNote>> ->
         PageImpl(
           e.body!!.content,
@@ -97,28 +113,41 @@ class ExternalApiService(
     return "$params$sortParams"
   }
 
-  fun createCaseNote(offenderIdentifier: String, newCaseNote: NewCaseNote): NomisCaseNote =
+  fun createCaseNote(offenderIdentifier: String, newCaseNote: CreateCaseNoteRequest): NomisCaseNote =
     elite2ApiWebClient.post().uri("/api/offenders/{offenderNo}/case-notes", offenderIdentifier)
       .bodyValue(newCaseNote)
       .retrieve()
-      .bodyToMono(NomisCaseNote::class.java)
+      .bodyToMono<NomisCaseNote>()
+      .retryOnTransientException()
       .block()!!
 
   fun getOffenderCaseNote(offenderIdentifier: String, caseNoteIdentifier: Long): NomisCaseNote =
     elite2ApiWebClient.get()
       .uri("/api/offenders/{offenderNo}/case-notes/{caseNoteIdentifier}", offenderIdentifier, caseNoteIdentifier)
       .retrieve()
-      .bodyToMono(NomisCaseNote::class.java)
+      .bodyToMono<NomisCaseNote>()
+      .retryOnTransientException()
       .block()!!
 
   fun amendOffenderCaseNote(
     offenderIdentifier: String,
     caseNoteIdentifier: Long,
-    caseNote: UpdateCaseNote,
+    caseNote: AmendCaseNoteRequest,
   ): NomisCaseNote = elite2ApiWebClient.put()
     .uri("/api/offenders/{offenderNo}/case-notes/{caseNoteIdentifier}", offenderIdentifier, caseNoteIdentifier)
     .bodyValue(caseNote)
     .retrieve()
-    .bodyToMono(NomisCaseNote::class.java)
+    .bodyToMono<NomisCaseNote>()
+    .retryOnTransientException()
     .block()!!
+
+  fun <T> Mono<T>.retryOnTransientException(): Mono<T> =
+    retryWhen(
+      Retry.backoff(3, Duration.ofMillis(250))
+        .filter {
+          it is WebClientRequestException || (it is WebClientResponseException && it.statusCode.is5xxServerError)
+        }.onRetryExhaustedThrow { _, signal ->
+          signal.failure()
+        },
+    )
 }

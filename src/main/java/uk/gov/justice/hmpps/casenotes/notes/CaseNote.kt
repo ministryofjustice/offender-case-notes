@@ -1,4 +1,4 @@
-package uk.gov.justice.hmpps.casenotes.dto
+package uk.gov.justice.hmpps.casenotes.notes
 
 import com.fasterxml.jackson.annotation.JsonInclude
 import io.swagger.v3.oas.annotations.media.Schema
@@ -206,3 +206,5 @@ data class CaseNote(
     }
   }
 }
+
+fun String.asLegacyId() = toLongOrNull()

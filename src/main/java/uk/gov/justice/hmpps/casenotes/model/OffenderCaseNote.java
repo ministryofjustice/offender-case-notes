@@ -15,6 +15,7 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
+import org.hibernate.annotations.SQLRestriction;
 import org.hibernate.annotations.SoftDelete;
 import org.hibernate.annotations.SortComparator;
 import org.springframework.data.annotation.CreatedBy;
@@ -45,6 +46,7 @@ import static java.time.LocalDateTime.now;
 @Builder(toBuilder = true)
 @EqualsAndHashCode(of = {"offenderIdentifier", "occurrenceDateTime", "locationId", "authorUsername", "caseNoteType", "noteText"})
 @ToString(of = {"id", "offenderIdentifier", "occurrenceDateTime", "locationId", "authorUsername", "caseNoteType"})
+@SQLRestriction("exists(select 1 from case_note_type ct where ct.case_note_type_id = case_note_type_id and ct.sync_to_nomis = false)")
 public class OffenderCaseNote {
 
     @Builder.Default
@@ -52,10 +54,10 @@ public class OffenderCaseNote {
     @Column(name = "OFFENDER_CASE_NOTE_ID", updatable = false, nullable = false)
     private UUID id = generateNewUuid();
 
-    @Column(nullable = false)
+    @Column(name = "occurrence_date_time", nullable = false)
     private LocalDateTime occurrenceDateTime;
 
-    @Column(nullable = false)
+    @Column(name = "offender_identifier", nullable = false)
     private String offenderIdentifier;
 
     @Column(nullable = false)
@@ -74,6 +76,7 @@ public class OffenderCaseNote {
     @JoinColumn(name = "CASE_NOTE_TYPE_ID", nullable = false)
     private CaseNoteType caseNoteType;
 
+    @Column(name = "note_text", nullable = false)
     private String noteText;
 
     @Builder.Default
