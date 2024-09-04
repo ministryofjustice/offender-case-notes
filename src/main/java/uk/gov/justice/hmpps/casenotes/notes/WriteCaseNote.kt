@@ -3,7 +3,6 @@ package uk.gov.justice.hmpps.casenotes.notes
 import com.microsoft.applicationinsights.TelemetryClient
 import jakarta.validation.Valid
 import jakarta.validation.ValidationException
-import org.springframework.data.repository.findByIdOrNull
 import org.springframework.security.access.AccessDeniedException
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.stereotype.Service
@@ -11,7 +10,6 @@ import org.springframework.transaction.annotation.Transactional
 import org.springframework.validation.annotation.Validated
 import uk.gov.justice.hmpps.casenotes.config.CaseNoteRequestContext
 import uk.gov.justice.hmpps.casenotes.config.SecurityUserContext.Companion.ROLE_CASE_NOTES_WRITE
-import uk.gov.justice.hmpps.casenotes.domain.AmendmentRepository
 import uk.gov.justice.hmpps.casenotes.domain.Note
 import uk.gov.justice.hmpps.casenotes.domain.NoteRepository
 import uk.gov.justice.hmpps.casenotes.domain.SubType
@@ -27,7 +25,6 @@ import java.util.UUID.fromString
 class WriteCaseNote(
   private val subTypeRepository: SubTypeRepository,
   private val noteRepository: NoteRepository,
-  private val amendmentRepository: AmendmentRepository,
   private val telemetryClient: TelemetryClient,
 ) {
   fun createNote(prisonNumber: String, @Valid request: CreateCaseNoteRequest, useRestrictedType: Boolean): CaseNote {
@@ -64,22 +61,6 @@ class WriteCaseNote(
       ),
       null,
     )
-  }
-
-  fun deleteAmendment(prisonNumber: String, amendmentId: Long) {
-    amendmentRepository.findByIdOrNull(amendmentId)?.also {
-      amendmentRepository.delete(it)
-      telemetryClient.trackEvent(
-        "CaseNoteAmendmentSoftDelete",
-        mapOf(
-          "userName" to CaseNoteRequestContext.get().username,
-          "prisonNumber" to prisonNumber,
-          "caseNoteId" to it.note.id.toString(),
-          "amendmentId" to amendmentId.toString(),
-        ),
-        null,
-      )
-    }
   }
 
   private fun getCaseNote(prisonNumber: String, caseNoteId: String): Note =

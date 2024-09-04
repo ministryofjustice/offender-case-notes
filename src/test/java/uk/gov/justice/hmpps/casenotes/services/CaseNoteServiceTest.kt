@@ -863,50 +863,6 @@ class CaseNoteServiceTest {
   }
 
   @Test
-  fun softDeleteCaseNoteAmendment() {
-    val noteType = CaseNoteType.builder().type("sometype").parentType(ParentNoteType.builder().build()).build()
-    val offenderCaseNoteAmendment = createOffenderCaseNoteAmendment(noteType)
-    whenever(amendmentRepository.findById(1L)).thenReturn(offenderCaseNoteAmendment)
-    whenever(securityUserContext.getCurrentUser()).thenReturn(UserIdUser("user", "userId"))
-
-    caseNoteService.softDeleteCaseNoteAmendment("A1234AC", 1L)
-
-    verify(amendmentRepository).deleteById(1L)
-  }
-
-  @Test
-  fun softDeleteCaseNoteAmendment_telemetry() {
-    val noteType = CaseNoteType.builder().type("sometype").parentType(ParentNoteType.builder().build()).build()
-    val offenderCaseNoteAmendment = createOffenderCaseNoteAmendment(noteType)
-    whenever(amendmentRepository.findById(1L)).thenReturn(offenderCaseNoteAmendment)
-    whenever(securityUserContext.getCurrentUser()).thenReturn(UserIdUser("user", "userId"))
-
-    caseNoteService.softDeleteCaseNoteAmendment("A1234AC", 1L)
-
-    Mockito.verify(telemetryClient).trackEvent(
-      "SecureCaseNoteAmendmentSoftDelete",
-      mapOf("userName" to "user", "offenderId" to "A1234AC", "case note amendment id" to "1"),
-      null,
-    )
-  }
-
-  @Test
-  fun softDeleteCaseNoteAmendmentEntityNotFoundExceptionThrownWhenCaseNoteNotFound() {
-    assertThatThrownBy { caseNoteService.softDeleteCaseNoteAmendment("A1234AC", 1L) }
-      .isInstanceOf(EntityNotFoundException::class.java)
-  }
-
-  @Test
-  fun softDeleteCaseNoteAmendmentEntityNotFoundExceptionThrownWhenCaseNoteDoesntBelongToOffender() {
-    val noteType = CaseNoteType.builder().type("sometype").parentType(ParentNoteType.builder().build()).build()
-    val offenderCaseNoteAmendment = createOffenderCaseNoteAmendment(noteType)
-    whenever(amendmentRepository.findById(any<Long>())).thenReturn(offenderCaseNoteAmendment)
-
-    assertThatThrownBy { caseNoteService.softDeleteCaseNoteAmendment("Z9999ZZ", 1L) }
-      .isInstanceOf(ValidationException::class.java)
-  }
-
-  @Test
   fun getCaseNotes_callPrisonerApi() {
     val nomisCaseNote = createNomisCaseNote("someType", "someSubType")
     val pageable = PageRequest.of(0, 10, Direction.DESC, "occurrenceDateTime")

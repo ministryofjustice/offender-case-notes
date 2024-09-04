@@ -205,31 +205,6 @@ class CaseNoteController(
     }
   }
 
-  @Operation(summary = "Deletes a case note amendment")
-  @ApiResponses(
-    ApiResponse(responseCode = "200", description = "OK"),
-    ApiResponse(
-      responseCode = "404",
-      description = "Offender or case note not found",
-      content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))],
-    ),
-  )
-  @ResponseStatus(HttpStatus.OK)
-  @DeleteMapping("/amendment/{offenderIdentifier}/{caseNoteAmendmentId}")
-  fun softDeleteCaseNoteAmendment(
-    @Parameter(description = "Offender Identifier", required = true, example = "A1234AA")
-    @PathVariable offenderIdentifier: String,
-    @Parameter(description = "Case Note Amendment Id", required = true, example = "1")
-    @PathVariable caseNoteAmendmentId: Long,
-    @RequestHeader(CASELOAD_ID) caseloadId: String? = null,
-  ) {
-    if (caseloadId in serviceConfig.activePrisons) {
-      save.deleteAmendment(offenderIdentifier, caseNoteAmendmentId)
-    } else {
-      caseNoteService.softDeleteCaseNoteAmendment(offenderIdentifier, caseNoteAmendmentId)
-    }
-  }
-
   private fun createEventProperties(caseNote: CaseNote): Map<String, String> {
     return java.util.Map.of(
       "caseNoteId", caseNote.caseNoteId,

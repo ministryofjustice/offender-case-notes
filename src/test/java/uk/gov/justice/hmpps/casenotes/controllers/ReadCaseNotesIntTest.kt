@@ -132,7 +132,7 @@ class ReadCaseNotesIntTest : ResourceTest() {
   fun `can filter by parent type`() {
     val prisonNumber = prisonNumber()
     val types = getAllTypes().asSequence()
-      .filter { !it.sensitive }
+      .filter { !it.sensitive && !it.code.contains("\\s".toRegex()) }
       .groupBy { it.parent.code }
       .map { it.value.take(2) }.flatten().take(20)
       .shuffled().toList()
@@ -151,7 +151,7 @@ class ReadCaseNotesIntTest : ResourceTest() {
   fun `can filter by a single sub type`() {
     val prisonNumber = prisonNumber()
     val types = getAllTypes().asSequence()
-      .filter { !it.sensitive }
+      .filter { !it.sensitive && !it.code.contains("\\s".toRegex()) }
       .groupBy { it.parent.code }
       .map { it.value.take(2) }.flatten().take(20)
       .toList()
