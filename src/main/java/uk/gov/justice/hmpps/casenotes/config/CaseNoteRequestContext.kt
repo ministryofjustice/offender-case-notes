@@ -10,6 +10,7 @@ data class CaseNoteRequestContext(
   val activeCaseloadId: String? = null,
   val source: Source = Source.DPS,
   val requestAt: LocalDateTime = LocalDateTime.now(),
+  val nomisUser: Boolean = false,
 ) {
   constructor(username: String) : this(username, username, username)
 

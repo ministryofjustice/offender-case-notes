@@ -72,6 +72,20 @@ class CreateCaseNoteIntTest : ResourceTest() {
     }
   }
 
+  @Test
+  fun `cannot create a sync to nomis case note with non nomis user`() {
+    val username = "DeliusUser"
+    oAuthApi.subGetUserDetails(username, nomisUser = false)
+    val type = getAllTypes().first { it.syncToNomis }
+    val request = createCaseNoteRequest(type = type.parent.code, subType = type.code)
+    val response = createCaseNote(prisonNumber(), request, params = mapOf(), username = username)
+      .errorResponse(HttpStatus.FORBIDDEN)
+
+    with(response) {
+      assertThat(developerMessage).isEqualTo("Unable to author 'sync to nomis' type without a nomis user")
+    }
+  }
+
   private fun createCaseNoteRequest(
     locationId: String? = "MDI",
     type: String = "OMIC",

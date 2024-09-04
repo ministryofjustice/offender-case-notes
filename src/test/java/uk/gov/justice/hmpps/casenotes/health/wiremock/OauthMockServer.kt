@@ -46,24 +46,24 @@ class OAuthMockServer : WireMockServer(WIREMOCK_PORT) {
     )
   }
 
-  fun subGetUserDetails(username: String) {
+  fun subGetUserDetails(username: String, nomisUser: Boolean = true) {
     stubFor(
       WireMock.get(WireMock.urlPathMatching(String.format("%s/user/%s", API_PREFIX, username)))
         .willReturn(
           WireMock.aResponse()
             .withHeader("Content-Type", "application/json")
             .withBody(
-              "{\n" +
-                "  \"staffId\": 1111,\n" +
-                "  \"username\": \"" + username + "\",\n" +
-                "  \"userId\": 1111,\n" +
-                "  \"active\": true,\n" +
-                "  \"name\": \"Mikey Mouse\",\n" +
-                "  \"authSource\": \"nomis\",\n" +
-                "  \"activeCaseLoadId\": \"LEI\"\n" +
-                "}",
-            )
-            .withStatus(200),
+              """
+                {
+                  "username": "$username",
+                  "userId": 1111,
+                  "active": true,
+                  "name": "Mikey Mouse",
+                  "authSource": "${if (nomisUser) "nomis" else "delius"}",
+                  "activeCaseLoadId": "LEI"
+                }
+              """.trimIndent(),
+            ).withStatus(200),
         ),
     )
   }

@@ -75,6 +75,21 @@ class CreateAmendmentIntTest : ResourceTest() {
     amendCaseNote(caseNote.prisonNumber, caseNote.id.toString(), request, mapOf()).expectStatus().isForbidden
   }
 
+  @Test
+  fun `cannot amend a sync to nomis case note with non nomis user`() {
+    val username = "DeliusUser"
+    oAuthApi.subGetUserDetails(username, nomisUser = false)
+    val type = getAllTypes().first { it.syncToNomis }
+    val caseNote = givenCaseNote(generateCaseNote(prisonNumber(), type))
+    val response =
+      amendCaseNote(caseNote.prisonNumber, caseNote.id.toString(), amendCaseNoteRequest(), mapOf(), username = username)
+        .errorResponse(HttpStatus.FORBIDDEN)
+
+    with(response) {
+      assertThat(developerMessage).isEqualTo("Unable to author 'sync to nomis' type without a nomis user")
+    }
+  }
+
   private fun amendCaseNoteRequest(
     text: String = "Some amended text about a case note",
   ) = AmendCaseNoteRequest(text)
