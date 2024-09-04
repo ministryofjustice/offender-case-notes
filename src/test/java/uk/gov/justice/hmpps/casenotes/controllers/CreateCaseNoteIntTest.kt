@@ -4,7 +4,6 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.springframework.http.HttpStatus
-import uk.gov.justice.hmpps.casenotes.config.CaseNoteContextInterceptor.Companion.USERNAME
 import uk.gov.justice.hmpps.casenotes.config.SecurityUserContext.Companion.ROLE_CASE_NOTES_READ
 import uk.gov.justice.hmpps.casenotes.config.SecurityUserContext.Companion.ROLE_CASE_NOTES_WRITE
 import uk.gov.justice.hmpps.casenotes.domain.Note
@@ -84,6 +83,7 @@ class CreateCaseNoteIntTest : ResourceTest() {
       noteRepository.findByIdAndPrisonNumber(fromString(response.caseNoteId), response.offenderIdentifier),
     )
     saved.verifyAgainst(request)
+    assertThat(saved.authorUsername).isEqualTo(USERNAME)
     response.verifyAgainst(saved)
   }
 

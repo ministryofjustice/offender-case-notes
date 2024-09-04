@@ -75,8 +75,4 @@ class CaseNoteContextInterceptor(
   private fun HttpServletRequest.username(): String =
     (getHeader(USERNAME_HEADER) ?: authentication().name).takeIf { it.length <= 64 }
       ?: throw ValidationException("username for audit exceeds 64 characters")
-
-  companion object {
-    const val USERNAME = "Username"
-  }
 }

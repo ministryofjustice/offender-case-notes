@@ -74,7 +74,10 @@ class CreateAmendmentIntTest : ResourceTest() {
     assertThat(response.amendments.first().additionalNoteText).isEqualTo(request.text)
 
     val saved = requireNotNull(noteRepository.findByIdAndPrisonNumber(caseNote.id, response.offenderIdentifier))
-    assertThat(saved.amendments().first().text).isEqualTo(request.text)
+    with(saved.amendments().first()) {
+      assertThat(text).isEqualTo(request.text)
+      assertThat(authorUsername).isEqualTo(USERNAME)
+    }
   }
 
   @Test
@@ -87,7 +90,10 @@ class CreateAmendmentIntTest : ResourceTest() {
     assertThat(response.amendments.first().additionalNoteText).isEqualTo(request.text)
 
     val saved = requireNotNull(noteRepository.findByIdAndPrisonNumber(caseNote.id, response.offenderIdentifier))
-    assertThat(saved.amendments().first().text).isEqualTo(request.text)
+    with(saved.amendments().first()) {
+      assertThat(text).isEqualTo(request.text)
+      assertThat(authorUsername).isEqualTo(USERNAME)
+    }
   }
 
   @Test
