@@ -3,7 +3,6 @@ package uk.gov.justice.hmpps.casenotes.notes
 import com.microsoft.applicationinsights.TelemetryClient
 import jakarta.validation.Valid
 import jakarta.validation.ValidationException
-import org.springframework.data.repository.findByIdOrNull
 import org.springframework.security.access.AccessDeniedException
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.stereotype.Service
@@ -11,7 +10,6 @@ import org.springframework.transaction.annotation.Transactional
 import org.springframework.validation.annotation.Validated
 import uk.gov.justice.hmpps.casenotes.config.CaseNoteRequestContext
 import uk.gov.justice.hmpps.casenotes.config.SecurityUserContext.Companion.ROLE_CASE_NOTES_WRITE
-import uk.gov.justice.hmpps.casenotes.domain.AmendmentRepository
 import uk.gov.justice.hmpps.casenotes.domain.Note
 import uk.gov.justice.hmpps.casenotes.domain.NoteRepository
 import uk.gov.justice.hmpps.casenotes.domain.SubType
@@ -27,12 +25,11 @@ import java.util.UUID.fromString
 class WriteCaseNote(
   private val subTypeRepository: SubTypeRepository,
   private val noteRepository: NoteRepository,
-  private val amendmentRepository: AmendmentRepository,
   private val telemetryClient: TelemetryClient,
 ) {
   fun createNote(prisonNumber: String, @Valid request: CreateCaseNoteRequest, useRestrictedType: Boolean): CaseNote {
     val type = subTypeRepository.findByParentCodeAndCode(request.type, request.subType)
-      ?.validateRestrictedUse(useRestrictedType)
+      ?.validateTypeUsage(useRestrictedType)
       ?: throw IllegalArgumentException("Unknown case note type ${request.type}/${request.subType}")
 
     if (!type.active) throw ValidationException("Case note type not active")
@@ -47,7 +44,7 @@ class WriteCaseNote(
     useRestrictedType: Boolean,
   ): CaseNote {
     val caseNote = getCaseNote(prisonNumber, caseNoteId).also {
-      it.type.validateRestrictedUse(useRestrictedType)
+      it.type.validateTypeUsage(useRestrictedType)
     }
 
     return noteRepository.saveAndFlush(caseNote.addAmendment(request)).toModel()
@@ -66,31 +63,18 @@ class WriteCaseNote(
     )
   }
 
-  fun deleteAmendment(prisonNumber: String, amendmentId: Long) {
-    amendmentRepository.findByIdOrNull(amendmentId)?.also {
-      amendmentRepository.delete(it)
-      telemetryClient.trackEvent(
-        "CaseNoteAmendmentSoftDelete",
-        mapOf(
-          "userName" to CaseNoteRequestContext.get().username,
-          "prisonNumber" to prisonNumber,
-          "caseNoteId" to it.note.id.toString(),
-          "amendmentId" to amendmentId.toString(),
-        ),
-        null,
-      )
-    }
-  }
-
   private fun getCaseNote(prisonNumber: String, caseNoteId: String): Note =
     when (val legacyId = caseNoteId.asLegacyId()) {
       null -> noteRepository.findByIdAndPrisonNumber(fromString(caseNoteId), prisonNumber)
       else -> noteRepository.findByLegacyIdAndPrisonNumber(legacyId, prisonNumber)
     }?.takeIf { it.prisonNumber == prisonNumber } ?: throw EntityNotFoundException.withId(caseNoteId)
 
-  private fun SubType.validateRestrictedUse(useRestrictedType: Boolean) = apply {
+  private fun SubType.validateTypeUsage(useRestrictedType: Boolean) = apply {
     if (restrictedUse && !useRestrictedType) {
       throw AccessDeniedException("Case note type is for restricted use, but useRestrictedType was not set")
+    }
+    if (!CaseNoteRequestContext.get().nomisUser && syncToNomis) {
+      throw AccessDeniedException("Unable to author 'sync to nomis' type without a nomis user")
     }
   }
 

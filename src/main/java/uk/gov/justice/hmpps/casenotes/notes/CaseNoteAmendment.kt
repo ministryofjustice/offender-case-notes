@@ -8,9 +8,6 @@ import java.time.LocalDateTime
 @Schema(description = "Case Note Amendment")
 @JsonInclude(JsonInclude.Include.NON_NULL)
 data class CaseNoteAmendment(
-  @Schema(required = true, description = "Amendment Case Note Id (unique)", example = "123232")
-  val caseNoteAmendmentId: Long,
-
   @Schema(required = true, description = "Date and Time of Case Note creation", example = "2018-12-01T13:45:00")
   val creationDateTime: LocalDateTime,
 

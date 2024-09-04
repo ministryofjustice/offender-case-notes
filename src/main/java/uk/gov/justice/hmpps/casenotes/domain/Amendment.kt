@@ -9,7 +9,6 @@ import jakarta.persistence.JoinColumn
 import jakarta.persistence.ManyToOne
 import jakarta.persistence.Table
 import org.hibernate.annotations.SoftDelete
-import org.springframework.data.jpa.repository.JpaRepository
 import uk.gov.justice.hmpps.casenotes.domain.audit.SimpleAudited
 
 @Entity
@@ -39,5 +38,3 @@ class Amendment(
 ) : SimpleAudited(), Comparable<Amendment> {
   override fun compareTo(other: Amendment): Int = createDateTime.compareTo(other.createDateTime)
 }
-
-interface AmendmentRepository : JpaRepository<Amendment, Long>

@@ -22,7 +22,7 @@ abstract class SimpleAudited(context: CaseNoteRequestContext = CaseNoteRequestCo
   override var createDateTime: LocalDateTime = context.requestAt
 
   @Column(nullable = false)
-  override var createUserId: String = context.userId
+  override var createUserId: String = context.username
 
   @Column
   override var modifyDateTime: LocalDateTime? = null
@@ -32,11 +32,11 @@ abstract class SimpleAudited(context: CaseNoteRequestContext = CaseNoteRequestCo
 
   override fun recordCreatedDetails(context: CaseNoteRequestContext) {
     createDateTime = context.requestAt
-    createUserId = context.userId
+    createUserId = context.username
   }
 
   override fun recordModifiedDetails(context: CaseNoteRequestContext) {
     modifyDateTime = context.requestAt
-    modifyUserId = context.userId
+    modifyUserId = context.username
   }
 }

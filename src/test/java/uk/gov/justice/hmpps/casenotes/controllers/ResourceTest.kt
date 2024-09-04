@@ -9,6 +9,8 @@ import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.web.reactive.server.WebTestClient
+import org.springframework.test.web.reactive.server.WebTestClient.RequestBodySpec
+import uk.gov.justice.hmpps.casenotes.config.CaseNoteRequestContext.Companion.USERNAME_HEADER
 import uk.gov.justice.hmpps.casenotes.domain.Amendment
 import uk.gov.justice.hmpps.casenotes.domain.Note
 import uk.gov.justice.hmpps.casenotes.domain.NoteRepository
@@ -51,6 +53,10 @@ abstract class ResourceTest : IntegrationTest() {
     headers.add(HttpHeaders.AUTHORIZATION, "Bearer $token")
     headers.add(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON_VALUE)
     headers.add(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+  }
+
+  fun RequestBodySpec.addUsernameHeader(username: String? = null) = apply {
+    username?.also { header(USERNAME_HEADER, it) }
   }
 
   fun readFile(file: String): String = this.javaClass.getResource(file)!!.readText()

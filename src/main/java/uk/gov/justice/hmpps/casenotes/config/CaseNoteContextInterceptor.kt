@@ -9,14 +9,14 @@ import org.springframework.http.HttpMethod.DELETE
 import org.springframework.http.HttpMethod.PATCH
 import org.springframework.http.HttpMethod.POST
 import org.springframework.http.HttpMethod.PUT
-import org.springframework.http.HttpStatus.BAD_REQUEST
-import org.springframework.http.MediaType.APPLICATION_JSON_VALUE
 import org.springframework.security.access.AccessDeniedException
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.web.servlet.HandlerInterceptor
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer
+import uk.gov.justice.hmpps.casenotes.config.CaseNoteRequestContext.Companion.USERNAME_HEADER
 import uk.gov.justice.hmpps.casenotes.dto.ErrorResponse
+import uk.gov.justice.hmpps.casenotes.dto.UserDetails.Companion.NOMIS
 import uk.gov.justice.hmpps.casenotes.services.ExternalApiService
 
 @Configuration
@@ -37,46 +37,42 @@ class CaseNoteContextInterceptor(
 ) : HandlerInterceptor {
   override fun preHandle(request: HttpServletRequest, response: HttpServletResponse, handler: Any): Boolean {
     if (request.method in listOf(POST.name(), PUT.name(), PATCH.name(), DELETE.name())) {
-      val username = username()
-      val userDetails = externalApiService.getUserDetails(username).orElse(null)
-
-      if (userDetails == null) {
-        with(response) {
-          status = BAD_REQUEST.value()
-          contentType = APPLICATION_JSON_VALUE
-          writer.write(
-            objectMapper.writeValueAsString(
-              ErrorResponse(
-                BAD_REQUEST.value(),
-                developerMessage = "Invalid username provided in token",
-              ),
-            ),
-          )
-        }
-        return false
-      }
-
-      val context = with(userDetails) {
-        CaseNoteRequestContext(
+      val username = request.username()
+      return externalApiService.getUserDetails(username)?.let {
+        val context = CaseNoteRequestContext(
           username,
-          name ?: username,
-          userId ?: username,
-          activeCaseLoadId,
+          it.name ?: username,
+          it.userId ?: username,
+          it.activeCaseLoadId,
           Source.DPS,
+          nomisUser = it.authSource == NOMIS,
         )
-      }
-
-      request.setAttribute(CaseNoteRequestContext::class.simpleName, context)
+        request.setAttribute(CaseNoteRequestContext::class.simpleName, context)
+        true
+      } ?: response.handleNoUserDetails(objectMapper)
     }
-
     return true
+  }
+
+  private fun HttpServletResponse.handleNoUserDetails(objectMapper: ObjectMapper): Boolean {
+    status = org.springframework.http.HttpStatus.BAD_REQUEST.value()
+    contentType = org.springframework.http.MediaType.APPLICATION_JSON_VALUE
+    writer.write(
+      objectMapper.writeValueAsString(
+        ErrorResponse(
+          org.springframework.http.HttpStatus.BAD_REQUEST.value(),
+          developerMessage = "Invalid username provided in token",
+        ),
+      ),
+    )
+    return false
   }
 
   private fun authentication(): AuthAwareAuthenticationToken =
     SecurityContextHolder.getContext().authentication as AuthAwareAuthenticationToken?
       ?: throw AccessDeniedException("User is not authenticated")
 
-  private fun username(): String =
-    authentication().name?.takeIf { it.length <= 64 }
+  private fun HttpServletRequest.username(): String =
+    (getHeader(USERNAME_HEADER) ?: authentication().name).takeIf { it.length <= 64 }
       ?: throw ValidationException("username for audit exceeds 64 characters")
 }

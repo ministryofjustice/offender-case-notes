@@ -10,10 +10,12 @@ data class CaseNoteRequestContext(
   val activeCaseloadId: String? = null,
   val source: Source = Source.DPS,
   val requestAt: LocalDateTime = LocalDateTime.now(),
+  val nomisUser: Boolean = false,
 ) {
   constructor(username: String) : this(username, username, username)
 
   companion object {
+    const val USERNAME_HEADER = "Username"
     private const val SYS_USER = "SYS"
     private const val SYS_DISPLAY_NAME = "Sys"
     val NOMIS_CONTEXT = CaseNoteRequestContext(SYS_USER, SYS_DISPLAY_NAME, SYS_USER, source = Source.NOMIS)

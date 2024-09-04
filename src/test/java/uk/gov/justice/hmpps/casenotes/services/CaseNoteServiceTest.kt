@@ -733,12 +733,11 @@ class CaseNoteServiceTest {
         assertThat(caseNote.amendments).hasSize(1)
 
         val expected = CaseNoteAmendment(
-          additionalNoteText = "text",
+          creationDateTime = LocalDateTime.now(),
+          authorUserName = "user",
           authorName = "author",
           authorUserId = "12345",
-          authorUserName = "user",
-          caseNoteAmendmentId = 0,
-          creationDateTime = LocalDateTime.now(),
+          additionalNoteText = "text",
         )
 
         assertThat(caseNote.amendments[0]).usingRecursiveComparison()
@@ -860,50 +859,6 @@ class CaseNoteServiceTest {
     whenever(repository.findById(any())).thenReturn(Optional.of(offenderCaseNote))
 
     assertThatThrownBy { caseNoteService.softDeleteCaseNote("Z9999ZZ", offenderCaseNoteId.toString()) }
-      .isInstanceOf(ValidationException::class.java)
-  }
-
-  @Test
-  fun softDeleteCaseNoteAmendment() {
-    val noteType = CaseNoteType.builder().type("sometype").parentType(ParentNoteType.builder().build()).build()
-    val offenderCaseNoteAmendment = createOffenderCaseNoteAmendment(noteType)
-    whenever(amendmentRepository.findById(1L)).thenReturn(offenderCaseNoteAmendment)
-    whenever(securityUserContext.getCurrentUser()).thenReturn(UserIdUser("user", "userId"))
-
-    caseNoteService.softDeleteCaseNoteAmendment("A1234AC", 1L)
-
-    verify(amendmentRepository).deleteById(1L)
-  }
-
-  @Test
-  fun softDeleteCaseNoteAmendment_telemetry() {
-    val noteType = CaseNoteType.builder().type("sometype").parentType(ParentNoteType.builder().build()).build()
-    val offenderCaseNoteAmendment = createOffenderCaseNoteAmendment(noteType)
-    whenever(amendmentRepository.findById(1L)).thenReturn(offenderCaseNoteAmendment)
-    whenever(securityUserContext.getCurrentUser()).thenReturn(UserIdUser("user", "userId"))
-
-    caseNoteService.softDeleteCaseNoteAmendment("A1234AC", 1L)
-
-    Mockito.verify(telemetryClient).trackEvent(
-      "SecureCaseNoteAmendmentSoftDelete",
-      mapOf("userName" to "user", "offenderId" to "A1234AC", "case note amendment id" to "1"),
-      null,
-    )
-  }
-
-  @Test
-  fun softDeleteCaseNoteAmendmentEntityNotFoundExceptionThrownWhenCaseNoteNotFound() {
-    assertThatThrownBy { caseNoteService.softDeleteCaseNoteAmendment("A1234AC", 1L) }
-      .isInstanceOf(EntityNotFoundException::class.java)
-  }
-
-  @Test
-  fun softDeleteCaseNoteAmendmentEntityNotFoundExceptionThrownWhenCaseNoteDoesntBelongToOffender() {
-    val noteType = CaseNoteType.builder().type("sometype").parentType(ParentNoteType.builder().build()).build()
-    val offenderCaseNoteAmendment = createOffenderCaseNoteAmendment(noteType)
-    whenever(amendmentRepository.findById(any<Long>())).thenReturn(offenderCaseNoteAmendment)
-
-    assertThatThrownBy { caseNoteService.softDeleteCaseNoteAmendment("Z9999ZZ", 1L) }
       .isInstanceOf(ValidationException::class.java)
   }
 

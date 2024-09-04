@@ -23,7 +23,6 @@ import uk.gov.justice.hmpps.casenotes.notes.AmendCaseNoteRequest
 import uk.gov.justice.hmpps.casenotes.notes.CreateCaseNoteRequest
 import java.time.Duration
 import java.time.format.DateTimeFormatter
-import java.util.Optional
 
 @Service
 class ExternalApiService(
@@ -47,7 +46,7 @@ class ExternalApiService(
       .retryOnTransientException()
       .block()!!
 
-  fun getUserDetails(currentUsername: String): Optional<UserDetails> =
+  fun getUserDetails(currentUsername: String): UserDetails? =
     oauthApiWebClient.get().uri("/api/user/{username}", currentUsername)
       .exchangeToMono {
         if (it.statusCode() == HttpStatus.NOT_FOUND) {
@@ -57,7 +56,7 @@ class ExternalApiService(
         }
       }
       .retryOnTransientException()
-      .blockOptional()
+      .block()
 
   fun getOffenderLocation(offenderIdentifier: String): String =
     elite2ApiWebClient.get().uri("/api/bookings/offenderNo/{offenderNo}", offenderIdentifier)

@@ -26,6 +26,7 @@ import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestController
 import uk.gov.justice.hmpps.casenotes.config.SecurityUserContext
 import uk.gov.justice.hmpps.casenotes.config.ServiceConfig
+import uk.gov.justice.hmpps.casenotes.config.UsernameHeader
 import uk.gov.justice.hmpps.casenotes.dto.CaseNoteFilter
 import uk.gov.justice.hmpps.casenotes.dto.ErrorResponse
 import uk.gov.justice.hmpps.casenotes.notes.AmendCaseNoteRequest
@@ -117,6 +118,7 @@ class CaseNoteController(
       ),
     ],
   )
+  @UsernameHeader
   @ResponseStatus(HttpStatus.CREATED)
   @PostMapping("/{offenderIdentifier}")
   fun createCaseNote(
@@ -160,6 +162,7 @@ class CaseNoteController(
       ),
     ],
   )
+  @UsernameHeader
   @PutMapping("/{offenderIdentifier}/{caseNoteIdentifier}")
   fun amendCaseNote(
     @Parameter(description = "Offender Identifier", required = true, example = "A1234AA")
@@ -189,6 +192,7 @@ class CaseNoteController(
       content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))],
     ),
   )
+  @UsernameHeader
   @ResponseStatus(HttpStatus.OK)
   @DeleteMapping("/{offenderIdentifier}/{caseNoteId}")
   fun softDeleteCaseNote(
@@ -202,31 +206,6 @@ class CaseNoteController(
       save.deleteNote(offenderIdentifier, caseNoteId)
     } else {
       caseNoteService.softDeleteCaseNote(offenderIdentifier, caseNoteId)
-    }
-  }
-
-  @Operation(summary = "Deletes a case note amendment")
-  @ApiResponses(
-    ApiResponse(responseCode = "200", description = "OK"),
-    ApiResponse(
-      responseCode = "404",
-      description = "Offender or case note not found",
-      content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))],
-    ),
-  )
-  @ResponseStatus(HttpStatus.OK)
-  @DeleteMapping("/amendment/{offenderIdentifier}/{caseNoteAmendmentId}")
-  fun softDeleteCaseNoteAmendment(
-    @Parameter(description = "Offender Identifier", required = true, example = "A1234AA")
-    @PathVariable offenderIdentifier: String,
-    @Parameter(description = "Case Note Amendment Id", required = true, example = "1")
-    @PathVariable caseNoteAmendmentId: Long,
-    @RequestHeader(CASELOAD_ID) caseloadId: String? = null,
-  ) {
-    if (caseloadId in serviceConfig.activePrisons) {
-      save.deleteAmendment(offenderIdentifier, caseNoteAmendmentId)
-    } else {
-      caseNoteService.softDeleteCaseNoteAmendment(offenderIdentifier, caseNoteAmendmentId)
     }
   }
 

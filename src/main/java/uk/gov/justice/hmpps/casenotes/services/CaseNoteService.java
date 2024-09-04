@@ -23,9 +23,9 @@ import uk.gov.justice.hmpps.casenotes.config.CaseNoteRequestContext;
 import uk.gov.justice.hmpps.casenotes.config.SecurityUserContext;
 import uk.gov.justice.hmpps.casenotes.dto.CaseNoteFilter;
 import uk.gov.justice.hmpps.casenotes.dto.NomisCaseNote;
-import uk.gov.justice.hmpps.casenotes.notes.AmendCaseNoteRequest;
 import uk.gov.justice.hmpps.casenotes.filters.OffenderCaseNoteFilter;
 import uk.gov.justice.hmpps.casenotes.model.OffenderCaseNote;
+import uk.gov.justice.hmpps.casenotes.notes.AmendCaseNoteRequest;
 import uk.gov.justice.hmpps.casenotes.notes.CaseNote;
 import uk.gov.justice.hmpps.casenotes.notes.CaseNoteAmendment;
 import uk.gov.justice.hmpps.casenotes.notes.CreateCaseNoteRequest;
@@ -160,7 +160,6 @@ public class CaseNoteService {
             .legacyId(cn.getLegacyId())
             .amendments(cn.getAmendments().stream().map(
                 a -> new CaseNoteAmendment(
-                    a.getId(),
                     a.getCreateDateTime(),
                     a.getAuthorUsername(),
                     a.getAuthorName(),
@@ -192,7 +191,6 @@ public class CaseNoteService {
             .legacyId(cn.getCaseNoteId())
             .amendments(cn.getAmendments().stream().map(
                 a -> new CaseNoteAmendment(
-                    a.getCaseNoteAmendmentId(),
                     a.getCreationDateTime(),
                     a.getAuthorUsername(),
                     a.getAuthorName(),
@@ -354,27 +352,6 @@ public class CaseNoteService {
             Map.of("userName", securityUserContext.getCurrentUser().getUsername(),
                 "offenderId", offenderIdentifier,
                 "case note id", caseNoteId
-            ),
-            null
-        );
-    }
-
-    @Transactional
-    @PreAuthorize("hasRole('DELETE_SENSITIVE_CASE_NOTES')")
-    public void softDeleteCaseNoteAmendment(final String offenderIdentifier, final Long caseNoteAmendmentId) {
-        final var caseNoteAmendment = amendmentRepository.findById(caseNoteAmendmentId)
-            .orElseThrow(() -> new EntityNotFoundException("Case note amendment not found"));
-
-        if (!caseNoteAmendment.getCaseNote().getOffenderIdentifier().equalsIgnoreCase(offenderIdentifier)) {
-            throw new ValidationException("case note amendment id not connected with offenderIdentifier");
-        }
-        amendmentRepository.deleteById(caseNoteAmendmentId);
-
-        telemetryClient.trackEvent(
-            "SecureCaseNoteAmendmentSoftDelete",
-            Map.of("userName", securityUserContext.getCurrentUser().getUsername(),
-                "offenderId", offenderIdentifier,
-                "case note amendment id", valueOf(caseNoteAmendmentId)
             ),
             null
         );

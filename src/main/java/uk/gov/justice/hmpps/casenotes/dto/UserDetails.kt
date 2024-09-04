@@ -6,4 +6,9 @@ class UserDetails(
   val name: String? = null,
   val activeCaseLoadId: String? = null,
   val userId: String? = null,
-)
+  val authSource: String? = null,
+) {
+  companion object {
+    const val NOMIS = "nomis"
+  }
+}
