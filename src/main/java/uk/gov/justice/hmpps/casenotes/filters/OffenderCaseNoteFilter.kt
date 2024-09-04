@@ -101,7 +101,6 @@ class OffenderCaseNoteFilter(
 
   private fun splitTypes(types: List<String>): Map<String, List<String>> {
     return types.stream()
-      .map { t: String -> t.trim().replace(' ', '+') }
       .collect(
         Collectors.toMap(
           { n -> StringUtils.substringBefore(n, "+") },

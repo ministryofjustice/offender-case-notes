@@ -46,6 +46,6 @@ class CaseNoteFilter(
       throw ValidationException("SubType must be used in conjunction with type.")
     }
 
-    return typeSubTypes ?: emptyList()
+    return typeSubTypes?.map { it.replaceFirst(" ", "+") } ?: emptyList()
   }
 }
