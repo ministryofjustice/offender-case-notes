@@ -32,12 +32,35 @@ class CreateAmendmentIntTest : ResourceTest() {
   @Test
   fun `cannot create case note without user details`() {
     val request = amendCaseNoteRequest()
-    val response = amendCaseNote(prisonNumber(), UUID.randomUUID().toString(), request, username = "NoneExistentUser")
+    val response = amendCaseNote(prisonNumber(), UUID.randomUUID().toString(), request, tokenUsername = "NoneExistentUser")
       .errorResponse(HttpStatus.BAD_REQUEST)
 
     with(response) {
       assertThat(status).isEqualTo(HttpStatus.BAD_REQUEST.value())
       assertThat(developerMessage).isEqualTo("Invalid username provided in token")
+    }
+  }
+
+  @Test
+  fun `cannot amend a restricted case note without passing useRestrictedType`() {
+    val type = givenRandomType(restricted = true)
+    val caseNote = givenCaseNote(generateCaseNote(prisonNumber(), type))
+    val request = amendCaseNoteRequest()
+    amendCaseNote(caseNote.prisonNumber, caseNote.id.toString(), request, mapOf()).expectStatus().isForbidden
+  }
+
+  @Test
+  fun `cannot amend a sync to nomis case note with non nomis user`() {
+    val username = "DeliusUser"
+    oAuthApi.subGetUserDetails(username, nomisUser = false)
+    val type = getAllTypes().first { it.syncToNomis }
+    val caseNote = givenCaseNote(generateCaseNote(prisonNumber(), type))
+    val response =
+      amendCaseNote(caseNote.prisonNumber, caseNote.id.toString(), amendCaseNoteRequest(), mapOf(), tokenUsername = username)
+        .errorResponse(HttpStatus.FORBIDDEN)
+
+    with(response) {
+      assertThat(developerMessage).isEqualTo("Unable to author 'sync to nomis' type without a nomis user")
     }
   }
 
@@ -68,25 +91,21 @@ class CreateAmendmentIntTest : ResourceTest() {
   }
 
   @Test
-  fun `cannot amend a restricted case note without passing useRestrictedType`() {
-    val type = givenRandomType(restricted = true)
-    val caseNote = givenCaseNote(generateCaseNote(prisonNumber(), type))
+  fun `can amend a case note with write role using 'Username' header`() {
+    val username = "HeaderUsername"
+    oAuthApi.subGetUserDetails(username)
+    val caseNote = givenCaseNote(generateCaseNote(prisonNumber()))
     val request = amendCaseNoteRequest()
-    amendCaseNote(caseNote.prisonNumber, caseNote.id.toString(), request, mapOf()).expectStatus().isForbidden
-  }
+    val response = amendCaseNote(caseNote.prisonNumber, caseNote.id.toString(), request, headerUsername = username)
+      .success<CaseNote>()
 
-  @Test
-  fun `cannot amend a sync to nomis case note with non nomis user`() {
-    val username = "DeliusUser"
-    oAuthApi.subGetUserDetails(username, nomisUser = false)
-    val type = getAllTypes().first { it.syncToNomis }
-    val caseNote = givenCaseNote(generateCaseNote(prisonNumber(), type))
-    val response =
-      amendCaseNote(caseNote.prisonNumber, caseNote.id.toString(), amendCaseNoteRequest(), mapOf(), username = username)
-        .errorResponse(HttpStatus.FORBIDDEN)
+    assertThat(response.amendments.size).isEqualTo(1)
+    assertThat(response.amendments.first().additionalNoteText).isEqualTo(request.text)
 
-    with(response) {
-      assertThat(developerMessage).isEqualTo("Unable to author 'sync to nomis' type without a nomis user")
+    val saved = requireNotNull(noteRepository.findByIdAndPrisonNumber(caseNote.id, response.offenderIdentifier))
+    with(saved.amendments().first()) {
+      assertThat(text).isEqualTo(request.text)
+      assertThat(authorUsername).isEqualTo(username)
     }
   }
 
@@ -100,15 +119,17 @@ class CreateAmendmentIntTest : ResourceTest() {
     request: AmendCaseNoteRequest,
     params: Map<String, String> = mapOf("useRestrictedType" to "true"),
     roles: List<String> = listOf(SecurityUserContext.ROLE_CASE_NOTES_WRITE),
-    username: String = USERNAME,
+    tokenUsername: String = USERNAME,
+    headerUsername: String? = null,
   ) = webTestClient.put().uri { ub ->
     ub.path(urlToTest())
     params.forEach {
       ub.queryParam(it.key, it.value)
     }
     ub.build(prisonNumber, caseNoteId)
-  }.headers(addBearerAuthorisation(username, roles))
+  }.headers(addBearerAuthorisation(tokenUsername, roles))
     .header(CASELOAD_ID, ACTIVE_PRISON)
+    .addUsernameHeader(headerUsername)
     .bodyValue(request)
     .exchange()
 

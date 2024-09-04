@@ -1,5 +1,9 @@
 package uk.gov.justice.hmpps.casenotes.config
 
+import io.swagger.v3.oas.annotations.Parameter
+import io.swagger.v3.oas.annotations.enums.ParameterIn
+import io.swagger.v3.oas.annotations.media.Content
+import io.swagger.v3.oas.annotations.media.Schema
 import io.swagger.v3.oas.models.OpenAPI
 import io.swagger.v3.oas.models.info.Contact
 import io.swagger.v3.oas.models.info.Info
@@ -15,6 +19,7 @@ import org.springframework.expression.spel.standard.SpelExpressionParser
 import org.springframework.expression.spel.support.StandardEvaluationContext
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.web.method.HandlerMethod
+import uk.gov.justice.hmpps.casenotes.config.CaseNoteRequestContext.Companion.USERNAME_HEADER
 
 @Configuration
 class OpenApiConfiguration(buildProperties: BuildProperties, private val context: ApplicationContext) {
@@ -33,7 +38,19 @@ class OpenApiConfiguration(buildProperties: BuildProperties, private val context
     .info(
       Info().title("HMPPS Offender Case Notes")
         .version(version)
-        .description("HMPPS Offender Case Notes API")
+        .description(
+          """
+          |HMPPS Offender Case Notes API
+          |
+          |## Identifying the user
+          |
+          |There are two ways to let the service know the user responsible for creation of the case note, or the action that led to creating the case note.
+          |  
+          | 1. Passing the username in the token - the subject of the jwt is assumed to be the username.
+          | 2. The 'Username' header - this takes priority and will override the value in the jwt subject.
+          | 
+          """.trimMargin(),
+        )
         .contact(Contact().name("HMPPS Digital Studio").email("feedback@digital.justice.gov.uk")),
     )
 
@@ -76,3 +93,18 @@ class OpenApiConfiguration(buildProperties: BuildProperties, private val context
     getMethodAnnotation(PreAuthorize::class.java)?.value
       ?: beanType.getAnnotation(PreAuthorize::class.java)?.value
 }
+
+@Parameter(
+  name = USERNAME_HEADER,
+  `in` = ParameterIn.HEADER,
+  description =
+  """
+    The username of the user interacting with the client service. 
+    This can be used to override the jwt subject when a client service is acting on behalf of a user.
+    """,
+  required = false,
+  content = [Content(schema = Schema(implementation = String::class))],
+)
+@Target(AnnotationTarget.CLASS, AnnotationTarget.FUNCTION)
+@Retention(AnnotationRetention.RUNTIME)
+internal annotation class UsernameHeader

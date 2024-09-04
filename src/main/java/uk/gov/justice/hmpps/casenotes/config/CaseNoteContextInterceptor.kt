@@ -14,6 +14,7 @@ import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.web.servlet.HandlerInterceptor
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer
+import uk.gov.justice.hmpps.casenotes.config.CaseNoteRequestContext.Companion.USERNAME_HEADER
 import uk.gov.justice.hmpps.casenotes.dto.ErrorResponse
 import uk.gov.justice.hmpps.casenotes.dto.UserDetails.Companion.NOMIS
 import uk.gov.justice.hmpps.casenotes.services.ExternalApiService
@@ -72,10 +73,10 @@ class CaseNoteContextInterceptor(
       ?: throw AccessDeniedException("User is not authenticated")
 
   private fun HttpServletRequest.username(): String =
-    (getHeader(USERNAME) ?: authentication().name).takeIf { it.length <= 64 }
+    (getHeader(USERNAME_HEADER) ?: authentication().name).takeIf { it.length <= 64 }
       ?: throw ValidationException("username for audit exceeds 64 characters")
 
   companion object {
-    private const val USERNAME = "Username"
+    const val USERNAME = "Username"
   }
 }

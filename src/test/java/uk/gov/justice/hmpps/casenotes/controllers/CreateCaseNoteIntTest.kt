@@ -4,6 +4,7 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.springframework.http.HttpStatus
+import uk.gov.justice.hmpps.casenotes.config.CaseNoteContextInterceptor.Companion.USERNAME
 import uk.gov.justice.hmpps.casenotes.config.SecurityUserContext.Companion.ROLE_CASE_NOTES_READ
 import uk.gov.justice.hmpps.casenotes.config.SecurityUserContext.Companion.ROLE_CASE_NOTES_WRITE
 import uk.gov.justice.hmpps.casenotes.domain.Note
@@ -33,25 +34,13 @@ class CreateCaseNoteIntTest : ResourceTest() {
   @Test
   fun `cannot create case note without user details`() {
     val request = createCaseNoteRequest()
-    val response = createCaseNote(prisonNumber(), request, username = "NoneExistentUser")
+    val response = createCaseNote(prisonNumber(), request, tokenUsername = "NoneExistentUser")
       .errorResponse(HttpStatus.BAD_REQUEST)
 
     with(response) {
       assertThat(status).isEqualTo(HttpStatus.BAD_REQUEST.value())
       assertThat(developerMessage).isEqualTo("Invalid username provided in token")
     }
-  }
-
-  @Test
-  fun `can create a case note with write role`() {
-    val request = createCaseNoteRequest()
-    val response = createCaseNote(prisonNumber(), request).success<CaseNote>(HttpStatus.CREATED)
-
-    val saved = requireNotNull(
-      noteRepository.findByIdAndPrisonNumber(fromString(response.caseNoteId), response.offenderIdentifier),
-    )
-    saved.verifyAgainst(request)
-    response.verifyAgainst(saved)
   }
 
   @Test
@@ -78,12 +67,40 @@ class CreateCaseNoteIntTest : ResourceTest() {
     oAuthApi.subGetUserDetails(username, nomisUser = false)
     val type = getAllTypes().first { it.syncToNomis }
     val request = createCaseNoteRequest(type = type.parent.code, subType = type.code)
-    val response = createCaseNote(prisonNumber(), request, params = mapOf(), username = username)
+    val response = createCaseNote(prisonNumber(), request, params = mapOf(), tokenUsername = username)
       .errorResponse(HttpStatus.FORBIDDEN)
 
     with(response) {
       assertThat(developerMessage).isEqualTo("Unable to author 'sync to nomis' type without a nomis user")
     }
+  }
+
+  @Test
+  fun `can create a case note with write role using jwt subject`() {
+    val request = createCaseNoteRequest()
+    val response = createCaseNote(prisonNumber(), request).success<CaseNote>(HttpStatus.CREATED)
+
+    val saved = requireNotNull(
+      noteRepository.findByIdAndPrisonNumber(fromString(response.caseNoteId), response.offenderIdentifier),
+    )
+    saved.verifyAgainst(request)
+    response.verifyAgainst(saved)
+  }
+
+  @Test
+  fun `can create a case note with write role using 'Username' header`() {
+    val username = "HeaderUsername"
+    oAuthApi.subGetUserDetails(username)
+    val request = createCaseNoteRequest()
+    val response = createCaseNote(prisonNumber(), request, headerUsername = username)
+      .success<CaseNote>(HttpStatus.CREATED)
+
+    val saved = requireNotNull(
+      noteRepository.findByIdAndPrisonNumber(fromString(response.caseNoteId), response.offenderIdentifier),
+    )
+    saved.verifyAgainst(request)
+    assertThat(saved.authorUsername).isEqualTo(username)
+    response.verifyAgainst(saved)
   }
 
   private fun createCaseNoteRequest(
@@ -100,15 +117,17 @@ class CreateCaseNoteIntTest : ResourceTest() {
     request: CreateCaseNoteRequest,
     params: Map<String, String> = mapOf("useRestrictedType" to "true"),
     roles: List<String> = listOf(ROLE_CASE_NOTES_WRITE),
-    username: String = USERNAME,
+    tokenUsername: String = USERNAME,
+    headerUsername: String? = null,
   ) = webTestClient.post().uri { ub ->
     ub.path(urlToTest(prisonNumber))
     params.forEach {
       ub.queryParam(it.key, it.value)
     }
     ub.build()
-  }.headers(addBearerAuthorisation(username, roles))
+  }.headers(addBearerAuthorisation(tokenUsername, roles))
     .header(CASELOAD_ID, ACTIVE_PRISON)
+    .addUsernameHeader(headerUsername)
     .bodyValue(request)
     .exchange()
 
