@@ -733,12 +733,11 @@ class CaseNoteServiceTest {
         assertThat(caseNote.amendments).hasSize(1)
 
         val expected = CaseNoteAmendment(
-          additionalNoteText = "text",
+          creationDateTime = LocalDateTime.now(),
+          authorUserName = "user",
           authorName = "author",
           authorUserId = "12345",
-          authorUserName = "user",
-          caseNoteAmendmentId = 0,
-          creationDateTime = LocalDateTime.now(),
+          additionalNoteText = "text",
         )
 
         assertThat(caseNote.amendments[0]).usingRecursiveComparison()

@@ -160,7 +160,6 @@ public class CaseNoteService {
             .legacyId(cn.getLegacyId())
             .amendments(cn.getAmendments().stream().map(
                 a -> new CaseNoteAmendment(
-                    a.getId(),
                     a.getCreateDateTime(),
                     a.getAuthorUsername(),
                     a.getAuthorName(),
@@ -192,7 +191,6 @@ public class CaseNoteService {
             .legacyId(cn.getCaseNoteId())
             .amendments(cn.getAmendments().stream().map(
                 a -> new CaseNoteAmendment(
-                    a.getCaseNoteAmendmentId(),
                     a.getCreationDateTime(),
                     a.getAuthorUsername(),
                     a.getAuthorName(),
