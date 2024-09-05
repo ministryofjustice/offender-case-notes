@@ -19,7 +19,7 @@ import uk.gov.justice.hmpps.casenotes.model.OffenderCaseNote.OffenderCaseNoteBui
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import static java.time.LocalDateTime.now;
@@ -139,7 +139,7 @@ public class OffenderCaseNoteRepositoryTest extends IntegrationTest {
         final var allCaseNotes = repository.findAll(new OffenderCaseNoteFilter());
         assertThat(allCaseNotes.size()).isGreaterThan(0);
 
-        final var caseNotes = repository.findAll(new OffenderCaseNoteFilter(OFFENDER_IDENTIFIER, "BOB", "FILTER", false, null, null, List.of(PARENT_TYPE + "+" + SUB_TYPE)));
+        final var caseNotes = repository.findAll(new OffenderCaseNoteFilter(OFFENDER_IDENTIFIER, "BOB", "FILTER", false, null, null, Map.of(PARENT_TYPE, Set.of(SUB_TYPE))));
         assertThat(caseNotes).hasSize(1);
     }
 

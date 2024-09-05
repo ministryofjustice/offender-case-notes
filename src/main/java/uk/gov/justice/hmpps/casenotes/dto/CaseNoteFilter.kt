@@ -12,7 +12,10 @@ class CaseNoteFilter(
   @Schema(description = "Filter by Case Note Type. Cannot be used in conjunction with typeSubTypes.", example = "KA")
   val type: String? = null,
 
-  @Schema(description = "Filter by Case Note Sub Type. Must be used in conjunction with type, and cannot be used in conjunction with typeSubTypes.", example = "KS")
+  @Schema(
+    description = "Filter by Case Note Sub Type. Must be used in conjunction with type, and cannot be used in conjunction with typeSubTypes.",
+    example = "KS",
+  )
   val subType: String? = null,
 
   @Schema(description = "Filter case notes from this date", example = "2017-10-31T01:30:00")
@@ -29,23 +32,20 @@ class CaseNoteFilter(
   @Schema(description = "Filter by username", example = "USER1")
   val authorUsername: String? = null,
 
-  @Schema(description = "Filter by a list of case note types and optional case note sub types separated by plus. Cannot be used in conjunction with type or subType.", example = "KA+KE,OBS,POM+GEN")
-  val typeSubTypes: List<String>? = null,
-
-  @Schema(description = "Allow client credentials clients to filter out sensitive case notes. Defaults to true (sensitive case notes are included by default).", example = "false")
+  @Schema(
+    description = "Allow client credentials clients to filter out sensitive case notes. Defaults to true (sensitive case notes are included by default).",
+    example = "false",
+  )
   val includeSensitive: Boolean = true,
 ) {
 
-  fun getTypesAndSubTypes(): List<String> {
+  fun getTypesAndSubTypes(): Map<String, Set<String>> {
     if (!type.isNullOrEmpty()) {
-      if (!typeSubTypes.isNullOrEmpty()) {
-        throw ValidationException("Both type and typeSubTypes are set, please only use one to filter.")
-      }
-      return if (subType.isNullOrEmpty()) listOf(type) else listOf("$type+$subType")
+      return if (subType.isNullOrEmpty()) mapOf(type to setOf()) else mapOf(type to setOf(subType))
     } else if (!subType.isNullOrEmpty()) {
       throw ValidationException("SubType must be used in conjunction with type.")
     }
 
-    return typeSubTypes?.map { it.trim().replaceFirst(" ", "+") } ?: emptyList()
+    return emptyMap()
   }
 }
