@@ -18,11 +18,11 @@ data class CaseNoteAmendment(
   @NotBlank val authorName: String,
 
   @Schema(
-    required = true,
-    description = "User Id of the user amending the case note - staffId for nomis users, userId for auth users",
+    required = false,
     example = "12345",
+    description = "User Id of the user amending the case note - staffId for nomis users, userId for auth users",
   )
-  val authorUserId: String,
+  val authorUserId: String?,
 
   @Schema(required = true, description = "Additional Case Note Information", example = "Some Additional Text")
   @NotBlank val additionalNoteText: String,
