@@ -7,13 +7,10 @@ import jakarta.persistence.criteria.Join
 import jakarta.persistence.criteria.JoinType
 import jakarta.persistence.criteria.Predicate
 import jakarta.persistence.criteria.Root
-import org.apache.commons.lang3.StringUtils
 import org.springframework.data.jpa.domain.Specification
 import uk.gov.justice.hmpps.casenotes.model.OffenderCaseNote
 import java.time.LocalDateTime
 import java.util.function.Consumer
-import java.util.stream.Collectors
-import java.util.stream.Stream
 
 class OffenderCaseNoteFilter(
   internal val offenderIdentifier: String? = null,
@@ -22,7 +19,7 @@ class OffenderCaseNoteFilter(
   internal val excludeSensitive: Boolean = false,
   internal val startDate: LocalDateTime? = null,
   internal val endDate: LocalDateTime? = null,
-  internal val typeSubTypes: List<String> = emptyList(),
+  internal val typeSubTypes: Map<String, Set<String>> = emptyMap(),
 ) : Specification<OffenderCaseNote> {
 
   override fun toPredicate(root: Root<OffenderCaseNote>, query: CriteriaQuery<*>, cb: CriteriaBuilder): Predicate? {
@@ -58,8 +55,7 @@ class OffenderCaseNoteFilter(
   }
 
   private fun getTypesPredicate(root: Root<OffenderCaseNote>, cb: CriteriaBuilder): Predicate {
-    val typesAndSubTypes: Map<String, List<String>> = splitTypes(typeSubTypes)
-    val typesPredicates: List<Predicate> = typesAndSubTypes.entries
+    val typesPredicates: List<Predicate> = typeSubTypes.entries
       .map { (key, value) ->
         if (value.isEmpty()) {
           getTypePredicate(root, cb, key)
@@ -84,7 +80,7 @@ class OffenderCaseNoteFilter(
     root: Root<OffenderCaseNote>,
     cb: CriteriaBuilder,
     type: String,
-    subTypes: List<String>,
+    subTypes: Set<String>,
   ): Predicate {
     val typePredicateBuilder: ImmutableList.Builder<Predicate> = ImmutableList.builder()
 
@@ -97,19 +93,5 @@ class OffenderCaseNoteFilter(
 
     val typePredicates = typePredicateBuilder.build()
     return cb.and(*typePredicates.toTypedArray<Predicate>())
-  }
-
-  private fun splitTypes(types: List<String>): Map<String, List<String>> {
-    return types.stream()
-      .collect(
-        Collectors.toMap(
-          { n -> StringUtils.substringBefore(n, "+") },
-          { n ->
-            val subtype: String = StringUtils.substringAfter(n, "+")
-            if (subtype.isEmpty()) listOf() else listOf(subtype)
-          },
-          { v1, v2 -> Stream.of(v1, v2).flatMap { obj -> obj.stream() }.toList() },
-        ),
-      )
   }
 }

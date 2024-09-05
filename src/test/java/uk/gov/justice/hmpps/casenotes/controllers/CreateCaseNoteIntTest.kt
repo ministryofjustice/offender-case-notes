@@ -1,5 +1,6 @@
 package uk.gov.justice.hmpps.casenotes.controllers
 
+import com.fasterxml.jackson.module.kotlin.readValue
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
@@ -10,6 +11,7 @@ import uk.gov.justice.hmpps.casenotes.domain.Note
 import uk.gov.justice.hmpps.casenotes.health.wiremock.OAuthExtension.Companion.oAuthApi
 import uk.gov.justice.hmpps.casenotes.notes.CaseNote
 import uk.gov.justice.hmpps.casenotes.notes.CreateCaseNoteRequest
+import uk.gov.justice.hmpps.casenotes.utils.JsonHelper.objectMapper
 import uk.gov.justice.hmpps.casenotes.utils.NomisIdGenerator.prisonNumber
 import uk.gov.justice.hmpps.casenotes.utils.verifyAgainst
 import java.time.LocalDateTime
@@ -103,6 +105,28 @@ class CreateCaseNoteIntTest : ResourceTest() {
     response.verifyAgainst(saved)
   }
 
+  @Test
+  fun `can handle explicitly null value for occurrence date time`() {
+    val request = """
+      {
+        "locationId": "MDI",
+        "type": "OMIC",
+        "subType": "GEN",
+        "occurrenceDateTime": null,
+        "text": "This should not really be happening",
+        "systemGenerated": null
+      }
+    """.trimMargin()
+    val response = createCaseNoteWithStringRequestBody(prisonNumber(), request).success<CaseNote>(HttpStatus.CREATED)
+
+    val saved = requireNotNull(
+      noteRepository.findByIdAndPrisonNumber(fromString(response.caseNoteId), response.offenderIdentifier),
+    )
+    saved.verifyAgainst(objectMapper.readValue<CreateCaseNoteRequest>(request))
+    assertThat(saved.authorUsername).isEqualTo(USERNAME)
+    response.verifyAgainst(saved)
+  }
+
   private fun createCaseNoteRequest(
     locationId: String? = "MDI",
     type: String = "OMIC",
@@ -115,6 +139,25 @@ class CreateCaseNoteIntTest : ResourceTest() {
   private fun createCaseNote(
     prisonNumber: String,
     request: CreateCaseNoteRequest,
+    params: Map<String, String> = mapOf("useRestrictedType" to "true"),
+    roles: List<String> = listOf(ROLE_CASE_NOTES_WRITE),
+    tokenUsername: String = USERNAME,
+    headerUsername: String? = null,
+  ) = webTestClient.post().uri { ub ->
+    ub.path(urlToTest(prisonNumber))
+    params.forEach {
+      ub.queryParam(it.key, it.value)
+    }
+    ub.build()
+  }.headers(addBearerAuthorisation(tokenUsername, roles))
+    .header(CASELOAD_ID, ACTIVE_PRISON)
+    .addUsernameHeader(headerUsername)
+    .bodyValue(request)
+    .exchange()
+
+  private fun createCaseNoteWithStringRequestBody(
+    prisonNumber: String,
+    request: String,
     params: Map<String, String> = mapOf("useRestrictedType" to "true"),
     roles: List<String> = listOf(ROLE_CASE_NOTES_WRITE),
     tokenUsername: String = USERNAME,

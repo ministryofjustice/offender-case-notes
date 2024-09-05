@@ -47,7 +47,7 @@ class ReadCaseNote(
 private fun CaseNoteFilter.asSpecification(prisonNumber: String) =
   listOfNotNull(
     matchesPrisonNumber(prisonNumber),
-    matchesOnType(includeSensitive, getTypesAndSubTypes().map(String::asTypePair).asMap()),
+    matchesOnType(includeSensitive, getTypesAndSubTypes()),
     locationId?.let { matchesLocationId(it) },
     authorUsername?.let { matchesAuthorUsername(it) },
     startDate?.let { occurredAfter(it) },
@@ -67,6 +67,3 @@ private fun String.asTypePair(): Pair<String, String?> {
     else -> Pair(split[0], split[1])
   }
 }
-
-private fun List<Pair<String, String?>>.asMap(): Map<String, Set<String>> =
-  groupBy({ it.first }, { it.second }).mapValues { t -> t.value.mapNotNull { it }.toSet() }

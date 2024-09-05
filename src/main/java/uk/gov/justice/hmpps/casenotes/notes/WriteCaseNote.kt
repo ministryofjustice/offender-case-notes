@@ -85,7 +85,7 @@ class WriteCaseNote(
   ) = Note(
     prisonNumber,
     type,
-    occurrenceDateTime,
+    occurrenceDateTime ?: context.requestAt,
     locationId!!,
     context.username,
     context.userId,

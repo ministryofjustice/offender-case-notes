@@ -73,7 +73,8 @@ class ExternalApiService(
   ): Page<NomisCaseNote> {
     val paramFilter = getParamFilter(filter, pageable)
     val url = "/api/offenders/{offenderIdentifier}/case-notes/v2?$paramFilter"
-    return elite2ApiWebClient.get().uri(url, offenderIdentifier, *filter.getTypesAndSubTypes().toTypedArray())
+    return elite2ApiWebClient.get()
+      .uri(url, offenderIdentifier, *filter.getTypesAndSubTypes().asPrisonApiParams().toTypedArray())
       .retrieve()
       .toEntity(object : ParameterizedTypeReference<RestResponsePage<NomisCaseNote>>() {})
       .retryOnTransientException()
@@ -104,8 +105,8 @@ class ExternalApiService(
       .joinToString(separator = "&", prefix = "&")
 
     if (filter.getTypesAndSubTypes().isNotEmpty()) {
-      val typeSubTypesParams =
-        filter.getTypesAndSubTypes().joinToString(separator = "&", prefix = "&") { "typeSubTypes={typeSubTypes}" }
+      val typeSubTypesParams = filter.getTypesAndSubTypes().asPrisonApiParams()
+        .joinToString(separator = "&", prefix = "&") { "typeSubTypes={typeSubTypes}" }
       return "$params$typeSubTypesParams$sortParams"
     }
 
@@ -149,4 +150,7 @@ class ExternalApiService(
           signal.failure()
         },
     )
+
+  private fun Map<String, Set<String>>.asPrisonApiParams(): List<String> =
+    entries.flatMap { e -> if (e.value.isEmpty()) setOf(e.key) else e.value.map { "${e.key}+$it" } }
 }

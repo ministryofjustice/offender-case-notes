@@ -291,7 +291,7 @@ class ExternalApiServiceTest {
       )
       val response = externalApiService.getOffenderCaseNotes(
         "AA123B",
-        CaseNoteFilter(typeSubTypes = listOf("GEN", "AddType+AddSubType")),
+        CaseNoteFilter(type = "AddType", subType = "AddSubType"),
         pageable,
       )
       assertThat(response.totalElements).isEqualTo(12)
@@ -306,12 +306,11 @@ class ExternalApiServiceTest {
             mapOf(
               "size" to listOf("10"),
               "page" to listOf("0"),
-              "typeSubTypes" to listOf("{typeSubTypes}", "{typeSubTypes}"),
+              "typeSubTypes" to listOf("{typeSubTypes}"),
             ),
           )
         },
         eq("AA123B"),
-        eq("GEN"),
         eq("AddType+AddSubType"),
       )
     }
