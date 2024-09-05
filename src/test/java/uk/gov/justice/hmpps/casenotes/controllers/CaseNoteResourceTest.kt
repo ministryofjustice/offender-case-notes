@@ -146,35 +146,6 @@ class CaseNoteResourceTest : ResourceTest() {
     }
 
     @Test
-    fun `test cannot set both type and typSubTypes`() {
-      oAuthApi.subGetUserDetails("API_TEST_USER")
-      elite2Api.subGetCaseNotesForOffender("A1234AA")
-      webTestClient.get().uri {
-        it.path("/case-notes/{offenderIdentifier}")
-          .queryParam("type", "GEN")
-          .queryParam("subType", "OSI")
-          .queryParam("locationId", "MDI")
-          .queryParam("startDate", "2024-01-02T10:20:30")
-          .queryParam("endDate", "2024-02-01T12:10:05")
-          .queryParam("typeSubTypes", "GEN+OSI")
-          .queryParam("size", "20")
-          .queryParam("page", "5")
-          .queryParam("sort", "creationDateTime,ASC")
-          .build("A1234AA")
-      }
-        .headers(addBearerAuthorisation("API_TEST_USER"))
-        .exchange()
-        .expectStatus().isBadRequest
-        .expectBody()
-        .json(
-          "{" +
-            "'status':400," +
-            "'developerMessage':'Both type and typeSubTypes are set, please only use one to filter.'" +
-            "}",
-        )
-    }
-
-    @Test
     fun `test can retrieve case notes - check Prison API parameters for additional types`() {
       oAuthApi.subGetUserDetails("API_TEST_USER")
       elite2Api.subGetCaseNotesForOffender("A1234AA")

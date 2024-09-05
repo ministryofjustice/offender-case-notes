@@ -43,6 +43,7 @@ import static java.lang.Boolean.TRUE;
 import static java.lang.String.format;
 import static java.lang.String.valueOf;
 import static java.util.Comparator.comparing;
+import static org.hibernate.internal.util.NullnessHelper.coalesce;
 
 @Service
 @Transactional(readOnly = true)
@@ -249,7 +250,7 @@ public class CaseNoteService {
             .authorUsername(context.getUsername())
             .authorUserId(context.getUserId())
             .authorName(context.getUserDisplayName())
-            .occurrenceDateTime(newCaseNote.getOccurrenceDateTime())
+            .occurrenceDateTime(coalesce(newCaseNote.getOccurrenceDateTime(), context.getRequestAt()))
             .caseNoteType(type)
             .offenderIdentifier(offenderIdentifier)
             .locationId(locationId)

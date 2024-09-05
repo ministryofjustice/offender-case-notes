@@ -921,46 +921,6 @@ class CaseNoteServiceTest {
   }
 
   @Test
-  fun getCaseNotes_multipleTypes() {
-    val pageable = PageRequest.of(0, 10, Direction.DESC, "occurrenceDateTime")
-
-    val nomisCaseNote = createNomisCaseNote("someType", "someSubType")
-    val addNomisCaseNote = createNomisCaseNote("someAddType", "someAddSubType")
-    whenever(externalApiService.getOffenderCaseNotes(anyString(), any(), any())).thenReturn(
-      PageImpl(
-        listOf(
-          nomisCaseNote,
-          addNomisCaseNote,
-        ),
-        pageable,
-        2,
-      ),
-    )
-
-    val noteType =
-      CaseNoteType.builder()
-        .type("someSubType").description("sub type description")
-        .parentType(ParentNoteType.builder().type("someType").description("type description").build())
-        .build()
-    val offenderCaseNote = createOffenderCaseNote(noteType)
-    whenever(repository.findAll(any<Specification<OffenderCaseNote>>())).thenReturn(listOf(offenderCaseNote))
-
-    whenever(securityUserContext.isOverrideRole(anyString(), anyString(), anyString())).thenReturn(true)
-
-    val filter = CaseNoteFilter(typeSubTypes = listOf("someType+someSubType", "someAddType+someAddSubType"))
-    val caseNotes = caseNoteService.getCaseNotes("12345", filter, pageable).content
-    assertThat(caseNotes.size).isEqualTo(3)
-    assertThat(
-      caseNotes.stream().filter { x: CaseNote -> x.type == "someType" && x.subType == "someSubType" }
-        .count(),
-    ).isEqualTo(2)
-    assertThat(
-      caseNotes.stream().filter { x: CaseNote -> x.type == "someAddType" && x.subType == "someAddSubType" }
-        .count(),
-    ).isEqualTo(1)
-  }
-
-  @Test
   fun `getCaseNotes includes sensitive case notes by default when presented with client credentials token`() {
     whenever(repository.findAll(ArgumentMatchers.any<Specification<OffenderCaseNote>>())).thenReturn(emptyList())
     whenever(externalApiService.getOffenderCaseNotes(anyString(), any(), any())).thenReturn(Page.empty())

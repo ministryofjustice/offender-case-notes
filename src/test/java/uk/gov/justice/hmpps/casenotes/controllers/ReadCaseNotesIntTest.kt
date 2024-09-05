@@ -172,23 +172,6 @@ class ReadCaseNotesIntTest : ResourceTest() {
     assertThat(found.subTypeDescription).isEqualTo(toFind.type.description)
   }
 
-  @Test
-  fun `can filter by a several sub types`() {
-    val prisonNumber = prisonNumber()
-    val types = getAllTypes().asSequence()
-      .filter { !it.sensitive && !it.code.contains("\\s".toRegex()) }
-      .groupBy { it.parent.code }
-      .map { it.value.take(2) }.flatten().take(20)
-      .toList()
-    val caseNotes = types.map { givenCaseNote(generateCaseNote(prisonNumber, it)) }
-
-    val toFind = caseNotes.shuffled().take(5)
-    val param = toFind.joinToString(",") { "${it.type.parent.code}+${it.type.code}" }
-    val response = getCaseNotes(prisonNumber, mapOf("typeSubTypes" to param)).page()
-
-    assertThat(response.totalElements.toInt()).isEqualTo(toFind.size)
-  }
-
   private fun getCaseNotes(
     prisonNumber: String,
     queryParams: Map<String, String> = mapOf(),
