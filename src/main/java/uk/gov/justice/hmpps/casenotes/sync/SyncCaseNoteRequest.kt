@@ -29,7 +29,7 @@ data class SyncCaseNoteRequest(
     example = "A1234BC",
     description = "The offender/prison/prisoner/noms number - used to identify the person in prison",
   )
-  val prisonIdentifier: String,
+  val personIdentifier: String,
 
   @Schema(requiredMode = REQUIRED, example = "MDI", description = "Location where case note was made")
   @Length(max = 6)

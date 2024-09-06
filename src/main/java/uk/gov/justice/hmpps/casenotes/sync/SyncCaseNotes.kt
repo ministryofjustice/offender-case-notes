@@ -57,7 +57,7 @@ private fun <T : TypeLookup> Collection<T>.exceptionMessage() =
     .joinToString(separator = ", ", prefix = "{ ", postfix = " }")
 
 private fun SyncCaseNoteRequest.asNoteAndAmendments(typeSupplier: (String, String) -> SubType) = Note(
-  prisonIdentifier,
+  personIdentifier,
   typeSupplier(type, subType),
   occurrenceDateTime,
   locationId,
