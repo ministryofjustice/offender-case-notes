@@ -49,7 +49,6 @@ import uk.gov.justice.hmpps.casenotes.notes.CaseNote
 import uk.gov.justice.hmpps.casenotes.notes.CaseNoteAmendment
 import uk.gov.justice.hmpps.casenotes.notes.CreateCaseNoteRequest
 import uk.gov.justice.hmpps.casenotes.repository.CaseNoteTypeRepository
-import uk.gov.justice.hmpps.casenotes.repository.OffenderCaseNoteAmendmentRepository
 import uk.gov.justice.hmpps.casenotes.repository.OffenderCaseNoteRepository
 import uk.gov.justice.hmpps.casenotes.utils.NomisIdGenerator
 import java.time.LocalDateTime
@@ -59,7 +58,6 @@ import java.util.UUID
 @ExtendWith(MockitoExtension::class)
 class CaseNoteServiceTest {
   private val repository: OffenderCaseNoteRepository = mock()
-  private val amendmentRepository: OffenderCaseNoteAmendmentRepository = mock()
   private val caseNoteTypeRepository: CaseNoteTypeRepository = mock()
   private val securityUserContext: SecurityUserContext = mock()
   private val externalApiService: ExternalApiService = mock()
@@ -75,7 +73,6 @@ class CaseNoteServiceTest {
   fun setUp() {
     caseNoteService = CaseNoteService(
       repository,
-      amendmentRepository,
       caseNoteTypeRepository,
       securityUserContext,
       externalApiService,
@@ -314,7 +311,7 @@ class CaseNoteServiceTest {
           val cn = (i.arguments[0] as OffenderCaseNote)
           cn.toBuilder().id(caseNoteId).createDateTime(now).eventId(1234)
             .amendments(
-              cn.amendments.map { it.toBuilder().id(NomisIdGenerator.newId()).build() }
+              cn.amendments.map { it.toBuilder().build() }
                 .toSortedSet(AmendmentComparator()),
             )
             .build()
@@ -710,7 +707,7 @@ class CaseNoteServiceTest {
           val cn = (i.arguments[0] as OffenderCaseNote)
           cn.toBuilder()
             .amendments(
-              cn.amendments.map { it.toBuilder().id(NomisIdGenerator.newId()).build() }
+              cn.amendments.map { it.toBuilder().build() }
                 .toSortedSet(AmendmentComparator()),
             )
             .build()
@@ -1006,7 +1003,6 @@ class CaseNoteServiceTest {
     val amendment = OffenderCaseNoteAmendment
       .builder()
       .caseNote(createOffenderCaseNote(caseNoteType))
-      .id(1L)
       .noteText("A")
       .authorName("some user")
       .build()

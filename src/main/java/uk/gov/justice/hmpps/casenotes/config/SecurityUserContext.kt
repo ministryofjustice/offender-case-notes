@@ -39,5 +39,6 @@ class SecurityUserContext {
   companion object {
     const val ROLE_CASE_NOTES_READ = "ROLE_PRISONER_CASE_NOTES__RO"
     const val ROLE_CASE_NOTES_WRITE = "ROLE_PRISONER_CASE_NOTES__RW"
+    const val ROLE_CASE_NOTES_SYNC = "ROLE_PRISONER_CASE_NOTES__SYNC__RW"
   }
 }

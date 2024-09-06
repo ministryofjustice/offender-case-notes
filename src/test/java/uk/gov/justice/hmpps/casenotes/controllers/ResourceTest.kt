@@ -1,5 +1,6 @@
 package uk.gov.justice.hmpps.casenotes.controllers
 
+import com.fasterxml.uuid.Generators
 import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
@@ -25,6 +26,7 @@ import uk.gov.justice.hmpps.casenotes.utils.JwtAuthHelper
 import uk.gov.justice.hmpps.casenotes.utils.NomisIdGenerator
 import uk.gov.justice.hmpps.casenotes.utils.setByName
 import java.time.LocalDateTime
+import java.util.UUID
 import java.util.function.Consumer
 
 internal const val ACTIVE_PRISON = "MDI"
@@ -117,7 +119,6 @@ abstract class ResourceTest : IntegrationTest() {
     text,
     systemGenerated,
   ).apply {
-    new = true
     this.legacyId = legacyId
     createdAt?.also { createDateTime = it }
   }
@@ -127,7 +128,7 @@ abstract class ResourceTest : IntegrationTest() {
     authorUserId: String = "AuthorId",
     authorName: String = "AuthorName",
     text: String = "An amendment to a case note saved in the case note database",
-    id: Long? = null,
+    id: UUID = Generators.timeBasedEpochGenerator().generate(),
   ): Note = apply {
     val amendment = Amendment(this, authorUsername, authorName, authorUserId, text, id)
     setByName("amendments", (amendments() + amendment).toSortedSet())

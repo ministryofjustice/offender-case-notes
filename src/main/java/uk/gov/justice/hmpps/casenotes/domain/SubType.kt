@@ -1,6 +1,8 @@
 package uk.gov.justice.hmpps.casenotes.domain
 
 import jakarta.persistence.Column
+import jakarta.persistence.Embeddable
+import jakarta.persistence.Embedded
 import jakarta.persistence.Entity
 import jakarta.persistence.GeneratedValue
 import jakarta.persistence.GenerationType
@@ -16,12 +18,15 @@ import org.springframework.data.jpa.repository.JpaRepository
 @Entity
 @Table(name = "case_note_type")
 class SubType(
+  @Embedded
+  val key: TypeKey,
+
   @ManyToOne
   @JoinColumn(name = "parent_type", nullable = false)
   val parent: Type,
 
   @Column(name = "sub_type", nullable = false)
-  val code: String,
+  override val code: String,
 
   @Column(name = "description", nullable = false)
   val description: String,
@@ -39,7 +44,7 @@ class SubType(
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   @Column(name = "case_note_type_id", nullable = false)
   val id: Long? = null,
-) {
+) : TypeLookup by key {
   @Column(insertable = false, updatable = false)
   val syncToNomis: Boolean = false
 
@@ -55,5 +60,24 @@ class SubType(
 
 interface SubTypeRepository : JpaRepository<SubType, Long> {
   @EntityGraph(attributePaths = ["parent"])
-  fun findByParentCodeAndCode(parentCode: String, code: String): SubType?
+  fun findByKey(key: TypeKey): SubType?
+
+  @EntityGraph(attributePaths = ["parent"])
+  fun findByKeyIn(keys: Set<TypeKey>): List<SubType>
 }
+
+fun SubTypeRepository.findByParentCodeAndCode(parentCode: String, code: String) =
+  findByKey(TypeKey(parentCode, code))
+
+interface TypeLookup {
+  val parentCode: String
+  val code: String
+}
+
+@Embeddable
+data class TypeKey(
+  @Column(name = "parent_type", nullable = false, insertable = false, updatable = false)
+  override val parentCode: String,
+  @Column(name = "sub_type", nullable = false, insertable = false, updatable = false)
+  override val code: String,
+) : TypeLookup

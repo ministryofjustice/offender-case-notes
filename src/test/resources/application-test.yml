@@ -4,7 +4,7 @@ spring:
     locations: classpath:db/migration/general,classpath:db/migration/{vendor},classpath:db/test/migration
 
   jpa:
-    show-sql: true
+    show-sql: false
 
   datasource:
     url: 'jdbc:postgresql://localhost:5432/case_notes'

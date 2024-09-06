@@ -9,6 +9,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
+import jakarta.persistence.Version;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.EqualsAndHashCode;
@@ -107,6 +108,9 @@ public class OffenderCaseNote {
 
     private Long legacyId;
 
+    @Version
+    private Long version;
+
     public void addAmendment(final String noteText, final String authorUsername, final String authorName, final String authorUserId) {
 
         final var amendment = OffenderCaseNoteAmendment.builder()
@@ -116,6 +120,7 @@ public class OffenderCaseNote {
                 .authorName(authorName)
                 .authorUserId(authorUserId)
                 .createDateTime(now())
+                .id(generateNewUuid())
                 .build();
 
         amendments.add(amendment);

@@ -30,7 +30,6 @@ import uk.gov.justice.hmpps.casenotes.notes.CaseNote;
 import uk.gov.justice.hmpps.casenotes.notes.CaseNoteAmendment;
 import uk.gov.justice.hmpps.casenotes.notes.CreateCaseNoteRequest;
 import uk.gov.justice.hmpps.casenotes.repository.CaseNoteTypeRepository;
-import uk.gov.justice.hmpps.casenotes.repository.OffenderCaseNoteAmendmentRepository;
 import uk.gov.justice.hmpps.casenotes.repository.OffenderCaseNoteRepository;
 
 import java.util.Comparator;
@@ -54,7 +53,6 @@ public class CaseNoteService {
 
     private static final String SERVICE_NAME = "OCNS";
     private final OffenderCaseNoteRepository repository;
-    private final OffenderCaseNoteAmendmentRepository amendmentRepository;
     private final CaseNoteTypeRepository caseNoteTypeRepository;
     private final SecurityUserContext securityUserContext;
     private final ExternalApiService externalApiService;

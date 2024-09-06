@@ -1,6 +1,5 @@
 package uk.gov.justice.hmpps.casenotes.domain
 
-import com.fasterxml.uuid.Generators
 import jakarta.persistence.CascadeType
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
@@ -10,16 +9,16 @@ import jakarta.persistence.JoinColumn
 import jakarta.persistence.ManyToOne
 import jakarta.persistence.OneToMany
 import jakarta.persistence.Table
-import jakarta.persistence.Transient
+import jakarta.persistence.Version
 import jakarta.persistence.criteria.Join
 import jakarta.persistence.criteria.JoinType
 import org.hibernate.annotations.SoftDelete
-import org.springframework.data.domain.Persistable
 import org.springframework.data.jpa.domain.Specification
 import org.springframework.data.jpa.repository.EntityGraph
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor
 import uk.gov.justice.hmpps.casenotes.config.CaseNoteRequestContext
+import uk.gov.justice.hmpps.casenotes.domain.IdGenerator.newUuid
 import uk.gov.justice.hmpps.casenotes.domain.Note.Companion.AMENDMENTS
 import uk.gov.justice.hmpps.casenotes.domain.Note.Companion.AUTHOR_USERNAME
 import uk.gov.justice.hmpps.casenotes.domain.Note.Companion.LOCATION_ID
@@ -29,7 +28,7 @@ import uk.gov.justice.hmpps.casenotes.domain.Note.Companion.TYPE
 import uk.gov.justice.hmpps.casenotes.domain.SubType.Companion.PARENT
 import uk.gov.justice.hmpps.casenotes.domain.audit.AuditedEntityListener
 import uk.gov.justice.hmpps.casenotes.domain.audit.SimpleAudited
-import uk.gov.justice.hmpps.casenotes.notes.AmendCaseNoteRequest
+import uk.gov.justice.hmpps.casenotes.notes.TextRequest
 import java.time.LocalDateTime
 import java.util.SortedSet
 import java.util.TreeSet
@@ -72,16 +71,14 @@ class Note(
     mappedBy = "note",
   )
   private val amendments: SortedSet<Amendment> = TreeSet(),
-) : SimpleAudited(), Persistable<UUID> {
+) : SimpleAudited() {
 
-  @Transient
-  var new: Boolean = false
-  override fun isNew(): Boolean = new
+  @Version
+  val version: Long? = null
 
   @Id
   @Column(name = "offender_case_note_id", updatable = false, nullable = false)
-  private val id: UUID = generateNewUuid()
-  override fun getId(): UUID = id
+  val id: UUID = newUuid()
 
   @Column(columnDefinition = "serial", insertable = false, updatable = false)
   var eventId: Int? = null
@@ -89,9 +86,18 @@ class Note(
   var legacyId: Long? = null
 
   fun amendments() = amendments.toSortedSet()
-  fun addAmendment(request: AmendCaseNoteRequest) = apply {
+  fun addAmendment(request: TextRequest) = apply {
     val context = CaseNoteRequestContext.get()
-    amendments.add(Amendment(this, context.username, context.userDisplayName, context.userId, request.text))
+    amendments.add(
+      Amendment(
+        this,
+        context.username,
+        context.userDisplayName,
+        context.userId,
+        request.text,
+        newUuid(),
+      ),
+    )
   }
 
   companion object {
@@ -102,10 +108,6 @@ class Note(
     val OCCURRED_AT = Note::occurredAt.name
     val CREATED_AT = Note::createDateTime.name
     const val AMENDMENTS = "amendments"
-
-    private fun generateNewUuid(): UUID {
-      return Generators.timeBasedEpochGenerator().generate()
-    }
   }
 }
 
