@@ -33,7 +33,8 @@ data class SyncCaseNoteRequest(
 
   @Schema(requiredMode = REQUIRED, example = "MDI", description = "Location where case note was made")
   @Length(max = 6)
-  var locationId: String,
+  @NotBlank
+  val locationId: String,
 
   @Schema(requiredMode = REQUIRED, description = "Type of case note", example = "GEN")
   @Length(max = 12)
@@ -54,19 +55,21 @@ data class SyncCaseNoteRequest(
 
   @Schema(requiredMode = REQUIRED, description = "Text of case note", example = "This is a case note message")
   @NotBlank
-  @Length(max = 30000)
   override val text: String,
 
   @Schema(requiredMode = REQUIRED, description = "Boolean flag to indicate if case not is system generated")
-  var systemGenerated: Boolean,
+  val systemGenerated: Boolean,
 
   @Schema(requiredMode = REQUIRED, description = "Username of the staff member that created the case note")
+  @NotBlank
   override val authorUsername: String,
 
   @Schema(requiredMode = REQUIRED, description = "Id of the staff member that created the case note")
+  @NotBlank
   override val authorUserId: String,
 
   @Schema(requiredMode = REQUIRED, description = "Full name of the staff member that created the case note")
+  @NotBlank
   override val authorName: String,
 
   @Schema(
@@ -91,26 +94,20 @@ data class SyncCaseNoteRequest(
 data class SyncAmendmentRequest(
   @Schema(requiredMode = REQUIRED, description = "Text of the amendment")
   @NotBlank
-  @Length(max = 30000)
   override val text: String,
 
   @Schema(requiredMode = REQUIRED, description = "Username of the staff member that amended the case note")
+  @NotBlank
   override val authorUsername: String,
 
   @Schema(requiredMode = REQUIRED, description = "Id of the staff member that amended the case note")
+  @NotBlank
   override val authorUserId: String,
 
   @Schema(requiredMode = REQUIRED, description = "Full name of the staff member that amended the case note")
+  @NotBlank
   override val authorName: String,
 
   @Schema(requiredMode = REQUIRED, example = "2024-09-01T10:25:00", description = "Date time of the amendment")
   override val createdDateTime: LocalDateTime,
-
-  @Schema(
-    requiredMode = REQUIRED,
-    example = "DPS",
-    allowableValues = ["DPS", "NOMIS"],
-    description = "Indicates whether the case note was created via prison API or nomis",
-  )
-  val source: Source,
 ) : TextRequest, AuthoredRequest
