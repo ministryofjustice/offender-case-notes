@@ -57,7 +57,7 @@ data class SyncCaseNoteRequest(
   @Length(max = 30000)
   override val text: String,
 
-  @Schema(description = "Boolean flag to indicate if case not is system generated")
+  @Schema(requiredMode = REQUIRED, description = "Boolean flag to indicate if case not is system generated")
   var systemGenerated: Boolean,
 
   @Schema(requiredMode = REQUIRED, description = "Username of the staff member that created the case note")

@@ -24,7 +24,7 @@ import uk.gov.justice.hmpps.casenotes.sync.SyncResult
 class SyncController(private val sync: SyncCaseNotes) {
   @Operation(
     summary = "Endpoint to migrate and/or sync case notes from nomis to dps.",
-    description = "Case notes that don't exist in dps will be created, those that already exist and can be identified will be updated. Conceptually, a merge endpoint."
+    description = "Case notes that don't exist in dps will be created, those that already exist and can be identified will be updated. Conceptually, a merge endpoint.",
   )
   @ApiResponses(
     value = [
