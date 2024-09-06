@@ -6,6 +6,8 @@ import org.springframework.http.HttpStatus
 import uk.gov.justice.hmpps.casenotes.config.SecurityUserContext.Companion.ROLE_CASE_NOTES_SYNC
 import uk.gov.justice.hmpps.casenotes.config.SecurityUserContext.Companion.ROLE_CASE_NOTES_WRITE
 import uk.gov.justice.hmpps.casenotes.config.Source
+import uk.gov.justice.hmpps.casenotes.domain.Amendment
+import uk.gov.justice.hmpps.casenotes.domain.Note
 import uk.gov.justice.hmpps.casenotes.sync.SyncAmendmentRequest
 import uk.gov.justice.hmpps.casenotes.sync.SyncCaseNoteRequest
 import uk.gov.justice.hmpps.casenotes.sync.SyncResult
@@ -13,6 +15,7 @@ import uk.gov.justice.hmpps.casenotes.utils.NomisIdGenerator
 import uk.gov.justice.hmpps.casenotes.utils.NomisIdGenerator.prisonNumber
 import java.time.Duration
 import java.time.LocalDateTime
+import java.time.temporal.ChronoUnit.SECONDS
 import java.util.UUID
 import kotlin.time.measureTimedValue
 import kotlin.time.toJavaDuration
@@ -73,6 +76,57 @@ class SyncCaseNotesIntTest : ResourceTest() {
     val (response, elapsed) = measureTimedValue { syncCaseNotes(request).successList<SyncResult>() }
     assertThat(response.size).isEqualTo(request.size)
     assertThat(elapsed.toJavaDuration()).isLessThanOrEqualTo(Duration.ofSeconds(2))
+  }
+
+  @Test
+  fun `200 ok - new case note with amendments is correctly stored`() {
+    val type = getAllTypes().first { it.syncToNomis }
+    val amendment = syncAmendmentRequest(
+      text = "An amendment to the case note, to verify it is saved correctly",
+      authorName = "Simon Else",
+      authorUsername = "SM1ELSE",
+      authorUserId = "585153477",
+      createdDateTime = LocalDateTime.now().minusDays(3),
+    )
+    val request = syncCaseNoteRequest(
+      prisonIdentifier = prisonNumber(),
+      locationId = "LEI",
+      type = type.parent.code,
+      subType = type.code,
+      text = "This a larger, non default text block to determine that notes are correctly saved to the db",
+      authorName = "A N Other",
+      authorUsername = "anotherUser",
+      authorUserId = "564716341",
+      occurrenceDateTime = LocalDateTime.now().minusDays(10),
+      createdDateTime = LocalDateTime.now().minusDays(7),
+      amendments = setOf(amendment),
+    )
+
+    val response = syncCaseNotes(listOf(request)).successList<SyncResult>()
+    val saved = noteRepository.findByIdAndPrisonNumber(response.first().id, request.personIdentifier)
+    requireNotNull(saved).verifyAgainst(request)
+    assertThat(saved.createUserId).isEqualTo("SYS")
+    saved.amendments().first().verifyAgainst(request.amendments.first())
+  }
+
+  private fun Note.verifyAgainst(request: SyncCaseNoteRequest) {
+    assertThat(prisonNumber).isEqualTo(request.personIdentifier)
+    assertThat(type.parent.code).isEqualTo(request.type)
+    assertThat(type.code).isEqualTo(request.subType)
+    assertThat(text).isEqualTo(text)
+    assertThat(occurredAt.truncatedTo(SECONDS)).isEqualTo(request.occurrenceDateTime.truncatedTo(SECONDS))
+    assertThat(createDateTime.truncatedTo(SECONDS)).isEqualTo(request.createdDateTime.truncatedTo(SECONDS))
+    assertThat(authorName).isEqualTo(authorName)
+    assertThat(authorUsername).isEqualTo(authorUsername)
+    assertThat(authorUserId).isEqualTo(authorUserId)
+  }
+
+  private fun Amendment.verifyAgainst(request: SyncAmendmentRequest) {
+    assertThat(text).isEqualTo(text)
+    assertThat(createDateTime.truncatedTo(SECONDS)).isEqualTo(request.createdDateTime.truncatedTo(SECONDS))
+    assertThat(authorName).isEqualTo(authorName)
+    assertThat(authorUsername).isEqualTo(authorUsername)
+    assertThat(authorUserId).isEqualTo(authorUserId)
   }
 
   private fun syncCaseNotes(

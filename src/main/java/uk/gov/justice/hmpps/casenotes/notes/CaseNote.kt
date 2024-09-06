@@ -68,7 +68,7 @@ data class CaseNote(
     description = "Delius number representation of the case note id - will be negative for sensitive case note types",
     example = "-23",
   )
-  val eventId: Int,
+  val eventId: Long,
 
   @Schema(required = true, description = "Sensitive Note", example = "true")
   val sensitive: Boolean = false,
@@ -80,7 +80,7 @@ data class CaseNote(
   val systemGenerated: Boolean,
 
   @Schema(description = "A temporary field that holds the legacy (nomis) id for services that have a dependency on the legacy id")
-  val legacyId: Long?,
+  val legacyId: Long,
 ) {
 
   class Builder internal constructor() {
@@ -97,11 +97,11 @@ data class CaseNote(
     private var authorUserId: @NotNull String? = null
     private var text: @NotBlank String? = null
     private var locationId: String? = null
-    private var eventId: Int = 0
+    private var eventId: Long = 0
     private var sensitive = false
     private var amendments: List<CaseNoteAmendment> = listOf()
     private var systemGenerated = false
-    private var legacyId: Long? = null
+    private var legacyId: Long = 0
 
     fun caseNoteId(caseNoteId: String): Builder = apply {
       this.caseNoteId = caseNoteId
@@ -155,7 +155,7 @@ data class CaseNote(
       this.locationId = locationId
     }
 
-    fun eventId(eventId: Int): Builder = apply {
+    fun eventId(eventId: Long): Builder = apply {
       this.eventId = eventId
     }
 
@@ -171,8 +171,8 @@ data class CaseNote(
       this.systemGenerated = systemGenerated
     }
 
-    fun legacyId(legacyId: Number?): Builder = apply {
-      this.legacyId = legacyId?.toLong()
+    fun legacyId(legacyId: Long): Builder = apply {
+      this.legacyId = legacyId
     }
 
     fun build(): CaseNote {

@@ -106,7 +106,7 @@ abstract class ResourceTest : IntegrationTest() {
     authorName: String = "AuthorName",
     text: String = "Text about the case note saved in the case note database",
     systemGenerated: Boolean = false,
-    legacyId: Long? = null,
+    legacyId: Long = NomisIdGenerator.newId(),
     createdAt: LocalDateTime? = null,
   ) = Note(
     prisonNumber,

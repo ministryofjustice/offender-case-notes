@@ -42,7 +42,6 @@ import uk.gov.justice.hmpps.casenotes.filters.OffenderCaseNoteFilter
 import uk.gov.justice.hmpps.casenotes.model.CaseNoteType
 import uk.gov.justice.hmpps.casenotes.model.OffenderCaseNote
 import uk.gov.justice.hmpps.casenotes.model.OffenderCaseNote.AmendmentComparator
-import uk.gov.justice.hmpps.casenotes.model.OffenderCaseNoteAmendment
 import uk.gov.justice.hmpps.casenotes.model.ParentNoteType
 import uk.gov.justice.hmpps.casenotes.notes.AmendCaseNoteRequest
 import uk.gov.justice.hmpps.casenotes.notes.CaseNote
@@ -309,7 +308,7 @@ class CaseNoteServiceTest {
         whenever(securityUserContext.getCurrentUser()).thenReturn(UserIdUser("someuser", "userId"))
         whenever(repository.saveAndFlush(any<OffenderCaseNote>())).thenAnswer { i ->
           val cn = (i.arguments[0] as OffenderCaseNote)
-          cn.toBuilder().id(caseNoteId).createDateTime(now).eventId(1234)
+          cn.toBuilder().id(caseNoteId).createDateTime(now).legacyId(1234)
             .amendments(
               cn.amendments.map { it.toBuilder().build() }
                 .toSortedSet(AmendmentComparator()),
@@ -360,6 +359,7 @@ class CaseNoteServiceTest {
             .amendments(emptyList())
             .creationDateTime(now)
             .eventId(1234)
+            .legacyId(1234)
             .locationId("MDI")
             .build(),
         )
@@ -402,6 +402,7 @@ class CaseNoteServiceTest {
             .amendments(emptyList())
             .creationDateTime(now)
             .eventId(1234)
+            .legacyId(1234)
             .locationId("MDI")
             .systemGenerated(true)
             .build(),
@@ -525,6 +526,7 @@ class CaseNoteServiceTest {
         "text",
         "amendments",
         "sensitive",
+        "eventId",
       )
       .isEqualTo(offenderCaseNote)
     assertThat(caseNote.text).isEqualTo("HELLO")
@@ -994,20 +996,9 @@ class CaseNoteServiceTest {
       .offenderIdentifier("A1234AC")
       .caseNoteType(caseNoteType)
       .noteText("HELLO")
-      .eventId(1234)
+      .legacyId(1234)
       .createDateTime(LocalDateTime.now().minusDays(7))
       .build()
-  }
-
-  private fun createOffenderCaseNoteAmendment(caseNoteType: CaseNoteType): Optional<OffenderCaseNoteAmendment> {
-    val amendment = OffenderCaseNoteAmendment
-      .builder()
-      .caseNote(createOffenderCaseNote(caseNoteType))
-      .noteText("A")
-      .authorName("some user")
-      .build()
-
-    return Optional.of(amendment)
   }
 
   private fun createCaseNoteRequest(

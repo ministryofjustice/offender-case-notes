@@ -59,11 +59,3 @@ private fun Pageable.forSpecification(): Pageable {
   val sort = occurredAtSort ?: sort.getOrderFor("creationDateTime")?.direction?.let { by(it, Note.CREATED_AT) }
   return PageRequest.of(pageNumber, pageSize, sort ?: by(Sort.Direction.DESC, Note.OCCURRED_AT))
 }
-
-private fun String.asTypePair(): Pair<String, String?> {
-  val split = split("+")
-  return when (split.size) {
-    1 -> Pair(split[0], null)
-    else -> Pair(split[0], split[1])
-  }
-}
