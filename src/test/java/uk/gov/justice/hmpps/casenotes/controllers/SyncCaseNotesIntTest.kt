@@ -38,7 +38,7 @@ class SyncCaseNotesIntTest : ResourceTest() {
     val response = syncCaseNotes(request).errorResponse(HttpStatus.BAD_REQUEST)
     with(response) {
       assertThat(status).isEqualTo(HttpStatus.BAD_REQUEST.value())
-      assertThat(developerMessage).isEqualTo("Case note types missing: { NON_EXISTENT:[GARBAGE, NOT_THERE], ANOTHER_TYPE:[GARBAGE] }")
+      assertThat(developerMessage).isEqualTo("Case note types missing: { ANOTHER_TYPE:[GARBAGE], NON_EXISTENT:[GARBAGE, NOT_THERE] }")
     }
   }
 
@@ -53,7 +53,7 @@ class SyncCaseNotesIntTest : ResourceTest() {
     val response = syncCaseNotes(request).errorResponse(HttpStatus.BAD_REQUEST)
     with(response) {
       assertThat(status).isEqualTo(HttpStatus.BAD_REQUEST.value())
-      assertThat(developerMessage).isEqualTo("Case note types are not sync to nomis types: { POM:[GEN, SPECIAL], OMIC:[GEN, OMIC_OPEN] }")
+      assertThat(developerMessage).isEqualTo("Case note types are not sync to nomis types: { OMIC:[GEN, OMIC_OPEN], POM:[GEN, SPECIAL] }")
     }
   }
 

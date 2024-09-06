@@ -51,8 +51,9 @@ class SyncCaseNotes(
 }
 
 private fun <T : TypeLookup> Collection<T>.exceptionMessage() =
-  groupBy { it.parentCode }
-    .map { e -> "${e.key}:${e.value.joinToString(prefix = "[", postfix = "]", separator = ", ") { it.code }}" }
+  sortedBy { it.parentCode }
+    .groupBy { it.parentCode }
+    .map { e -> "${e.key}:${e.value.sortedBy { it.code }.joinToString(prefix = "[", postfix = "]", separator = ", ") { it.code }}" }
     .joinToString(separator = ", ", prefix = "{ ", postfix = " }")
 
 private fun SyncCaseNoteRequest.asNoteAndAmendments(typeSupplier: (String, String) -> SubType) = Note(
