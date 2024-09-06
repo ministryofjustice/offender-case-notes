@@ -39,8 +39,8 @@ dependencies {
   implementation("com.pauldijou:jwt-core_2.11:5.0.0")
   implementation("com.google.guava:guava:33.3.0-jre")
 
-  implementation(platform("com.amazonaws:aws-java-sdk-bom:1.12.770"))
-  implementation("software.amazon.awssdk:sns:2.27.16")
+  implementation(platform("com.amazonaws:aws-java-sdk-bom:1.12.771"))
+  implementation("software.amazon.awssdk:sns:2.27.20")
 
   testAnnotationProcessor("org.projectlombok:lombok:1.18.34")
   testCompileOnly("org.projectlombok:lombok:1.18.34")
