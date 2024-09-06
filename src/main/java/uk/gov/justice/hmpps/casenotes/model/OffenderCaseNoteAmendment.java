@@ -1,5 +1,6 @@
 package uk.gov.justice.hmpps.casenotes.model;
 
+import jakarta.persistence.Version;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.EqualsAndHashCode;
@@ -26,6 +27,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Entity
 @Table(name = "OFFENDER_CASE_NOTE_AMENDMENT")
@@ -41,9 +43,8 @@ import java.time.LocalDateTime;
 public class OffenderCaseNoteAmendment {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "OFFENDER_CASE_NOTE_AMENDMENT_ID", nullable = false)
-    private Long id;
+    private UUID id;
 
     @ManyToOne
     @JoinColumn(name = "OFFENDER_CASE_NOTE_ID", nullable = false)
@@ -78,5 +79,8 @@ public class OffenderCaseNoteAmendment {
     @Builder.Default
     @Setter
     private boolean softDeleted = false;
+
+    @Version
+    private Long version;
 
 }

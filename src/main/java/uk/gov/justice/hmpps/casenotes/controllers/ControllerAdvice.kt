@@ -46,7 +46,12 @@ class ControllerAdvice {
       .body(ErrorResponse(status = (HttpStatus.NOT_FOUND.value()), developerMessage = e.message))
   }
 
-  @ExceptionHandler(MissingServletRequestParameterException::class, ValidationException::class)
+  @ExceptionHandler(
+    MissingServletRequestParameterException::class,
+    ValidationException::class,
+    IllegalArgumentException::class,
+    IllegalStateException::class,
+  )
   fun handleValidationException(e: Exception): ResponseEntity<ErrorResponse> {
     return ResponseEntity
       .status(HttpStatus.BAD_REQUEST)

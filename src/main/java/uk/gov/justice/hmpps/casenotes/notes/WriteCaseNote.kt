@@ -14,6 +14,7 @@ import uk.gov.justice.hmpps.casenotes.domain.Note
 import uk.gov.justice.hmpps.casenotes.domain.NoteRepository
 import uk.gov.justice.hmpps.casenotes.domain.SubType
 import uk.gov.justice.hmpps.casenotes.domain.SubTypeRepository
+import uk.gov.justice.hmpps.casenotes.domain.findByParentCodeAndCode
 import uk.gov.justice.hmpps.casenotes.domain.saveAndRefresh
 import uk.gov.justice.hmpps.casenotes.services.EntityNotFoundException
 import java.util.UUID.fromString
@@ -92,5 +93,5 @@ class WriteCaseNote(
     context.userDisplayName,
     text,
     systemGenerated ?: false,
-  ).apply { new = true }
+  )
 }
