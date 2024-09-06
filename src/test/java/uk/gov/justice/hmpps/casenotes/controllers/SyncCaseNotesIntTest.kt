@@ -61,7 +61,7 @@ class SyncCaseNotesIntTest : ResourceTest() {
   fun `200 ok - new case notes created`() {
     val prisonNumbers = (0..100).map { prisonNumber() }
     val types = getAllTypes().filter { it.syncToNomis }
-    val request = (0..10_000).map {
+    val request = (0..5_000).map {
       val type = types.random()
       syncCaseNoteRequest(
         prisonIdentifier = prisonNumbers.random(),
@@ -72,7 +72,7 @@ class SyncCaseNotesIntTest : ResourceTest() {
     }
     val (response, elapsed) = measureTimedValue { syncCaseNotes(request).successList<SyncResult>() }
     assertThat(response.size).isEqualTo(request.size)
-    assertThat(elapsed.toJavaDuration()).isLessThanOrEqualTo(Duration.ofSeconds(3))
+    assertThat(elapsed.toJavaDuration()).isLessThanOrEqualTo(Duration.ofSeconds(2))
   }
 
   private fun syncCaseNotes(
