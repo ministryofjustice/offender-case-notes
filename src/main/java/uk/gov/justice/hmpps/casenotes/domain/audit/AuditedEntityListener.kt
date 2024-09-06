@@ -20,7 +20,7 @@ class AuditedEntityListener {
   private fun Audited.recordModifiedDetails() {
     val context = CaseNoteRequestContext.get()
     if (context.source == Source.DPS) {
-      recordCreatedDetails(context)
+      recordModifiedDetails(context)
     }
   }
 }
