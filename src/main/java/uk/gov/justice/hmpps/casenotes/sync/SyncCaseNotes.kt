@@ -69,6 +69,7 @@ private fun SyncCaseNoteRequest.asNoteAndAmendments(typeSupplier: (String, Strin
   TreeSet(),
 ).let { note ->
   note.legacyId = this.legacyId
+  note.createDateTime = createdDateTime
   NoteAndAmendments(note, amendments.map { it.asAmendment(note) })
 }
 
