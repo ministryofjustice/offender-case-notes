@@ -129,5 +129,4 @@ private fun syncAmendmentRequest(
   authorUserId: String = "12376471",
   authorName: String = "Author Name",
   createdDateTime: LocalDateTime = LocalDateTime.now(),
-  source: Source = Source.NOMIS,
-) = SyncAmendmentRequest(text, authorUsername, authorUserId, authorName, createdDateTime, source)
+) = SyncAmendmentRequest(text, authorUsername, authorUserId, authorName, createdDateTime)
