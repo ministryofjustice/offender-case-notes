@@ -17,6 +17,7 @@ import org.springframework.data.jpa.domain.Specification
 import org.springframework.data.jpa.repository.EntityGraph
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor
+import org.springframework.data.jpa.repository.Query
 import uk.gov.justice.hmpps.casenotes.config.CaseNoteRequestContext
 import uk.gov.justice.hmpps.casenotes.domain.IdGenerator.newUuid
 import uk.gov.justice.hmpps.casenotes.domain.Note.Companion.AMENDMENTS
@@ -80,10 +81,7 @@ class Note(
   @Column(name = "offender_case_note_id", updatable = false, nullable = false)
   val id: UUID = newUuid()
 
-  @Column(columnDefinition = "serial", insertable = false, updatable = false)
-  var eventId: Int? = null
-
-  var legacyId: Long? = null
+  var legacyId: Long = 0
 
   fun amendments() = amendments.toSortedSet()
   fun addAmendment(request: TextRequest) = apply {
@@ -117,6 +115,9 @@ interface NoteRepository : JpaSpecificationExecutor<Note>, JpaRepository<Note, U
 
   @EntityGraph(attributePaths = ["type.parent", "amendments"])
   fun findByLegacyIdAndPrisonNumber(legacyId: Long, prisonNumber: String): Note?
+
+  @Query("select nextval('offender_case_note_event_id_seq')", nativeQuery = true)
+  fun getNextLegacyId(): Long
 }
 
 fun NoteRepository.saveAndRefresh(note: Note): Note {

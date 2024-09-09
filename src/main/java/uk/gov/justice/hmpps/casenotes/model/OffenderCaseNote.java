@@ -102,11 +102,9 @@ public class OffenderCaseNote {
     private String modifyUserId;
 
     @Column(columnDefinition = "serial", insertable = false, updatable = false)
-    private Integer eventId;
+    private Long legacyId;
 
     private boolean systemGenerated;
-
-    private Long legacyId;
 
     @Version
     private Long version;

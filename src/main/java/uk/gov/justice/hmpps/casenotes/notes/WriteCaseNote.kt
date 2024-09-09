@@ -93,5 +93,5 @@ class WriteCaseNote(
     context.userDisplayName,
     text,
     systemGenerated ?: false,
-  )
+  ).apply { legacyId = noteRepository.getNextLegacyId() }
 }

@@ -18,11 +18,11 @@ data class CaseNoteRequestContext(
     const val USERNAME_HEADER = "Username"
     private const val SYS_USER = "SYS"
     private const val SYS_DISPLAY_NAME = "Sys"
-    val NOMIS_CONTEXT = CaseNoteRequestContext(SYS_USER, SYS_DISPLAY_NAME, SYS_USER, source = Source.NOMIS)
+    private val NomisContext = { CaseNoteRequestContext(SYS_USER, SYS_DISPLAY_NAME, SYS_USER, source = Source.NOMIS) }
 
     fun get(): CaseNoteRequestContext = RequestContextHolder.getRequestAttributes()
       ?.getAttribute(CaseNoteRequestContext::class.simpleName!!, 0) as CaseNoteRequestContext?
-      ?: NOMIS_CONTEXT
+      ?: NomisContext()
   }
 }
 

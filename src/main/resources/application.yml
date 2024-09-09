@@ -21,7 +21,7 @@ spring:
     locations: classpath:db/migration/general,classpath:db/migration/{vendor}
 
   datasource:
-    url: 'jdbc:postgresql://${DATABASE_ENDPOINT}/${DATABASE_NAME}?sslmode=verify-full&reWriteBatchedInserts=true'
+    url: 'jdbc:postgresql://${DATABASE_ENDPOINT}/${DATABASE_NAME}?sslmode=verify-full'
     username: ${DATABASE_USERNAME}
     password: ${DATABASE_PASSWORD}
     hikari:

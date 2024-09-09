@@ -40,7 +40,7 @@ class WebClientConfiguration(
   /** OAUTH2 API Rest URL endpoint ("http://localhost:8100") */
   @Value("\${tokenverification.api.base.url}") private val tokenVerificationApiBaseUrl: @URL String,
   @Value("\${api.health-timeout:1s}") private val healthTimeout: Duration,
-  @Value("\${api.response-timeout:10s}") private val responseTimeout: Duration,
+  @Value("\${api.response-timeout:2s}") private val responseTimeout: Duration,
 ) {
 
   @Bean

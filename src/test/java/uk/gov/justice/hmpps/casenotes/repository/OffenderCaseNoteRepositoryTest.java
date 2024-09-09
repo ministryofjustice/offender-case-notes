@@ -46,9 +46,9 @@ public class OffenderCaseNoteRepositoryTest extends IntegrationTest {
     @BeforeEach
     public void setUp() {
         final var jwt = Jwt.withTokenValue("some").subject("anonymous").header("head", "something").build();
-        SecurityContextHolder.getContext().setAuthentication(
-                new AuthAwareAuthenticationToken(jwt, "userId", Collections.emptyList()));
-        genType = caseNoteTypeRepository.findByParentTypeAndType(PARENT_TYPE, SUB_TYPE).get();
+        SecurityContextHolder.getContext()
+            .setAuthentication(new AuthAwareAuthenticationToken(jwt, "userId", Collections.emptyList()));
+        genType = caseNoteTypeRepository.findByParentTypeAndType(PARENT_TYPE, SUB_TYPE).orElseThrow();
     }
 
     @Test
@@ -67,7 +67,9 @@ public class OffenderCaseNoteRepositoryTest extends IntegrationTest {
 
         final var retrievedEntity = repository.findById(persistedEntity.getId()).orElseThrow();
 
-        assertThat(retrievedEntity).usingRecursiveComparison().ignoringFields("occurrenceDateTime", "caseNoteType", "eventId", "createDateTime", "modifyDateTime").isEqualTo(caseNote);
+        assertThat(retrievedEntity).usingRecursiveComparison()
+            .ignoringFields("occurrenceDateTime", "caseNoteType", "eventId", "createDateTime", "modifyDateTime", "legacyId")
+            .isEqualTo(caseNote);
         assertThat(retrievedEntity.getOccurrenceDateTime()).isEqualToIgnoringNanos(caseNote.getOccurrenceDateTime());
         assertThat(retrievedEntity.getCaseNoteType()).isEqualTo(caseNote.getCaseNoteType());
     }
@@ -207,7 +209,7 @@ public class OffenderCaseNoteRepositoryTest extends IntegrationTest {
         TestTransaction.end();
         TestTransaction.start();
 
-        assertThat(repository.findById(note.getId()).orElseThrow().getEventId()).isLessThan(0);
+        assertThat(repository.findById(note.getId()).orElseThrow().getLegacyId()).isLessThan(0);
     }
 
     @Test
@@ -278,8 +280,14 @@ public class OffenderCaseNoteRepositoryTest extends IntegrationTest {
         TestTransaction.flagForCommit();
         TestTransaction.end();
 
-        final var caseNoteCountBefore = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM offender_case_note_amendment", Integer.class);
-        assertThat(caseNoteCountBefore).isEqualTo(6);
+        final var offenderAmendmentSql = """
+            select count(1) from offender_case_note_amendment a
+            join offender_case_note c on a.offender_case_note_id = c.offender_case_note_id
+            where c.offender_identifier = 'X3111XX'
+            """;
+
+        final var caseNoteCountBefore = jdbcTemplate.queryForObject(offenderAmendmentSql, Integer.class);
+        assertThat(caseNoteCountBefore).isEqualTo(1);
 
         TestTransaction.start();
         repository.deleteOffenderCaseNoteAmendmentsByOffenderIdentifier("X3111XX");
@@ -292,8 +300,8 @@ public class OffenderCaseNoteRepositoryTest extends IntegrationTest {
         assertThat(repository.findById(persistedEntity.getId())).isEmpty();
         TestTransaction.end();
 
-        final var caseNoteCountAfter = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM offender_case_note_amendment", Integer.class);
-        assertThat(caseNoteCountAfter).isEqualTo(5);
+        final var caseNoteCountAfter = jdbcTemplate.queryForObject(offenderAmendmentSql, Integer.class);
+        assertThat(caseNoteCountAfter).isZero();
 
     }
 

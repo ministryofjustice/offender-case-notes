@@ -142,7 +142,6 @@ public class CaseNoteService {
         final var parentType = cn.getCaseNoteType().getParentType();
         return CaseNote.builder()
             .caseNoteId(cn.getId().toString())
-            .eventId(cn.getEventId())
             .offenderIdentifier(cn.getOffenderIdentifier())
             .occurrenceDateTime(cn.getOccurrenceDateTime())
             .authorUserId(cn.getAuthorUserId())
@@ -157,6 +156,7 @@ public class CaseNoteService {
             .creationDateTime(cn.getCreateDateTime())
             .systemGenerated(cn.isSystemGenerated())
             .legacyId(cn.getLegacyId())
+            .eventId(cn.getLegacyId())
             .amendments(cn.getAmendments().stream().map(
                 a -> new CaseNoteAmendment(
                     a.getCreateDateTime(),

@@ -80,7 +80,7 @@ private fun SyncAmendmentRequest.asAmendment(note: Note) = Amendment(
   authorUserId,
   text,
   newUuid(),
-)
+).apply { this.createDateTime = this@asAmendment.createdDateTime }
 
 private data class NoteAndAmendments(val note: Note, val amendments: List<Amendment>)
 
