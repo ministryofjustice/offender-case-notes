@@ -113,7 +113,7 @@ class SyncCaseNotesIntTest : ResourceTest() {
     assertThat(prisonNumber).isEqualTo(request.personIdentifier)
     assertThat(type.parent.code).isEqualTo(request.type)
     assertThat(type.code).isEqualTo(request.subType)
-    assertThat(text).isEqualTo(text)
+    assertThat(text).isEqualTo(request.text)
     assertThat(occurredAt.truncatedTo(SECONDS)).isEqualTo(request.occurrenceDateTime.truncatedTo(SECONDS))
     assertThat(createDateTime.truncatedTo(SECONDS)).isEqualTo(request.createdDateTime.truncatedTo(SECONDS))
     assertThat(authorName).isEqualTo(request.authorName)
@@ -123,7 +123,7 @@ class SyncCaseNotesIntTest : ResourceTest() {
   }
 
   private fun Amendment.verifyAgainst(request: SyncAmendmentRequest) {
-    assertThat(text).isEqualTo(text)
+    assertThat(text).isEqualTo(request.text)
     assertThat(createDateTime.truncatedTo(SECONDS)).isEqualTo(request.createdDateTime.truncatedTo(SECONDS))
     assertThat(authorName).isEqualTo(request.authorName)
     assertThat(authorUsername).isEqualTo(request.authorUsername)
