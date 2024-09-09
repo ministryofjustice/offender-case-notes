@@ -25,7 +25,7 @@ class SyncCaseNotes(
     val types = getTypesForSync(caseNotes.map { it.typeKey() }.toSet())
     val (persist, _) = caseNotes.partition { it.id == null }
     val new = create(persist.map { it.asNoteAndAmendments { t, st -> requireNotNull(types[TypeKey(t, st)]) } })
-    return new.map { SyncResult(it.id, it.legacyId!!) }
+    return new.map { SyncResult(it.id, it.legacyId) }
   }
 
   private fun SyncCaseNoteRequest.typeKey() = TypeKey(type, subType)
@@ -53,7 +53,11 @@ class SyncCaseNotes(
 private fun <T : TypeLookup> Collection<T>.exceptionMessage() =
   sortedBy { it.parentCode }
     .groupBy { it.parentCode }
-    .map { e -> "${e.key}:${e.value.sortedBy { it.code }.joinToString(prefix = "[", postfix = "]", separator = ", ") { it.code }}" }
+    .map { e ->
+      "${e.key}:${
+        e.value.sortedBy { it.code }.joinToString(prefix = "[", postfix = "]", separator = ", ") { it.code }
+      }"
+    }
     .joinToString(separator = ", ", prefix = "{ ", postfix = " }")
 
 private fun SyncCaseNoteRequest.asNoteAndAmendments(typeSupplier: (String, String) -> SubType) = Note(
@@ -70,6 +74,7 @@ private fun SyncCaseNoteRequest.asNoteAndAmendments(typeSupplier: (String, Strin
 ).let { note ->
   note.legacyId = this.legacyId
   note.createDateTime = createdDateTime
+  note.createUserId = createdByUsername
   NoteAndAmendments(note, amendments.map { it.asAmendment(note) })
 }
 
@@ -80,7 +85,10 @@ private fun SyncAmendmentRequest.asAmendment(note: Note) = Amendment(
   authorUserId,
   text,
   newUuid(),
-).apply { this.createDateTime = this@asAmendment.createdDateTime }
+).apply {
+  this.createDateTime = this@asAmendment.createdDateTime
+  this.createUserId = createdByUsername
+}
 
 private data class NoteAndAmendments(val note: Note, val amendments: List<Amendment>)
 

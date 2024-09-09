@@ -7,4 +7,5 @@ interface AuthoredRequest {
   val authorUserId: String
   val authorName: String
   val createdDateTime: LocalDateTime
+  val createdByUsername: String
 }

@@ -64,7 +64,7 @@ class SyncCaseNotesIntTest : ResourceTest() {
   fun `200 ok - new case notes created`() {
     val prisonNumbers = (0..100).map { prisonNumber() }
     val types = getAllTypes().filter { it.syncToNomis }
-    val request = (0..5_000).map {
+    val request = (0..10_000).map {
       val type = types.random()
       syncCaseNoteRequest(
         prisonIdentifier = prisonNumbers.random(),
@@ -105,7 +105,6 @@ class SyncCaseNotesIntTest : ResourceTest() {
     val response = syncCaseNotes(listOf(request)).successList<SyncResult>()
     val saved = noteRepository.findByIdAndPrisonNumber(response.first().id, request.personIdentifier)
     requireNotNull(saved).verifyAgainst(request)
-    assertThat(saved.createUserId).isEqualTo("SYS")
     saved.amendments().first().verifyAgainst(request.amendments.first())
   }
 
@@ -120,6 +119,7 @@ class SyncCaseNotesIntTest : ResourceTest() {
     assertThat(authorUsername).isEqualTo(request.authorUsername)
     assertThat(authorUserId).isEqualTo(request.authorUserId)
     assertThat(legacyId).isEqualTo(request.legacyId)
+    assertThat(createUserId).isEqualTo(request.createdByUsername)
   }
 
   private fun Amendment.verifyAgainst(request: SyncAmendmentRequest) {
@@ -128,6 +128,7 @@ class SyncCaseNotesIntTest : ResourceTest() {
     assertThat(authorName).isEqualTo(request.authorName)
     assertThat(authorUsername).isEqualTo(request.authorUsername)
     assertThat(authorUserId).isEqualTo(request.authorUserId)
+    assertThat(createUserId).isEqualTo(request.createdByUsername)
   }
 
   private fun syncCaseNotes(
@@ -158,6 +159,7 @@ private fun syncCaseNoteRequest(
   authorUserId: String = "12376471",
   authorName: String = "Author Name",
   createdDateTime: LocalDateTime = LocalDateTime.now().minusDays(1),
+  createdBy: String = "CreatedByUsername",
   source: Source = Source.NOMIS,
   amendments: Set<SyncAmendmentRequest> = setOf(),
 ) = SyncCaseNoteRequest(
@@ -174,6 +176,7 @@ private fun syncCaseNoteRequest(
   authorUserId,
   authorName,
   createdDateTime,
+  createdBy,
   source,
   amendments,
 )
@@ -184,4 +187,5 @@ private fun syncAmendmentRequest(
   authorUserId: String = "12376471",
   authorName: String = "Author Name",
   createdDateTime: LocalDateTime = LocalDateTime.now(),
-) = SyncAmendmentRequest(text, authorUsername, authorUserId, authorName, createdDateTime)
+  createdBy: String = "CreatedByUsername",
+) = SyncAmendmentRequest(text, authorUsername, authorUserId, authorName, createdDateTime, createdBy)
