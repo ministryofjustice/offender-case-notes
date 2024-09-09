@@ -7,7 +7,7 @@ spring:
     show-sql: false
 
   datasource:
-    url: 'jdbc:postgresql://localhost:5432/case_notes'
+    url: 'jdbc:postgresql://localhost:5432/case_notes?reWriteBatchedInserts=true'
     username: case
     password: notes
 
