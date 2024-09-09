@@ -9,7 +9,7 @@ spring:
         jdbc:
           lob:
             non_contextual_creation: true
-          batch_size: 50
+          batch_size: 100
           batch_versioned_data: true
     show-sql: false
     generate-ddl: false
@@ -21,7 +21,7 @@ spring:
     locations: classpath:db/migration/general,classpath:db/migration/{vendor}
 
   datasource:
-    url: 'jdbc:postgresql://${DATABASE_ENDPOINT}/${DATABASE_NAME}?sslmode=verify-full?reWriteBatchedInserts=true'
+    url: 'jdbc:postgresql://${DATABASE_ENDPOINT}/${DATABASE_NAME}?sslmode=verify-full&reWriteBatchedInserts=true'
     username: ${DATABASE_USERNAME}
     password: ${DATABASE_PASSWORD}
     hikari:

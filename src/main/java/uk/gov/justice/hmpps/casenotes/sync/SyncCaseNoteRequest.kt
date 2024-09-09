@@ -79,6 +79,10 @@ data class SyncCaseNoteRequest(
   )
   override val createdDateTime: LocalDateTime,
 
+  @Schema(requiredMode = REQUIRED, description = "Username of the user that created the case note")
+  @NotBlank
+  val createdByUsername: String,
+
   @Schema(
     requiredMode = REQUIRED,
     example = "DPS",

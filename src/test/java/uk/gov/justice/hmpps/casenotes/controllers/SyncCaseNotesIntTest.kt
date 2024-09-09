@@ -105,7 +105,6 @@ class SyncCaseNotesIntTest : ResourceTest() {
     val response = syncCaseNotes(listOf(request)).successList<SyncResult>()
     val saved = noteRepository.findByIdAndPrisonNumber(response.first().id, request.personIdentifier)
     requireNotNull(saved).verifyAgainst(request)
-    assertThat(saved.createUserId).isEqualTo("SYS")
     saved.amendments().first().verifyAgainst(request.amendments.first())
   }
 
@@ -120,6 +119,7 @@ class SyncCaseNotesIntTest : ResourceTest() {
     assertThat(authorUsername).isEqualTo(request.authorUsername)
     assertThat(authorUserId).isEqualTo(request.authorUserId)
     assertThat(legacyId).isEqualTo(request.legacyId)
+    assertThat(createUserId).isEqualTo(request.createdByUsername)
   }
 
   private fun Amendment.verifyAgainst(request: SyncAmendmentRequest) {
@@ -158,6 +158,7 @@ private fun syncCaseNoteRequest(
   authorUserId: String = "12376471",
   authorName: String = "Author Name",
   createdDateTime: LocalDateTime = LocalDateTime.now().minusDays(1),
+  createdBy: String = "CreatedByUsername",
   source: Source = Source.NOMIS,
   amendments: Set<SyncAmendmentRequest> = setOf(),
 ) = SyncCaseNoteRequest(
@@ -174,6 +175,7 @@ private fun syncCaseNoteRequest(
   authorUserId,
   authorName,
   createdDateTime,
+  createdBy,
   source,
   amendments,
 )
