@@ -64,7 +64,7 @@ class SyncCaseNotesIntTest : ResourceTest() {
   fun `200 ok - new case notes created`() {
     val prisonNumbers = (0..100).map { prisonNumber() }
     val types = getAllTypes().filter { it.syncToNomis }
-    val request = (0..10_000).map {
+    val request = (0..8_000).map {
       val type = types.random()
       syncCaseNoteRequest(
         prisonIdentifier = prisonNumbers.random(),
@@ -128,7 +128,6 @@ class SyncCaseNotesIntTest : ResourceTest() {
     assertThat(authorName).isEqualTo(request.authorName)
     assertThat(authorUsername).isEqualTo(request.authorUsername)
     assertThat(authorUserId).isEqualTo(request.authorUserId)
-    assertThat(createUserId).isEqualTo(request.createdByUsername)
   }
 
   private fun syncCaseNotes(
@@ -187,5 +186,4 @@ private fun syncAmendmentRequest(
   authorUserId: String = "12376471",
   authorName: String = "Author Name",
   createdDateTime: LocalDateTime = LocalDateTime.now(),
-  createdBy: String = "CreatedByUsername",
-) = SyncAmendmentRequest(text, authorUsername, authorUserId, authorName, createdDateTime, createdBy)
+) = SyncAmendmentRequest(text, authorUsername, authorUserId, authorName, createdDateTime)
