@@ -116,17 +116,18 @@ class SyncCaseNotesIntTest : ResourceTest() {
     assertThat(text).isEqualTo(text)
     assertThat(occurredAt.truncatedTo(SECONDS)).isEqualTo(request.occurrenceDateTime.truncatedTo(SECONDS))
     assertThat(createDateTime.truncatedTo(SECONDS)).isEqualTo(request.createdDateTime.truncatedTo(SECONDS))
-    assertThat(authorName).isEqualTo(authorName)
-    assertThat(authorUsername).isEqualTo(authorUsername)
-    assertThat(authorUserId).isEqualTo(authorUserId)
+    assertThat(authorName).isEqualTo(request.authorName)
+    assertThat(authorUsername).isEqualTo(request.authorUsername)
+    assertThat(authorUserId).isEqualTo(request.authorUserId)
+    assertThat(legacyId).isEqualTo(request.legacyId)
   }
 
   private fun Amendment.verifyAgainst(request: SyncAmendmentRequest) {
     assertThat(text).isEqualTo(text)
     assertThat(createDateTime.truncatedTo(SECONDS)).isEqualTo(request.createdDateTime.truncatedTo(SECONDS))
-    assertThat(authorName).isEqualTo(authorName)
-    assertThat(authorUsername).isEqualTo(authorUsername)
-    assertThat(authorUserId).isEqualTo(authorUserId)
+    assertThat(authorName).isEqualTo(request.authorName)
+    assertThat(authorUsername).isEqualTo(request.authorUsername)
+    assertThat(authorUserId).isEqualTo(request.authorUserId)
   }
 
   private fun syncCaseNotes(
