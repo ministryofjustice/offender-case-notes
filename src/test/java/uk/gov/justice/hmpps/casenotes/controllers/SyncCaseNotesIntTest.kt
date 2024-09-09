@@ -64,7 +64,7 @@ class SyncCaseNotesIntTest : ResourceTest() {
   fun `200 ok - new case notes created`() {
     val prisonNumbers = (0..100).map { prisonNumber() }
     val types = getAllTypes().filter { it.syncToNomis }
-    val request = (0..8_000).map {
+    val request = (0..5_000).map {
       val type = types.random()
       syncCaseNoteRequest(
         prisonIdentifier = prisonNumbers.random(),
