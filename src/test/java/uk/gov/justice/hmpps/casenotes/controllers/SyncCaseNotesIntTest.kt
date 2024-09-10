@@ -23,7 +23,7 @@ import kotlin.time.toJavaDuration
 class SyncCaseNotesIntTest : ResourceTest() {
   @Test
   fun `401 unauthorised`() {
-    webTestClient.get().uri(SYNC_URL).exchange().expectStatus().isUnauthorized
+    webTestClient.put().uri(SYNC_URL).exchange().expectStatus().isUnauthorized
   }
 
   @Test

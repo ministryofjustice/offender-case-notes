@@ -66,7 +66,7 @@ data class SyncCaseNoteRequest(
 
   @Schema(requiredMode = REQUIRED, description = "Id of the staff member that created the case note")
   @NotBlank
-  override val authorUserId: String,
+  val authorUserId: String,
 
   @Schema(requiredMode = REQUIRED, description = "Full name of the staff member that created the case note")
   @NotBlank
@@ -77,7 +77,7 @@ data class SyncCaseNoteRequest(
     example = "2024-09-01T10:25:00",
     description = "Created date time from audit field in nomis to allow ordering by creation date",
   )
-  override val createdDateTime: LocalDateTime,
+  val createdDateTime: LocalDateTime,
 
   @Schema(requiredMode = REQUIRED, description = "Username of the user that created the case note")
   @NotBlank
@@ -106,12 +106,12 @@ data class SyncAmendmentRequest(
 
   @Schema(requiredMode = REQUIRED, description = "Id of the staff member that amended the case note")
   @NotBlank
-  override val authorUserId: String,
+  val authorUserId: String,
 
   @Schema(requiredMode = REQUIRED, description = "Full name of the staff member that amended the case note")
   @NotBlank
   override val authorName: String,
 
   @Schema(requiredMode = REQUIRED, example = "2024-09-01T10:25:00", description = "Date time of the amendment")
-  override val createdDateTime: LocalDateTime,
+  val createdDateTime: LocalDateTime,
 ) : TextRequest, AuthoredRequest
