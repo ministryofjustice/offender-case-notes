@@ -33,7 +33,7 @@ data class SystemGeneratedRequest(
   )
   val occurrenceDateTime: LocalDateTime? = null,
 
-  @Schema(requiredMode = REQUIRED, description = "Username of the staff member that created the case note")
+  @Schema(description = "Optional username of the staff member that created the case note. If not provided, the subject of the jwt token used to authorise the request will be used.")
   @field:Size(max = 64, message = "Author username cannot be more than 64 characters")
   @NotBlank
   override val authorUsername: String? = null,
