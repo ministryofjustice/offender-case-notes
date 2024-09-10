@@ -96,25 +96,6 @@ class CreateAmendmentIntTest : ResourceTest() {
     }
   }
 
-  @Test
-  fun `can amend a case note with write role using 'Username' header`() {
-    val username = "HeaderUsername"
-    oAuthApi.subGetUserDetails(username)
-    val caseNote = givenCaseNote(generateCaseNote(prisonNumber()))
-    val request = amendCaseNoteRequest()
-    val response = amendCaseNote(caseNote.prisonNumber, caseNote.id.toString(), request, headerUsername = username)
-      .success<CaseNote>()
-
-    assertThat(response.amendments.size).isEqualTo(1)
-    assertThat(response.amendments.first().additionalNoteText).isEqualTo(request.text)
-
-    val saved = requireNotNull(noteRepository.findByIdAndPrisonNumber(caseNote.id, response.offenderIdentifier))
-    with(saved.amendments().first()) {
-      assertThat(text).isEqualTo(request.text)
-      assertThat(authorUsername).isEqualTo(username)
-    }
-  }
-
   private fun amendCaseNoteRequest(
     text: String = "Some amended text about a case note",
   ) = AmendCaseNoteRequest(text)
