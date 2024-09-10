@@ -90,22 +90,6 @@ class CreateCaseNoteIntTest : ResourceTest() {
   }
 
   @Test
-  fun `can create a case note with write role using 'Username' header`() {
-    val username = "HeaderUsername"
-    oAuthApi.subGetUserDetails(username)
-    val request = createCaseNoteRequest()
-    val response = createCaseNote(prisonNumber(), request, headerUsername = username)
-      .success<CaseNote>(HttpStatus.CREATED)
-
-    val saved = requireNotNull(
-      noteRepository.findByIdAndPrisonNumber(fromString(response.caseNoteId), response.offenderIdentifier),
-    )
-    saved.verifyAgainst(request)
-    assertThat(saved.authorUsername).isEqualTo(username)
-    response.verifyAgainst(saved)
-  }
-
-  @Test
   fun `can handle explicitly null value for occurrence date time`() {
     val request = """
       {

@@ -26,7 +26,6 @@ import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestController
 import uk.gov.justice.hmpps.casenotes.config.SecurityUserContext
 import uk.gov.justice.hmpps.casenotes.config.ServiceConfig
-import uk.gov.justice.hmpps.casenotes.config.UsernameHeader
 import uk.gov.justice.hmpps.casenotes.dto.CaseNoteFilter
 import uk.gov.justice.hmpps.casenotes.dto.ErrorResponse
 import uk.gov.justice.hmpps.casenotes.notes.AmendCaseNoteRequest
@@ -129,7 +128,6 @@ class CaseNoteController(
       ),
     ],
   )
-  @UsernameHeader
   @ResponseStatus(HttpStatus.CREATED)
   @PostMapping("/{offenderIdentifier}")
   fun createCaseNote(
@@ -173,7 +171,6 @@ class CaseNoteController(
       ),
     ],
   )
-  @UsernameHeader
   @PutMapping("/{offenderIdentifier}/{caseNoteIdentifier}")
   fun amendCaseNote(
     @Parameter(description = "Offender Identifier", required = true, example = "A1234AA")
@@ -203,7 +200,6 @@ class CaseNoteController(
       content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))],
     ),
   )
-  @UsernameHeader
   @ResponseStatus(HttpStatus.OK)
   @DeleteMapping("/{offenderIdentifier}/{caseNoteId}")
   fun softDeleteCaseNote(
