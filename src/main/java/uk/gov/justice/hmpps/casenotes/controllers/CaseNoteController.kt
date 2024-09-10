@@ -104,7 +104,18 @@ class CaseNoteController(
     }
   }
 
-  @Operation(summary = "Add Case Note for offender", description = "Creates a note for a specific type/subType")
+  @Operation(
+    summary = "Add a user supplied case note for an offender.",
+    description =
+    """
+    This endpoint should be used for adding a user supplied case note for an offender.
+    
+    System generated case notes, i.e. those generated as a side effect of another service, are supported but their usage is discouraged. 
+    HMPPS intends case notes to only be supplied by users. Case notes used to inform of a change in another service, for example alerts being added or closed, should be considered deprecated and alternative methods of displaying this information to users should be pursued.
+    
+    An example alternative solution: a dedicated widget showing summary information on the prisoner profile provides improved context at a glance about a prisoner.
+    """,
+  )
   @ApiResponses(
     value = [
       ApiResponse(
