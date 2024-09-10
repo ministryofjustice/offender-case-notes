@@ -16,12 +16,10 @@ class ReadTypeIntTest : ResourceTest() {
     webTestClient.get().uri(BASE_URL).exchange().expectStatus().isUnauthorized
   }
 
-  /* Temporarily removed due to a user issue
   @Test
   fun `403 forbidden - does not have the right role`() {
     getCaseNoteTypes(roles = listOf("ANY_OTHER_ROLE")).expectStatus().isForbidden
   }
-   */
 
   @ParameterizedTest
   @ValueSource(strings = [ROLE_CASE_NOTES_READ, ROLE_CASE_NOTES_WRITE])
@@ -31,11 +29,11 @@ class ReadTypeIntTest : ResourceTest() {
   }
 
   @Test
-  fun `default request provides inactive, active and restricted types`() {
+  fun `default request provides active and non restricted types`() {
     val types = getCaseNoteTypes().successList<CaseNoteType>()
     assertThat(types.withoutSubTypes()).isEmpty()
-    assertThat(types.inactive()).isNotEmpty()
-    assertThat(types.restricted()).isNotEmpty()
+    assertThat(types.inactive()).isEmpty()
+    assertThat(types.restricted()).isEmpty()
     assertThat(types.filter { it.code == "READ_TEST" }).isNotEmpty()
     assertThat(types.filter { it.code == "NOT_DPS" }).isNotEmpty()
   }
