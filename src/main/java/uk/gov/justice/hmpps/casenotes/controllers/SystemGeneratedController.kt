@@ -6,6 +6,7 @@ import io.swagger.v3.oas.annotations.media.Schema
 import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.responses.ApiResponses
 import io.swagger.v3.oas.annotations.tags.Tag
+import jakarta.validation.Valid
 import org.springframework.http.HttpStatus
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.security.core.context.SecurityContextHolder
@@ -20,6 +21,7 @@ import uk.gov.justice.hmpps.casenotes.config.AuthAwareAuthenticationToken
 import uk.gov.justice.hmpps.casenotes.config.CaseNoteRequestContext
 import uk.gov.justice.hmpps.casenotes.config.SecurityUserContext.Companion.ROLE_SYSTEM_GENERATED_RW
 import uk.gov.justice.hmpps.casenotes.dto.ErrorResponse
+import uk.gov.justice.hmpps.casenotes.integrations.PrisonerSearchService
 import uk.gov.justice.hmpps.casenotes.notes.CaseNote
 import uk.gov.justice.hmpps.casenotes.services.CaseNoteEventPusher
 import uk.gov.justice.hmpps.casenotes.systemgenerated.CreateSysGenNote
@@ -29,6 +31,7 @@ import uk.gov.justice.hmpps.casenotes.systemgenerated.SystemGeneratedRequest
 @RestController
 @RequestMapping("system-generated/case-notes/{personIdentifier}")
 class SystemGeneratedController(
+  private val search: PrisonerSearchService,
   private val save: CreateSysGenNote,
   private val eventPusher: CaseNoteEventPusher,
 ) {
@@ -62,10 +65,11 @@ class SystemGeneratedController(
   @PostMapping
   fun createSystemGeneratedNote(
     @PathVariable personIdentifier: String,
-    @RequestBody request: SystemGeneratedRequest,
+    @Valid @RequestBody request: SystemGeneratedRequest,
   ): CaseNote {
     setContext()
-    return save.systemGeneratedCaseNote(personIdentifier, request).also { eventPusher.sendEvent(it) }
+    val create = if (request.locationId == null) request.copy(locationId = search.getPrisonerDetails(personIdentifier).prisonId) else request
+    return save.systemGeneratedCaseNote(personIdentifier, create).also { eventPusher.sendEvent(it) }
   }
 
   private fun setContext() {

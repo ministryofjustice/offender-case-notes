@@ -1,13 +1,11 @@
 package uk.gov.justice.hmpps.casenotes.notes
 
 import com.microsoft.applicationinsights.TelemetryClient
-import jakarta.validation.Valid
 import jakarta.validation.ValidationException
 import org.springframework.security.access.AccessDeniedException
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
-import org.springframework.validation.annotation.Validated
 import uk.gov.justice.hmpps.casenotes.config.CaseNoteRequestContext
 import uk.gov.justice.hmpps.casenotes.config.SecurityUserContext.Companion.ROLE_CASE_NOTES_WRITE
 import uk.gov.justice.hmpps.casenotes.domain.Note
@@ -19,7 +17,6 @@ import uk.gov.justice.hmpps.casenotes.domain.saveAndRefresh
 import uk.gov.justice.hmpps.casenotes.services.EntityNotFoundException
 import java.util.UUID.fromString
 
-@Validated
 @Service
 @Transactional
 @PreAuthorize("hasAnyRole('$ROLE_CASE_NOTES_WRITE')")
@@ -28,7 +25,7 @@ class WriteCaseNote(
   private val noteRepository: NoteRepository,
   private val telemetryClient: TelemetryClient,
 ) {
-  fun createNote(prisonNumber: String, @Valid request: CreateCaseNoteRequest, useRestrictedType: Boolean): CaseNote {
+  fun createNote(prisonNumber: String, request: CreateCaseNoteRequest, useRestrictedType: Boolean): CaseNote {
     val type = subTypeRepository.findByParentCodeAndCode(request.type, request.subType)
       ?.validateTypeUsage(useRestrictedType)
       ?: throw IllegalArgumentException("Unknown case note type ${request.type}/${request.subType}")
@@ -41,7 +38,7 @@ class WriteCaseNote(
   fun createAmendment(
     prisonNumber: String,
     caseNoteId: String,
-    @Valid request: AmendCaseNoteRequest,
+    request: AmendCaseNoteRequest,
     useRestrictedType: Boolean,
   ): CaseNote {
     val caseNote = getCaseNote(prisonNumber, caseNoteId).also {

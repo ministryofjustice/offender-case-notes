@@ -90,6 +90,30 @@ class CreateCaseNoteIntTest : ResourceTest() {
   }
 
   @Test
+  fun `400 bad request - field validation failures`() {
+    val request = createCaseNoteRequest(
+      type = "n".repeat(13),
+      subType = "n".repeat(13),
+      locationId = "n".repeat(7),
+      text = "",
+    )
+    val response = createCaseNote(prisonNumber(), request).errorResponse(HttpStatus.BAD_REQUEST)
+    with(response) {
+      assertThat(status).isEqualTo(HttpStatus.BAD_REQUEST.value())
+      assertThat(developerMessage).isEqualTo(
+        """
+        |400 BAD_REQUEST Validation failures: 
+        |location must be no more than 6 characters
+        |sub type must be no more than 12 characters
+        |text cannot be blank
+        |type must be no more than 12 characters
+        |
+        """.trimMargin(),
+      )
+    }
+  }
+
+  @Test
   fun `can handle explicitly null value for occurrence date time`() {
     val request = """
       {
@@ -126,7 +150,6 @@ class CreateCaseNoteIntTest : ResourceTest() {
     params: Map<String, String> = mapOf("useRestrictedType" to "true"),
     roles: List<String> = listOf(ROLE_CASE_NOTES_WRITE),
     tokenUsername: String = USERNAME,
-    headerUsername: String? = null,
   ) = webTestClient.post().uri { ub ->
     ub.path(urlToTest(prisonNumber))
     params.forEach {
@@ -135,7 +158,6 @@ class CreateCaseNoteIntTest : ResourceTest() {
     ub.build()
   }.headers(addBearerAuthorisation(tokenUsername, roles))
     .header(CASELOAD_ID, ACTIVE_PRISON)
-    .addUsernameHeader(headerUsername)
     .bodyValue(request)
     .exchange()
 
@@ -145,7 +167,6 @@ class CreateCaseNoteIntTest : ResourceTest() {
     params: Map<String, String> = mapOf("useRestrictedType" to "true"),
     roles: List<String> = listOf(ROLE_CASE_NOTES_WRITE),
     tokenUsername: String = USERNAME,
-    headerUsername: String? = null,
   ) = webTestClient.post().uri { ub ->
     ub.path(urlToTest(prisonNumber))
     params.forEach {
@@ -154,7 +175,6 @@ class CreateCaseNoteIntTest : ResourceTest() {
     ub.build()
   }.headers(addBearerAuthorisation(tokenUsername, roles))
     .header(CASELOAD_ID, ACTIVE_PRISON)
-    .addUsernameHeader(headerUsername)
     .bodyValue(request)
     .exchange()
 

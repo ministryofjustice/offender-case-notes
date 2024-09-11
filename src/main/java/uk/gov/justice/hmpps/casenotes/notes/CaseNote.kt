@@ -2,8 +2,6 @@ package uk.gov.justice.hmpps.casenotes.notes
 
 import com.fasterxml.jackson.annotation.JsonInclude
 import io.swagger.v3.oas.annotations.media.Schema
-import jakarta.validation.constraints.NotBlank
-import jakarta.validation.constraints.NotNull
 import java.time.LocalDateTime
 
 @Schema(description = "Case Note")
@@ -16,27 +14,21 @@ data class CaseNote(
   val offenderIdentifier: String,
 
   @Schema(required = true, description = "Case Note Type", example = "KA")
-  @NotBlank
   val type: String,
 
   @Schema(required = true, description = "Case Note Type Description", example = "Key Worker")
-  @NotBlank
   val typeDescription: String,
 
   @Schema(required = true, description = "Case Note Sub Type", example = "KS")
-  @NotBlank
   val subType: String,
 
   @Schema(required = true, description = "Case Note Sub Type Description", example = "Key Worker Session")
-  @NotBlank
   val subTypeDescription: String,
 
   @Schema(required = true, description = "Source Type", example = "INST")
-  @NotBlank
   val source: String,
 
   @Schema(required = true, description = "Date and Time of Case Note creation", example = "2017-10-31T01:30:00")
-  @NotNull
   val creationDateTime: LocalDateTime,
 
   @Schema(
@@ -57,7 +49,6 @@ data class CaseNote(
   val authorUserId: String,
 
   @Schema(required = true, description = "Case Note Text", example = "This is some text")
-  @NotBlank
   val text: String,
 
   @Schema(description = "Location Id representing where Case Note was made.", example = "MDI")
@@ -84,18 +75,18 @@ data class CaseNote(
 ) {
 
   class Builder internal constructor() {
-    private var caseNoteId: @NotNull String? = null
-    private var offenderIdentifier: @NotNull String? = null
-    private var type: @NotBlank String? = null
-    private var typeDescription: @NotBlank String? = null
-    private var subType: @NotBlank String? = null
-    private var subTypeDescription: @NotBlank String? = null
-    private var source: @NotBlank String? = null
-    private var creationDateTime: @NotNull LocalDateTime? = null
-    private var occurrenceDateTime: @NotNull LocalDateTime? = null
-    private var authorName: @NotNull String? = null
-    private var authorUserId: @NotNull String? = null
-    private var text: @NotBlank String? = null
+    private var caseNoteId: String? = null
+    private var offenderIdentifier: String? = null
+    private var type: String? = null
+    private var typeDescription: String? = null
+    private var subType: String? = null
+    private var subTypeDescription: String? = null
+    private var source: String? = null
+    private var creationDateTime: LocalDateTime? = null
+    private var occurrenceDateTime: LocalDateTime? = null
+    private var authorName: String? = null
+    private var authorUserId: String? = null
+    private var text: String? = null
     private var locationId: String? = null
     private var eventId: Long = 0
     private var sensitive = false
@@ -111,23 +102,23 @@ data class CaseNote(
       this.offenderIdentifier = offenderIdentifier
     }
 
-    fun type(@NotBlank type: String): Builder = apply {
+    fun type(type: String): Builder = apply {
       this.type = type
     }
 
-    fun typeDescription(@NotBlank typeDescription: String): Builder = apply {
+    fun typeDescription(typeDescription: String): Builder = apply {
       this.typeDescription = typeDescription
     }
 
-    fun subType(@NotBlank subType: String): Builder = apply {
+    fun subType(subType: String): Builder = apply {
       this.subType = subType
     }
 
-    fun subTypeDescription(@NotBlank subTypeDescription: String): Builder = apply {
+    fun subTypeDescription(subTypeDescription: String): Builder = apply {
       this.subTypeDescription = subTypeDescription
     }
 
-    fun source(@NotBlank source: String): Builder = apply {
+    fun source(source: String): Builder = apply {
       this.source = source
     }
 
@@ -147,7 +138,7 @@ data class CaseNote(
       this.authorUserId = authorUserId
     }
 
-    fun text(@NotBlank text: String): Builder = apply {
+    fun text(text: String): Builder = apply {
       this.text = text
     }
 

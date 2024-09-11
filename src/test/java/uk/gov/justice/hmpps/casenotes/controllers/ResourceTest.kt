@@ -11,7 +11,6 @@ import org.springframework.http.MediaType
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.web.reactive.server.WebTestClient
 import org.springframework.test.web.reactive.server.WebTestClient.RequestBodySpec
-import uk.gov.justice.hmpps.casenotes.config.CaseNoteRequestContext.Companion.USERNAME_HEADER
 import uk.gov.justice.hmpps.casenotes.domain.Amendment
 import uk.gov.justice.hmpps.casenotes.domain.Note
 import uk.gov.justice.hmpps.casenotes.domain.NoteRepository
@@ -21,6 +20,7 @@ import uk.gov.justice.hmpps.casenotes.dto.ErrorResponse
 import uk.gov.justice.hmpps.casenotes.health.IntegrationTest
 import uk.gov.justice.hmpps.casenotes.health.wiremock.Elite2Extension
 import uk.gov.justice.hmpps.casenotes.health.wiremock.OAuthExtension
+import uk.gov.justice.hmpps.casenotes.health.wiremock.PrisonerSearchApiExtension
 import uk.gov.justice.hmpps.casenotes.health.wiremock.TokenVerificationExtension
 import uk.gov.justice.hmpps.casenotes.utils.JwtAuthHelper
 import uk.gov.justice.hmpps.casenotes.utils.NomisIdGenerator
@@ -34,7 +34,12 @@ internal const val USERNAME = "TestUser"
 
 @ActiveProfiles("test", "noqueue", "token-verification")
 @SpringBootTest(webEnvironment = RANDOM_PORT)
-@ExtendWith(Elite2Extension::class, OAuthExtension::class, TokenVerificationExtension::class)
+@ExtendWith(
+  Elite2Extension::class,
+  OAuthExtension::class,
+  TokenVerificationExtension::class,
+  PrisonerSearchApiExtension::class,
+)
 abstract class ResourceTest : IntegrationTest() {
 
   @Autowired
@@ -57,8 +62,8 @@ abstract class ResourceTest : IntegrationTest() {
     headers.add(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
   }
 
-  fun RequestBodySpec.addUsernameHeader(username: String? = null) = apply {
-    username?.also { header(USERNAME_HEADER, it) }
+  fun RequestBodySpec.addHeader(key: String, value: String? = null) = apply {
+    value?.also { header(key, it) }
   }
 
   fun readFile(file: String): String = this.javaClass.getResource(file)!!.readText()

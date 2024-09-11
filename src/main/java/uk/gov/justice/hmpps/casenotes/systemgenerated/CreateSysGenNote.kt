@@ -37,7 +37,7 @@ class CreateSysGenNote(
     prisonNumber,
     type,
     occurrenceDateTime ?: context.requestAt,
-    locationId,
+    requireNotNull(locationId),
     authorUsername ?: context.username,
     context.userId,
     authorName,

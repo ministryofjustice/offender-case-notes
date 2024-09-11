@@ -8,6 +8,7 @@ import io.swagger.v3.oas.annotations.media.Schema
 import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.responses.ApiResponses
 import io.swagger.v3.oas.annotations.tags.Tag
+import jakarta.validation.Valid
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.data.domain.Sort
@@ -133,10 +134,10 @@ class CaseNoteController(
   fun createCaseNote(
     @Parameter(description = "Offender Identifier", required = true, example = "A1234AA")
     @PathVariable offenderIdentifier: String,
-    @RequestBody createCaseNote: CreateCaseNoteRequest,
+    @Valid @RequestBody createCaseNote: CreateCaseNoteRequest,
     @Parameter(description = "Boolean to indicate that the user creating the case note has privileges to use restricted use case note types")
     @RequestParam(required = false, defaultValue = "false") useRestrictedType: Boolean,
-    @RequestHeader(CASELOAD_ID) caseloadId: String? = null,
+    @RequestHeader(required = false, value = CASELOAD_ID) caseloadId: String? = null,
   ): CaseNote {
     val caseNote = if (caseloadId in serviceConfig.activePrisons) {
       val request = if (createCaseNote.locationId == null) {
@@ -177,9 +178,9 @@ class CaseNoteController(
     @PathVariable offenderIdentifier: String,
     @Parameter(description = "Case Note Id", required = true, example = "518b2200-6489-4c77-8514-10cf80ccd488")
     @PathVariable caseNoteIdentifier: String,
-    @RequestBody amendedText: AmendCaseNoteRequest,
+    @Valid @RequestBody amendedText: AmendCaseNoteRequest,
     @RequestParam(required = false, defaultValue = "false") useRestrictedType: Boolean,
-    @RequestHeader(CASELOAD_ID) caseloadId: String? = null,
+    @RequestHeader(required = false, value = CASELOAD_ID) caseloadId: String? = null,
   ): CaseNote {
     val caseNote = if (caseloadId in serviceConfig.activePrisons) {
       save.createAmendment(offenderIdentifier, caseNoteIdentifier, amendedText, useRestrictedType)
