@@ -26,8 +26,8 @@ import uk.gov.justice.hmpps.casenotes.sync.SyncResult
 @RestController
 class SyncController(private val sync: SyncCaseNotes) {
   @Operation(
-    summary = "Endpoint to migrate and/or sync case notes from nomis to dps.",
-    description = "Case notes that don't exist in dps will be created, those that already exist and can be identified will be updated. Conceptually, a merge endpoint.",
+    summary = "Endpoint to migrate case notes from nomis to dps.",
+    description = "Case notes that don't exist in dps will be created.",
   )
   @ApiResponses(
     value = [
@@ -58,14 +58,18 @@ class SyncController(private val sync: SyncCaseNotes) {
     sync.migrateNotes(caseNotes)
 
   @Operation(
-    summary = "Endpoint to migrate and/or sync case notes from nomis to dps.",
+    summary = "Endpoint to sync a case note from nomis to dps.",
     description = "Case notes that don't exist in dps will be created, those that already exist and can be identified will be updated. Conceptually, a merge endpoint.",
   )
   @ApiResponses(
     value = [
       ApiResponse(
+        responseCode = "201",
+        description = "Case Note successfully created",
+      ),
+      ApiResponse(
         responseCode = "200",
-        description = "Case Notes successfully migrated",
+        description = "Case Note successfully updated",
       ),
       ApiResponse(
         responseCode = "400",
