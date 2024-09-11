@@ -133,9 +133,11 @@ abstract class ResourceTest : IntegrationTest() {
     authorUserId: String = "AuthorId",
     authorName: String = "AuthorName",
     text: String = "An amendment to a case note saved in the case note database",
+    createdAt: LocalDateTime = LocalDateTime.now(),
     id: UUID = Generators.timeBasedEpochGenerator().generate(),
   ): Note = apply {
-    val amendment = Amendment(this, authorUsername, authorName, authorUserId, text, id)
+    val amendment =
+      Amendment(this, authorUsername, authorName, authorUserId, text, id).apply { createDateTime = createdAt }
     setByName("amendments", (amendments() + amendment).toSortedSet())
   }
 

@@ -1,5 +1,6 @@
 package uk.gov.justice.hmpps.casenotes.sync
 
+import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import uk.gov.justice.hmpps.casenotes.domain.Amendment
@@ -11,6 +12,8 @@ import uk.gov.justice.hmpps.casenotes.domain.SubType
 import uk.gov.justice.hmpps.casenotes.domain.SubTypeRepository
 import uk.gov.justice.hmpps.casenotes.domain.TypeKey
 import uk.gov.justice.hmpps.casenotes.domain.TypeLookup
+import uk.gov.justice.hmpps.casenotes.domain.getByParentCodeAndCode
+import uk.gov.justice.hmpps.casenotes.domain.saveAndRefresh
 import java.util.TreeSet
 import java.util.UUID
 
@@ -21,14 +24,33 @@ class SyncCaseNotes(
   private val noteRepository: NoteRepository,
   private val amendmentRepository: AmendmentRepository,
 ) {
-  fun caseNotes(caseNotes: List<SyncCaseNoteRequest>): List<SyncResult> {
+  fun migrateNotes(caseNotes: List<MigrateCaseNoteRequest>): List<MigrationResult> {
     val types = getTypesForSync(caseNotes.map { it.typeKey() }.toSet())
-    val (persist, _) = caseNotes.partition { it.id == null }
-    val new = create(persist.map { it.asNoteAndAmendments { t, st -> requireNotNull(types[TypeKey(t, st)]) } })
-    return new.map { SyncResult(it.id, it.legacyId) }
+    val new = create(caseNotes.map { it.asNoteAndAmendments { t, st -> requireNotNull(types[TypeKey(t, st)]) } })
+    return new.map { MigrationResult(it.id, it.legacyId) }
   }
 
-  private fun SyncCaseNoteRequest.typeKey() = TypeKey(type, subType)
+  fun syncNote(request: SyncCaseNoteRequest): SyncResult {
+    val existing = when (request.id) {
+      null -> noteRepository.findByLegacyId(request.legacyId)
+      else -> noteRepository.findByIdOrNull(request.id)
+    }
+
+    existing?.also {
+      check(it.prisonNumber == request.personIdentifier) { "Case note belongs to another prisoner or prisoner records have been merged" }
+    }
+
+    val saved = existing?.sync(request, typeRepository::getByParentCodeAndCode)
+      ?: noteRepository.saveAndRefresh(request.asNoteWithAmendments(typeRepository::getByParentCodeAndCode))
+
+    return SyncResult(
+      saved.id,
+      saved.legacyId,
+      if (existing == null) SyncResult.Action.CREATED else SyncResult.Action.UPDATED,
+    )
+  }
+
+  private fun SyncNoteRequest.typeKey() = TypeKey(type, subType)
 
   private fun getTypesForSync(keys: Set<TypeKey>): Map<TypeKey, SubType> {
     val types = typeRepository.findByKeyIn(keys).associateBy { it.key }
@@ -60,7 +82,20 @@ private fun <T : TypeLookup> Collection<T>.exceptionMessage() =
     }
     .joinToString(separator = ", ", prefix = "{ ", postfix = " }")
 
-private fun SyncCaseNoteRequest.asNoteAndAmendments(typeSupplier: (String, String) -> SubType) = Note(
+private fun SyncNoteRequest.asNoteAndAmendments(typeSupplier: (String, String) -> SubType) =
+  asNote(typeSupplier).let { note ->
+    note.legacyId = this.legacyId
+    note.createDateTime = createdDateTime
+    note.createUserId = createdByUsername
+    NoteAndAmendments(note, amendments.map { it.asAmendment(note) })
+  }
+
+private fun SyncNoteRequest.asNoteWithAmendments(typeSupplier: (String, String) -> SubType) =
+  asNote(typeSupplier).also { note ->
+    amendments.forEach { note.addAmendment(it) }
+  }
+
+private fun SyncNoteRequest.asNote(typeSupplier: (String, String) -> SubType) = Note(
   personIdentifier,
   typeSupplier(type, subType),
   occurrenceDateTime,
@@ -71,11 +106,10 @@ private fun SyncCaseNoteRequest.asNoteAndAmendments(typeSupplier: (String, Strin
   text,
   systemGenerated,
   TreeSet(),
-).let { note ->
-  note.legacyId = this.legacyId
-  note.createDateTime = createdDateTime
-  note.createUserId = createdByUsername
-  NoteAndAmendments(note, amendments.map { it.asAmendment(note) })
+).apply {
+  this.legacyId = this@asNote.legacyId
+  this.createDateTime = this@asNote.createdDateTime
+  this.createUserId = this@asNote.createdByUsername
 }
 
 private fun SyncAmendmentRequest.asAmendment(note: Note) = Amendment(
@@ -89,4 +123,7 @@ private fun SyncAmendmentRequest.asAmendment(note: Note) = Amendment(
 
 private data class NoteAndAmendments(val note: Note, val amendments: List<Amendment>)
 
-data class SyncResult(val id: UUID, val legacyId: Long)
+data class MigrationResult(val id: UUID, val legacyId: Long)
+data class SyncResult(val id: UUID, val legacyId: Long, val action: Action) {
+  enum class Action { CREATED, UPDATED }
+}
