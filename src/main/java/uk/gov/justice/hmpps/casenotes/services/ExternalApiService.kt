@@ -8,20 +8,17 @@ import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Service
 import org.springframework.web.reactive.function.client.WebClient
-import org.springframework.web.reactive.function.client.WebClientRequestException
-import org.springframework.web.reactive.function.client.WebClientResponseException
 import org.springframework.web.reactive.function.client.bodyToFlux
 import org.springframework.web.reactive.function.client.bodyToMono
 import reactor.core.publisher.Mono
-import reactor.util.retry.Retry
 import uk.gov.justice.hmpps.casenotes.dto.BookingIdentifier
 import uk.gov.justice.hmpps.casenotes.dto.CaseNoteFilter
 import uk.gov.justice.hmpps.casenotes.dto.NomisCaseNote
 import uk.gov.justice.hmpps.casenotes.dto.OffenderBooking
 import uk.gov.justice.hmpps.casenotes.dto.UserDetails
+import uk.gov.justice.hmpps.casenotes.integrations.retryOnTransientException
 import uk.gov.justice.hmpps.casenotes.notes.AmendCaseNoteRequest
 import uk.gov.justice.hmpps.casenotes.notes.CreateCaseNoteRequest
-import java.time.Duration
 import java.time.format.DateTimeFormatter
 
 @Service
@@ -140,16 +137,6 @@ class ExternalApiService(
     .bodyToMono<NomisCaseNote>()
     .retryOnTransientException()
     .block()!!
-
-  fun <T> Mono<T>.retryOnTransientException(): Mono<T> =
-    retryWhen(
-      Retry.backoff(3, Duration.ofMillis(250))
-        .filter {
-          it is WebClientRequestException || (it is WebClientResponseException && it.statusCode.is5xxServerError)
-        }.onRetryExhaustedThrow { _, signal ->
-          signal.failure()
-        },
-    )
 
   private fun Map<String, Set<String>>.asPrisonApiParams(): List<String> =
     entries.flatMap { e -> if (e.value.isEmpty()) setOf(e.key) else e.value.map { "${e.key}+$it" } }

@@ -2,10 +2,9 @@ package uk.gov.justice.hmpps.casenotes.config
 
 import io.netty.channel.ChannelOption.CONNECT_TIMEOUT_MILLIS
 import io.netty.channel.ChannelOption.SO_KEEPALIVE
-import io.netty.channel.socket.nio.NioChannelOption
+import io.netty.channel.epoll.EpollChannelOption
 import io.netty.handler.timeout.ReadTimeoutHandler
 import io.netty.handler.timeout.WriteTimeoutHandler
-import jdk.net.ExtendedSocketOptions.TCP_KEEPINTERVAL
 import org.hibernate.validator.constraints.URL
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Qualifier
@@ -33,11 +32,9 @@ import java.time.Duration.ofSeconds
 
 @Configuration
 class WebClientConfiguration(
-  /** Elite2 API Base URL endpoint ("http://localhost:8080") */
   @Value("\${elite2.api.base.url}") private val elite2ApiBaseUrl: @URL String,
-  /**  OAUTH2 API Rest URL endpoint ("http://localhost:9090/auth/api") */
   @Value("\${oauth.api.base.url}") private val oauthApiBaseUrl: @URL String,
-  /** OAUTH2 API Rest URL endpoint ("http://localhost:8100") */
+  @Value("\${prisoner-search.api.base.url}") private val prisonerSearchApiBaseUrl: @URL String,
   @Value("\${tokenverification.api.base.url}") private val tokenVerificationApiBaseUrl: @URL String,
   @Value("\${api.health-timeout:1s}") private val healthTimeout: Duration,
   @Value("\${api.response-timeout:2s}") private val responseTimeout: Duration,
@@ -73,7 +70,8 @@ class WebClientConfiguration(
         create().responseTimeout(ofSeconds(responseTimeout.toSeconds()))
           .option(CONNECT_TIMEOUT_MILLIS, 1000)
           .option(SO_KEEPALIVE, true)
-          .option(NioChannelOption.of(TCP_KEEPINTERVAL), 60)
+          // this will show a warning on apple (arm) architecture but will work on linux x86 container
+          .option(EpollChannelOption.TCP_KEEPINTVL, 60)
           .warmupWithHealthPing(tokenVerificationApiBaseUrl),
       ),
     ).build()
@@ -117,13 +115,19 @@ class WebClientConfiguration(
     builder: Builder,
   ): WebClient = getOAuthWebClient(authorizedClientManager, builder, elite2ApiBaseUrl)
 
+  @Bean
+  fun prisonerSearchWebClient(
+    @Qualifier(value = "authorizedClientManagerAppScope") authorizedClientManager: OAuth2AuthorizedClientManager,
+    builder: Builder,
+  ): WebClient = getOAuthWebClient(authorizedClientManager, builder, prisonerSearchApiBaseUrl)
+
   private fun getOAuthWebClient(
     authorizedClientManager: OAuth2AuthorizedClientManager,
     builder: Builder,
     rootUri: String,
   ): WebClient {
     val oauth2Client = ServletOAuth2AuthorizedClientExchangeFilterFunction(authorizedClientManager)
-    oauth2Client.setDefaultClientRegistrationId("elite2-api")
+    oauth2Client.setDefaultClientRegistrationId("default")
     return builder.baseUrl(rootUri)
       .apply(oauth2Client.oauth2Configuration())
       .build()

@@ -2,7 +2,6 @@ package uk.gov.justice.hmpps.casenotes.notes
 
 import com.fasterxml.jackson.annotation.JsonInclude
 import io.swagger.v3.oas.annotations.media.Schema
-import jakarta.validation.constraints.NotBlank
 import java.time.LocalDateTime
 
 @Schema(description = "Case Note Amendment")
@@ -12,10 +11,10 @@ data class CaseNoteAmendment(
   val creationDateTime: LocalDateTime?,
 
   @Schema(required = true, description = "Username of the user amending the case note", example = "USER1")
-  @NotBlank val authorUserName: String,
+  val authorUserName: String,
 
   @Schema(required = true, description = "Name of the user amending the case note", example = "Mickey Mouse")
-  @NotBlank val authorName: String,
+  val authorName: String,
 
   @Schema(
     required = false,
@@ -25,5 +24,5 @@ data class CaseNoteAmendment(
   val authorUserId: String?,
 
   @Schema(required = true, description = "Additional Case Note Information", example = "Some Additional Text")
-  @NotBlank val additionalNoteText: String,
+  val additionalNoteText: String,
 )

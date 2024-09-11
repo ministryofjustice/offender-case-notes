@@ -39,7 +39,7 @@ spring:
     oauth2:
       client:
         registration:
-          elite2-api:
+          default:
             provider: hmpps-auth
             client-id: ${offender.case.notes.client.id}
             client-secret: ${offender.case.notes.client.secret}

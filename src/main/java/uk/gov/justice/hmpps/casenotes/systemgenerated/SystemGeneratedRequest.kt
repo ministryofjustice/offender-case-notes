@@ -10,20 +10,21 @@ import uk.gov.justice.hmpps.casenotes.notes.TextRequest
 import java.time.LocalDateTime
 
 data class SystemGeneratedRequest(
-
-  @Schema(requiredMode = REQUIRED, example = "MDI", description = "Location where case note was made")
-  @Length(max = 6)
-  @NotBlank
-  val locationId: String,
+  @Schema(
+    example = "MDI",
+    description = "Location where case note was made. If not provided, location of person will be retrieved using prison search.",
+  )
+  @field:Length(max = 6, message = "location must be no more than 6 characters")
+  val locationId: String?,
 
   @Schema(requiredMode = REQUIRED, description = "Type of case note", example = "GEN")
-  @Length(max = 12)
-  @NotBlank
+  @field:Length(max = 12, message = "type must be no more than 12 characters")
+  @field:NotBlank(message = "type cannot be blank")
   val type: String,
 
   @Schema(requiredMode = REQUIRED, description = "Sub Type of case note", example = "OBS")
-  @Length(max = 12)
-  @NotBlank
+  @field:Length(max = 12, message = "sub type must be no more than 12 characters")
+  @field:NotBlank(message = "sub type cannot be blank")
   val subType: String,
 
   @Schema(
@@ -34,17 +35,16 @@ data class SystemGeneratedRequest(
   val occurrenceDateTime: LocalDateTime? = null,
 
   @Schema(description = "Optional username of the staff member that created the case note. If not provided, the subject of the jwt token used to authorise the request will be used.")
-  @field:Size(max = 64, message = "Author username cannot be more than 64 characters")
-  @NotBlank
+  @field:Size(max = 64, message = "author username cannot be more than 64 characters")
   override val authorUsername: String? = null,
 
   @Schema(requiredMode = REQUIRED, description = "Full name of the staff member that created the case note")
-  @field:Size(max = 80, message = "Author name cannot be more than 80 characters")
-  @NotBlank
+  @field:Size(max = 80, message = "author name cannot be more than 80 characters")
+  @field:NotBlank(message = "author name cannot be blank")
   override val authorName: String,
 
   @Schema(requiredMode = REQUIRED, description = "Text of case note", example = "This is a case note message")
-  @NotBlank
+  @field:NotBlank(message = "text cannot be blank")
   override val text: String,
 
 ) : TextRequest, AuthoredRequest

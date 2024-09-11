@@ -32,8 +32,9 @@ class CreateAmendmentIntTest : ResourceTest() {
   @Test
   fun `cannot create case note without user details`() {
     val request = amendCaseNoteRequest()
-    val response = amendCaseNote(prisonNumber(), UUID.randomUUID().toString(), request, tokenUsername = "NoneExistentUser")
-      .errorResponse(HttpStatus.BAD_REQUEST)
+    val response =
+      amendCaseNote(prisonNumber(), UUID.randomUUID().toString(), request, tokenUsername = "NoneExistentUser")
+        .errorResponse(HttpStatus.BAD_REQUEST)
 
     with(response) {
       assertThat(status).isEqualTo(HttpStatus.BAD_REQUEST.value())
@@ -56,7 +57,13 @@ class CreateAmendmentIntTest : ResourceTest() {
     val type = getAllTypes().first { it.syncToNomis }
     val caseNote = givenCaseNote(generateCaseNote(prisonNumber(), type))
     val response =
-      amendCaseNote(caseNote.prisonNumber, caseNote.id.toString(), amendCaseNoteRequest(), mapOf(), tokenUsername = username)
+      amendCaseNote(
+        caseNote.prisonNumber,
+        caseNote.id.toString(),
+        amendCaseNoteRequest(),
+        mapOf(),
+        tokenUsername = username,
+      )
         .errorResponse(HttpStatus.FORBIDDEN)
 
     with(response) {
@@ -84,7 +91,25 @@ class CreateAmendmentIntTest : ResourceTest() {
   fun `can amend a case note with write role using legacyId`() {
     val caseNote = givenCaseNote(generateCaseNote(prisonNumber(), legacyId = newId()))
     val request = amendCaseNoteRequest()
-    val response = amendCaseNote(caseNote.prisonNumber, caseNote.legacyId!!.toString(), request).success<CaseNote>()
+    val response = amendCaseNote(caseNote.prisonNumber, caseNote.legacyId.toString(), request).success<CaseNote>()
+
+    assertThat(response.amendments.size).isEqualTo(1)
+    assertThat(response.amendments.first().additionalNoteText).isEqualTo(request.text)
+
+    val saved = requireNotNull(noteRepository.findByIdAndPrisonNumber(caseNote.id, response.offenderIdentifier))
+    with(saved.amendments().first()) {
+      assertThat(text).isEqualTo(request.text)
+      assertThat(authorUsername).isEqualTo(USERNAME)
+    }
+  }
+
+  @Test
+  fun `can amend a case note without caseload id when not sync to nomis`() {
+    val type = getAllTypes().first { !it.syncToNomis }
+    val caseNote = givenCaseNote(generateCaseNote(prisonNumber(), type = type))
+    val request = amendCaseNoteRequest()
+    val response = amendCaseNote(caseNote.prisonNumber, caseNote.id.toString(), request, caseloadId = null)
+      .success<CaseNote>()
 
     assertThat(response.amendments.size).isEqualTo(1)
     assertThat(response.amendments.first().additionalNoteText).isEqualTo(request.text)
@@ -107,7 +132,7 @@ class CreateAmendmentIntTest : ResourceTest() {
     params: Map<String, String> = mapOf("useRestrictedType" to "true"),
     roles: List<String> = listOf(SecurityUserContext.ROLE_CASE_NOTES_WRITE),
     tokenUsername: String = USERNAME,
-    headerUsername: String? = null,
+    caseloadId: String? = ACTIVE_PRISON,
   ) = webTestClient.put().uri { ub ->
     ub.path(urlToTest())
     params.forEach {
@@ -115,8 +140,7 @@ class CreateAmendmentIntTest : ResourceTest() {
     }
     ub.build(prisonNumber, caseNoteId)
   }.headers(addBearerAuthorisation(tokenUsername, roles))
-    .header(CASELOAD_ID, ACTIVE_PRISON)
-    .addUsernameHeader(headerUsername)
+    .addHeader(CASELOAD_ID, caseloadId)
     .bodyValue(request)
     .exchange()
 

@@ -11,7 +11,7 @@ interface TextRequest {
 @Schema(description = "Amend a Case Note")
 data class AmendCaseNoteRequest(
   @Schema(required = true, description = "Text of case note", example = "This is a case note message")
-  @NotBlank
-  @Length(max = 30000)
+  @field:NotBlank(message = "amendment text cannot be blank")
+  @field:Length(max = 30000)
   override val text: String,
 ) : TextRequest

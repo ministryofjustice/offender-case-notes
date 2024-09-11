@@ -6,6 +6,8 @@ import org.springframework.http.HttpStatus
 import uk.gov.justice.hmpps.casenotes.config.SecurityUserContext.Companion.ROLE_CASE_NOTES_WRITE
 import uk.gov.justice.hmpps.casenotes.config.SecurityUserContext.Companion.ROLE_SYSTEM_GENERATED_RW
 import uk.gov.justice.hmpps.casenotes.domain.Note
+import uk.gov.justice.hmpps.casenotes.health.wiremock.OAuthExtension.Companion.oAuthApi
+import uk.gov.justice.hmpps.casenotes.health.wiremock.PrisonerSearchApiExtension.Companion.prisonerSearchApi
 import uk.gov.justice.hmpps.casenotes.notes.CaseNote
 import uk.gov.justice.hmpps.casenotes.systemgenerated.SystemGeneratedRequest
 import uk.gov.justice.hmpps.casenotes.utils.NomisIdGenerator.prisonNumber
@@ -42,6 +44,34 @@ class SystemGeneratedNotesIntTest : ResourceTest() {
     with(response) {
       assertThat(status).isEqualTo(HttpStatus.BAD_REQUEST.value())
       assertThat(developerMessage).isEqualTo("System generated case notes cannot use a sync to nomis type")
+    }
+  }
+
+  @Test
+  fun `400 bad request - field validation failures`() {
+    val request = sysGenRequest(
+      type = "n".repeat(13),
+      subType = "n".repeat(13),
+      locationId = "n".repeat(7),
+      authorUsername = "n".repeat(65),
+      authorName = "n".repeat(81),
+      text = "",
+    )
+    val response = sysGenNote(prisonNumber(), request).errorResponse(HttpStatus.BAD_REQUEST)
+    with(response) {
+      assertThat(status).isEqualTo(HttpStatus.BAD_REQUEST.value())
+      assertThat(developerMessage).isEqualTo(
+        """
+        |400 BAD_REQUEST Validation failures: 
+        |author name cannot be more than 80 characters
+        |author username cannot be more than 64 characters
+        |location must be no more than 6 characters
+        |sub type must be no more than 12 characters
+        |text cannot be blank
+        |type must be no more than 12 characters
+        |
+        """.trimMargin(),
+      )
     }
   }
 
@@ -83,10 +113,34 @@ class SystemGeneratedNotesIntTest : ResourceTest() {
     requireNotNull(saved).verifyAgainst(request, apiClientId)
   }
 
+  @Test
+  fun `201 ok - use prison id from prisoner search when location id not provided`() {
+    val personIdentifier = prisonNumber()
+    val prisonId = "LEI"
+    oAuthApi.stubGrantToken()
+    prisonerSearchApi.stubPrisonerDetails(personIdentifier, prisonId)
+    val type = getAllTypes().filter { it.parentCode == "ACP" && !it.syncToNomis }.random()
+
+    val request = sysGenRequest(
+      type = type.parent.code,
+      subType = type.code,
+      occurrenceDateTime = null,
+      locationId = null,
+    )
+
+    val apiClientId = "API_CLIENT_ID"
+    val response = sysGenNote(personIdentifier, request).success<CaseNote>(HttpStatus.CREATED)
+    assertThat(response.locationId).isEqualTo(prisonId)
+    val saved = noteRepository.findByIdAndPrisonNumber(UUID.fromString(response.caseNoteId), personIdentifier)
+    requireNotNull(saved).verifyAgainst(request, apiClientId)
+    assertThat(saved.locationId).isEqualTo(prisonId)
+  }
+
   private fun Note.verifyAgainst(request: SystemGeneratedRequest, userId: String) {
     assertThat(type.parent.code).isEqualTo(request.type)
     assertThat(type.code).isEqualTo(request.subType)
     assertThat(text).isEqualTo(request.text)
+    request.locationId?.also { assertThat(locationId).isEqualTo(it) }
     request.occurrenceDateTime?.also {
       assertThat(occurredAt.truncatedTo(SECONDS)).isEqualTo(it.truncatedTo(SECONDS))
     }
@@ -109,7 +163,7 @@ class SystemGeneratedNotesIntTest : ResourceTest() {
 }
 
 private fun sysGenRequest(
-  locationId: String = "MDI",
+  locationId: String? = "MDI",
   type: String = "ACP",
   subType: String = "REFD",
   occurrenceDateTime: LocalDateTime? = LocalDateTime.now(),

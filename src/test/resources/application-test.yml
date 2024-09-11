@@ -33,6 +33,8 @@ oauth:
 tokenverification:
   api.base.url: http://localhost:9100
 
+prisoner-search.api.base.url: http://localhost:8200
+
 api:
   health-timeout: 400ms
 
