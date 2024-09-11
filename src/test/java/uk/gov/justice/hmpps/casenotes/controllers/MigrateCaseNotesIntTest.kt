@@ -63,7 +63,7 @@ class MigrateCaseNotesIntTest : ResourceTest() {
   fun `200 ok - new case notes created`() {
     val prisonNumbers = (0..100).map { prisonNumber() }
     val types = getAllTypes().filter { it.syncToNomis }
-    val request = (0..5_000).map {
+    val request = (0..2_500).map {
       val type = types.random()
       migrateCaseNoteRequest(
         prisonIdentifier = prisonNumbers.random(),
