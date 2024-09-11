@@ -24,10 +24,13 @@ class SyncCaseNotes(
   private val noteRepository: NoteRepository,
   private val amendmentRepository: AmendmentRepository,
 ) {
-  fun migrateNotes(caseNotes: List<MigrateCaseNoteRequest>): List<MigrationResult> {
-    val types = getTypesForSync(caseNotes.map { it.typeKey() }.toSet())
-    val new = create(caseNotes.map { it.asNoteAndAmendments { t, st -> requireNotNull(types[TypeKey(t, st)]) } })
-    return new.map { MigrationResult(it.id, it.legacyId) }
+  fun migrateNotes(toMigrate: List<MigrateCaseNoteRequest>): List<MigrationResult> {
+    val types = getTypesForSync(toMigrate.map { it.typeKey() }.toSet())
+    val existingIds = noteRepository.findMigratedIds(toMigrate.map { it.legacyId })
+    val existingLegacyIds = existingIds.map { it.legacyId }.toSet()
+    val new = toMigrate.filter { it.legacyId !in existingLegacyIds }
+      .map { it.asNoteAndAmendments { t, st -> requireNotNull(types[TypeKey(t, st)]) } }
+    return create(new).map { MigrationResult(it.id, it.legacyId) } + existingIds
   }
 
   fun syncNote(request: SyncCaseNoteRequest): SyncResult {

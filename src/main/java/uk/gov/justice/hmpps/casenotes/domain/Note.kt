@@ -30,6 +30,7 @@ import uk.gov.justice.hmpps.casenotes.domain.SubType.Companion.PARENT
 import uk.gov.justice.hmpps.casenotes.domain.audit.AuditedEntityListener
 import uk.gov.justice.hmpps.casenotes.domain.audit.SimpleAudited
 import uk.gov.justice.hmpps.casenotes.notes.TextRequest
+import uk.gov.justice.hmpps.casenotes.sync.MigrationResult
 import uk.gov.justice.hmpps.casenotes.sync.SyncAmendmentRequest
 import uk.gov.justice.hmpps.casenotes.sync.SyncNoteRequest
 import java.time.LocalDateTime
@@ -156,6 +157,9 @@ interface NoteRepository : JpaSpecificationExecutor<Note>, JpaRepository<Note, U
 
   @Query("select nextval('offender_case_note_event_id_seq')", nativeQuery = true)
   fun getNextLegacyId(): Long
+
+  @Query("select new uk.gov.justice.hmpps.casenotes.sync.MigrationResult(n.id, n.legacyId) from Note n where n.legacyId in (:legacyIds)")
+  fun findMigratedIds(legacyIds: List<Long>): List<MigrationResult>
 }
 
 fun NoteRepository.saveAndRefresh(note: Note): Note {
