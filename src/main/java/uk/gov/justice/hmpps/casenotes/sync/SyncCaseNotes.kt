@@ -1,5 +1,6 @@
 package uk.gov.justice.hmpps.casenotes.sync
 
+import com.microsoft.applicationinsights.TelemetryClient
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -23,6 +24,7 @@ class SyncCaseNotes(
   private val typeRepository: SubTypeRepository,
   private val noteRepository: NoteRepository,
   private val amendmentRepository: AmendmentRepository,
+  private val telemetryClient: TelemetryClient,
 ) {
   fun migrateNotes(toMigrate: List<MigrateCaseNoteRequest>): List<MigrationResult> {
     val types = getTypesForSync(toMigrate.map { it.typeKey() }.toSet())
@@ -51,6 +53,10 @@ class SyncCaseNotes(
       saved.legacyId,
       if (existing == null) SyncResult.Action.CREATED else SyncResult.Action.UPDATED,
     )
+  }
+
+  fun deleteCaseNote(id: UUID) = noteRepository.deleteById(id).also {
+    telemetryClient.trackEvent("CaseNoteDeletedViaSync", mapOf("id" to it.toString()), mapOf())
   }
 
   private fun SyncNoteRequest.typeKey() = TypeKey(type, subType)

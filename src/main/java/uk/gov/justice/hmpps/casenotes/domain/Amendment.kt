@@ -10,6 +10,7 @@ import jakarta.persistence.Version
 import org.hibernate.annotations.SoftDelete
 import org.springframework.data.jpa.repository.JpaRepository
 import uk.gov.justice.hmpps.casenotes.domain.audit.SimpleAudited
+import uk.gov.justice.hmpps.casenotes.notes.TextRequest
 import java.util.UUID
 
 @Entity
@@ -29,8 +30,7 @@ class Amendment(
   @Column(nullable = false)
   val authorUserId: String,
 
-  @Column(name = "note_text", nullable = false)
-  val text: String,
+  text: String,
 
   @Id
   @Column(name = "offender_case_note_amendment_id", nullable = false)
@@ -41,6 +41,14 @@ class Amendment(
   val version: Long? = null
 
   override fun compareTo(other: Amendment): Int = createDateTime.compareTo(other.createDateTime)
+
+  @Column(name = "note_text", nullable = false)
+  var text: String = text
+    private set
+
+  internal fun update(request: TextRequest) = apply {
+    text = request.text
+  }
 }
 
 interface AmendmentRepository : JpaRepository<Amendment, UUID>

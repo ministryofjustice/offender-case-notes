@@ -2,7 +2,7 @@ package uk.gov.justice.hmpps.casenotes.controllers
 
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
-import org.springframework.data.jpa.domain.AbstractPersistable_.id
+import org.springframework.data.repository.findByIdOrNull
 import org.springframework.http.HttpStatus
 import uk.gov.justice.hmpps.casenotes.config.SecurityUserContext.Companion.ROLE_CASE_NOTES_SYNC
 import uk.gov.justice.hmpps.casenotes.config.SecurityUserContext.Companion.ROLE_CASE_NOTES_WRITE
@@ -122,11 +122,17 @@ class SyncCaseNoteIntTest : ResourceTest() {
   @Test
   fun `200 ok - sync updates an existing case note with amendments`() {
     val prisonNumber = prisonNumber()
-    val existing = givenCaseNote(generateCaseNote(prisonNumber).withAmendment())
+    val existing = givenCaseNote(
+      generateCaseNote(prisonNumber).withAmendment(createdAt = LocalDateTime.now().minusSeconds(5)),
+    )
     val request = existing.syncRequest().let { r ->
       r.copy(
-        amendments = (r.amendments + syncAmendmentRequest("A new amendment"))
-          .toSortedSet(compareBy { it.createdDateTime }),
+        amendments = (
+          r.amendments + syncAmendmentRequest(
+            "A new amendment",
+            createdDateTime = LocalDateTime.now().minusSeconds(10),
+          )
+          ).toSortedSet(compareBy { it.createdDateTime }),
       )
     }
     val response = syncCaseNote(request).success<SyncResult>(HttpStatus.OK)
@@ -139,12 +145,46 @@ class SyncCaseNoteIntTest : ResourceTest() {
     amend.verifyAgainst(request.amendments.first())
   }
 
+  @Test
+  fun `400 bad request - exception thrown if person identifier doesn't match`() {
+    val existing = givenCaseNote(generateCaseNote())
+    val request = existing.syncRequest().copy(personIdentifier = prisonNumber())
+    val response = syncCaseNote(request).errorResponse(HttpStatus.BAD_REQUEST)
+    assertThat(response.developerMessage)
+      .isEqualTo("Case note belongs to another prisoner or prisoner records have been merged")
+  }
+
+  @Test
+  fun `204 no content - delete case note`() {
+    val prisonNumber = prisonNumber()
+    val note = givenCaseNote(generateCaseNote(prisonNumber))
+    val cns = { noteRepository.findByIdOrNull(note.id) }
+    assertThat(cns()).isNotNull()
+
+    deleteCaseNote(note.id)
+
+    assertThat(cns()).isNull()
+  }
+
+  @Test
+  fun `204 no content - delete non existent case note`() {
+    deleteCaseNote(UUID.randomUUID())
+  }
+
   private fun syncCaseNote(
     request: SyncCaseNoteRequest,
     roles: List<String> = listOf(ROLE_CASE_NOTES_SYNC),
     tokenUsername: String = USERNAME,
   ) = webTestClient.put().uri(BASE_URL).headers(addBearerAuthorisation(tokenUsername, roles))
     .bodyValue(request).exchange()
+
+  private fun deleteCaseNote(
+    id: UUID,
+    roles: List<String> = listOf(ROLE_CASE_NOTES_SYNC),
+    tokenUsername: String = USERNAME,
+  ) = webTestClient.delete().uri("$BASE_URL/$id")
+    .headers(addBearerAuthorisation(tokenUsername, roles))
+    .exchange().expectStatus().isNoContent
 
   companion object {
     private const val BASE_URL = "/sync/case-notes"

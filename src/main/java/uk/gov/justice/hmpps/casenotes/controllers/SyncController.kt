@@ -7,12 +7,16 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.responses.ApiResponses
 import io.swagger.v3.oas.annotations.tags.Tag
 import jakarta.validation.Valid
+import org.springframework.http.HttpStatus
 import org.springframework.http.HttpStatus.CREATED
 import org.springframework.http.ResponseEntity
 import org.springframework.security.access.prepost.PreAuthorize
+import org.springframework.web.bind.annotation.DeleteMapping
+import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.PutMapping
 import org.springframework.web.bind.annotation.RequestBody
+import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestController
 import uk.gov.justice.hmpps.casenotes.config.SecurityUserContext.Companion.ROLE_CASE_NOTES_SYNC
 import uk.gov.justice.hmpps.casenotes.dto.ErrorResponse
@@ -21,6 +25,7 @@ import uk.gov.justice.hmpps.casenotes.sync.MigrationResult
 import uk.gov.justice.hmpps.casenotes.sync.SyncCaseNoteRequest
 import uk.gov.justice.hmpps.casenotes.sync.SyncCaseNotes
 import uk.gov.justice.hmpps.casenotes.sync.SyncResult
+import java.util.UUID
 
 @Tag(name = "Sync Case Notes", description = "Endpoint for sync operations")
 @RestController
@@ -54,7 +59,7 @@ class SyncController(private val sync: SyncCaseNotes) {
   )
   @PostMapping("migrate/case-notes")
   @PreAuthorize("hasRole('$ROLE_CASE_NOTES_SYNC')")
-  fun syncCaseNotes(@Valid @RequestBody caseNotes: List<MigrateCaseNoteRequest>): List<MigrationResult> =
+  fun migrateCaseNotes(@Valid @RequestBody caseNotes: List<MigrateCaseNoteRequest>): List<MigrationResult> =
     sync.migrateNotes(caseNotes)
 
   @Operation(
@@ -97,4 +102,31 @@ class SyncController(private val sync: SyncCaseNotes) {
         SyncResult.Action.UPDATED -> ResponseEntity.ok(it)
       }
     }
+
+  @Operation(
+    summary = "Endpoint to delete a case note - only for sync operations",
+    description = "Case notes that exist will be deleted. No exception will be returned if the case note does not exist.",
+  )
+  @ApiResponses(
+    value = [
+      ApiResponse(
+        responseCode = "204",
+        description = "Case Note successfully deleted",
+      ),
+      ApiResponse(
+        responseCode = "401",
+        description = "Unauthorised, requires a valid Oauth2 token",
+        content = [Content(schema = Schema(implementation = ErrorResponse::class))],
+      ),
+      ApiResponse(
+        responseCode = "403",
+        description = "Forbidden, requires an appropriate role",
+        content = [Content(schema = Schema(implementation = ErrorResponse::class))],
+      ),
+    ],
+  )
+  @ResponseStatus(HttpStatus.NO_CONTENT)
+  @DeleteMapping("sync/case-notes/{id}")
+  @PreAuthorize("hasRole('$ROLE_CASE_NOTES_SYNC')")
+  fun deleteCaseNote(@PathVariable id: UUID) = sync.deleteCaseNote(id)
 }
