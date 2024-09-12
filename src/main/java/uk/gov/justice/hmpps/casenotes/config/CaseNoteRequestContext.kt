@@ -15,7 +15,6 @@ data class CaseNoteRequestContext(
   constructor(username: String) : this(username, username, username)
 
   companion object {
-    const val USERNAME_HEADER = "Username"
     private const val SYS_USER = "SYS"
     private const val SYS_DISPLAY_NAME = "Sys"
     private val NomisContext = { CaseNoteRequestContext(SYS_USER, SYS_DISPLAY_NAME, SYS_USER, source = Source.NOMIS) }

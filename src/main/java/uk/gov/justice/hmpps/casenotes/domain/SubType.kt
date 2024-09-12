@@ -69,6 +69,10 @@ interface SubTypeRepository : JpaRepository<SubType, Long> {
 fun SubTypeRepository.findByParentCodeAndCode(parentCode: String, code: String) =
   findByKey(TypeKey(parentCode, code))
 
+fun SubTypeRepository.getByParentCodeAndCode(parentCode: String, code: String) =
+  findByParentCodeAndCode(parentCode, code)
+    ?: throw IllegalArgumentException("Unknown case note type $parentCode:$code")
+
 interface TypeLookup {
   val parentCode: String
   val code: String

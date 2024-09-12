@@ -52,7 +52,7 @@ class SystemGeneratedNotesIntTest : ResourceTest() {
     val request = sysGenRequest(
       type = "n".repeat(13),
       subType = "n".repeat(13),
-      locationId = "n".repeat(7),
+      locationId = "n".repeat(13),
       authorUsername = "n".repeat(65),
       authorName = "n".repeat(81),
       text = "",
@@ -65,7 +65,7 @@ class SystemGeneratedNotesIntTest : ResourceTest() {
         |400 BAD_REQUEST Validation failures: 
         |author name cannot be more than 80 characters
         |author username cannot be more than 64 characters
-        |location must be no more than 6 characters
+        |location must be no more than 12 characters
         |sub type must be no more than 12 characters
         |text cannot be blank
         |type must be no more than 12 characters

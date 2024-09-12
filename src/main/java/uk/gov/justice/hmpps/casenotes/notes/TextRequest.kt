@@ -1,17 +1,11 @@
 package uk.gov.justice.hmpps.casenotes.notes
 
 import io.swagger.v3.oas.annotations.media.Schema
+import io.swagger.v3.oas.annotations.media.Schema.RequiredMode.REQUIRED
 import jakarta.validation.constraints.NotBlank
-import org.hibernate.validator.constraints.Length
 
 interface TextRequest {
+  @get:Schema(requiredMode = REQUIRED, description = "The text of the note")
+  @get:NotBlank(message = "text cannot be blank")
   val text: String
 }
-
-@Schema(description = "Amend a Case Note")
-data class AmendCaseNoteRequest(
-  @Schema(required = true, description = "Text of case note", example = "This is a case note message")
-  @field:NotBlank(message = "amendment text cannot be blank")
-  @field:Length(max = 30000)
-  override val text: String,
-) : TextRequest

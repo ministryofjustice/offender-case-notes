@@ -94,7 +94,7 @@ class CreateCaseNoteIntTest : ResourceTest() {
     val request = createCaseNoteRequest(
       type = "n".repeat(13),
       subType = "n".repeat(13),
-      locationId = "n".repeat(7),
+      locationId = "n".repeat(13),
       text = "",
     )
     val response = createCaseNote(prisonNumber(), request).errorResponse(HttpStatus.BAD_REQUEST)
@@ -103,7 +103,7 @@ class CreateCaseNoteIntTest : ResourceTest() {
       assertThat(developerMessage).isEqualTo(
         """
         |400 BAD_REQUEST Validation failures: 
-        |location must be no more than 6 characters
+        |location must be no more than 12 characters
         |sub type must be no more than 12 characters
         |text cannot be blank
         |type must be no more than 12 characters
