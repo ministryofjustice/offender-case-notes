@@ -17,6 +17,7 @@ import uk.gov.justice.hmpps.sqs.HmppsQueueService
 import uk.gov.justice.hmpps.sqs.HmppsTopic
 import java.time.LocalDateTime
 import java.util.concurrent.CompletableFuture
+import java.util.concurrent.CompletableFuture.completedFuture
 
 class CaseNoteAwsEventPusherTest {
   private val hmppsQueueService: HmppsQueueService = mock()
@@ -58,11 +59,9 @@ class CaseNoteAwsEventPusherTest {
   fun `send event sends to the sns client1`() {
     whenever(objectMapper.writeValueAsString(any())).thenReturn("messageAsJson")
     whenever(hmppsQueueService.findByTopicId("domainevents")).thenReturn(HmppsTopic("id", "topicArn", snsClient))
-    val publishResponse = PublishResponse.builder().messageId("Hello").build()
-    val completableFuture = CompletableFuture<PublishResponse>()
-    completableFuture.complete(publishResponse)
+    val publishResponse = mock<PublishResponse>()
+    whenever(snsClient.publish(any<PublishRequest>())).thenReturn(completedFuture(publishResponse))
 
-    whenever(snsClient.publish(publishRequest)).thenReturn(completableFuture)
     service.sendEvent(caseCaseNote())
     // val  publishRequest =
     verify(snsClient).publish(
