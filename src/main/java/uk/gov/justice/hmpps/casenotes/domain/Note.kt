@@ -105,7 +105,7 @@ class Note(
           request.authorUserId,
           request.text,
           newUuid(),
-        ),
+        ).apply { createDateTime = request.createdDateTime },
       )
     } else {
       val context = CaseNoteRequestContext.get()
@@ -117,7 +117,7 @@ class Note(
           context.userId,
           request.text,
           newUuid(),
-        ),
+        ).apply { createDateTime = context.requestAt },
       )
     }
   }
