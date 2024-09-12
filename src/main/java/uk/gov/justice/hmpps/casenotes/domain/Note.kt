@@ -30,7 +30,12 @@ import uk.gov.justice.hmpps.casenotes.domain.SubType.Companion.PARENT
 import uk.gov.justice.hmpps.casenotes.domain.audit.AuditedEntityListener
 import uk.gov.justice.hmpps.casenotes.domain.audit.SimpleAudited
 import uk.gov.justice.hmpps.casenotes.notes.TextRequest
+import uk.gov.justice.hmpps.casenotes.sync.MigrationResult
+import uk.gov.justice.hmpps.casenotes.sync.SyncAmendmentRequest
+import uk.gov.justice.hmpps.casenotes.sync.SyncNoteRequest
 import java.time.LocalDateTime
+import java.time.temporal.ChronoUnit
+import java.util.Optional
 import java.util.SortedSet
 import java.util.TreeSet
 import java.util.UUID
@@ -43,9 +48,7 @@ class Note(
   @Column(name = "offender_identifier", nullable = false)
   val prisonNumber: String,
 
-  @ManyToOne
-  @JoinColumn(name = "case_note_type_id", nullable = false)
-  val type: SubType,
+  type: SubType,
 
   @Column(name = "occurrence_date_time", nullable = false)
   val occurredAt: LocalDateTime,
@@ -62,15 +65,11 @@ class Note(
   @Column(nullable = false)
   val authorName: String,
 
-  @Column(name = "note_text", nullable = false)
-  val text: String,
+  text: String,
 
   val systemGenerated: Boolean,
 
-  @OneToMany(
-    cascade = [CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REFRESH, CascadeType.DETACH],
-    mappedBy = "note",
-  )
+  @OneToMany(cascade = [CascadeType.ALL], mappedBy = "note")
   private val amendments: SortedSet<Amendment> = TreeSet(),
 ) : SimpleAudited() {
 
@@ -83,20 +82,65 @@ class Note(
 
   var legacyId: Long = 0
 
+  @ManyToOne
+  @JoinColumn(name = "case_note_type_id", nullable = false)
+  var type: SubType = type
+    private set
+
+  @Column(name = "note_text", nullable = false)
+  var text: String = text
+    private set
+
   fun amendments() = amendments.toSortedSet()
   fun addAmendment(request: TextRequest) = apply {
-    val context = CaseNoteRequestContext.get()
-    amendments.add(
-      Amendment(
-        this,
-        context.username,
-        context.userDisplayName,
-        context.userId,
-        request.text,
-        newUuid(),
-      ),
-    )
+    if (request is SyncAmendmentRequest) {
+      amendments.add(
+        Amendment(
+          this,
+          request.authorUsername,
+          request.authorName,
+          request.authorUserId,
+          request.text,
+          newUuid(),
+        ).apply { createDateTime = request.createdDateTime },
+      )
+    } else {
+      val context = CaseNoteRequestContext.get()
+      amendments.add(
+        Amendment(
+          this,
+          context.username,
+          context.userDisplayName,
+          context.userId,
+          request.text,
+          newUuid(),
+        ).apply { createDateTime = context.requestAt },
+      )
+    }
   }
+
+  fun sync(request: SyncNoteRequest, typeSupplier: (String, String) -> SubType) = apply {
+    if (!(type.code == request.subType && type.parentCode == request.type)) {
+      type = typeSupplier(request.type, request.subType)
+    }
+    text = request.text
+    request.amendments.forEach {
+      matchAmendment(it)?.update(it) ?: addAmendment(it)
+    }
+  }
+
+  private fun matchAmendment(request: SyncAmendmentRequest): Amendment? {
+    val matching = amendments.filter {
+      request.authorUsername == it.authorUsername && request.createdDateTime.sameSecond(it.createDateTime)
+    }
+    return when (matching.size) {
+      1 -> matching.single()
+      else -> null
+    }
+  }
+
+  private fun LocalDateTime.sameSecond(other: LocalDateTime): Boolean =
+    truncatedTo(ChronoUnit.SECONDS) == other.truncatedTo(ChronoUnit.SECONDS)
 
   companion object {
     val TYPE = Note::type.name
@@ -116,8 +160,17 @@ interface NoteRepository : JpaSpecificationExecutor<Note>, JpaRepository<Note, U
   @EntityGraph(attributePaths = ["type.parent", "amendments"])
   fun findByLegacyIdAndPrisonNumber(legacyId: Long, prisonNumber: String): Note?
 
+  @EntityGraph(attributePaths = ["type.parent", "amendments"])
+  override fun findById(id: UUID): Optional<Note>
+
+  @EntityGraph(attributePaths = ["type.parent", "amendments"])
+  fun findByLegacyId(legacyId: Long): Note?
+
   @Query("select nextval('offender_case_note_event_id_seq')", nativeQuery = true)
   fun getNextLegacyId(): Long
+
+  @Query("select new uk.gov.justice.hmpps.casenotes.sync.MigrationResult(n.id, n.legacyId) from Note n where n.legacyId in (:legacyIds)")
+  fun findMigratedIds(legacyIds: List<Long>): List<MigrationResult>
 }
 
 fun NoteRepository.saveAndRefresh(note: Note): Note {
