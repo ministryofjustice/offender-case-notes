@@ -34,6 +34,7 @@ import uk.gov.justice.hmpps.casenotes.sync.MigrationResult
 import uk.gov.justice.hmpps.casenotes.sync.SyncAmendmentRequest
 import uk.gov.justice.hmpps.casenotes.sync.SyncNoteRequest
 import java.time.LocalDateTime
+import java.time.temporal.ChronoUnit
 import java.util.Optional
 import java.util.SortedSet
 import java.util.TreeSet
@@ -68,11 +69,7 @@ class Note(
 
   val systemGenerated: Boolean,
 
-  @OneToMany(
-    cascade = [CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REFRESH, CascadeType.DETACH, CascadeType.REMOVE],
-    mappedBy = "note",
-    orphanRemoval = true,
-  )
+  @OneToMany(cascade = [CascadeType.ALL], mappedBy = "note")
   private val amendments: SortedSet<Amendment> = TreeSet(),
 ) : SimpleAudited() {
 
@@ -127,9 +124,23 @@ class Note(
       type = typeSupplier(request.type, request.subType)
     }
     text = request.text
-    amendments.clear()
-    request.amendments.forEach { addAmendment(it) }
+    request.amendments.forEach {
+      matchAmendment(it)?.update(it) ?: addAmendment(it)
+    }
   }
+
+  private fun matchAmendment(request: SyncAmendmentRequest): Amendment? {
+    val matching = amendments.filter {
+      request.authorUsername == it.authorUsername && request.createdDateTime.sameSecond(it.createDateTime)
+    }
+    return when (matching.size) {
+      1 -> matching.single()
+      else -> null
+    }
+  }
+
+  private fun LocalDateTime.sameSecond(other: LocalDateTime): Boolean =
+    truncatedTo(ChronoUnit.SECONDS) == other.truncatedTo(ChronoUnit.SECONDS)
 
   companion object {
     val TYPE = Note::type.name
