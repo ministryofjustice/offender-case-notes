@@ -146,6 +146,15 @@ class SyncCaseNoteIntTest : ResourceTest() {
   }
 
   @Test
+  fun `400 bad request - exception thrown if person identifier doesn't match`() {
+    val existing = givenCaseNote(generateCaseNote())
+    val request = existing.syncRequest().copy(personIdentifier = prisonNumber())
+    val response = syncCaseNote(request).errorResponse(HttpStatus.BAD_REQUEST)
+    assertThat(response.developerMessage)
+      .isEqualTo("Case note belongs to another prisoner or prisoner records have been merged")
+  }
+
+  @Test
   fun `204 no content - delete case note`() {
     val prisonNumber = prisonNumber()
     val note = givenCaseNote(generateCaseNote(prisonNumber))
