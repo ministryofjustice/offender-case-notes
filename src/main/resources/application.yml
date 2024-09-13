@@ -11,6 +11,11 @@ spring:
             non_contextual_creation: true
           batch_size: 100
           batch_versioned_data: true
+      org.hibernate.envers.audit_table_suffix: _audit
+      org.hibernate.envers.revision_field_name: rev_id
+      org.hibernate.envers.revision_type_field_name: rev_type
+      org.hibernate.envers.modified_flag_suffix: _modified
+      org.hibernate.envers.store_data_at_delete: true
     show-sql: false
     generate-ddl: false
     hibernate:

@@ -19,6 +19,8 @@ dependencies {
 
   implementation("org.springframework.boot:spring-boot-starter-data-jpa")
   implementation("org.springframework.boot:spring-boot-starter-cache")
+  implementation("org.hibernate.orm:hibernate-envers")
+  implementation("org.springframework.data:spring-data-envers")
 
   implementation("org.springframework.boot:spring-boot-starter-oauth2-resource-server")
   implementation("org.springframework.boot:spring-boot-starter-oauth2-client")

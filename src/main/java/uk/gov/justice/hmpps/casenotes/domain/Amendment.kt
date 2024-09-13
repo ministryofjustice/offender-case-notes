@@ -7,15 +7,15 @@ import jakarta.persistence.JoinColumn
 import jakarta.persistence.ManyToOne
 import jakarta.persistence.Table
 import jakarta.persistence.Version
-import org.hibernate.annotations.SoftDelete
+import org.hibernate.envers.Audited
 import org.springframework.data.jpa.repository.JpaRepository
 import uk.gov.justice.hmpps.casenotes.domain.audit.SimpleAudited
 import uk.gov.justice.hmpps.casenotes.notes.TextRequest
 import java.util.UUID
 
 @Entity
-@SoftDelete(columnName = "soft_deleted")
 @Table(name = "offender_case_note_amendment")
+@Audited(withModifiedFlag = false)
 class Amendment(
   @ManyToOne
   @JoinColumn(name = "offender_case_note_id", nullable = false)
@@ -42,6 +42,7 @@ class Amendment(
 
   override fun compareTo(other: Amendment): Int = createDateTime.compareTo(other.createDateTime)
 
+  @Audited(withModifiedFlag = true)
   @Column(name = "note_text", nullable = false)
   var text: String = text
     private set

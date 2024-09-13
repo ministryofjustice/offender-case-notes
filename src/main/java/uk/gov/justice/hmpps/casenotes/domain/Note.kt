@@ -12,12 +12,15 @@ import jakarta.persistence.Table
 import jakarta.persistence.Version
 import jakarta.persistence.criteria.Join
 import jakarta.persistence.criteria.JoinType
-import org.hibernate.annotations.SoftDelete
+import org.hibernate.envers.Audited
+import org.hibernate.envers.NotAudited
+import org.hibernate.envers.RelationTargetAuditMode.NOT_AUDITED
 import org.springframework.data.jpa.domain.Specification
 import org.springframework.data.jpa.repository.EntityGraph
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor
 import org.springframework.data.jpa.repository.Query
+import org.springframework.data.repository.history.RevisionRepository
 import uk.gov.justice.hmpps.casenotes.config.CaseNoteRequestContext
 import uk.gov.justice.hmpps.casenotes.domain.IdGenerator.newUuid
 import uk.gov.justice.hmpps.casenotes.domain.Note.Companion.AMENDMENTS
@@ -42,7 +45,7 @@ import java.util.UUID
 
 @Entity
 @Table(name = "offender_case_note")
-@SoftDelete(columnName = "soft_deleted")
+@Audited(withModifiedFlag = false)
 @EntityListeners(AuditedEntityListener::class)
 class Note(
   @Column(name = "offender_identifier", nullable = false)
@@ -69,6 +72,7 @@ class Note(
 
   val systemGenerated: Boolean,
 
+  @NotAudited
   @OneToMany(cascade = [CascadeType.ALL], mappedBy = "note")
   private val amendments: SortedSet<Amendment> = TreeSet(),
 ) : SimpleAudited() {
@@ -82,11 +86,13 @@ class Note(
 
   var legacyId: Long = 0
 
+  @Audited(withModifiedFlag = true, targetAuditMode = NOT_AUDITED)
   @ManyToOne
   @JoinColumn(name = "case_note_type_id", nullable = false)
   var type: SubType = type
     private set
 
+  @Audited(withModifiedFlag = true)
   @Column(name = "note_text", nullable = false)
   var text: String = text
     private set
@@ -153,7 +159,12 @@ class Note(
   }
 }
 
-interface NoteRepository : JpaSpecificationExecutor<Note>, JpaRepository<Note, UUID>, RefreshRepository<Note, UUID> {
+interface NoteRepository :
+  JpaSpecificationExecutor<Note>,
+  JpaRepository<Note, UUID>,
+  RefreshRepository<Note, UUID>,
+  RevisionRepository<Note, UUID, Long> {
+
   @EntityGraph(attributePaths = ["type.parent", "amendments"])
   fun findByIdAndPrisonNumber(id: UUID, prisonNumber: String): Note?
 

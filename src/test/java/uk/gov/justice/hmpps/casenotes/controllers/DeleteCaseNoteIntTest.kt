@@ -3,6 +3,7 @@ package uk.gov.justice.hmpps.casenotes.controllers
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
+import org.springframework.data.history.RevisionMetadata.RevisionType.DELETE
 import org.springframework.http.HttpStatus
 import uk.gov.justice.hmpps.casenotes.config.SecurityUserContext.Companion.ROLE_CASE_NOTES_READ
 import uk.gov.justice.hmpps.casenotes.config.SecurityUserContext.Companion.ROLE_CASE_NOTES_WRITE
@@ -44,6 +45,8 @@ class DeleteCaseNoteIntTest : ResourceTest() {
 
     val saved = noteRepository.findByIdAndPrisonNumber(caseNote.id, caseNote.prisonNumber)
     assertThat(saved).isNull()
+
+    verifyAudited(caseNote.id, DELETE)
   }
 
   private fun deleteCaseNote(

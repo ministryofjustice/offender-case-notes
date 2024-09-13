@@ -2,6 +2,9 @@ package uk.gov.justice.hmpps.casenotes.controllers
 
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
+import org.springframework.data.history.RevisionMetadata.RevisionType.DELETE
+import org.springframework.data.history.RevisionMetadata.RevisionType.INSERT
+import org.springframework.data.history.RevisionMetadata.RevisionType.UPDATE
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.http.HttpStatus
 import uk.gov.justice.hmpps.casenotes.config.SecurityUserContext.Companion.ROLE_CASE_NOTES_SYNC
@@ -74,6 +77,15 @@ class SyncCaseNoteIntTest : ResourceTest() {
   }
 
   @Test
+  fun `400 bad request - exception thrown if person identifier doesn't match`() {
+    val existing = givenCaseNote(generateCaseNote())
+    val request = existing.syncRequest().copy(personIdentifier = prisonNumber())
+    val response = syncCaseNote(request).errorResponse(HttpStatus.BAD_REQUEST)
+    assertThat(response.developerMessage)
+      .isEqualTo("Case note belongs to another prisoner or prisoner records have been merged")
+  }
+
+  @Test
   fun `201 created - sync creates a new case note`() {
     val request = syncCaseNoteRequest()
     val response = syncCaseNote(request).success<SyncResult>(HttpStatus.CREATED)
@@ -81,6 +93,8 @@ class SyncCaseNoteIntTest : ResourceTest() {
 
     val saved = requireNotNull(noteRepository.findByIdAndPrisonNumber(response.id, request.personIdentifier))
     saved.verifyAgainst(request)
+
+    verifyAudited(saved.id, INSERT)
   }
 
   @Test
@@ -93,6 +107,8 @@ class SyncCaseNoteIntTest : ResourceTest() {
     saved.verifyAgainst(request)
     val amended = saved.amendments().first()
     amended.verifyAgainst(request.amendments.first())
+
+    verifyAudited(saved.id, INSERT)
   }
 
   @Test
@@ -105,6 +121,8 @@ class SyncCaseNoteIntTest : ResourceTest() {
 
     val saved = requireNotNull(noteRepository.findByIdAndPrisonNumber(response.id, request.personIdentifier))
     saved.verifyAgainst(request)
+
+    verifyAudited(saved.id, UPDATE)
   }
 
   @Test
@@ -117,6 +135,8 @@ class SyncCaseNoteIntTest : ResourceTest() {
 
     val saved = requireNotNull(noteRepository.findByIdAndPrisonNumber(response.id, request.personIdentifier))
     saved.verifyAgainst(request)
+
+    verifyAudited(saved.id, UPDATE)
   }
 
   @Test
@@ -143,15 +163,8 @@ class SyncCaseNoteIntTest : ResourceTest() {
     assertThat(saved.amendments().size).isEqualTo(2)
     val amend = saved.amendments().first()
     amend.verifyAgainst(request.amendments.first())
-  }
 
-  @Test
-  fun `400 bad request - exception thrown if person identifier doesn't match`() {
-    val existing = givenCaseNote(generateCaseNote())
-    val request = existing.syncRequest().copy(personIdentifier = prisonNumber())
-    val response = syncCaseNote(request).errorResponse(HttpStatus.BAD_REQUEST)
-    assertThat(response.developerMessage)
-      .isEqualTo("Case note belongs to another prisoner or prisoner records have been merged")
+    verifyAudited(saved.id, UPDATE)
   }
 
   @Test
@@ -164,6 +177,8 @@ class SyncCaseNoteIntTest : ResourceTest() {
     deleteCaseNote(note.id)
 
     assertThat(cns()).isNull()
+
+    verifyAudited(note.id, DELETE)
   }
 
   @Test

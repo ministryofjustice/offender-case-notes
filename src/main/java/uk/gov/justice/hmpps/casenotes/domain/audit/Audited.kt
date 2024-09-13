@@ -15,6 +15,7 @@ interface Audited {
   fun recordModifiedDetails(context: CaseNoteRequestContext)
 }
 
+@org.hibernate.envers.Audited(withModifiedFlag = false)
 @MappedSuperclass
 abstract class SimpleAudited(context: CaseNoteRequestContext = CaseNoteRequestContext.get()) : Audited {
 

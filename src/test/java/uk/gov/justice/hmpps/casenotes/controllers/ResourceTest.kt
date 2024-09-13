@@ -1,10 +1,12 @@
 package uk.gov.justice.hmpps.casenotes.controllers
 
 import com.fasterxml.uuid.Generators
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT
+import org.springframework.data.history.RevisionMetadata.RevisionType
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
@@ -28,6 +30,7 @@ import uk.gov.justice.hmpps.casenotes.utils.setByName
 import java.time.LocalDateTime
 import java.util.UUID
 import java.util.function.Consumer
+import kotlin.jvm.optionals.getOrNull
 
 internal const val ACTIVE_PRISON = "MDI"
 internal const val USERNAME = "TestUser"
@@ -82,6 +85,11 @@ abstract class ResourceTest : IntegrationTest() {
     expectStatus().isEqualTo(status)
       .expectBodyList(T::class.java)
       .returnResult().responseBody!!
+
+  internal fun verifyAudited(caseNoteId: UUID, type: RevisionType) {
+    val revision = requireNotNull(noteRepository.findLastChangeRevision(caseNoteId).getOrNull())
+    assertThat(revision.metadata.revisionType).isEqualTo(type)
+  }
 
   fun getAllTypes(
     includeInactive: Boolean = true,

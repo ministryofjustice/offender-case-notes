@@ -4,6 +4,7 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
+import org.springframework.data.history.RevisionMetadata.RevisionType.INSERT
 import org.springframework.http.HttpStatus
 import uk.gov.justice.hmpps.casenotes.config.SecurityUserContext.Companion.ROLE_CASE_NOTES_READ
 import uk.gov.justice.hmpps.casenotes.config.SecurityUserContext.Companion.ROLE_CASE_NOTES_WRITE
@@ -87,6 +88,8 @@ class CreateCaseNoteIntTest : ResourceTest() {
     saved.verifyAgainst(request)
     assertThat(saved.authorUsername).isEqualTo(USERNAME)
     response.verifyAgainst(saved)
+
+    verifyAudited(saved.id, INSERT)
   }
 
   @Test
@@ -133,6 +136,8 @@ class CreateCaseNoteIntTest : ResourceTest() {
     saved.verifyAgainst(objectMapper.readValue<CreateCaseNoteRequest>(request))
     assertThat(saved.authorUsername).isEqualTo(USERNAME)
     response.verifyAgainst(saved)
+
+    verifyAudited(saved.id, INSERT)
   }
 
   private fun createCaseNoteRequest(
