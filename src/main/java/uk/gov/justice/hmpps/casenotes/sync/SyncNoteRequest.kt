@@ -9,6 +9,7 @@ import uk.gov.justice.hmpps.casenotes.config.Source
 import uk.gov.justice.hmpps.casenotes.notes.AuthoredRequest
 import uk.gov.justice.hmpps.casenotes.notes.NoteRequest
 import uk.gov.justice.hmpps.casenotes.notes.TextRequest
+import uk.gov.justice.hmpps.casenotes.utils.LanguageFormatUtils
 import java.time.LocalDateTime
 
 interface SyncNoteRequest : NoteRequest, AuthoredRequest {
@@ -36,14 +37,18 @@ interface SyncNoteRequest : NoteRequest, AuthoredRequest {
   )
   override val occurrenceDateTime: LocalDateTime
 
-  @get:Schema(requiredMode = REQUIRED, description = "Username of the staff member that created the case note")
-  @get:NotBlank(message = "author username cannot be blank")
   override val authorUsername: String
+    get() = author.username
 
-  @get:Schema(requiredMode = REQUIRED, description = "Id of the staff member that created the case note")
-  @get:Length(max = 64, message = "author user id cannot be more than 64 characters")
-  @get:NotBlank(message = "author user id cannot be blank")
+  override val authorName: String
+    get() = LanguageFormatUtils.formatDisplayName("${author.firstName} ${author.lastName}").trim()
+
   val authorUserId: String
+    get() = author.userId
+
+  @get:Schema(description = "The staff member who created the case note")
+  @get:Valid
+  val author: CreateAuthor
 
   @get:Schema(
     requiredMode = REQUIRED,
@@ -73,11 +78,41 @@ interface SyncNoteRequest : NoteRequest, AuthoredRequest {
 }
 
 interface SyncAmendmentRequest : TextRequest, AuthoredRequest {
-  @get:NotBlank(message = "author username cannot be blank")
   override val authorUsername: String
-
-  @get:Length(max = 64, message = "author user id cannot be more than 64 characters")
-  @get:NotBlank(message = "author user id cannot be blank")
+    get() = author.username
+  override val authorName: String
+    get() = LanguageFormatUtils.formatDisplayName("${author.firstName} ${author.lastName}").trim()
   val authorUserId: String
+    get() = author.userId
+  @get:Schema(description = "The staff member who amended the case note")
+  @get:Valid
+  val author: AmendAuthor
   val createdDateTime: LocalDateTime
 }
+
+data class CreateAuthor(
+  @get:Schema(requiredMode = REQUIRED, description = "Full name of the staff member that created the case note")
+  @get:Length(max = 80, message = "author name cannot be more than 80 characters")
+  @get:NotBlank(message = "author name cannot be blank")
+  val username: String,
+  @get:Schema(requiredMode = REQUIRED, description = "Id of the staff member that created the case note")
+  @get:Length(max = 64, message = "author user id cannot be more than 64 characters")
+  @get:NotBlank(message = "author user id cannot be blank")
+  val userId: String,
+  @get:Schema(requiredMode = REQUIRED, description = "First name of the staff member that created the case note")
+  @get:NotBlank(message = "author first name cannot be blank")
+  val firstName: String,
+  @get:Schema(description = "Last name of the staff member that created the case note")
+  val lastName: String,
+)
+
+data class AmendAuthor(
+  @get:NotBlank(message = "author username cannot be blank")
+  val username: String,
+  @get:Length(max = 64, message = "author user id cannot be more than 64 characters")
+  @get:NotBlank(message = "author user id cannot be blank")
+  val userId: String,
+  @get:NotBlank(message = "author first name cannot be blank")
+  val firstName: String,
+  val lastName: String,
+)

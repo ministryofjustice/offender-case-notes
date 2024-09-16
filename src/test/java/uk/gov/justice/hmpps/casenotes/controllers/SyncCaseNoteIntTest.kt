@@ -9,6 +9,8 @@ import uk.gov.justice.hmpps.casenotes.config.SecurityUserContext.Companion.ROLE_
 import uk.gov.justice.hmpps.casenotes.config.Source
 import uk.gov.justice.hmpps.casenotes.domain.Amendment
 import uk.gov.justice.hmpps.casenotes.domain.Note
+import uk.gov.justice.hmpps.casenotes.sync.AmendAuthor
+import uk.gov.justice.hmpps.casenotes.sync.CreateAuthor
 import uk.gov.justice.hmpps.casenotes.sync.SyncCaseNoteAmendmentRequest
 import uk.gov.justice.hmpps.casenotes.sync.SyncCaseNoteRequest
 import uk.gov.justice.hmpps.casenotes.sync.SyncResult
@@ -56,6 +58,7 @@ class SyncCaseNoteIntTest : ResourceTest() {
       assertThat(developerMessage).isEqualTo(
         """
         |400 BAD_REQUEST Validation failures: 
+        |author first name cannot be blank
         |author name cannot be blank
         |author name cannot be more than 80 characters
         |author user id cannot be blank
@@ -218,9 +221,12 @@ private fun syncCaseNoteRequest(
   occurrenceDateTime,
   text,
   systemGenerated,
-  authorUsername,
-  authorUserId,
-  authorName,
+  CreateAuthor(
+    username = authorUsername,
+    userId = authorUserId,
+    firstName = authorName.split(" ").first(),
+    lastName = authorName.split(" ").let { if (it.size > 1) it.last() else "" },
+  ),
   createdDateTime,
   createdBy,
   source,
@@ -233,7 +239,16 @@ private fun syncAmendmentRequest(
   authorUserId: String = "12376471",
   authorName: String = "Author Name",
   createdDateTime: LocalDateTime = LocalDateTime.now(),
-) = SyncCaseNoteAmendmentRequest(text, authorUsername, authorUserId, authorName, createdDateTime)
+) = SyncCaseNoteAmendmentRequest(
+  text,
+  AmendAuthor(
+    username = authorUsername,
+    userId = authorUserId,
+    firstName = authorName.split(' ').first(),
+    lastName = authorName.split(" ").let { if (it.size > 1) it.last() else "" },
+  ),
+  createdDateTime,
+)
 
 private fun Note.syncRequest() = syncCaseNoteRequest(
   legacyId = legacyId,

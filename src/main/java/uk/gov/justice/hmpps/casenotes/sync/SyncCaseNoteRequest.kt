@@ -21,9 +21,7 @@ data class SyncCaseNoteRequest(
   override val occurrenceDateTime: LocalDateTime,
   override val text: String,
   override val systemGenerated: Boolean,
-  override val authorUsername: String,
-  override val authorUserId: String,
-  override val authorName: String,
+  override val author: CreateAuthor,
   override val createdDateTime: LocalDateTime,
   override val createdByUsername: String,
   override val source: Source,
@@ -32,8 +30,6 @@ data class SyncCaseNoteRequest(
 
 data class SyncCaseNoteAmendmentRequest(
   override val text: String,
-  override val authorUsername: String,
-  override val authorUserId: String,
-  override val authorName: String,
+  override val author: AmendAuthor,
   override val createdDateTime: LocalDateTime,
 ) : SyncAmendmentRequest

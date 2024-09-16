@@ -8,6 +8,8 @@ import uk.gov.justice.hmpps.casenotes.config.SecurityUserContext.Companion.ROLE_
 import uk.gov.justice.hmpps.casenotes.config.Source
 import uk.gov.justice.hmpps.casenotes.domain.Note
 import uk.gov.justice.hmpps.casenotes.domain.matchesPrisonNumber
+import uk.gov.justice.hmpps.casenotes.sync.AmendAuthor
+import uk.gov.justice.hmpps.casenotes.sync.CreateAuthor
 import uk.gov.justice.hmpps.casenotes.sync.MigrateAmendmentRequest
 import uk.gov.justice.hmpps.casenotes.sync.MigrateCaseNoteRequest
 import uk.gov.justice.hmpps.casenotes.sync.MigrationResult
@@ -82,7 +84,7 @@ class MigrateCaseNotesIntTest : ResourceTest() {
     val type = getAllTypes().first { it.syncToNomis }
     val amendment = migrateAmendmentRequest(
       text = "An amendment to the case note, to verify it is saved correctly",
-      authorName = "Simon Else",
+      authorName = "DOUBLE-BARRELLED O’NEIL",
       authorUsername = "SM1ELSE",
       authorUserId = "585153477",
       createdDateTime = LocalDateTime.now().minusDays(3),
@@ -93,7 +95,7 @@ class MigrateCaseNotesIntTest : ResourceTest() {
       type = type.parent.code,
       subType = type.code,
       text = "This a larger, non default text block to determine that notes are correctly saved to the db",
-      authorName = "A N Other",
+      authorName = "DOUBLE-BARRELLED O’NEIL",
       authorUsername = "anotherUser",
       authorUserId = "564716341",
       occurrenceDateTime = LocalDateTime.now().minusDays(10),
@@ -104,7 +106,9 @@ class MigrateCaseNotesIntTest : ResourceTest() {
     val response = migrateCaseNotes(listOf(request)).successList<MigrationResult>()
     val saved = noteRepository.findByIdAndPrisonNumber(response.first().id, request.personIdentifier)
     requireNotNull(saved).verifyAgainst(request)
+    assertThat(saved.authorName).isEqualTo("Double-Barrelled O’Neil")
     saved.amendments().first().verifyAgainst(request.amendments.first())
+    assertThat(saved.amendments().first().authorName).isEqualTo("Double-Barrelled O’Neil")
   }
 
   @Test
@@ -165,9 +169,12 @@ private fun migrateCaseNoteRequest(
   occurrenceDateTime,
   text,
   systemGenerated,
-  authorUsername,
-  authorUserId,
-  authorName,
+  CreateAuthor(
+    username = authorUsername,
+    userId = authorUserId,
+    firstName = authorName.split(" ").first(),
+    lastName = authorName.split(" ").last(),
+  ),
   createdDateTime,
   createdBy,
   source,
@@ -180,7 +187,16 @@ private fun migrateAmendmentRequest(
   authorUserId: String = "12376471",
   authorName: String = "Author Name",
   createdDateTime: LocalDateTime = LocalDateTime.now(),
-) = MigrateAmendmentRequest(text, authorUsername, authorUserId, authorName, createdDateTime)
+) = MigrateAmendmentRequest(
+  text,
+  AmendAuthor(
+    username = authorUsername,
+    userId = authorUserId,
+    firstName = authorName.split(' ').first(),
+    lastName = authorName.split(' ').last(),
+  ),
+  createdDateTime,
+)
 
 private fun Note.migrateRequest() = migrateCaseNoteRequest(
   legacyId = legacyId,

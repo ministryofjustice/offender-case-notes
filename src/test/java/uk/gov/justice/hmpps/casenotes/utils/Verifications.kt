@@ -34,7 +34,6 @@ fun Note.verifyAgainst(request: SyncNoteRequest) {
   assertThat(text).isEqualTo(request.text)
   assertThat(occurredAt.truncatedTo(SECONDS)).isEqualTo(request.occurrenceDateTime.truncatedTo(SECONDS))
   assertThat(createDateTime.truncatedTo(SECONDS)).isEqualTo(request.createdDateTime.truncatedTo(SECONDS))
-  assertThat(authorName).isEqualTo(request.authorName)
   assertThat(authorUsername).isEqualTo(request.authorUsername)
   assertThat(authorUserId).isEqualTo(request.authorUserId)
   assertThat(legacyId).isEqualTo(request.legacyId)
