@@ -41,10 +41,10 @@ create table if not exists case_note_deleted
     id                bigserial   not null primary key,
     person_identifier varchar     not null,
     case_note_id      uuid        not null,
-    legacy_id         bigint      not null,
+    legacy_id         bigint,
     case_note         jsonb       not null,
-    deleted_datetime  timestamp   not null,
-    deleted_username  varchar(64) not null,
+    deleted_at        timestamp   not null,
+    deleted_by        varchar(64) not null,
     caseload_id       varchar(12),
     source            varchar(6)
         constraint check_source check (source in ('DPS', 'NOMIS')),
@@ -70,8 +70,8 @@ begin
                         where cn.id = any (case_note_ids)
                         group by cn.id)
     insert
-    into case_note_deleted(id, person_identifier, case_note_id, legacy_id, case_note, deleted_datetime,
-                           deleted_username, caseload_id, source, cause)
+    into case_note_deleted(id, person_identifier, case_note_id, legacy_id, case_note, deleted_at, deleted_by,
+                           caseload_id, source, cause)
     select nextval('case_note_deleted_id_seq'),
            cn.person_identifier,
            cn.id,

@@ -1,12 +1,9 @@
 package uk.gov.justice.hmpps.casenotes.domain
 
-import com.fasterxml.jackson.databind.PropertyNamingStrategies.SnakeCaseStrategy
-import com.fasterxml.jackson.databind.annotation.JsonNaming
 import java.time.LocalDateTime
 import java.util.SortedSet
 import java.util.UUID
 
-@JsonNaming(SnakeCaseStrategy::class)
 interface NoteState {
   val personIdentifier: String
   val typeId: Long
@@ -19,14 +16,17 @@ interface NoteState {
   val systemGenerated: Boolean
   val legacyId: Long?
   val id: UUID
+  val createdAt: LocalDateTime
+  val createdBy: String
   fun amendments(): SortedSet<out AmendmentState>
 }
 
-@JsonNaming(SnakeCaseStrategy::class)
 interface AmendmentState {
   val authorUsername: String
   val authorName: String
   val authorUserId: String
   val text: String
   val id: UUID
+  val createdAt: LocalDateTime
+  val createdBy: String
 }

@@ -21,6 +21,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 import uk.gov.justice.hmpps.casenotes.config.CaseNoteRequestContext;
 import uk.gov.justice.hmpps.casenotes.config.SecurityUserContext;
+import uk.gov.justice.hmpps.casenotes.domain.audit.DeletedCaseNoteRepository;
 import uk.gov.justice.hmpps.casenotes.dto.CaseNoteFilter;
 import uk.gov.justice.hmpps.casenotes.dto.NomisCaseNote;
 import uk.gov.justice.hmpps.casenotes.filters.OffenderCaseNoteFilter;
@@ -58,6 +59,7 @@ public class CaseNoteService {
     private final ExternalApiService externalApiService;
     private final TelemetryClient telemetryClient;
     private final EntityManager entityManager;
+    private final DeletedCaseNoteRepository deletedCaseNoteRepository;
 
     public Page<CaseNote> getCaseNotes(
         final String offenderIdentifier,
@@ -322,13 +324,14 @@ public class CaseNoteService {
     }
 
     @Transactional
-    public int deleteCaseNotesForOffender(final String offenderIdentifier) {
-        repository.deleteCaseNoteAmendmentsByPersonIdentifier(offenderIdentifier);
-        final var deletedCaseNotesCount = repository.deleteCaseNoteByPersonIdentifier(offenderIdentifier);
-        log.info("Deleted {} case notes for offender identifier {}", deletedCaseNotesCount, offenderIdentifier);
+    public int deleteCaseNotesForOffender(final String personIdentifier) {
+        repository.deleteCaseNoteAmendmentsByPersonIdentifier(personIdentifier);
+        final var deletedCaseNotesCount = repository.deleteCaseNoteByPersonIdentifier(personIdentifier);
+        deletedCaseNoteRepository.deleteByPersonIdentifier(personIdentifier);
+
         telemetryClient.trackEvent(
-            "OffenderDelete",
-            Map.of("offenderNo", offenderIdentifier, "count", valueOf(deletedCaseNotesCount)),
+            "DataComplianceDelete",
+            Map.of("personIdentifier", personIdentifier, "count", valueOf(deletedCaseNotesCount)),
             null
         );
         return deletedCaseNotesCount;
@@ -336,7 +339,7 @@ public class CaseNoteService {
 
     @Transactional
     @PreAuthorize("hasRole('DELETE_SENSITIVE_CASE_NOTES')")
-    public void softDeleteCaseNote(final String offenderIdentifier, final String caseNoteId) {
+    public void deleteCaseNote(final String offenderIdentifier, final String caseNoteId) {
         if (isLegacyId(caseNoteId)) {
             throw new ValidationException("Case note id not a sensitive case note, please delete through NOMIS");
         }
@@ -345,15 +348,7 @@ public class CaseNoteService {
         if (!caseNote.getPersonIdentifier().equalsIgnoreCase(offenderIdentifier)) {
             throw new ValidationException("case note id not connected with offenderIdentifier");
         }
-        repository.deleteById(UUID.fromString(caseNoteId));
-        telemetryClient.trackEvent(
-            "SecureCaseNoteSoftDelete",
-            Map.of("userName", securityUserContext.getCurrentUser().getUsername(),
-                "offenderId", offenderIdentifier,
-                "case note id", caseNoteId
-            ),
-            null
-        );
+        repository.delete(caseNote);
     }
 
     private boolean isAllowedToCreateRestrictedCaseNote() {

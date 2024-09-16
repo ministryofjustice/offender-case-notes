@@ -16,7 +16,6 @@ import uk.gov.justice.hmpps.casenotes.model.CaseNoteType;
 import uk.gov.justice.hmpps.casenotes.model.OffenderCaseNote;
 import uk.gov.justice.hmpps.casenotes.model.OffenderCaseNote.OffenderCaseNoteBuilder;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
@@ -101,109 +100,6 @@ public class OffenderCaseNoteRepositoryTest extends IntegrationTest {
         final var sql = String.format("select count(*) FROM case_note where id = '%s'", persistedEntity.getId().toString());
         final var caseNoteCountAfter = jdbcTemplate.queryForObject(sql, Integer.class);
         assertThat(caseNoteCountAfter).isEqualTo(0);
-    }
-
-    @Test
-    public void testDeleteOfSoftDeletedCaseNotes() {
-
-        final var persistedEntity = repository.save(transientEntityBuilder("X2111XX").text("note to delete").build());
-
-        TestTransaction.flagForCommit();
-        TestTransaction.end();
-        TestTransaction.start();
-
-        repository.delete(persistedEntity);
-
-        TestTransaction.flagForCommit();
-        TestTransaction.end();
-        TestTransaction.start();
-
-        final var deletedCaseNotes = repository.deleteCaseNoteByPersonIdentifier("X2111XX");
-        assertThat(deletedCaseNotes).isEqualTo(1);
-
-        TestTransaction.flagForCommit();
-        TestTransaction.end();
-        TestTransaction.start();
-
-        assertThat(repository.findById(persistedEntity.getId())).isEmpty();
-        TestTransaction.end();
-
-        final var sql = String.format("select count(*) FROM case_note where id = '%s'", persistedEntity.getId().toString());
-        final var caseNoteCountAfter = jdbcTemplate.queryForObject(sql, Integer.class);
-        assertThat(caseNoteCountAfter).isEqualTo(0);
-    }
-
-    @Test
-    public void testDeleteOfSoftDeletedCaseNotesAmendments() {
-
-        final var persistedEntity = repository.save(transientEntityBuilder("X3111XX")
-                .text("note to delete")
-                .build());
-        persistedEntity.addAmendment("Another Note 0", "someuser", "Some User", "user id");
-        repository.save(persistedEntity);
-        TestTransaction.flagForCommit();
-        TestTransaction.end();
-        TestTransaction.start();
-
-        repository.delete(persistedEntity);
-
-        TestTransaction.flagForCommit();
-        TestTransaction.end();
-
-        final var offenderAmendmentSql = """
-            select count(1) from case_note_amendment a
-            join case_note c on a.case_note_id = c.id
-            where c.person_identifier = 'X3111XX'
-            """;
-
-        final var caseNoteCountBefore = jdbcTemplate.queryForObject(offenderAmendmentSql, Integer.class);
-        assertThat(caseNoteCountBefore).isEqualTo(1);
-
-        TestTransaction.start();
-        repository.deleteCaseNoteAmendmentsByPersonIdentifier("X3111XX");
-        final var deletedCaseNotes = repository.deleteCaseNoteByPersonIdentifier("X3111XX");
-        assertThat(deletedCaseNotes).isEqualTo(1);
-
-        TestTransaction.flagForCommit();
-        TestTransaction.end();
-        TestTransaction.start();
-        assertThat(repository.findById(persistedEntity.getId())).isEmpty();
-        TestTransaction.end();
-
-        final var caseNoteCountAfter = jdbcTemplate.queryForObject(offenderAmendmentSql, Integer.class);
-        assertThat(caseNoteCountAfter).isZero();
-
-    }
-
-    @Test
-    @WithAnonymousUser
-    public void testPersistCaseNoteAndAmendmentAndThenDelete() {
-
-        final var caseNote = transientEntity(OFFENDER_IDENTIFIER);
-        caseNote.addAmendment("Another Note 0", "someuser", "Some User", "user id");
-        final var persistedEntity = repository.save(caseNote);
-        TestTransaction.flagForCommit();
-        TestTransaction.end();
-        TestTransaction.start();
-        final var retrievedEntity = repository.findById(persistedEntity.getId()).orElseThrow();
-
-        retrievedEntity.addAmendment("Another Note 1", "someuser", "Some User", "user id");
-        retrievedEntity.addAmendment("Another Note 2", "someuser", "Some User", "user id");
-
-        TestTransaction.flagForCommit();
-        TestTransaction.end();
-        TestTransaction.start();
-
-        repository.deleteCaseNoteAmendmentsByPersonIdentifier(caseNote.getPersonIdentifier());
-        final var deletedEntities = repository.deleteCaseNoteByPersonIdentifier(caseNote.getPersonIdentifier());
-
-        assertThat(deletedEntities).isEqualTo(1);
-        TestTransaction.flagForCommit();
-        TestTransaction.end();
-        TestTransaction.start();
-
-        final var deletedEntity = repository.findById(persistedEntity.getId());
-        assertThat(deletedEntity).isEmpty();
     }
 
     @Test

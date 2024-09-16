@@ -214,7 +214,7 @@ class CaseNoteController(
     if (caseloadId in serviceConfig.activePrisons) {
       save.deleteNote(personIdentifier, caseNoteId)
     } else {
-      caseNoteService.softDeleteCaseNote(personIdentifier, caseNoteId)
+      caseNoteService.deleteCaseNote(personIdentifier, caseNoteId)
     }
 
     telemetryClient.trackEvent(

@@ -14,7 +14,6 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
-import org.hibernate.annotations.SoftDelete;
 import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
@@ -25,7 +24,6 @@ import java.util.UUID;
 
 @Entity
 @Table(name = "case_note_amendment")
-@SoftDelete(columnName = "soft_deleted")
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor

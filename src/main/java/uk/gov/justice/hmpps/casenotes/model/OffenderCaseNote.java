@@ -17,13 +17,13 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 import org.hibernate.annotations.SQLRestriction;
-import org.hibernate.annotations.SoftDelete;
 import org.hibernate.annotations.SortComparator;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import uk.gov.justice.hmpps.casenotes.domain.NoteState;
+import uk.gov.justice.hmpps.casenotes.domain.audit.DeletedEntityListener;
 
 import java.time.LocalDateTime;
 import java.util.Collections;
@@ -32,21 +32,17 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.UUID;
 
-import static jakarta.persistence.CascadeType.DETACH;
-import static jakarta.persistence.CascadeType.MERGE;
-import static jakarta.persistence.CascadeType.PERSIST;
-import static jakarta.persistence.CascadeType.REFRESH;
+import static jakarta.persistence.CascadeType.ALL;
 import static java.time.LocalDateTime.now;
 
 @Entity
 @Table(name = "case_note")
-@SoftDelete(columnName = "soft_deleted")
+@EntityListeners({AuditingEntityListener.class, DeletedEntityListener.class})
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter
-@EntityListeners(AuditingEntityListener.class)
 @Builder(toBuilder = true)
-@EqualsAndHashCode(of = {"personIdentifier", "occurredAt", "locationId", "authorUsername", "caseNoteType", "noteText"})
+@EqualsAndHashCode(of = {"personIdentifier", "occurredAt", "locationId", "authorUsername", "caseNoteType", "text"})
 @ToString(of = {"id", "personIdentifier", "occurredAt", "locationId", "authorUsername", "caseNoteType"})
 @SQLRestriction("exists(select 1 from case_note_type ct where ct.case_note_type_id = type_id and ct.sync_to_nomis = false)")
 public class OffenderCaseNote implements NoteState {
@@ -83,9 +79,7 @@ public class OffenderCaseNote implements NoteState {
 
     @Builder.Default
     @SortComparator(AmendmentComparator.class)
-    // cascade All not used as we don't want the soft delete to cascade to the case note amendments in case we need to
-    // restore the case note with previously soft deleted amendment
-    @OneToMany(cascade = {PERSIST, MERGE, REFRESH, DETACH}, mappedBy = "caseNote")
+    @OneToMany(cascade = ALL, mappedBy = "caseNote")
     private final SortedSet<OffenderCaseNoteAmendment> amendments = new TreeSet<>(new AmendmentComparator());
 
     @CreatedDate

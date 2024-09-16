@@ -25,12 +25,6 @@ interface OffenderCaseNoteRepository :
   fun deleteCaseNoteByPersonIdentifier(personIdentifier: String): Int
 
   @Modifying
-  @Query(
-    """
-        delete from case_note_amendment ocna where case_note_id in 
-            (select case_note_id from case_note where person_identifier = :personIdentifier)
-      """,
-    nativeQuery = true,
-  )
+  @Query("delete from OffenderCaseNoteAmendment ocna where ocna.caseNote.personIdentifier = :personIdentifier")
   fun deleteCaseNoteAmendmentsByPersonIdentifier(personIdentifier: String): Int
 }

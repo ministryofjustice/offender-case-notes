@@ -2,7 +2,6 @@ package uk.gov.justice.hmpps.casenotes.services
 
 import com.microsoft.applicationinsights.TelemetryClient
 import jakarta.persistence.EntityManager
-import jakarta.validation.ValidationException
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.BeforeEach
@@ -35,6 +34,7 @@ import uk.gov.justice.hmpps.casenotes.config.CaseNoteRequestContext
 import uk.gov.justice.hmpps.casenotes.config.SecurityUserContext
 import uk.gov.justice.hmpps.casenotes.config.SecurityUserContext.UserIdUser
 import uk.gov.justice.hmpps.casenotes.config.Source
+import uk.gov.justice.hmpps.casenotes.domain.audit.DeletedCaseNoteRepository
 import uk.gov.justice.hmpps.casenotes.dto.CaseNoteFilter
 import uk.gov.justice.hmpps.casenotes.dto.NomisCaseNote
 import uk.gov.justice.hmpps.casenotes.dto.NomisCaseNoteAmendment
@@ -63,6 +63,7 @@ class CaseNoteServiceTest {
   private val telemetryClient: TelemetryClient = mock()
   private var caseNoteService: CaseNoteService = mock()
   private var entityManager: EntityManager = mock()
+  private var deletedCaseNoteRepository: DeletedCaseNoteRepository = mock()
   private val requestAttributes: RequestAttributes = mock()
 
   @Captor
@@ -77,6 +78,7 @@ class CaseNoteServiceTest {
       externalApiService,
       telemetryClient,
       entityManager,
+      deletedCaseNoteRepository,
     )
     RequestContextHolder.setRequestAttributes(requestAttributes)
     whenever(requestAttributes.getAttribute(CaseNoteRequestContext::class.simpleName!!, 0)).thenReturn(
@@ -813,54 +815,7 @@ class CaseNoteServiceTest {
       .thenReturn(3)
     caseNoteService.deleteCaseNotesForOffender("A1234AC")
     Mockito.verify(telemetryClient)
-      .trackEvent("OffenderDelete", mapOf("offenderNo" to "A1234AC", "count" to "3"), null)
-  }
-
-  @Test
-  fun softDeleteCaseNote() {
-    val noteType = CaseNoteType.builder().type("sometype").parentType(ParentNoteType.builder().build()).build()
-    val offenderCaseNote = createOffenderCaseNote(noteType)
-    val offenderCaseNoteId = offenderCaseNote.id
-    whenever(repository.findById(any())).thenReturn(Optional.of(offenderCaseNote))
-    whenever(securityUserContext.getCurrentUser()).thenReturn(UserIdUser("user", "userId"))
-
-    caseNoteService.softDeleteCaseNote("A1234AC", offenderCaseNoteId.toString())
-
-    Mockito.verify(repository).deleteById(offenderCaseNoteId)
-  }
-
-  @Test
-  fun softDeleteCaseNote_telemetry() {
-    val noteType = CaseNoteType.builder().type("sometype").parentType(ParentNoteType.builder().build()).build()
-    val offenderCaseNote = createOffenderCaseNote(noteType)
-    val offenderCaseNoteId = offenderCaseNote.id
-    whenever(repository.findById(any())).thenReturn(Optional.of(offenderCaseNote))
-    whenever(securityUserContext.getCurrentUser()).thenReturn(UserIdUser("user", "userId"))
-
-    caseNoteService.softDeleteCaseNote("A1234AC", offenderCaseNoteId.toString())
-
-    Mockito.verify(telemetryClient).trackEvent(
-      "SecureCaseNoteSoftDelete",
-      mapOf("userName" to "user", "offenderId" to "A1234AC", "case note id" to offenderCaseNoteId.toString()),
-      null,
-    )
-  }
-
-  @Test
-  fun softDeleteCaseNoteEntityNotFoundExceptionThrownWhenCaseNoteNotFound() {
-    assertThatThrownBy { caseNoteService.softDeleteCaseNote("A1234AC", UUID.randomUUID().toString()) }
-      .isInstanceOf(EntityNotFoundException::class.java)
-  }
-
-  @Test
-  fun softDeleteCaseNoteEntityNotFoundExceptionThrownWhenCaseNoteDoesntBelongToOffender() {
-    val noteType = CaseNoteType.builder().type("sometype").parentType(ParentNoteType.builder().build()).build()
-    val offenderCaseNote = createOffenderCaseNote(noteType)
-    val offenderCaseNoteId = offenderCaseNote.id
-    whenever(repository.findById(any())).thenReturn(Optional.of(offenderCaseNote))
-
-    assertThatThrownBy { caseNoteService.softDeleteCaseNote("Z9999ZZ", offenderCaseNoteId.toString()) }
-      .isInstanceOf(ValidationException::class.java)
+      .trackEvent("DataComplianceDelete", mapOf("personIdentifier" to "A1234AC", "count" to "3"), null)
   }
 
   @Test

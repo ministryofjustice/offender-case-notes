@@ -3,6 +3,7 @@ package uk.gov.justice.hmpps.casenotes.utils
 import org.assertj.core.api.Assertions.assertThat
 import uk.gov.justice.hmpps.casenotes.domain.Amendment
 import uk.gov.justice.hmpps.casenotes.domain.Note
+import uk.gov.justice.hmpps.casenotes.domain.audit.DeletedDetail
 import uk.gov.justice.hmpps.casenotes.notes.CaseNote
 import uk.gov.justice.hmpps.casenotes.notes.CaseNoteAmendment
 import uk.gov.justice.hmpps.casenotes.sync.SyncAmendmentRequest
@@ -47,4 +48,17 @@ fun Amendment.verifyAgainst(request: SyncAmendmentRequest) {
   assertThat(authorName).isEqualTo(request.authorName)
   assertThat(authorUsername).isEqualTo(request.authorUsername)
   assertThat(authorUserId).isEqualTo(request.authorUserId)
+}
+
+fun DeletedDetail.verifyAgainst(note: Note) {
+  assertThat(personIdentifier).isEqualTo(note.personIdentifier)
+  assertThat(typeId).isEqualTo(note.type.id)
+  assertThat(text).isEqualTo(note.text)
+  assertThat(occurredAt.truncatedTo(SECONDS)).isEqualTo(note.occurredAt.truncatedTo(SECONDS))
+  assertThat(createdAt.truncatedTo(SECONDS)).isEqualTo(note.createdAt.truncatedTo(SECONDS))
+  assertThat(authorName).isEqualTo(note.authorName)
+  assertThat(authorUsername).isEqualTo(note.authorUsername)
+  assertThat(authorUserId).isEqualTo(note.authorUserId)
+  assertThat(legacyId).isEqualTo(note.legacyId)
+  assertThat(createdBy).isEqualTo(note.createdBy)
 }

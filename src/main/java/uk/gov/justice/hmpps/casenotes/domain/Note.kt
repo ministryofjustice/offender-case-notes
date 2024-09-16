@@ -3,6 +3,7 @@ package uk.gov.justice.hmpps.casenotes.domain
 import jakarta.persistence.CascadeType
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
+import jakarta.persistence.EntityListeners
 import jakarta.persistence.Id
 import jakarta.persistence.JoinColumn
 import jakarta.persistence.ManyToOne
@@ -25,6 +26,7 @@ import uk.gov.justice.hmpps.casenotes.domain.Note.Companion.OCCURRED_AT
 import uk.gov.justice.hmpps.casenotes.domain.Note.Companion.PERSON_IDENTIFIER
 import uk.gov.justice.hmpps.casenotes.domain.Note.Companion.TYPE
 import uk.gov.justice.hmpps.casenotes.domain.SubType.Companion.PARENT
+import uk.gov.justice.hmpps.casenotes.domain.audit.DeletedEntityListener
 import uk.gov.justice.hmpps.casenotes.domain.audit.SimpleAudited
 import uk.gov.justice.hmpps.casenotes.notes.TextRequest
 import uk.gov.justice.hmpps.casenotes.sync.MigrationResult
@@ -37,6 +39,7 @@ import java.util.UUID
 
 @Entity
 @Table(name = "case_note")
+@EntityListeners(DeletedEntityListener::class)
 class Note(
   @Column(nullable = false)
   override val personIdentifier: String,
