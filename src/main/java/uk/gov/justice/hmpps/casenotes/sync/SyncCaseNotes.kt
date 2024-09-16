@@ -55,8 +55,11 @@ class SyncCaseNotes(
     )
   }
 
-  fun deleteCaseNote(id: UUID) = noteRepository.deleteById(id).also {
-    telemetryClient.trackEvent("CaseNoteDeletedViaSync", mapOf("id" to it.toString()), mapOf())
+  fun deleteCaseNote(id: UUID) {
+    noteRepository.findByIdOrNull(id)?.also {
+      noteRepository.delete(it)
+      telemetryClient.trackEvent("CaseNoteDeletedViaSync", mapOf("id" to it.toString()), mapOf())
+    }
   }
 
   private fun Note.sync(request: SyncNoteRequest): Note? =
