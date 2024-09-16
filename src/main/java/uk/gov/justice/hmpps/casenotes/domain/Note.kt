@@ -3,7 +3,6 @@ package uk.gov.justice.hmpps.casenotes.domain
 import jakarta.persistence.CascadeType
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
-import jakarta.persistence.EntityListeners
 import jakarta.persistence.Id
 import jakarta.persistence.JoinColumn
 import jakarta.persistence.ManyToOne
@@ -12,7 +11,6 @@ import jakarta.persistence.Table
 import jakarta.persistence.Version
 import jakarta.persistence.criteria.Join
 import jakarta.persistence.criteria.JoinType
-import org.hibernate.annotations.SoftDelete
 import org.springframework.data.jpa.domain.Specification
 import org.springframework.data.jpa.repository.EntityGraph
 import org.springframework.data.jpa.repository.JpaRepository
@@ -24,74 +22,64 @@ import uk.gov.justice.hmpps.casenotes.domain.Note.Companion.AMENDMENTS
 import uk.gov.justice.hmpps.casenotes.domain.Note.Companion.AUTHOR_USERNAME
 import uk.gov.justice.hmpps.casenotes.domain.Note.Companion.LOCATION_ID
 import uk.gov.justice.hmpps.casenotes.domain.Note.Companion.OCCURRED_AT
-import uk.gov.justice.hmpps.casenotes.domain.Note.Companion.PRISON_NUMBER
+import uk.gov.justice.hmpps.casenotes.domain.Note.Companion.PERSON_IDENTIFIER
 import uk.gov.justice.hmpps.casenotes.domain.Note.Companion.TYPE
 import uk.gov.justice.hmpps.casenotes.domain.SubType.Companion.PARENT
-import uk.gov.justice.hmpps.casenotes.domain.audit.AuditedEntityListener
 import uk.gov.justice.hmpps.casenotes.domain.audit.SimpleAudited
 import uk.gov.justice.hmpps.casenotes.notes.TextRequest
 import uk.gov.justice.hmpps.casenotes.sync.MigrationResult
 import uk.gov.justice.hmpps.casenotes.sync.SyncAmendmentRequest
-import uk.gov.justice.hmpps.casenotes.sync.SyncNoteRequest
 import java.time.LocalDateTime
-import java.time.temporal.ChronoUnit
 import java.util.Optional
 import java.util.SortedSet
 import java.util.TreeSet
 import java.util.UUID
 
 @Entity
-@Table(name = "offender_case_note")
-@SoftDelete(columnName = "soft_deleted")
-@EntityListeners(AuditedEntityListener::class)
+@Table(name = "case_note")
 class Note(
-  @Column(name = "offender_identifier", nullable = false)
-  val prisonNumber: String,
+  @Column(nullable = false)
+  override val personIdentifier: String,
 
-  type: SubType,
-
-  @Column(name = "occurrence_date_time", nullable = false)
-  val occurredAt: LocalDateTime,
+  @ManyToOne
+  @JoinColumn(name = "type_id", nullable = false)
+  override val type: SubType,
 
   @Column(nullable = false)
-  val locationId: String,
+  override val occurredAt: LocalDateTime,
 
   @Column(nullable = false)
-  val authorUsername: String,
+  override val locationId: String,
 
   @Column(nullable = false)
-  val authorUserId: String,
+  override val authorUsername: String,
 
   @Column(nullable = false)
-  val authorName: String,
+  override val authorUserId: String,
 
-  text: String,
+  @Column(nullable = false)
+  override val authorName: String,
 
-  val systemGenerated: Boolean,
+  @Column(name = "note_text", nullable = false)
+  override val text: String,
 
-  @OneToMany(cascade = [CascadeType.ALL], mappedBy = "note")
-  private val amendments: SortedSet<Amendment> = TreeSet(),
-) : SimpleAudited() {
+  override val systemGenerated: Boolean,
+) : SimpleAudited(), NoteState {
 
   @Version
   val version: Long? = null
 
   @Id
-  @Column(name = "offender_case_note_id", updatable = false, nullable = false)
-  val id: UUID = newUuid()
+  @Column(updatable = false, nullable = false)
+  override val id: UUID = newUuid()
 
-  var legacyId: Long = 0
+  override var legacyId: Long = 0
 
-  @ManyToOne
-  @JoinColumn(name = "case_note_type_id", nullable = false)
-  var type: SubType = type
-    private set
+  @OneToMany(cascade = [CascadeType.ALL], mappedBy = "note")
+  private val amendments: SortedSet<Amendment> = TreeSet()
 
-  @Column(name = "note_text", nullable = false)
-  var text: String = text
-    private set
+  override fun amendments() = amendments.toSortedSet()
 
-  fun amendments() = amendments.toSortedSet()
   fun addAmendment(request: TextRequest) = apply {
     if (request is SyncAmendmentRequest) {
       amendments.add(
@@ -102,7 +90,7 @@ class Note(
           request.authorUserId,
           request.text,
           newUuid(),
-        ).apply { createDateTime = request.createdDateTime },
+        ).apply { createdAt = request.createdDateTime },
       )
     } else {
       val context = CaseNoteRequestContext.get()
@@ -114,51 +102,28 @@ class Note(
           context.userId,
           request.text,
           newUuid(),
-        ).apply { createDateTime = context.requestAt },
+        ).apply { createdAt = context.requestAt },
       )
     }
   }
 
-  fun sync(request: SyncNoteRequest, typeSupplier: (String, String) -> SubType) = apply {
-    if (!(type.code == request.subType && type.parentCode == request.type)) {
-      type = typeSupplier(request.type, request.subType)
-    }
-    text = request.text
-    request.amendments.forEach {
-      matchAmendment(it)?.update(it) ?: addAmendment(it)
-    }
-  }
-
-  private fun matchAmendment(request: SyncAmendmentRequest): Amendment? {
-    val matching = amendments.filter {
-      request.authorUsername == it.authorUsername && request.createdDateTime.sameSecond(it.createDateTime)
-    }
-    return when (matching.size) {
-      1 -> matching.single()
-      else -> null
-    }
-  }
-
-  private fun LocalDateTime.sameSecond(other: LocalDateTime): Boolean =
-    truncatedTo(ChronoUnit.SECONDS) == other.truncatedTo(ChronoUnit.SECONDS)
-
   companion object {
     val TYPE = Note::type.name
-    val PRISON_NUMBER = Note::prisonNumber.name
+    val PERSON_IDENTIFIER = Note::personIdentifier.name
     val AUTHOR_USERNAME = Note::authorUsername.name
     val LOCATION_ID = Note::locationId.name
     val OCCURRED_AT = Note::occurredAt.name
-    val CREATED_AT = Note::createDateTime.name
+    val CREATED_AT = Note::createdAt.name
     const val AMENDMENTS = "amendments"
   }
 }
 
 interface NoteRepository : JpaSpecificationExecutor<Note>, JpaRepository<Note, UUID>, RefreshRepository<Note, UUID> {
   @EntityGraph(attributePaths = ["type.parent", "amendments"])
-  fun findByIdAndPrisonNumber(id: UUID, prisonNumber: String): Note?
+  fun findByIdAndPersonIdentifier(id: UUID, prisonNumber: String): Note?
 
   @EntityGraph(attributePaths = ["type.parent", "amendments"])
-  fun findByLegacyIdAndPrisonNumber(legacyId: Long, prisonNumber: String): Note?
+  fun findByLegacyIdAndPersonIdentifier(legacyId: Long, prisonNumber: String): Note?
 
   @EntityGraph(attributePaths = ["type.parent", "amendments"])
   override fun findById(id: UUID): Optional<Note>
@@ -166,7 +131,7 @@ interface NoteRepository : JpaSpecificationExecutor<Note>, JpaRepository<Note, U
   @EntityGraph(attributePaths = ["type.parent", "amendments"])
   fun findByLegacyId(legacyId: Long): Note?
 
-  @Query("select nextval('offender_case_note_event_id_seq')", nativeQuery = true)
+  @Query("select nextval('case_note_legacy_id_seq')", nativeQuery = true)
   fun getNextLegacyId(): Long
 
   @Query("select new uk.gov.justice.hmpps.casenotes.sync.MigrationResult(n.id, n.legacyId) from Note n where n.legacyId in (:legacyIds)")
@@ -182,7 +147,7 @@ fun NoteRepository.saveAndRefresh(note: Note): Note {
 fun matchesPrisonNumber(prisonNumber: String) =
   Specification<Note> { cn, _, cb ->
     cn.fetch<Note, Amendment>(AMENDMENTS, JoinType.LEFT)
-    cb.equal(cb.lower(cn[PRISON_NUMBER]), prisonNumber.lowercase())
+    cb.equal(cb.lower(cn[PERSON_IDENTIFIER]), prisonNumber.lowercase())
   }
 
 fun matchesLocationId(locationId: String) =

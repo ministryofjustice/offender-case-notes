@@ -40,9 +40,9 @@ class DeleteCaseNoteIntTest : ResourceTest() {
   @Test
   fun `can delete a case note with write role`() {
     val caseNote = givenCaseNote(generateCaseNote(prisonNumber()).withAmendment())
-    deleteCaseNote(caseNote.prisonNumber, caseNote.id.toString()).expectStatus().isOk
+    deleteCaseNote(caseNote.personIdentifier, caseNote.id.toString()).expectStatus().isOk
 
-    val saved = noteRepository.findByIdAndPrisonNumber(caseNote.id, caseNote.prisonNumber)
+    val saved = noteRepository.findByIdAndPersonIdentifier(caseNote.id, caseNote.personIdentifier)
     assertThat(saved).isNull()
   }
 

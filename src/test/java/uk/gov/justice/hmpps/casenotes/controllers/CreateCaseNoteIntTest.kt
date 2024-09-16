@@ -82,7 +82,7 @@ class CreateCaseNoteIntTest : ResourceTest() {
     val response = createCaseNote(prisonNumber(), request).success<CaseNote>(HttpStatus.CREATED)
 
     val saved = requireNotNull(
-      noteRepository.findByIdAndPrisonNumber(fromString(response.caseNoteId), response.offenderIdentifier),
+      noteRepository.findByIdAndPersonIdentifier(fromString(response.caseNoteId), response.personIdentifier),
     )
     saved.verifyAgainst(request)
     assertThat(saved.authorUsername).isEqualTo(USERNAME)
@@ -128,7 +128,7 @@ class CreateCaseNoteIntTest : ResourceTest() {
     val response = createCaseNoteWithStringRequestBody(prisonNumber(), request).success<CaseNote>(HttpStatus.CREATED)
 
     val saved = requireNotNull(
-      noteRepository.findByIdAndPrisonNumber(fromString(response.caseNoteId), response.offenderIdentifier),
+      noteRepository.findByIdAndPersonIdentifier(fromString(response.caseNoteId), response.personIdentifier),
     )
     saved.verifyAgainst(objectMapper.readValue<CreateCaseNoteRequest>(request))
     assertThat(saved.authorUsername).isEqualTo(USERNAME)

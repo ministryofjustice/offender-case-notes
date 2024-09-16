@@ -102,7 +102,7 @@ class MigrateCaseNotesIntTest : ResourceTest() {
     )
 
     val response = migrateCaseNotes(listOf(request)).successList<MigrationResult>()
-    val saved = noteRepository.findByIdAndPrisonNumber(response.first().id, request.personIdentifier)
+    val saved = noteRepository.findByIdAndPersonIdentifier(response.first().id, request.personIdentifier)
     requireNotNull(saved).verifyAgainst(request)
     saved.amendments().first().verifyAgainst(request.amendments.first())
   }
@@ -185,14 +185,14 @@ private fun migrateAmendmentRequest(
 private fun Note.migrateRequest() = migrateCaseNoteRequest(
   legacyId = legacyId,
   locationId = locationId,
-  prisonIdentifier = prisonNumber,
+  prisonIdentifier = personIdentifier,
   text = text,
-  createdDateTime = createDateTime,
+  createdDateTime = createdAt,
   occurrenceDateTime = occurredAt,
   authorName = authorName,
   authorUsername = authorUsername,
   authorUserId = authorUserId,
-  createdBy = createUserId,
+  createdBy = createdBy,
   type = type.parent.code,
   subType = type.code,
 )

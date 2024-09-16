@@ -106,7 +106,7 @@ public class CaseNoteService {
             final var direction = pageable.getSort().isSorted() ? pageable.getSort().get().map(Sort.Order::getDirection)
                 .toList().getFirst() : Direction.DESC;
             final var sortField = pageable.getSort().isSorted() ? pageable.getSort().get().map(Sort.Order::getProperty)
-                .toList().getFirst() : "occurrenceDateTime";
+                .toList().getFirst() : "occurredAt";
 
             final var sortedList = sortByFieldName(dtoNotes, sortField, direction);
 
@@ -131,7 +131,7 @@ public class CaseNoteService {
         final Sort.Direction direction
     ) {
         final Comparator<CaseNote> compare = fieldName.equalsIgnoreCase("creationDateTime") ?
-            comparing(CaseNote::getCreationDateTime) : comparing(CaseNote::getOccurrenceDateTime);
+            comparing(CaseNote::getCreatedAt) : comparing(CaseNote::getOccurredAt);
 
         final var sort = direction == Direction.ASC ? compare : compare.reversed();
 
@@ -142,8 +142,8 @@ public class CaseNoteService {
         final var parentType = cn.getCaseNoteType().getParentType();
         return CaseNote.builder()
             .caseNoteId(cn.getId().toString())
-            .offenderIdentifier(cn.getOffenderIdentifier())
-            .occurrenceDateTime(cn.getOccurrenceDateTime())
+            .personIdentifier(cn.getPersonIdentifier())
+            .occurredAt(cn.getOccurredAt())
             .authorUserId(cn.getAuthorUserId())
             .authorName(cn.getAuthorName())
             .type(parentType.getType())
@@ -153,13 +153,13 @@ public class CaseNoteService {
             .source(SERVICE_NAME) // Indicates its a Offender Case Note Service Type
             .sensitive(cn.getCaseNoteType().isSensitive())
             .text(cn.getNoteText())
-            .creationDateTime(cn.getCreateDateTime())
+            .createdAt(cn.getCreatedAt())
             .systemGenerated(cn.isSystemGenerated())
             .legacyId(cn.getLegacyId())
             .eventId(cn.getLegacyId())
             .amendments(cn.getAmendments().stream().map(
                 a -> new CaseNoteAmendment(
-                    a.getCreateDateTime(),
+                    a.getCreatedAt(),
                     a.getAuthorUsername(),
                     a.getAuthorName(),
                     a.getAuthorUserId(),
@@ -174,8 +174,8 @@ public class CaseNoteService {
         return CaseNote.builder()
             .caseNoteId(cn.getCaseNoteId().toString())
             .eventId(cn.getCaseNoteId())
-            .offenderIdentifier(offenderIdentifier)
-            .occurrenceDateTime(cn.getOccurrenceDateTime())
+            .personIdentifier(offenderIdentifier)
+            .occurredAt(cn.getOccurredAt())
             .authorName(cn.getAuthorName())
             .authorUserId(valueOf(cn.getStaffId()))
             .type(cn.getType())
@@ -185,7 +185,7 @@ public class CaseNoteService {
             .source(cn.getSource())
             .sensitive(false)
             .text(cn.getOriginalNoteText())
-            .creationDateTime(cn.getCreationDateTime())
+            .createdAt(cn.getCreatedAt())
             .systemGenerated(cn.getSource().equalsIgnoreCase("AUTO"))
             .legacyId(cn.getCaseNoteId())
             .amendments(cn.getAmendments().stream().map(
@@ -248,9 +248,9 @@ public class CaseNoteService {
             .authorUsername(context.getUsername())
             .authorUserId(context.getUserId())
             .authorName(context.getUserDisplayName())
-            .occurrenceDateTime(coalesce(newCaseNote.getOccurrenceDateTime(), context.getRequestAt()))
+            .occurredAt(coalesce(newCaseNote.getOccurrenceDateTime(), context.getRequestAt()))
             .caseNoteType(type)
-            .offenderIdentifier(offenderIdentifier)
+            .personIdentifier(offenderIdentifier)
             .locationId(locationId)
             .systemGenerated(TRUE.equals(newCaseNote.getSystemGenerated()))
             .build();
@@ -281,7 +281,7 @@ public class CaseNoteService {
                 throw new AccessDeniedException("User not allowed to amend this case note type [" + offenderCaseNote.getCaseNoteType() + "]");
             }
 
-            if (!offenderIdentifier.equals(offenderCaseNote.getOffenderIdentifier())) {
+            if (!offenderIdentifier.equals(offenderCaseNote.getPersonIdentifier())) {
                 throw EntityNotFoundException.withId(offenderIdentifier);
             }
 
@@ -323,8 +323,8 @@ public class CaseNoteService {
 
     @Transactional
     public int deleteCaseNotesForOffender(final String offenderIdentifier) {
-        repository.deleteOffenderCaseNoteAmendmentsByOffenderIdentifier(offenderIdentifier);
-        final var deletedCaseNotesCount = repository.deleteOffenderCaseNoteByOffenderIdentifier(offenderIdentifier);
+        repository.deleteCaseNoteAmendmentsByPersonIdentifier(offenderIdentifier);
+        final var deletedCaseNotesCount = repository.deleteCaseNoteByPersonIdentifier(offenderIdentifier);
         log.info("Deleted {} case notes for offender identifier {}", deletedCaseNotesCount, offenderIdentifier);
         telemetryClient.trackEvent(
             "OffenderDelete",
@@ -342,7 +342,7 @@ public class CaseNoteService {
         }
         final var caseNote = repository.findById(UUID.fromString(caseNoteId))
             .orElseThrow(() -> new EntityNotFoundException("Case note not found"));
-        if (!caseNote.getOffenderIdentifier().equalsIgnoreCase(offenderIdentifier)) {
+        if (!caseNote.getPersonIdentifier().equalsIgnoreCase(offenderIdentifier)) {
             throw new ValidationException("case note id not connected with offenderIdentifier");
         }
         repository.deleteById(UUID.fromString(caseNoteId));

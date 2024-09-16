@@ -14,30 +14,25 @@ import java.util.UUID
 interface OffenderCaseNoteRepository :
   JpaSpecificationExecutor<OffenderCaseNote>,
   JpaRepository<OffenderCaseNote, UUID> {
-  fun findByCaseNoteTypeParentTypeTypeInAndModifyDateTimeAfterOrderByModifyDateTime(
-    types: Set<String>?,
-    createdDate: LocalDateTime?,
-    page: Pageable?,
-  ): List<OffenderCaseNote>
 
   @Modifying
   @Query(
-    "update offender_case_note set offender_identifier = :new where offender_identifier = :old",
+    "update case_note set person_identifier = :new where person_identifier = :old",
     nativeQuery = true,
   )
   fun updateOffenderIdentifier(old: String, new: String): Int
 
   @Modifying
-  @Query("delete from offender_case_note ocn WHERE ocn.offender_identifier = :offenderIdentifier", nativeQuery = true)
-  fun deleteOffenderCaseNoteByOffenderIdentifier(offenderIdentifier: String): Int
+  @Query("delete from case_note ocn WHERE ocn.person_identifier = :personIdentifier", nativeQuery = true)
+  fun deleteCaseNoteByPersonIdentifier(personIdentifier: String): Int
 
   @Modifying
   @Query(
     """
-        delete from offender_case_note_amendment ocna where offender_case_note_id in 
-            (select offender_case_note_id from offender_case_note where offender_identifier = :offenderIdentifier)
+        delete from case_note_amendment ocna where case_note_id in 
+            (select case_note_id from case_note where person_identifier = :personIdentifier)
       """,
     nativeQuery = true,
   )
-  fun deleteOffenderCaseNoteAmendmentsByOffenderIdentifier(offenderIdentifier: String): Int
+  fun deleteCaseNoteAmendmentsByPersonIdentifier(personIdentifier: String): Int
 }

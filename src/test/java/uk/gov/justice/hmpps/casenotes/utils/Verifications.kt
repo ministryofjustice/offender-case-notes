@@ -28,22 +28,22 @@ fun CaseNoteAmendment.verifyAgainst(amendment: Amendment) {
 }
 
 fun Note.verifyAgainst(request: SyncNoteRequest) {
-  assertThat(prisonNumber).isEqualTo(request.personIdentifier)
+  assertThat(personIdentifier).isEqualTo(request.personIdentifier)
   assertThat(type.parent.code).isEqualTo(request.type)
   assertThat(type.code).isEqualTo(request.subType)
   assertThat(text).isEqualTo(request.text)
   assertThat(occurredAt.truncatedTo(SECONDS)).isEqualTo(request.occurrenceDateTime.truncatedTo(SECONDS))
-  assertThat(createDateTime.truncatedTo(SECONDS)).isEqualTo(request.createdDateTime.truncatedTo(SECONDS))
+  assertThat(createdAt.truncatedTo(SECONDS)).isEqualTo(request.createdDateTime.truncatedTo(SECONDS))
   assertThat(authorName).isEqualTo(request.authorName)
   assertThat(authorUsername).isEqualTo(request.authorUsername)
   assertThat(authorUserId).isEqualTo(request.authorUserId)
   assertThat(legacyId).isEqualTo(request.legacyId)
-  assertThat(createUserId).isEqualTo(request.createdByUsername)
+  assertThat(createdBy).isEqualTo(request.createdByUsername)
 }
 
 fun Amendment.verifyAgainst(request: SyncAmendmentRequest) {
   assertThat(text).isEqualTo(request.text)
-  assertThat(createDateTime.truncatedTo(SECONDS)).isEqualTo(request.createdDateTime.truncatedTo(SECONDS))
+  assertThat(createdAt.truncatedTo(SECONDS)).isEqualTo(request.createdDateTime.truncatedTo(SECONDS))
   assertThat(authorName).isEqualTo(request.authorName)
   assertThat(authorUsername).isEqualTo(request.authorUsername)
   assertThat(authorUserId).isEqualTo(request.authorUserId)

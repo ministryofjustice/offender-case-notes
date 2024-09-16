@@ -264,16 +264,16 @@ class CaseNoteResourceTest : ResourceTest() {
       val type = caseNoteTypeRepository.findByParentTypeAndType("CAB", "EDUCATION").orElseThrow()
       val caseNote = ocnRepository.save(
         OffenderCaseNote.builder()
-          .offenderIdentifier(prisonNumber)
+          .personIdentifier(prisonNumber)
           .caseNoteType(type)
           .noteText("A case note that should not appear")
-          .occurrenceDateTime(LocalDateTime.now().minusDays(1))
+          .occurredAt(LocalDateTime.now().minusDays(1))
           .locationId("MDI")
           .authorUserId("SYS")
           .authorUsername("SYS")
           .authorName("SYS")
-          .createDateTime(LocalDateTime.now().minusDays(1))
-          .createUserId("SYS")
+          .createdAt(LocalDateTime.now().minusDays(1))
+          .createdBy("SYS")
           .build(),
       )
 
@@ -286,12 +286,12 @@ class CaseNoteResourceTest : ResourceTest() {
     @Test
     fun `case notes of type sync to nomis stored in the db are not returned`() {
       oAuthApi.subGetUserDetails("SECURE_CASENOTE_USER")
-      val prisonNumber = "S1234TN"
-      elite2Api.subGetOffender(prisonNumber)
-      elite2Api.subGetCaseNotesForOffender(prisonNumber)
+      val personIdentifier = "S1234TN"
+      elite2Api.subGetOffender(personIdentifier)
+      elite2Api.subGetCaseNotesForOffender(personIdentifier)
       val token = jwtHelper.createJwt("SECURE_CASENOTE_USER", roles = CASENOTES_ROLES)
 
-      webTestClient.get().uri("/case-notes/{offenderIdentifier}", prisonNumber)
+      webTestClient.get().uri("/case-notes/{personIdentifier}", personIdentifier)
         .headers(addBearerToken(token))
         .exchange()
         .expectStatus().isOk

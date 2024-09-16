@@ -27,7 +27,7 @@ class ReadCaseNotesIntTest : ResourceTest() {
   @ValueSource(strings = [ROLE_CASE_NOTES_READ, ROLE_CASE_NOTES_WRITE])
   fun `can read a case note by id with appropriate role`(role: String) {
     val caseNote = givenCaseNote(generateCaseNote().withAmendment())
-    val response = getCaseNotes(caseNote.prisonNumber, roles = listOf(role)).page()
+    val response = getCaseNotes(caseNote.personIdentifier, roles = listOf(role)).page()
 
     assertThat(response.totalElements).isEqualTo(1)
     val first = response.content.first()

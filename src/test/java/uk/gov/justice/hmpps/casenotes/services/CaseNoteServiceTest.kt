@@ -308,7 +308,7 @@ class CaseNoteServiceTest {
         whenever(securityUserContext.getCurrentUser()).thenReturn(UserIdUser("someuser", "userId"))
         whenever(repository.saveAndFlush(any<OffenderCaseNote>())).thenAnswer { i ->
           val cn = (i.arguments[0] as OffenderCaseNote)
-          cn.toBuilder().id(caseNoteId).createDateTime(now).legacyId(1234)
+          cn.toBuilder().id(caseNoteId).createdAt(now).legacyId(1234)
             .amendments(
               cn.amendments.map { it.toBuilder().build() }
                 .toSortedSet(AmendmentComparator()),
@@ -344,20 +344,20 @@ class CaseNoteServiceTest {
         assertThat(createdNote).isEqualTo(
           CaseNote.builder()
             .caseNoteId(caseNoteId.toString())
-            .offenderIdentifier("A1234AA")
+            .personIdentifier("A1234AA")
             .sensitive(true)
             .type("someparent")
             .typeDescription("description of parent")
             .subType("sometype")
             .subTypeDescription("description of some type")
             .text("HELLO")
-            .occurrenceDateTime(now)
+            .occurredAt(now)
             .authorName("John Smith")
             .authorUserId("4321")
             .source("OCNS")
             .systemGenerated(false)
             .amendments(emptyList())
-            .creationDateTime(now)
+            .createdAt(now)
             .eventId(1234)
             .legacyId(1234)
             .locationId("MDI")
@@ -388,19 +388,19 @@ class CaseNoteServiceTest {
         assertThat(createdNote).isEqualTo(
           CaseNote.builder()
             .caseNoteId(caseNoteId.toString())
-            .offenderIdentifier("A1234AA")
+            .personIdentifier("A1234AA")
             .sensitive(true)
             .type("someparent")
             .typeDescription("description of parent")
             .subType("sometype")
             .subTypeDescription("description of some type")
             .text("HELLO")
-            .occurrenceDateTime(now)
+            .occurredAt(now)
             .authorName("John Smith")
             .authorUserId("4321")
             .source("OCNS")
             .amendments(emptyList())
-            .creationDateTime(now)
+            .createdAt(now)
             .eventId(1234)
             .legacyId(1234)
             .locationId("MDI")
@@ -527,6 +527,8 @@ class CaseNoteServiceTest {
         "amendments",
         "sensitive",
         "eventId",
+        "occurrenceDateTime",
+        "offenderIdentifier"
       )
       .isEqualTo(offenderCaseNote)
     assertThat(caseNote.text).isEqualTo("HELLO")
@@ -800,14 +802,14 @@ class CaseNoteServiceTest {
 
   @Test
   fun deleteOffenderTest() {
-    whenever(repository.deleteOffenderCaseNoteByOffenderIdentifier(eq("A1234AC"))).thenReturn(3)
+    whenever(repository.deleteCaseNoteByPersonIdentifier(eq("A1234AC"))).thenReturn(3)
     val offendersDeleted: Int = caseNoteService.deleteCaseNotesForOffender("A1234AC")
     assertThat(offendersDeleted).isEqualTo(3)
   }
 
   @Test
   fun deleteOffenderTest_telemetry() {
-    whenever(repository.deleteOffenderCaseNoteByOffenderIdentifier(eq("A1234AC")))
+    whenever(repository.deleteCaseNoteByPersonIdentifier(eq("A1234AC")))
       .thenReturn(3)
     caseNoteService.deleteCaseNotesForOffender("A1234AC")
     Mockito.verify(telemetryClient)
@@ -952,8 +954,8 @@ class CaseNoteServiceTest {
       .agencyId("agency")
       .authorName("somebody")
       .caseNoteId(12345)
-      .creationDateTime(LocalDateTime.parse("2019-03-23T11:22"))
-      .occurrenceDateTime(LocalDateTime.parse("2019-04-16T10:42"))
+      .createdAt(LocalDateTime.parse("2019-03-23T11:22"))
+      .occurredAt(LocalDateTime.parse("2019-04-16T10:42"))
       .originalNoteText("original")
       .source("WHERE")
       .staffId(23456L)
@@ -962,7 +964,7 @@ class CaseNoteServiceTest {
       .text("new text")
       .type("type")
       .typeDescription("Type desc")
-      .offenderIdentifier("12345")
+      .personIdentifier("12345")
       .build()
   }
 
@@ -971,8 +973,8 @@ class CaseNoteServiceTest {
       .agencyId("agency")
       .authorName("somebody")
       .caseNoteId(12345)
-      .creationDateTime(LocalDateTime.parse("2019-03-23T11:22"))
-      .occurrenceDateTime(LocalDateTime.parse("2019-04-16T10:42"))
+      .createdAt(LocalDateTime.parse("2019-03-23T11:22"))
+      .occurredAt(LocalDateTime.parse("2019-04-16T10:42"))
       .originalNoteText("original")
       .source("WHERE")
       .staffId(23456L)
@@ -981,23 +983,23 @@ class CaseNoteServiceTest {
       .text("new text")
       .type(type)
       .typeDescription("Type desc")
-      .offenderIdentifier("12345")
+      .personIdentifier("12345")
       .build()
   }
 
   private fun createOffenderCaseNote(caseNoteType: CaseNoteType): OffenderCaseNote {
     return OffenderCaseNote.builder()
       .id(UUID.randomUUID())
-      .occurrenceDateTime(LocalDateTime.now())
+      .occurredAt(LocalDateTime.now())
       .locationId("MDI")
       .authorUsername("USER2")
       .authorUserId("some user")
       .authorName("Mickey Mouse")
-      .offenderIdentifier("A1234AC")
+      .personIdentifier("A1234AC")
       .caseNoteType(caseNoteType)
       .noteText("HELLO")
       .legacyId(1234)
-      .createDateTime(LocalDateTime.now().minusDays(7))
+      .createdAt(LocalDateTime.now().minusDays(7))
       .build()
   }
 

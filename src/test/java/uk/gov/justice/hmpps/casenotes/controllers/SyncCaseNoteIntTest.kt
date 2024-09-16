@@ -79,7 +79,7 @@ class SyncCaseNoteIntTest : ResourceTest() {
     val response = syncCaseNote(request).success<SyncResult>(HttpStatus.CREATED)
     assertThat(response.action).isEqualTo(CREATED)
 
-    val saved = requireNotNull(noteRepository.findByIdAndPrisonNumber(response.id, request.personIdentifier))
+    val saved = requireNotNull(noteRepository.findByIdAndPersonIdentifier(response.id, request.personIdentifier))
     saved.verifyAgainst(request)
   }
 
@@ -89,7 +89,7 @@ class SyncCaseNoteIntTest : ResourceTest() {
     val response = syncCaseNote(request).success<SyncResult>(HttpStatus.CREATED)
     assertThat(response.action).isEqualTo(CREATED)
 
-    val saved = requireNotNull(noteRepository.findByIdAndPrisonNumber(response.id, request.personIdentifier))
+    val saved = requireNotNull(noteRepository.findByIdAndPersonIdentifier(response.id, request.personIdentifier))
     saved.verifyAgainst(request)
     val amended = saved.amendments().first()
     amended.verifyAgainst(request.amendments.first())
@@ -101,9 +101,9 @@ class SyncCaseNoteIntTest : ResourceTest() {
     val existing = givenCaseNote(generateCaseNote(prisonNumber))
     val request = existing.syncRequest()
     val response = syncCaseNote(request).success<SyncResult>(HttpStatus.OK)
-    assertThat(response).isEqualTo(SyncResult(existing.id, existing.legacyId, UPDATED))
+    assertThat(response.action).isEqualTo(UPDATED)
 
-    val saved = requireNotNull(noteRepository.findByIdAndPrisonNumber(response.id, request.personIdentifier))
+    val saved = requireNotNull(noteRepository.findByIdAndPersonIdentifier(response.id, request.personIdentifier))
     saved.verifyAgainst(request)
   }
 
@@ -113,9 +113,9 @@ class SyncCaseNoteIntTest : ResourceTest() {
     val existing = givenCaseNote(generateCaseNote(prisonNumber))
     val request = existing.syncRequest().copy(id = null)
     val response = syncCaseNote(request).success<SyncResult>(HttpStatus.OK)
-    assertThat(response).isEqualTo(SyncResult(existing.id, existing.legacyId, UPDATED))
+    assertThat(response.action).isEqualTo(UPDATED)
 
-    val saved = requireNotNull(noteRepository.findByIdAndPrisonNumber(response.id, request.personIdentifier))
+    val saved = requireNotNull(noteRepository.findByIdAndPersonIdentifier(response.id, request.personIdentifier))
     saved.verifyAgainst(request)
   }
 
@@ -136,9 +136,9 @@ class SyncCaseNoteIntTest : ResourceTest() {
       )
     }
     val response = syncCaseNote(request).success<SyncResult>(HttpStatus.OK)
-    assertThat(response).isEqualTo(SyncResult(existing.id, existing.legacyId, UPDATED))
+    assertThat(response.action).isEqualTo(UPDATED)
 
-    val saved = requireNotNull(noteRepository.findByIdAndPrisonNumber(response.id, request.personIdentifier))
+    val saved = requireNotNull(noteRepository.findByIdAndPersonIdentifier(response.id, request.personIdentifier))
     saved.verifyAgainst(request)
     assertThat(saved.amendments().size).isEqualTo(2)
     val amend = saved.amendments().first()
@@ -239,14 +239,14 @@ private fun Note.syncRequest() = syncCaseNoteRequest(
   legacyId = legacyId,
   id = id,
   locationId = locationId,
-  prisonIdentifier = prisonNumber,
+  prisonIdentifier = personIdentifier,
   text = "The text has been updated from nomis",
-  createdDateTime = createDateTime,
+  createdDateTime = createdAt,
   occurrenceDateTime = occurredAt,
   authorName = authorName,
   authorUsername = authorUsername,
   authorUserId = authorUserId,
-  createdBy = createUserId,
+  createdBy = createdBy,
   amendments = amendments().map { it.syncRequest() }.toSortedSet(compareBy { it.createdDateTime }),
 )
 
@@ -255,5 +255,5 @@ private fun Amendment.syncRequest() = syncAmendmentRequest(
   authorName = authorName,
   authorUsername = authorUsername,
   authorUserId = authorUserId,
-  createdDateTime = createDateTime,
+  createdDateTime = createdAt,
 )

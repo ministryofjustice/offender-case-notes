@@ -29,7 +29,7 @@ class ReadCaseNoteIntTest : ResourceTest() {
   @ValueSource(strings = [SecurityUserContext.ROLE_CASE_NOTES_READ, SecurityUserContext.ROLE_CASE_NOTES_WRITE])
   fun `can read a case note by id with appropriate role`(role: String) {
     val caseNote = givenCaseNote(generateCaseNote().withAmendment())
-    val response = getCaseNote(caseNote.prisonNumber, caseNote.id.toString(), listOf(role))
+    val response = getCaseNote(caseNote.personIdentifier, caseNote.id.toString(), listOf(role))
       .success<CaseNote>()
 
     response.verifyAgainst(caseNote)
@@ -39,7 +39,7 @@ class ReadCaseNoteIntTest : ResourceTest() {
   @Test
   fun `can read a case note by legacy id`() {
     val caseNote = givenCaseNote(generateCaseNote(legacyId = NomisIdGenerator.newId()).withAmendment())
-    val response = getCaseNote(caseNote.prisonNumber, caseNote.legacyId.toString())
+    val response = getCaseNote(caseNote.personIdentifier, caseNote.legacyId.toString())
       .success<CaseNote>()
 
     response.verifyAgainst(caseNote)

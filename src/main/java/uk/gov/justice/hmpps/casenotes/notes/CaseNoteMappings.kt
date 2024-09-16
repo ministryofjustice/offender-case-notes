@@ -6,14 +6,14 @@ import uk.gov.justice.hmpps.casenotes.notes.ReadCaseNote.Companion.SOURCE
 
 internal fun Note.toModel() = CaseNote(
   caseNoteId = id.toString(),
-  offenderIdentifier = prisonNumber,
+  personIdentifier = personIdentifier,
   type = type.parent.code,
   typeDescription = type.parent.description,
   subType = type.code,
   subTypeDescription = type.description,
   source = SOURCE,
-  creationDateTime = createDateTime,
-  occurrenceDateTime = occurredAt,
+  createdAt = createdAt,
+  occurredAt = occurredAt,
   authorName = authorName,
   authorUserId = authorUserId,
   text = text,
@@ -26,4 +26,4 @@ internal fun Note.toModel() = CaseNote(
 )
 
 internal fun Amendment.toModel() =
-  CaseNoteAmendment(createDateTime, authorUsername, authorName, authorUserId, text)
+  CaseNoteAmendment(createdAt, authorUsername, authorName, authorUserId, text)

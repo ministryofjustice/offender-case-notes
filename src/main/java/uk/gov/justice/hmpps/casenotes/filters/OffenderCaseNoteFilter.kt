@@ -13,7 +13,7 @@ import java.time.LocalDateTime
 import java.util.function.Consumer
 
 class OffenderCaseNoteFilter(
-  internal val offenderIdentifier: String? = null,
+  internal val personIdentifier: String? = null,
   internal val locationId: String? = null,
   internal val authorUsername: String? = null,
   internal val excludeSensitive: Boolean = false,
@@ -25,8 +25,8 @@ class OffenderCaseNoteFilter(
   override fun toPredicate(root: Root<OffenderCaseNote>, query: CriteriaQuery<*>, cb: CriteriaBuilder): Predicate? {
     val predicateBuilder = mutableListOf<Predicate>()
 
-    if (!offenderIdentifier.isNullOrBlank()) {
-      predicateBuilder.add(cb.equal(root.get<Any>("offenderIdentifier"), offenderIdentifier))
+    if (!personIdentifier.isNullOrBlank()) {
+      predicateBuilder.add(cb.equal(root.get<Any>("personIdentifier"), personIdentifier))
     }
     if (!locationId.isNullOrBlank()) {
       predicateBuilder.add(cb.equal(root.get<Any>("locationId"), locationId))
@@ -39,10 +39,10 @@ class OffenderCaseNoteFilter(
       predicateBuilder.add(cb.equal(caseNoteType.get<Any>("sensitive"), false))
     }
     startDate?.let {
-      predicateBuilder.add(cb.greaterThanOrEqualTo(root.get("occurrenceDateTime"), startDate))
+      predicateBuilder.add(cb.greaterThanOrEqualTo(root.get("occurredAt"), startDate))
     }
     endDate?.let {
-      predicateBuilder.add(cb.lessThanOrEqualTo(root.get("occurrenceDateTime"), endDate))
+      predicateBuilder.add(cb.lessThanOrEqualTo(root.get("occurredAt"), endDate))
     }
     if (typeSubTypes.isNotEmpty()) {
       predicateBuilder.add(getTypesPredicate(root, cb))

@@ -125,7 +125,7 @@ abstract class ResourceTest : IntegrationTest() {
     systemGenerated,
   ).apply {
     this.legacyId = legacyId
-    createdAt?.also { createDateTime = it }
+    createdAt?.also { this.createdAt = it }
   }
 
   fun Note.withAmendment(
@@ -137,7 +137,7 @@ abstract class ResourceTest : IntegrationTest() {
     id: UUID = Generators.timeBasedEpochGenerator().generate(),
   ): Note = apply {
     val amendment =
-      Amendment(this, authorUsername, authorName, authorUserId, text, id).apply { createDateTime = createdAt }
+      Amendment(this, authorUsername, authorName, authorUserId, text, id).apply { this.createdAt = createdAt }
     setByName("amendments", (amendments() + amendment).toSortedSet())
   }
 

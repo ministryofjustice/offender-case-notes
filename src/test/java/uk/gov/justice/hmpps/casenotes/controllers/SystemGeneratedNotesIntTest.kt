@@ -90,7 +90,7 @@ class SystemGeneratedNotesIntTest : ResourceTest() {
 
     val apiClientId = "ApiClientId"
     val response = sysGenNote(personIdentifier, request, username = apiClientId).success<CaseNote>(HttpStatus.CREATED)
-    val saved = noteRepository.findByIdAndPrisonNumber(UUID.fromString(response.caseNoteId), personIdentifier)
+    val saved = noteRepository.findByIdAndPersonIdentifier(UUID.fromString(response.caseNoteId), personIdentifier)
     requireNotNull(saved).verifyAgainst(request, apiClientId)
   }
 
@@ -109,7 +109,7 @@ class SystemGeneratedNotesIntTest : ResourceTest() {
 
     val apiClientId = "ApiClientId"
     val response = sysGenNote(personIdentifier, request, username = apiClientId).success<CaseNote>(HttpStatus.CREATED)
-    val saved = noteRepository.findByIdAndPrisonNumber(UUID.fromString(response.caseNoteId), personIdentifier)
+    val saved = noteRepository.findByIdAndPersonIdentifier(UUID.fromString(response.caseNoteId), personIdentifier)
     requireNotNull(saved).verifyAgainst(request, apiClientId)
   }
 
@@ -131,7 +131,7 @@ class SystemGeneratedNotesIntTest : ResourceTest() {
     val apiClientId = "API_CLIENT_ID"
     val response = sysGenNote(personIdentifier, request).success<CaseNote>(HttpStatus.CREATED)
     assertThat(response.locationId).isEqualTo(prisonId)
-    val saved = noteRepository.findByIdAndPrisonNumber(UUID.fromString(response.caseNoteId), personIdentifier)
+    val saved = noteRepository.findByIdAndPersonIdentifier(UUID.fromString(response.caseNoteId), personIdentifier)
     requireNotNull(saved).verifyAgainst(request, apiClientId)
     assertThat(saved.locationId).isEqualTo(prisonId)
   }

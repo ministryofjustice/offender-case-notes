@@ -11,7 +11,7 @@ import java.time.LocalDate
 import java.time.LocalTime
 
 class SAROffenderCaseNoteFilter(
-  private val offenderIdentifier: String? = null,
+  private val personIdentifier: String? = null,
   private val startDate: LocalDate? = null,
   private val endDate: LocalDate? = null,
 ) : Specification<OffenderCaseNote> {
@@ -19,15 +19,15 @@ class SAROffenderCaseNoteFilter(
   override fun toPredicate(root: Root<OffenderCaseNote>, query: CriteriaQuery<*>, cb: CriteriaBuilder): Predicate? {
     val predicateBuilder = mutableListOf<Predicate>()
 
-    if (!offenderIdentifier.isNullOrBlank()) {
-      predicateBuilder.add(cb.equal(root.get<Any>("offenderIdentifier"), offenderIdentifier))
+    if (!personIdentifier.isNullOrBlank()) {
+      predicateBuilder.add(cb.equal(root.get<Any>("personIdentifier"), personIdentifier))
     }
 
     startDate?.let {
-      predicateBuilder.add(cb.greaterThanOrEqualTo(root.get("createDateTime"), startDate.atStartOfDay()))
+      predicateBuilder.add(cb.greaterThanOrEqualTo(root.get("createdAt"), startDate.atStartOfDay()))
     }
     endDate?.let {
-      predicateBuilder.add(cb.lessThanOrEqualTo(root.get("createDateTime"), endDate.atTime(LocalTime.MAX)))
+      predicateBuilder.add(cb.lessThanOrEqualTo(root.get("createdAt"), endDate.atTime(LocalTime.MAX)))
     }
 
     root.fetch<Any, Any>("amendments", JoinType.LEFT)

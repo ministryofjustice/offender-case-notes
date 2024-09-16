@@ -47,7 +47,7 @@ class CreateAmendmentIntTest : ResourceTest() {
     val type = givenRandomType(restricted = true)
     val caseNote = givenCaseNote(generateCaseNote(prisonNumber(), type))
     val request = amendCaseNoteRequest()
-    amendCaseNote(caseNote.prisonNumber, caseNote.id.toString(), request, mapOf()).expectStatus().isForbidden
+    amendCaseNote(caseNote.personIdentifier, caseNote.id.toString(), request, mapOf()).expectStatus().isForbidden
   }
 
   @Test
@@ -58,7 +58,7 @@ class CreateAmendmentIntTest : ResourceTest() {
     val caseNote = givenCaseNote(generateCaseNote(prisonNumber(), type))
     val response =
       amendCaseNote(
-        caseNote.prisonNumber,
+        caseNote.personIdentifier,
         caseNote.id.toString(),
         amendCaseNoteRequest(),
         mapOf(),
@@ -75,12 +75,12 @@ class CreateAmendmentIntTest : ResourceTest() {
   fun `can amend a case note with write role`() {
     val caseNote = givenCaseNote(generateCaseNote(prisonNumber()))
     val request = amendCaseNoteRequest()
-    val response = amendCaseNote(caseNote.prisonNumber, caseNote.id.toString(), request).success<CaseNote>()
+    val response = amendCaseNote(caseNote.personIdentifier, caseNote.id.toString(), request).success<CaseNote>()
 
     assertThat(response.amendments.size).isEqualTo(1)
     assertThat(response.amendments.first().additionalNoteText).isEqualTo(request.text)
 
-    val saved = requireNotNull(noteRepository.findByIdAndPrisonNumber(caseNote.id, response.offenderIdentifier))
+    val saved = requireNotNull(noteRepository.findByIdAndPersonIdentifier(caseNote.id, response.personIdentifier))
     with(saved.amendments().first()) {
       assertThat(text).isEqualTo(request.text)
       assertThat(authorUsername).isEqualTo(USERNAME)
@@ -91,12 +91,12 @@ class CreateAmendmentIntTest : ResourceTest() {
   fun `can amend a case note with write role using legacyId`() {
     val caseNote = givenCaseNote(generateCaseNote(prisonNumber(), legacyId = newId()))
     val request = amendCaseNoteRequest()
-    val response = amendCaseNote(caseNote.prisonNumber, caseNote.legacyId.toString(), request).success<CaseNote>()
+    val response = amendCaseNote(caseNote.personIdentifier, caseNote.legacyId.toString(), request).success<CaseNote>()
 
     assertThat(response.amendments.size).isEqualTo(1)
     assertThat(response.amendments.first().additionalNoteText).isEqualTo(request.text)
 
-    val saved = requireNotNull(noteRepository.findByIdAndPrisonNumber(caseNote.id, response.offenderIdentifier))
+    val saved = requireNotNull(noteRepository.findByIdAndPersonIdentifier(caseNote.id, response.personIdentifier))
     with(saved.amendments().first()) {
       assertThat(text).isEqualTo(request.text)
       assertThat(authorUsername).isEqualTo(USERNAME)
@@ -108,13 +108,13 @@ class CreateAmendmentIntTest : ResourceTest() {
     val type = getAllTypes().first { !it.syncToNomis }
     val caseNote = givenCaseNote(generateCaseNote(prisonNumber(), type = type))
     val request = amendCaseNoteRequest()
-    val response = amendCaseNote(caseNote.prisonNumber, caseNote.id.toString(), request, caseloadId = null)
+    val response = amendCaseNote(caseNote.personIdentifier, caseNote.id.toString(), request, caseloadId = null)
       .success<CaseNote>()
 
     assertThat(response.amendments.size).isEqualTo(1)
     assertThat(response.amendments.first().additionalNoteText).isEqualTo(request.text)
 
-    val saved = requireNotNull(noteRepository.findByIdAndPrisonNumber(caseNote.id, response.offenderIdentifier))
+    val saved = requireNotNull(noteRepository.findByIdAndPersonIdentifier(caseNote.id, response.personIdentifier))
     with(saved.amendments().first()) {
       assertThat(text).isEqualTo(request.text)
       assertThat(authorUsername).isEqualTo(USERNAME)

@@ -33,8 +33,8 @@ class ReadCaseNote(
 
   fun caseNote(prisonNumber: String, caseNoteId: String): CaseNote {
     val caseNote = when (val legacyId = caseNoteId.asLegacyId()) {
-      null -> noteRepository.findByIdAndPrisonNumber(fromString(caseNoteId), prisonNumber)
-      else -> noteRepository.findByLegacyIdAndPrisonNumber(legacyId, prisonNumber)
+      null -> noteRepository.findByIdAndPersonIdentifier(fromString(caseNoteId), prisonNumber)
+      else -> noteRepository.findByLegacyIdAndPersonIdentifier(legacyId, prisonNumber)
     } ?: throw EntityNotFoundException.withId(caseNoteId)
     return caseNote.toModel()
   }

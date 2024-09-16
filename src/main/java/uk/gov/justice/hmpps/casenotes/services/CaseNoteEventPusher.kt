@@ -75,9 +75,9 @@ data class HmppsDomainEvent(
   val additionalInformation: CaseNoteAdditionalInformation,
 ) {
   constructor(caseNote: CaseNote, baseUrl: String) : this(
-    detailUrl = URI.create("$baseUrl/case-notes/${caseNote.offenderIdentifier}/${caseNote.caseNoteId}").toString(),
-    occurredAt = caseNote.creationDateTime,
-    personReference = PersonReference(identifiers = listOf(PersonIdentifier("NOMS", caseNote.offenderIdentifier))),
+    detailUrl = URI.create("$baseUrl/case-notes/${caseNote.personIdentifier}/${caseNote.caseNoteId}").toString(),
+    occurredAt = caseNote.createdAt,
+    personReference = PersonReference(identifiers = listOf(PersonIdentifier("NOMS", caseNote.personIdentifier))),
     additionalInformation = CaseNoteAdditionalInformation(
       caseNoteId = caseNote.caseNoteId,
       caseNoteType = "${caseNote.type}-${caseNote.subType}",

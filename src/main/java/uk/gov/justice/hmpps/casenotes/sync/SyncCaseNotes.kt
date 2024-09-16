@@ -6,7 +6,6 @@ import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import uk.gov.justice.hmpps.casenotes.domain.Amendment
 import uk.gov.justice.hmpps.casenotes.domain.AmendmentRepository
-import uk.gov.justice.hmpps.casenotes.domain.IdGenerator.newUuid
 import uk.gov.justice.hmpps.casenotes.domain.Note
 import uk.gov.justice.hmpps.casenotes.domain.NoteRepository
 import uk.gov.justice.hmpps.casenotes.domain.SubType
@@ -15,7 +14,8 @@ import uk.gov.justice.hmpps.casenotes.domain.TypeKey
 import uk.gov.justice.hmpps.casenotes.domain.TypeLookup
 import uk.gov.justice.hmpps.casenotes.domain.getByParentCodeAndCode
 import uk.gov.justice.hmpps.casenotes.domain.saveAndRefresh
-import java.util.TreeSet
+import java.time.LocalDateTime
+import java.time.temporal.ChronoUnit
 import java.util.UUID
 
 @Transactional
@@ -42,10 +42,10 @@ class SyncCaseNotes(
     }
 
     existing?.also {
-      check(it.prisonNumber == request.personIdentifier) { "Case note belongs to another prisoner or prisoner records have been merged" }
+      check(it.personIdentifier == request.personIdentifier) { "Case note belongs to another prisoner or prisoner records have been merged" }
     }
 
-    val saved = existing?.sync(request, typeRepository::getByParentCodeAndCode)
+    val saved = existing?.sync(request)
       ?: noteRepository.saveAndRefresh(request.asNoteWithAmendments(typeRepository::getByParentCodeAndCode))
 
     return SyncResult(
@@ -59,7 +59,17 @@ class SyncCaseNotes(
     telemetryClient.trackEvent("CaseNoteDeletedViaSync", mapOf("id" to it.toString()), mapOf())
   }
 
-  private fun SyncNoteRequest.typeKey() = TypeKey(type, subType)
+  private fun Note.sync(request: SyncNoteRequest): Note? =
+    if (!type.matches(request.type, request.subType) || text != request.text) {
+      noteRepository.delete(this)
+      noteRepository.flush()
+      null
+    } else {
+      request.amendments.forEach {
+        matchAmendment(it) ?: addAmendment(it)
+      }
+      this
+    }
 
   private fun getTypesForSync(keys: Set<TypeKey>): Map<TypeKey, SubType> {
     val types = typeRepository.findByKeyIn(keys).associateBy { it.key }
@@ -91,48 +101,19 @@ private fun <T : TypeLookup> Collection<T>.exceptionMessage() =
     }
     .joinToString(separator = ", ", prefix = "{ ", postfix = " }")
 
-private fun SyncNoteRequest.asNoteAndAmendments(typeSupplier: (String, String) -> SubType) =
-  asNote(typeSupplier).let { note ->
-    note.legacyId = this.legacyId
-    note.createDateTime = createdDateTime
-    note.createUserId = createdByUsername
-    NoteAndAmendments(note, amendments.map { it.asAmendment(note) })
-  }
-
-private fun SyncNoteRequest.asNoteWithAmendments(typeSupplier: (String, String) -> SubType) =
-  asNote(typeSupplier).also { note ->
-    amendments.forEach { note.addAmendment(it) }
-  }
-
-private fun SyncNoteRequest.asNote(typeSupplier: (String, String) -> SubType) = Note(
-  personIdentifier,
-  typeSupplier(type, subType),
-  occurrenceDateTime,
-  locationId,
-  authorUsername,
-  authorUserId,
-  authorName,
-  text,
-  systemGenerated,
-  TreeSet(),
-).apply {
-  this.legacyId = this@asNote.legacyId
-  this.createDateTime = this@asNote.createdDateTime
-  this.createUserId = this@asNote.createdByUsername
+private fun SubType.matches(parentCode: String, code: String): Boolean {
+  return this.code == code && this.parentCode == parentCode
 }
 
-private fun SyncAmendmentRequest.asAmendment(note: Note) = Amendment(
-  note,
-  authorUsername,
-  authorName,
-  authorUserId,
-  text,
-  newUuid(),
-).apply { this.createDateTime = this@asAmendment.createdDateTime }
-
-private data class NoteAndAmendments(val note: Note, val amendments: List<Amendment>)
-
-data class MigrationResult(val id: UUID, val legacyId: Long)
-data class SyncResult(val id: UUID, val legacyId: Long, val action: Action) {
-  enum class Action { CREATED, UPDATED }
+private fun Note.matchAmendment(request: SyncAmendmentRequest): Amendment? {
+  val matching = amendments().filter {
+    request.authorUsername == it.authorUsername && request.createdDateTime.sameSecond(it.createdAt)
+  }
+  return when (matching.size) {
+    1 -> matching.single()
+    else -> null
+  }
 }
+
+private fun LocalDateTime.sameSecond(other: LocalDateTime): Boolean =
+  truncatedTo(ChronoUnit.SECONDS) == other.truncatedTo(ChronoUnit.SECONDS)
