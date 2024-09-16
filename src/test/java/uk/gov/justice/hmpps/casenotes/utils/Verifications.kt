@@ -3,9 +3,9 @@ package uk.gov.justice.hmpps.casenotes.utils
 import org.assertj.core.api.Assertions.assertThat
 import uk.gov.justice.hmpps.casenotes.domain.Amendment
 import uk.gov.justice.hmpps.casenotes.domain.Note
-import uk.gov.justice.hmpps.casenotes.domain.audit.DeletedDetail
 import uk.gov.justice.hmpps.casenotes.notes.CaseNote
 import uk.gov.justice.hmpps.casenotes.notes.CaseNoteAmendment
+import uk.gov.justice.hmpps.casenotes.notes.DeletedDetail
 import uk.gov.justice.hmpps.casenotes.sync.SyncAmendmentRequest
 import uk.gov.justice.hmpps.casenotes.sync.SyncNoteRequest
 import java.time.temporal.ChronoUnit.SECONDS

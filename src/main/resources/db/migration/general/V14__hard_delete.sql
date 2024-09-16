@@ -46,10 +46,10 @@ create table if not exists case_note_deleted
     deleted_at        timestamp   not null,
     deleted_by        varchar(64) not null,
     caseload_id       varchar(12),
-    source            varchar(6)
-        constraint check_source check (source in ('DPS', 'NOMIS')),
-    cause             varchar(6)
-        constraint check_cause check (cause in ('DELETE', 'UPDATE', 'MERGE'))
+    source            varchar(6)  not null,
+    constraint check_source check (source in ('DPS', 'NOMIS')),
+    cause             varchar(6)  not null,
+    constraint check_cause check (cause in ('DELETE', 'UPDATE', 'MERGE'))
 );
 
 create index case_note_deleted_person_identifier on case_note_deleted (person_identifier);

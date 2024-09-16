@@ -1,8 +1,10 @@
-package uk.gov.justice.hmpps.casenotes.domain.audit
+package uk.gov.justice.hmpps.casenotes.notes
 
 import com.fasterxml.jackson.databind.PropertyNamingStrategies.SnakeCaseStrategy
 import com.fasterxml.jackson.databind.annotation.JsonNaming
 import jakarta.persistence.Entity
+import jakarta.persistence.EnumType
+import jakarta.persistence.Enumerated
 import jakarta.persistence.GeneratedValue
 import jakarta.persistence.GenerationType
 import jakarta.persistence.Id
@@ -11,7 +13,9 @@ import jakarta.persistence.Table
 import org.hibernate.annotations.JdbcTypeCode
 import org.hibernate.type.SqlTypes
 import org.springframework.data.jpa.repository.JpaRepository
+import uk.gov.justice.hmpps.casenotes.config.Source
 import uk.gov.justice.hmpps.casenotes.domain.AmendmentState
+import uk.gov.justice.hmpps.casenotes.domain.DeletionCause
 import uk.gov.justice.hmpps.casenotes.domain.NoteState
 import java.time.LocalDateTime
 import java.util.SortedSet
@@ -32,9 +36,15 @@ class DeletedCaseNote(
   val deletedAt: LocalDateTime,
   val deletedBy: String,
 
+  @Enumerated(EnumType.STRING)
+  val source: Source,
+
+  @Enumerated(EnumType.STRING)
+  val cause: DeletionCause,
+
   @Id
   @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "case_note_deleted_id_seq")
-  val id: Long = 0,
+  val id: Long? = null,
 )
 
 interface DeletedCaseNoteRepository : JpaRepository<DeletedCaseNote, Long> {
