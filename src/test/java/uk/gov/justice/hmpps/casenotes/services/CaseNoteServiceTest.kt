@@ -528,7 +528,7 @@ class CaseNoteServiceTest {
         "sensitive",
         "eventId",
         "occurrenceDateTime",
-        "offenderIdentifier"
+        "offenderIdentifier",
       )
       .isEqualTo(offenderCaseNote)
     assertThat(caseNote.text).isEqualTo("HELLO")

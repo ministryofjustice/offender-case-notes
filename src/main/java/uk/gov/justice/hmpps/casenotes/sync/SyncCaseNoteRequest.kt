@@ -8,7 +8,6 @@ import uk.gov.justice.hmpps.casenotes.domain.Note
 import uk.gov.justice.hmpps.casenotes.domain.SubType
 import uk.gov.justice.hmpps.casenotes.domain.TypeKey
 import java.time.LocalDateTime
-import java.util.TreeSet
 import java.util.UUID
 
 data class SyncCaseNoteRequest(
