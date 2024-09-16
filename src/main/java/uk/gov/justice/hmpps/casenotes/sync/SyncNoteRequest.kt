@@ -37,12 +37,15 @@ interface SyncNoteRequest : NoteRequest, AuthoredRequest {
   )
   override val occurrenceDateTime: LocalDateTime
 
+  @get:Schema(hidden = true)
   override val authorUsername: String
     get() = author.username
 
+  @get:Schema(hidden = true)
   override val authorName: String
     get() = LanguageFormatUtils.formatDisplayName("${author.firstName} ${author.lastName}").trim()
 
+  @get:Schema(hidden = true)
   val authorUserId: String
     get() = author.userId
 
@@ -78,10 +81,13 @@ interface SyncNoteRequest : NoteRequest, AuthoredRequest {
 }
 
 interface SyncAmendmentRequest : TextRequest, AuthoredRequest {
+  @get:Schema(hidden = true)
   override val authorUsername: String
     get() = author.username
+  @get:Schema(hidden = true)
   override val authorName: String
     get() = LanguageFormatUtils.formatDisplayName("${author.firstName} ${author.lastName}").trim()
+  @get:Schema(hidden = true)
   val authorUserId: String
     get() = author.userId
 
