@@ -84,6 +84,7 @@ interface SyncAmendmentRequest : TextRequest, AuthoredRequest {
     get() = LanguageFormatUtils.formatDisplayName("${author.firstName} ${author.lastName}").trim()
   val authorUserId: String
     get() = author.userId
+
   @get:Schema(description = "The staff member who amended the case note")
   @get:Valid
   val author: AmendAuthor
