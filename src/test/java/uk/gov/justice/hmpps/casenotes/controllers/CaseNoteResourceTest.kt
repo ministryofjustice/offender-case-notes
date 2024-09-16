@@ -266,7 +266,7 @@ class CaseNoteResourceTest : ResourceTest() {
         OffenderCaseNote.builder()
           .personIdentifier(prisonNumber)
           .caseNoteType(type)
-          .noteText("A case note that should not appear")
+          .text("A case note that should not appear")
           .occurredAt(LocalDateTime.now().minusDays(1))
           .locationId("MDI")
           .authorUserId("SYS")

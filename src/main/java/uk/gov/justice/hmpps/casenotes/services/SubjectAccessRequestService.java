@@ -70,12 +70,12 @@ public class SubjectAccessRequestService {
                 .authorName(cn.getAuthorName())
                 .type(parentType.getType())
                 .subType(cn.getCaseNoteType().getType())
-                .text(cn.getNoteText())
+                .text(cn.getText())
                 .creationDateTime(cn.getCreatedAt())
                 .amendments(cn.getAmendments().stream().map(
                         a -> SARCaseNoteAmendment.builder()
                                 .authorName(a.getAuthorName())
-                                .additionalNoteText(a.getNoteText())
+                                .additionalNoteText(a.getText())
                                 .creationDateTime(a.getCreatedAt())
                                 .build()
                 ).sorted(comparing(SARCaseNoteAmendment::getCreationDateTime).reversed()).toList()).build();

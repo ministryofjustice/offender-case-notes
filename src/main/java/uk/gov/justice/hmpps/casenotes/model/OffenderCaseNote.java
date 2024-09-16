@@ -19,11 +19,14 @@ import lombok.ToString;
 import org.hibernate.annotations.SQLRestriction;
 import org.hibernate.annotations.SoftDelete;
 import org.hibernate.annotations.SortComparator;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+import uk.gov.justice.hmpps.casenotes.domain.NoteState;
 
 import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.SortedSet;
 import java.util.TreeSet;
@@ -46,7 +49,7 @@ import static java.time.LocalDateTime.now;
 @EqualsAndHashCode(of = {"personIdentifier", "occurredAt", "locationId", "authorUsername", "caseNoteType", "noteText"})
 @ToString(of = {"id", "personIdentifier", "occurredAt", "locationId", "authorUsername", "caseNoteType"})
 @SQLRestriction("exists(select 1 from case_note_type ct where ct.case_note_type_id = type_id and ct.sync_to_nomis = false)")
-public class OffenderCaseNote {
+public class OffenderCaseNote implements NoteState {
 
     @Builder.Default
     @Id
@@ -76,7 +79,7 @@ public class OffenderCaseNote {
     private CaseNoteType caseNoteType;
 
     @Column(name = "note_text", nullable = false)
-    private String noteText;
+    private String text;
 
     @Builder.Default
     @SortComparator(AmendmentComparator.class)
@@ -98,6 +101,11 @@ public class OffenderCaseNote {
 
     private boolean systemGenerated;
 
+    @Override
+    public boolean getSystemGenerated() {
+        return systemGenerated;
+    }
+
     @Version
     private Long version;
 
@@ -110,7 +118,7 @@ public class OffenderCaseNote {
 
         final var amendment = OffenderCaseNoteAmendment.builder()
             .caseNote(this)
-            .noteText(noteText)
+            .text(noteText)
             .authorUsername(authorUsername)
             .authorName(authorName)
             .authorUserId(authorUserId)
@@ -119,6 +127,17 @@ public class OffenderCaseNote {
             .build();
 
         amendments.add(amendment);
+    }
+
+    @Override
+    public long getTypeId() {
+        return caseNoteType.getId();
+    }
+
+    @NotNull
+    @Override
+    public SortedSet<OffenderCaseNoteAmendment> amendments() {
+        return Collections.unmodifiableSortedSet(amendments);
     }
 
     public static class AmendmentComparator implements Comparator<OffenderCaseNoteAmendment> {

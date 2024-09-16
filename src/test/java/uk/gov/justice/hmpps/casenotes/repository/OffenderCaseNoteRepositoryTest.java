@@ -105,9 +105,9 @@ public class OffenderCaseNoteRepositoryTest extends IntegrationTest {
 
         assertThat(retrievedEntity2.getAmendments()).hasSize(3);
 
-        assertThat(retrievedEntity2.getAmendments().first().getNoteText()).isEqualTo("Another Note 0");
+        assertThat(retrievedEntity2.getAmendments().first().getText()).isEqualTo("Another Note 0");
         final var offenderCaseNoteAmendment3 = new ArrayList<>(retrievedEntity2.getAmendments()).get(2);
-        assertThat(offenderCaseNoteAmendment3.getNoteText()).isEqualTo("Another Note 2");
+        assertThat(offenderCaseNoteAmendment3.getText()).isEqualTo("Another Note 2");
 
         retrievedEntity2.addAmendment("Another Note 3", "USER1", "Mickey Mouse", "user id");
 
@@ -120,7 +120,7 @@ public class OffenderCaseNoteRepositoryTest extends IntegrationTest {
 
         assertThat(retrievedEntity3.getAmendments()).hasSize(4);
 
-        assertThat(retrievedEntity3.getAmendments().last().getNoteText()).isEqualTo("Another Note 3");
+        assertThat(retrievedEntity3.getAmendments().last().getText()).isEqualTo("Another Note 3");
     }
 
     @Test
@@ -133,7 +133,7 @@ public class OffenderCaseNoteRepositoryTest extends IntegrationTest {
                 .authorName("Mickey Mouse")
                 .personIdentifier(OFFENDER_IDENTIFIER)
                 .caseNoteType(genType)
-                .noteText("HELLO")
+                .text("HELLO")
                 .build();
         repository.save(entity);
 
@@ -158,7 +158,7 @@ public class OffenderCaseNoteRepositoryTest extends IntegrationTest {
     @Test
     public void testDeleteCaseNotes() {
 
-        final var persistedEntity = repository.save(transientEntityBuilder("X1111XX").noteText("note to delete").build());
+        final var persistedEntity = repository.save(transientEntityBuilder("X1111XX").text("note to delete").build());
 
         TestTransaction.flagForCommit();
         TestTransaction.end();
@@ -179,7 +179,7 @@ public class OffenderCaseNoteRepositoryTest extends IntegrationTest {
     @Test
     public void testDeleteOfSoftDeletedCaseNotes() {
 
-        final var persistedEntity = repository.save(transientEntityBuilder("X2111XX").noteText("note to delete").build());
+        final var persistedEntity = repository.save(transientEntityBuilder("X2111XX").text("note to delete").build());
 
         TestTransaction.flagForCommit();
         TestTransaction.end();
@@ -210,7 +210,7 @@ public class OffenderCaseNoteRepositoryTest extends IntegrationTest {
     public void testDeleteOfSoftDeletedCaseNotesAmendments() {
 
         final var persistedEntity = repository.save(transientEntityBuilder("X3111XX")
-                .noteText("note to delete")
+                .text("note to delete")
                 .build());
         persistedEntity.addAmendment("Another Note 0", "someuser", "Some User", "user id");
         repository.save(persistedEntity);
@@ -329,7 +329,7 @@ public class OffenderCaseNoteRepositoryTest extends IntegrationTest {
     @WithAnonymousUser
     public void testRetrieveASoftDeletedFalseCaseNote() {
 
-        final var persistedEntity = repository.save(transientEntityBuilder("X4111XX").noteText("note to retrieve").build());
+        final var persistedEntity = repository.save(transientEntityBuilder("X4111XX").text("note to retrieve").build());
 
         TestTransaction.flagForCommit();
         TestTransaction.end();
@@ -361,7 +361,7 @@ public class OffenderCaseNoteRepositoryTest extends IntegrationTest {
                 .authorName("Mickey Mouse")
                 .personIdentifier(offenderIdentifier)
                 .caseNoteType(genType)
-                .noteText("HELLO")
+                .text("HELLO")
                 .createdBy("SYS")
                 .systemGenerated(false);
 

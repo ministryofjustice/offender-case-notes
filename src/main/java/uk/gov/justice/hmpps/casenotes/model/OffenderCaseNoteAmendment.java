@@ -18,6 +18,7 @@ import org.hibernate.annotations.SoftDelete;
 import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+import uk.gov.justice.hmpps.casenotes.domain.AmendmentState;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -32,7 +33,7 @@ import java.util.UUID;
 @Builder(toBuilder = true)
 @EqualsAndHashCode
 @ToString(of = {"id", "caseNote"})
-public class OffenderCaseNoteAmendment {
+public class OffenderCaseNoteAmendment implements AmendmentState {
 
     @Id
     @Column(nullable = false)
@@ -52,7 +53,7 @@ public class OffenderCaseNoteAmendment {
     private String authorUserId;
 
     @Column(name = "note_text", nullable = false)
-    private String noteText;
+    private String text;
 
     @CreatedDate
     @Column(nullable = false)

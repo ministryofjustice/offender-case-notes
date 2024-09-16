@@ -997,7 +997,7 @@ class CaseNoteServiceTest {
       .authorName("Mickey Mouse")
       .personIdentifier("A1234AC")
       .caseNoteType(caseNoteType)
-      .noteText("HELLO")
+      .text("HELLO")
       .legacyId(1234)
       .createdAt(LocalDateTime.now().minusDays(7))
       .build()

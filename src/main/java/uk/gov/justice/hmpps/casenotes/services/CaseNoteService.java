@@ -152,9 +152,9 @@ public class CaseNoteService {
             .subTypeDescription(cn.getCaseNoteType().getDescription())
             .source(SERVICE_NAME) // Indicates its a Offender Case Note Service Type
             .sensitive(cn.getCaseNoteType().isSensitive())
-            .text(cn.getNoteText())
+            .text(cn.getText())
             .createdAt(cn.getCreatedAt())
-            .systemGenerated(cn.isSystemGenerated())
+            .systemGenerated(cn.getSystemGenerated())
             .legacyId(cn.getLegacyId())
             .eventId(cn.getLegacyId())
             .amendments(cn.getAmendments().stream().map(
@@ -163,7 +163,7 @@ public class CaseNoteService {
                     a.getAuthorUsername(),
                     a.getAuthorName(),
                     a.getAuthorUserId(),
-                    a.getNoteText()
+                    a.getText()
                 )
             ).toList())
             .locationId(cn.getLocationId())
@@ -244,7 +244,7 @@ public class CaseNoteService {
             newCaseNote.getLocationId() == null ? externalApiService.getOffenderLocation(offenderIdentifier) : newCaseNote.getLocationId();
 
         final var caseNote = OffenderCaseNote.builder()
-            .noteText(newCaseNote.getText())
+            .text(newCaseNote.getText())
             .authorUsername(context.getUsername())
             .authorUserId(context.getUserId())
             .authorName(context.getUserDisplayName())

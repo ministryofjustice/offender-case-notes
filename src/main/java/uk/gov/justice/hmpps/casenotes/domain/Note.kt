@@ -43,7 +43,7 @@ class Note(
 
   @ManyToOne
   @JoinColumn(name = "type_id", nullable = false)
-  override val type: SubType,
+  val type: SubType,
 
   @Column(nullable = false)
   override val occurredAt: LocalDateTime,
@@ -73,6 +73,8 @@ class Note(
   @Column(updatable = false, nullable = false)
   override val id: UUID = newUuid()
 
+  @Column(name = "type_id", insertable = false, updatable = false, nullable = false)
+  override val typeId: Long = type.id!!
   override var legacyId: Long = 0
 
   @OneToMany(cascade = [CascadeType.ALL], mappedBy = "note")

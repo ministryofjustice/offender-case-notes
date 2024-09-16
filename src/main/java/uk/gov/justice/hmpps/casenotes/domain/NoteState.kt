@@ -3,12 +3,13 @@ package uk.gov.justice.hmpps.casenotes.domain
 import com.fasterxml.jackson.databind.PropertyNamingStrategies.SnakeCaseStrategy
 import com.fasterxml.jackson.databind.annotation.JsonNaming
 import java.time.LocalDateTime
+import java.util.SortedSet
 import java.util.UUID
 
 @JsonNaming(SnakeCaseStrategy::class)
 interface NoteState {
   val personIdentifier: String
-  val type: SubType
+  val typeId: Long
   val occurredAt: LocalDateTime
   val locationId: String
   val authorUsername: String
@@ -16,11 +17,12 @@ interface NoteState {
   val authorName: String
   val text: String
   val systemGenerated: Boolean
-  val legacyId: Long
+  val legacyId: Long?
   val id: UUID
-  fun amendments(): Set<AmendmentState>
+  fun amendments(): SortedSet<out AmendmentState>
 }
 
+@JsonNaming(SnakeCaseStrategy::class)
 interface AmendmentState {
   val authorUsername: String
   val authorName: String
