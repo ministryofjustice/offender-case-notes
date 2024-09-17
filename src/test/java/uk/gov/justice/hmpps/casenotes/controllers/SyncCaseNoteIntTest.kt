@@ -2,13 +2,17 @@ package uk.gov.justice.hmpps.casenotes.controllers
 
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.http.HttpStatus
 import uk.gov.justice.hmpps.casenotes.config.SecurityUserContext.Companion.ROLE_CASE_NOTES_SYNC
 import uk.gov.justice.hmpps.casenotes.config.SecurityUserContext.Companion.ROLE_CASE_NOTES_WRITE
 import uk.gov.justice.hmpps.casenotes.config.Source
 import uk.gov.justice.hmpps.casenotes.domain.Amendment
+import uk.gov.justice.hmpps.casenotes.domain.DeletionCause.DELETE
+import uk.gov.justice.hmpps.casenotes.domain.DeletionCause.UPDATE
 import uk.gov.justice.hmpps.casenotes.domain.Note
+import uk.gov.justice.hmpps.casenotes.notes.DeletedCaseNoteRepository
 import uk.gov.justice.hmpps.casenotes.sync.SyncCaseNoteAmendmentRequest
 import uk.gov.justice.hmpps.casenotes.sync.SyncCaseNoteRequest
 import uk.gov.justice.hmpps.casenotes.sync.SyncResult
@@ -21,6 +25,10 @@ import java.time.LocalDateTime
 import java.util.UUID
 
 class SyncCaseNoteIntTest : ResourceTest() {
+
+  @Autowired
+  lateinit var deletedCaseNoteRepository: DeletedCaseNoteRepository
+
   @Test
   fun `401 unauthorised`() {
     webTestClient.put().uri(BASE_URL).exchange().expectStatus().isUnauthorized
@@ -74,12 +82,21 @@ class SyncCaseNoteIntTest : ResourceTest() {
   }
 
   @Test
+  fun `400 bad request - exception thrown if person identifier doesn't match`() {
+    val existing = givenCaseNote(generateCaseNote())
+    val request = existing.syncRequest().copy(personIdentifier = prisonNumber())
+    val response = syncCaseNote(request).errorResponse(HttpStatus.BAD_REQUEST)
+    assertThat(response.developerMessage)
+      .isEqualTo("Case note belongs to another prisoner or prisoner records have been merged")
+  }
+
+  @Test
   fun `201 created - sync creates a new case note`() {
     val request = syncCaseNoteRequest()
     val response = syncCaseNote(request).success<SyncResult>(HttpStatus.CREATED)
     assertThat(response.action).isEqualTo(CREATED)
 
-    val saved = requireNotNull(noteRepository.findByIdAndPrisonNumber(response.id, request.personIdentifier))
+    val saved = requireNotNull(noteRepository.findByIdAndPersonIdentifier(response.id, request.personIdentifier))
     saved.verifyAgainst(request)
   }
 
@@ -89,7 +106,7 @@ class SyncCaseNoteIntTest : ResourceTest() {
     val response = syncCaseNote(request).success<SyncResult>(HttpStatus.CREATED)
     assertThat(response.action).isEqualTo(CREATED)
 
-    val saved = requireNotNull(noteRepository.findByIdAndPrisonNumber(response.id, request.personIdentifier))
+    val saved = requireNotNull(noteRepository.findByIdAndPersonIdentifier(response.id, request.personIdentifier))
     saved.verifyAgainst(request)
     val amended = saved.amendments().first()
     amended.verifyAgainst(request.amendments.first())
@@ -101,10 +118,15 @@ class SyncCaseNoteIntTest : ResourceTest() {
     val existing = givenCaseNote(generateCaseNote(prisonNumber))
     val request = existing.syncRequest()
     val response = syncCaseNote(request).success<SyncResult>(HttpStatus.OK)
-    assertThat(response).isEqualTo(SyncResult(existing.id, existing.legacyId, UPDATED))
+    assertThat(response.action).isEqualTo(UPDATED)
 
-    val saved = requireNotNull(noteRepository.findByIdAndPrisonNumber(response.id, request.personIdentifier))
+    val saved = requireNotNull(noteRepository.findByIdAndPersonIdentifier(response.id, request.personIdentifier))
     saved.verifyAgainst(request)
+
+    val deleted = deletedCaseNoteRepository.findByCaseNoteId(existing.id)
+    assertThat(deleted!!.caseNote).isNotNull()
+    assertThat(deleted.cause).isEqualTo(UPDATE)
+    deleted.caseNote.verifyAgainst(existing)
   }
 
   @Test
@@ -113,10 +135,15 @@ class SyncCaseNoteIntTest : ResourceTest() {
     val existing = givenCaseNote(generateCaseNote(prisonNumber))
     val request = existing.syncRequest().copy(id = null)
     val response = syncCaseNote(request).success<SyncResult>(HttpStatus.OK)
-    assertThat(response).isEqualTo(SyncResult(existing.id, existing.legacyId, UPDATED))
+    assertThat(response.action).isEqualTo(UPDATED)
 
-    val saved = requireNotNull(noteRepository.findByIdAndPrisonNumber(response.id, request.personIdentifier))
+    val saved = requireNotNull(noteRepository.findByIdAndPersonIdentifier(response.id, request.personIdentifier))
     saved.verifyAgainst(request)
+
+    val deleted = deletedCaseNoteRepository.findByCaseNoteId(existing.id)
+    assertThat(deleted!!.caseNote).isNotNull()
+    assertThat(deleted.cause).isEqualTo(UPDATE)
+    deleted.caseNote.verifyAgainst(existing)
   }
 
   @Test
@@ -136,22 +163,18 @@ class SyncCaseNoteIntTest : ResourceTest() {
       )
     }
     val response = syncCaseNote(request).success<SyncResult>(HttpStatus.OK)
-    assertThat(response).isEqualTo(SyncResult(existing.id, existing.legacyId, UPDATED))
+    assertThat(response.action).isEqualTo(UPDATED)
 
-    val saved = requireNotNull(noteRepository.findByIdAndPrisonNumber(response.id, request.personIdentifier))
+    val saved = requireNotNull(noteRepository.findByIdAndPersonIdentifier(response.id, request.personIdentifier))
     saved.verifyAgainst(request)
     assertThat(saved.amendments().size).isEqualTo(2)
     val amend = saved.amendments().first()
     amend.verifyAgainst(request.amendments.first())
-  }
 
-  @Test
-  fun `400 bad request - exception thrown if person identifier doesn't match`() {
-    val existing = givenCaseNote(generateCaseNote())
-    val request = existing.syncRequest().copy(personIdentifier = prisonNumber())
-    val response = syncCaseNote(request).errorResponse(HttpStatus.BAD_REQUEST)
-    assertThat(response.developerMessage)
-      .isEqualTo("Case note belongs to another prisoner or prisoner records have been merged")
+    val deleted = deletedCaseNoteRepository.findByCaseNoteId(existing.id)
+    assertThat(deleted!!.caseNote).isNotNull()
+    assertThat(deleted.cause).isEqualTo(UPDATE)
+    deleted.caseNote.verifyAgainst(existing)
   }
 
   @Test
@@ -164,6 +187,11 @@ class SyncCaseNoteIntTest : ResourceTest() {
     deleteCaseNote(note.id)
 
     assertThat(cns()).isNull()
+
+    val deleted = deletedCaseNoteRepository.findByCaseNoteId(note.id)
+    assertThat(deleted!!.caseNote).isNotNull()
+    assertThat(deleted.cause).isEqualTo(DELETE)
+    deleted.caseNote.verifyAgainst(note)
   }
 
   @Test
@@ -239,14 +267,14 @@ private fun Note.syncRequest() = syncCaseNoteRequest(
   legacyId = legacyId,
   id = id,
   locationId = locationId,
-  prisonIdentifier = prisonNumber,
+  prisonIdentifier = personIdentifier,
   text = "The text has been updated from nomis",
-  createdDateTime = createDateTime,
+  createdDateTime = createdAt,
   occurrenceDateTime = occurredAt,
   authorName = authorName,
   authorUsername = authorUsername,
   authorUserId = authorUserId,
-  createdBy = createUserId,
+  createdBy = createdBy,
   amendments = amendments().map { it.syncRequest() }.toSortedSet(compareBy { it.createdDateTime }),
 )
 
@@ -255,5 +283,5 @@ private fun Amendment.syncRequest() = syncAmendmentRequest(
   authorName = authorName,
   authorUsername = authorUsername,
   authorUserId = authorUserId,
-  createdDateTime = createDateTime,
+  createdDateTime = createdAt,
 )

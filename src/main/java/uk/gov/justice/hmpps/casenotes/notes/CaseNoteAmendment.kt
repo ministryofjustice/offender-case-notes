@@ -1,14 +1,16 @@
 package uk.gov.justice.hmpps.casenotes.notes
 
 import com.fasterxml.jackson.annotation.JsonInclude
+import com.fasterxml.jackson.annotation.JsonProperty
 import io.swagger.v3.oas.annotations.media.Schema
 import java.time.LocalDateTime
 
 @Schema(description = "Case Note Amendment")
 @JsonInclude(JsonInclude.Include.NON_NULL)
 data class CaseNoteAmendment(
+  @JsonProperty("creationDateTime")
   @Schema(required = false, description = "Date and Time of Case Note creation", example = "2018-12-01T13:45:00")
-  val creationDateTime: LocalDateTime?,
+  val createdAt: LocalDateTime?,
 
   @Schema(required = true, description = "Username of the user amending the case note", example = "USER1")
   val authorUserName: String,

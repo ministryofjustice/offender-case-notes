@@ -2,6 +2,11 @@ package uk.gov.justice.hmpps.casenotes.sync
 
 import io.swagger.v3.oas.annotations.media.Schema
 import uk.gov.justice.hmpps.casenotes.config.Source
+import uk.gov.justice.hmpps.casenotes.domain.Amendment
+import uk.gov.justice.hmpps.casenotes.domain.IdGenerator.newUuid
+import uk.gov.justice.hmpps.casenotes.domain.Note
+import uk.gov.justice.hmpps.casenotes.domain.SubType
+import uk.gov.justice.hmpps.casenotes.domain.TypeKey
 import java.time.LocalDateTime
 import java.util.UUID
 
@@ -37,3 +42,43 @@ data class SyncCaseNoteAmendmentRequest(
   override val authorName: String,
   override val createdDateTime: LocalDateTime,
 ) : SyncAmendmentRequest
+
+internal data class NoteAndAmendments(val note: Note, val amendments: List<Amendment>)
+
+internal fun SyncNoteRequest.typeKey() = TypeKey(type, subType)
+
+internal fun SyncNoteRequest.asNoteAndAmendments(typeSupplier: (String, String) -> SubType) =
+  asNote(typeSupplier).let { note ->
+    note.legacyId = this.legacyId
+    note.createdAt = createdDateTime
+    note.createdBy = createdByUsername
+    NoteAndAmendments(note, amendments.map { it.asAmendment(note) })
+  }
+
+private fun SyncAmendmentRequest.asAmendment(note: Note) = Amendment(
+  note,
+  authorUsername,
+  authorName,
+  authorUserId,
+  text,
+  newUuid(),
+).apply { this.createdAt = this@asAmendment.createdDateTime }
+
+internal fun SyncNoteRequest.asNoteWithAmendments(typeSupplier: (String, String) -> SubType) =
+  asNote(typeSupplier).also { note -> amendments.forEach { note.addAmendment(it) } }
+
+internal fun SyncNoteRequest.asNote(typeSupplier: (String, String) -> SubType) = Note(
+  personIdentifier,
+  typeSupplier(type, subType),
+  occurrenceDateTime,
+  locationId,
+  authorUsername,
+  authorUserId,
+  authorName,
+  text,
+  systemGenerated,
+).apply {
+  this.legacyId = this@asNote.legacyId
+  this.createdAt = this@asNote.createdDateTime
+  this.createdBy = this@asNote.createdByUsername
+}

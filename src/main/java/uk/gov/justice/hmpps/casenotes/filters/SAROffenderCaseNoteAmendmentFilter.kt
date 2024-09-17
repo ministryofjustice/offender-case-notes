@@ -21,16 +21,16 @@ class SAROffenderCaseNoteAmendmentFilter(
     val predicateBuilder = mutableListOf<Predicate>()
 
     startDate?.let {
-      predicateBuilder.add(cb.greaterThanOrEqualTo(root.get("createDateTime"), startDate.atStartOfDay()))
+      predicateBuilder.add(cb.greaterThanOrEqualTo(root.get("createdAt"), startDate.atStartOfDay()))
     }
     endDate?.let {
-      predicateBuilder.add(cb.lessThanOrEqualTo(root.get("createDateTime"), endDate.atTime(LocalTime.MAX)))
+      predicateBuilder.add(cb.lessThanOrEqualTo(root.get("createdAt"), endDate.atTime(LocalTime.MAX)))
     }
 
     val offenderCaseNote = root.fetch<Any, Any>("caseNote", JoinType.LEFT) as Join<*, *>
 
-    cb.equal(offenderCaseNote.get<Any>("offenderIdentifier"), pNum)
-    predicateBuilder.add(cb.equal(offenderCaseNote.get<Any>("offenderIdentifier"), pNum))
+    cb.equal(offenderCaseNote.get<Any>("personIdentifier"), pNum)
+    predicateBuilder.add(cb.equal(offenderCaseNote.get<Any>("personIdentifier"), pNum))
 
     return cb.and(*predicateBuilder.toTypedArray())
   }

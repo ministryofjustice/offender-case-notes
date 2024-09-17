@@ -67,7 +67,7 @@ class MigrateCaseNotesIntTest : ResourceTest() {
       val type = types.random()
       migrateCaseNoteRequest(
         prisonIdentifier = prisonNumbers.random(),
-        type = type.parent.code,
+        type = type.type.code,
         subType = type.code,
         amendments = if (it % 5 == 0) setOf(migrateAmendmentRequest(), migrateAmendmentRequest()) else setOf(),
       )
@@ -90,7 +90,7 @@ class MigrateCaseNotesIntTest : ResourceTest() {
     val request = migrateCaseNoteRequest(
       prisonIdentifier = prisonNumber(),
       locationId = "LEI",
-      type = type.parent.code,
+      type = type.type.code,
       subType = type.code,
       text = "This a larger, non default text block to determine that notes are correctly saved to the db",
       authorName = "A N Other",
@@ -102,7 +102,7 @@ class MigrateCaseNotesIntTest : ResourceTest() {
     )
 
     val response = migrateCaseNotes(listOf(request)).successList<MigrationResult>()
-    val saved = noteRepository.findByIdAndPrisonNumber(response.first().id, request.personIdentifier)
+    val saved = noteRepository.findByIdAndPersonIdentifier(response.first().id, request.personIdentifier)
     requireNotNull(saved).verifyAgainst(request)
     saved.amendments().first().verifyAgainst(request.amendments.first())
   }
@@ -114,7 +114,7 @@ class MigrateCaseNotesIntTest : ResourceTest() {
     val migrated = givenCaseNote(generateCaseNote(prisonNumber, types.random()))
     val secondType = types.random()
     val request = listOf(
-      migrateCaseNoteRequest(prisonIdentifier = prisonNumber, type = secondType.parentCode, subType = secondType.code),
+      migrateCaseNoteRequest(prisonIdentifier = prisonNumber, type = secondType.typeCode, subType = secondType.code),
       migrated.migrateRequest(),
     )
 
@@ -185,14 +185,14 @@ private fun migrateAmendmentRequest(
 private fun Note.migrateRequest() = migrateCaseNoteRequest(
   legacyId = legacyId,
   locationId = locationId,
-  prisonIdentifier = prisonNumber,
+  prisonIdentifier = personIdentifier,
   text = text,
-  createdDateTime = createDateTime,
+  createdDateTime = createdAt,
   occurrenceDateTime = occurredAt,
   authorName = authorName,
   authorUsername = authorUsername,
   authorUserId = authorUserId,
-  createdBy = createUserId,
-  type = type.parent.code,
-  subType = type.code,
+  createdBy = createdBy,
+  type = subType.type.code,
+  subType = subType.code,
 )

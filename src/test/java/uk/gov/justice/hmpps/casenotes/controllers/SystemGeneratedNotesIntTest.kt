@@ -39,7 +39,7 @@ class SystemGeneratedNotesIntTest : ResourceTest() {
   @Test
   fun `400 bad request - case note types cannot be sync to nomis type`() {
     val type = getAllTypes().filter { it.syncToNomis }.random()
-    val request = sysGenRequest(type = type.parent.code, subType = type.code)
+    val request = sysGenRequest(type = type.type.code, subType = type.code)
     val response = sysGenNote(prisonNumber(), request).errorResponse(HttpStatus.BAD_REQUEST)
     with(response) {
       assertThat(status).isEqualTo(HttpStatus.BAD_REQUEST.value())
@@ -77,11 +77,11 @@ class SystemGeneratedNotesIntTest : ResourceTest() {
 
   @Test
   fun `201 ok - new case note is correctly stored`() {
-    val type = getAllTypes().filter { it.parentCode == "ACP" && !it.syncToNomis }.random()
+    val type = getAllTypes().filter { it.typeCode == "ACP" && !it.syncToNomis }.random()
     val personIdentifier = prisonNumber()
 
     val request = sysGenRequest(
-      type = type.parent.code,
+      type = type.type.code,
       subType = type.code,
       authorName = "A. P. User",
       authorUsername = "SystemUser",
@@ -90,17 +90,17 @@ class SystemGeneratedNotesIntTest : ResourceTest() {
 
     val apiClientId = "ApiClientId"
     val response = sysGenNote(personIdentifier, request, username = apiClientId).success<CaseNote>(HttpStatus.CREATED)
-    val saved = noteRepository.findByIdAndPrisonNumber(UUID.fromString(response.caseNoteId), personIdentifier)
+    val saved = noteRepository.findByIdAndPersonIdentifier(UUID.fromString(response.id), personIdentifier)
     requireNotNull(saved).verifyAgainst(request, apiClientId)
   }
 
   @Test
   fun `201 ok - new case note stored when optional fields are null`() {
-    val type = getAllTypes().filter { it.parentCode == "ACP" && !it.syncToNomis }.random()
+    val type = getAllTypes().filter { it.typeCode == "ACP" && !it.syncToNomis }.random()
     val personIdentifier = prisonNumber()
 
     val request = sysGenRequest(
-      type = type.parent.code,
+      type = type.type.code,
       subType = type.code,
       authorName = "A. P. User",
       authorUsername = null,
@@ -109,7 +109,7 @@ class SystemGeneratedNotesIntTest : ResourceTest() {
 
     val apiClientId = "ApiClientId"
     val response = sysGenNote(personIdentifier, request, username = apiClientId).success<CaseNote>(HttpStatus.CREATED)
-    val saved = noteRepository.findByIdAndPrisonNumber(UUID.fromString(response.caseNoteId), personIdentifier)
+    val saved = noteRepository.findByIdAndPersonIdentifier(UUID.fromString(response.id), personIdentifier)
     requireNotNull(saved).verifyAgainst(request, apiClientId)
   }
 
@@ -119,10 +119,10 @@ class SystemGeneratedNotesIntTest : ResourceTest() {
     val prisonId = "LEI"
     oAuthApi.stubGrantToken()
     prisonerSearchApi.stubPrisonerDetails(personIdentifier, prisonId)
-    val type = getAllTypes().filter { it.parentCode == "ACP" && !it.syncToNomis }.random()
+    val type = getAllTypes().filter { it.typeCode == "ACP" && !it.syncToNomis }.random()
 
     val request = sysGenRequest(
-      type = type.parent.code,
+      type = type.type.code,
       subType = type.code,
       occurrenceDateTime = null,
       locationId = null,
@@ -131,14 +131,14 @@ class SystemGeneratedNotesIntTest : ResourceTest() {
     val apiClientId = "API_CLIENT_ID"
     val response = sysGenNote(personIdentifier, request).success<CaseNote>(HttpStatus.CREATED)
     assertThat(response.locationId).isEqualTo(prisonId)
-    val saved = noteRepository.findByIdAndPrisonNumber(UUID.fromString(response.caseNoteId), personIdentifier)
+    val saved = noteRepository.findByIdAndPersonIdentifier(UUID.fromString(response.id), personIdentifier)
     requireNotNull(saved).verifyAgainst(request, apiClientId)
     assertThat(saved.locationId).isEqualTo(prisonId)
   }
 
   private fun Note.verifyAgainst(request: SystemGeneratedRequest, userId: String) {
-    assertThat(type.parent.code).isEqualTo(request.type)
-    assertThat(type.code).isEqualTo(request.subType)
+    assertThat(subType.type.code).isEqualTo(request.type)
+    assertThat(subType.code).isEqualTo(request.subType)
     assertThat(text).isEqualTo(request.text)
     request.locationId?.also { assertThat(locationId).isEqualTo(it) }
     request.occurrenceDateTime?.also {

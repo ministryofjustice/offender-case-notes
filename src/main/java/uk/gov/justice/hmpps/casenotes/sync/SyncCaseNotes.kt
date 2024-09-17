@@ -4,18 +4,15 @@ import com.microsoft.applicationinsights.TelemetryClient
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
-import uk.gov.justice.hmpps.casenotes.domain.Amendment
 import uk.gov.justice.hmpps.casenotes.domain.AmendmentRepository
-import uk.gov.justice.hmpps.casenotes.domain.IdGenerator.newUuid
 import uk.gov.justice.hmpps.casenotes.domain.Note
 import uk.gov.justice.hmpps.casenotes.domain.NoteRepository
 import uk.gov.justice.hmpps.casenotes.domain.SubType
 import uk.gov.justice.hmpps.casenotes.domain.SubTypeRepository
 import uk.gov.justice.hmpps.casenotes.domain.TypeKey
 import uk.gov.justice.hmpps.casenotes.domain.TypeLookup
-import uk.gov.justice.hmpps.casenotes.domain.getByParentCodeAndCode
+import uk.gov.justice.hmpps.casenotes.domain.getByTypeCodeAndCode
 import uk.gov.justice.hmpps.casenotes.domain.saveAndRefresh
-import java.util.TreeSet
 import java.util.UUID
 
 @Transactional
@@ -42,11 +39,12 @@ class SyncCaseNotes(
     }
 
     existing?.also {
-      check(it.prisonNumber == request.personIdentifier) { "Case note belongs to another prisoner or prisoner records have been merged" }
+      check(it.personIdentifier == request.personIdentifier) { "Case note belongs to another prisoner or prisoner records have been merged" }
+      noteRepository.delete(it)
+      noteRepository.flush()
     }
 
-    val saved = existing?.sync(request, typeRepository::getByParentCodeAndCode)
-      ?: noteRepository.saveAndRefresh(request.asNoteWithAmendments(typeRepository::getByParentCodeAndCode))
+    val saved = noteRepository.saveAndRefresh(request.asNoteWithAmendments(typeRepository::getByTypeCodeAndCode))
 
     return SyncResult(
       saved.id,
@@ -55,11 +53,12 @@ class SyncCaseNotes(
     )
   }
 
-  fun deleteCaseNote(id: UUID) = noteRepository.deleteById(id).also {
-    telemetryClient.trackEvent("CaseNoteDeletedViaSync", mapOf("id" to it.toString()), mapOf())
+  fun deleteCaseNote(id: UUID) {
+    noteRepository.findByIdOrNull(id)?.also {
+      noteRepository.delete(it)
+      telemetryClient.trackEvent("CaseNoteDeletedViaSync", mapOf("id" to it.toString()), mapOf())
+    }
   }
-
-  private fun SyncNoteRequest.typeKey() = TypeKey(type, subType)
 
   private fun getTypesForSync(keys: Set<TypeKey>): Map<TypeKey, SubType> {
     val types = typeRepository.findByKeyIn(keys).associateBy { it.key }
@@ -82,57 +81,11 @@ class SyncCaseNotes(
 }
 
 private fun <T : TypeLookup> Collection<T>.exceptionMessage() =
-  sortedBy { it.parentCode }
-    .groupBy { it.parentCode }
+  sortedBy { it.typeCode }
+    .groupBy { it.typeCode }
     .map { e ->
       "${e.key}:${
         e.value.sortedBy { it.code }.joinToString(prefix = "[", postfix = "]", separator = ", ") { it.code }
       }"
     }
     .joinToString(separator = ", ", prefix = "{ ", postfix = " }")
-
-private fun SyncNoteRequest.asNoteAndAmendments(typeSupplier: (String, String) -> SubType) =
-  asNote(typeSupplier).let { note ->
-    note.legacyId = this.legacyId
-    note.createDateTime = createdDateTime
-    note.createUserId = createdByUsername
-    NoteAndAmendments(note, amendments.map { it.asAmendment(note) })
-  }
-
-private fun SyncNoteRequest.asNoteWithAmendments(typeSupplier: (String, String) -> SubType) =
-  asNote(typeSupplier).also { note ->
-    amendments.forEach { note.addAmendment(it) }
-  }
-
-private fun SyncNoteRequest.asNote(typeSupplier: (String, String) -> SubType) = Note(
-  personIdentifier,
-  typeSupplier(type, subType),
-  occurrenceDateTime,
-  locationId,
-  authorUsername,
-  authorUserId,
-  authorName,
-  text,
-  systemGenerated,
-  TreeSet(),
-).apply {
-  this.legacyId = this@asNote.legacyId
-  this.createDateTime = this@asNote.createdDateTime
-  this.createUserId = this@asNote.createdByUsername
-}
-
-private fun SyncAmendmentRequest.asAmendment(note: Note) = Amendment(
-  note,
-  authorUsername,
-  authorName,
-  authorUserId,
-  text,
-  newUuid(),
-).apply { this.createDateTime = this@asAmendment.createdDateTime }
-
-private data class NoteAndAmendments(val note: Note, val amendments: List<Amendment>)
-
-data class MigrationResult(val id: UUID, val legacyId: Long)
-data class SyncResult(val id: UUID, val legacyId: Long, val action: Action) {
-  enum class Action { CREATED, UPDATED }
-}

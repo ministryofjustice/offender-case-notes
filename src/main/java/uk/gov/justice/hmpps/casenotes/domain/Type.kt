@@ -1,7 +1,5 @@
 package uk.gov.justice.hmpps.casenotes.domain
 
-import jakarta.persistence.CascadeType
-import jakarta.persistence.Column
 import jakarta.persistence.Entity
 import jakarta.persistence.Id
 import jakarta.persistence.OneToMany
@@ -12,15 +10,13 @@ import org.springframework.data.jpa.repository.Query
 
 @Immutable
 @Entity
-@Table(name = "case_note_parent_type")
+@Table(name = "case_note_type")
 class Type(
-  @Id @Column(name = "note_type", nullable = false)
+  @Id
   val code: String,
-
-  @Column(name = "description", nullable = false)
   val description: String,
 
-  @OneToMany(cascade = [CascadeType.ALL], mappedBy = "parent")
+  @OneToMany(mappedBy = "type")
   private val subTypes: MutableSet<SubType> = mutableSetOf(),
 ) {
   fun getSubtypes(): Set<SubType> = subTypes.toSet()

@@ -1,17 +1,16 @@
-insert into offender_case_note (offender_case_note_id, offender_identifier, location_id, author_username, author_name,
-                                case_note_type_id, occurrence_date_time, note_text, create_date_time, create_user_id,
-                                author_user_id)
+insert into case_note (id, person_identifier, location_id, author_username, author_name, sub_type_id, occurred_at,
+                       note_text, created_at, created_by, author_user_id)
 select gen_random_uuid(),
        'S1234TN',
        'MDI',
        'SYS',
        'SYS',
-       case_note_type_id,
+       st.id,
        current_date,
        'A case note that should not be visible',
        current_date,
        'SYS',
        'SYS'
-from case_note_type
-where parent_type = 'CAB'
-  and sub_type = 'EDUCATION';
+from case_note_sub_type st
+where type_code = 'CAB'
+  and code = 'EDUCATION';

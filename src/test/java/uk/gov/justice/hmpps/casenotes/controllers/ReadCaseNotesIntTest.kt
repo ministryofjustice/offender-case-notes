@@ -27,7 +27,7 @@ class ReadCaseNotesIntTest : ResourceTest() {
   @ValueSource(strings = [ROLE_CASE_NOTES_READ, ROLE_CASE_NOTES_WRITE])
   fun `can read a case note by id with appropriate role`(role: String) {
     val caseNote = givenCaseNote(generateCaseNote().withAmendment())
-    val response = getCaseNotes(caseNote.prisonNumber, roles = listOf(role)).page()
+    val response = getCaseNotes(caseNote.personIdentifier, roles = listOf(role)).page()
 
     assertThat(response.totalElements).isEqualTo(1)
     val first = response.content.first()
@@ -133,18 +133,18 @@ class ReadCaseNotesIntTest : ResourceTest() {
     val prisonNumber = prisonNumber()
     val types = getAllTypes().asSequence()
       .filter { !it.sensitive }
-      .groupBy { it.parent.code }
+      .groupBy { it.type.code }
       .map { it.value.take(2) }.flatten().take(20)
       .shuffled().toList()
     val caseNotes = types.map { givenCaseNote(generateCaseNote(prisonNumber, it)) }
 
-    val parent = types.random().parent
-    val toFind = caseNotes.filter { it.type.parent.code == parent.code }
+    val parent = types.random().type
+    val toFind = caseNotes.filter { it.subType.type.code == parent.code }
     val response = getCaseNotes(prisonNumber, mapOf("type" to parent.code)).page()
 
     assertThat(response.totalElements.toInt()).isEqualTo(toFind.size)
     assertThat(response.content.map { it.type to it.subType })
-      .containsExactlyInAnyOrderElementsOf(toFind.map { it.type.parent.code to it.type.code })
+      .containsExactlyInAnyOrderElementsOf(toFind.map { it.subType.type.code to it.subType.code })
   }
 
   @Test
@@ -152,7 +152,7 @@ class ReadCaseNotesIntTest : ResourceTest() {
     val prisonNumber = prisonNumber()
     val types = getAllTypes().asSequence()
       .filter { !it.sensitive }
-      .groupBy { it.parent.code }
+      .groupBy { it.type.code }
       .map { it.value.take(2) }.flatten().take(20)
       .toList()
     val caseNotes = types.map { givenCaseNote(generateCaseNote(prisonNumber, it)) }
@@ -161,15 +161,15 @@ class ReadCaseNotesIntTest : ResourceTest() {
 
     val response = getCaseNotes(
       prisonNumber,
-      mapOf("type" to toFind.type.parent.code, "subType" to toFind.type.code),
+      mapOf("type" to toFind.subType.type.code, "subType" to toFind.subType.code),
     ).page()
 
     assertThat(response.totalElements).isEqualTo(1)
     val found = response.content.first()
-    assertThat(found.type).isEqualTo(toFind.type.parent.code)
-    assertThat(found.typeDescription).isEqualTo(toFind.type.parent.description)
-    assertThat(found.subType).isEqualTo(toFind.type.code)
-    assertThat(found.subTypeDescription).isEqualTo(toFind.type.description)
+    assertThat(found.type).isEqualTo(toFind.subType.type.code)
+    assertThat(found.typeDescription).isEqualTo(toFind.subType.type.description)
+    assertThat(found.subType).isEqualTo(toFind.subType.code)
+    assertThat(found.subTypeDescription).isEqualTo(toFind.subType.description)
   }
 
   private fun getCaseNotes(

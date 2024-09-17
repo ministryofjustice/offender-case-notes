@@ -25,6 +25,7 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestController
+import uk.gov.justice.hmpps.casenotes.config.CaseNoteRequestContext
 import uk.gov.justice.hmpps.casenotes.config.SecurityUserContext
 import uk.gov.justice.hmpps.casenotes.config.ServiceConfig
 import uk.gov.justice.hmpps.casenotes.dto.CaseNoteFilter
@@ -62,18 +63,18 @@ class CaseNoteController(
       content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))],
     ),
   )
-  @GetMapping("/{offenderIdentifier}/{caseNoteIdentifier}")
+  @GetMapping("/{personIdentifier}/{caseNoteIdentifier}")
   fun getCaseNote(
-    @Parameter(description = "Offender Identifier", required = true, example = "A1234AA")
-    @PathVariable offenderIdentifier: String,
+    @Parameter(description = "Person Identifier", required = true, example = "A1234AA")
+    @PathVariable personIdentifier: String,
     @Parameter(description = "Case Note Id", required = true, example = "518b2200-6489-4c77-8514-10cf80ccd488")
     @PathVariable caseNoteIdentifier: String,
     @RequestHeader(CASELOAD_ID) caseloadId: String? = null,
   ): CaseNote {
     return if (caseloadId in serviceConfig.activePrisons) {
-      find.caseNote(offenderIdentifier, caseNoteIdentifier)
+      find.caseNote(personIdentifier, caseNoteIdentifier)
     } else {
-      caseNoteService.getCaseNote(offenderIdentifier, caseNoteIdentifier)
+      caseNoteService.getCaseNote(personIdentifier, caseNoteIdentifier)
     }
   }
 
@@ -89,18 +90,18 @@ class CaseNoteController(
       content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))],
     ),
   )
-  @GetMapping("/{offenderIdentifier}")
+  @GetMapping("/{personIdentifier}")
   fun getCaseNotes(
-    @Parameter(description = "Offender Identifier", required = true, example = "A1234AA")
-    @PathVariable offenderIdentifier: String,
+    @Parameter(description = "Person Identifier", required = true, example = "A1234AA")
+    @PathVariable personIdentifier: String,
     @Parameter(description = "Optionally specify a case note filter") filter: CaseNoteFilter,
     @PageableDefault(sort = ["occurrenceDateTime"], direction = Sort.Direction.DESC) pageable: Pageable,
     @RequestHeader(CASELOAD_ID) caseloadId: String? = null,
   ): Page<CaseNote> {
     return if (caseloadId in serviceConfig.activePrisons) {
-      find.caseNotes(offenderIdentifier, filter, pageable)
+      find.caseNotes(personIdentifier, filter, pageable)
     } else {
-      caseNoteService.getCaseNotes(offenderIdentifier, filter, pageable)
+      caseNoteService.getCaseNotes(personIdentifier, filter, pageable)
     }
   }
 
@@ -130,10 +131,10 @@ class CaseNoteController(
     ],
   )
   @ResponseStatus(HttpStatus.CREATED)
-  @PostMapping("/{offenderIdentifier}")
+  @PostMapping("/{personIdentifier}")
   fun createCaseNote(
-    @Parameter(description = "Offender Identifier", required = true, example = "A1234AA")
-    @PathVariable offenderIdentifier: String,
+    @Parameter(description = "Person Identifier", required = true, example = "A1234AA")
+    @PathVariable personIdentifier: String,
     @Valid @RequestBody createCaseNote: CreateCaseNoteRequest,
     @Parameter(description = "Boolean to indicate that the user creating the case note has privileges to use restricted use case note types")
     @RequestParam(required = false, defaultValue = "false") useRestrictedType: Boolean,
@@ -141,13 +142,13 @@ class CaseNoteController(
   ): CaseNote {
     val caseNote = if (caseloadId in serviceConfig.activePrisons) {
       val request = if (createCaseNote.locationId == null) {
-        createCaseNote.copy(locationId = externalApiService.getOffenderLocation(offenderIdentifier))
+        createCaseNote.copy(locationId = externalApiService.getOffenderLocation(personIdentifier))
       } else {
         createCaseNote
       }
-      save.createNote(offenderIdentifier, request, useRestrictedType)
+      save.createNote(personIdentifier, request, useRestrictedType)
     } else {
-      caseNoteService.createCaseNote(offenderIdentifier, createCaseNote)
+      caseNoteService.createCaseNote(personIdentifier, createCaseNote)
     }
 
     telemetryClient.trackEvent("CaseNoteCreated", createEventProperties(caseNote), null)
@@ -172,10 +173,10 @@ class CaseNoteController(
       ),
     ],
   )
-  @PutMapping("/{offenderIdentifier}/{caseNoteIdentifier}")
+  @PutMapping("/{personIdentifier}/{caseNoteIdentifier}")
   fun amendCaseNote(
-    @Parameter(description = "Offender Identifier", required = true, example = "A1234AA")
-    @PathVariable offenderIdentifier: String,
+    @Parameter(description = "Person Identifier", required = true, example = "A1234AA")
+    @PathVariable personIdentifier: String,
     @Parameter(description = "Case Note Id", required = true, example = "518b2200-6489-4c77-8514-10cf80ccd488")
     @PathVariable caseNoteIdentifier: String,
     @Valid @RequestBody amendedText: AmendCaseNoteRequest,
@@ -183,9 +184,9 @@ class CaseNoteController(
     @RequestHeader(required = false, value = CASELOAD_ID) caseloadId: String? = null,
   ): CaseNote {
     val caseNote = if (caseloadId in serviceConfig.activePrisons) {
-      save.createAmendment(offenderIdentifier, caseNoteIdentifier, amendedText, useRestrictedType)
+      save.createAmendment(personIdentifier, caseNoteIdentifier, amendedText, useRestrictedType)
     } else {
-      caseNoteService.amendCaseNote(offenderIdentifier, caseNoteIdentifier, amendedText)
+      caseNoteService.amendCaseNote(personIdentifier, caseNoteIdentifier, amendedText)
     }
     telemetryClient.trackEvent("CaseNoteUpdated", createEventProperties(caseNote), null)
     caseNoteEventPusher.sendEvent(caseNote)
@@ -202,28 +203,38 @@ class CaseNoteController(
     ),
   )
   @ResponseStatus(HttpStatus.OK)
-  @DeleteMapping("/{offenderIdentifier}/{caseNoteId}")
+  @DeleteMapping("/{personIdentifier}/{caseNoteId}")
   fun softDeleteCaseNote(
-    @Parameter(description = "Offender Identifier", required = true, example = "A1234AA")
-    @PathVariable offenderIdentifier: String,
+    @Parameter(description = "Person Identifier", required = true, example = "A1234AA")
+    @PathVariable personIdentifier: String,
     @Parameter(description = "Case Note Id", required = true, example = "518b2200-6489-4c77-8514-10cf80ccd488")
     @PathVariable caseNoteId: String,
     @RequestHeader(CASELOAD_ID) caseloadId: String? = null,
   ) {
     if (caseloadId in serviceConfig.activePrisons) {
-      save.deleteNote(offenderIdentifier, caseNoteId)
+      save.deleteNote(personIdentifier, caseNoteId)
     } else {
-      caseNoteService.softDeleteCaseNote(offenderIdentifier, caseNoteId)
+      caseNoteService.deleteCaseNote(personIdentifier, caseNoteId)
     }
+
+    telemetryClient.trackEvent(
+      "CaseNoteDelete",
+      mapOf(
+        "userName" to CaseNoteRequestContext.get().username,
+        "personIdentifier" to personIdentifier,
+        "caseNoteId" to caseNoteId,
+      ),
+      null,
+    )
   }
 
   private fun createEventProperties(caseNote: CaseNote): Map<String, String> {
     return java.util.Map.of(
-      "caseNoteId", caseNote.caseNoteId,
+      "caseNoteId", caseNote.id,
       "caseNoteType", String.format("%s-%s", caseNote.type, caseNote.subType),
       "type", caseNote.type,
       "subType", caseNote.subType,
-      "offenderIdentifier", caseNote.offenderIdentifier,
+      "personIdentifier", caseNote.personIdentifier,
       "authorUsername", securityUserContext.getCurrentUsername() ?: "unknown",
     )
   }

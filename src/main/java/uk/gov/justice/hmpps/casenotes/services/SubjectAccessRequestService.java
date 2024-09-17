@@ -64,19 +64,19 @@ public class SubjectAccessRequestService {
 
     private SubjectAccessRequestData toSubjectAccessRequestContent(final OffenderCaseNote cn) {
 
-        final var parentType = cn.getCaseNoteType().getParentType();
+        final var parentType = cn.getSubType().getType();
 
         return   SubjectAccessRequestData.builder()
                 .authorName(cn.getAuthorName())
-                .type(parentType.getType())
-                .subType(cn.getCaseNoteType().getType())
-                .text(cn.getNoteText())
-                .creationDateTime(cn.getCreateDateTime())
+                .type(parentType.getCode())
+                .subType(cn.getSubType().getCode())
+                .text(cn.getText())
+                .creationDateTime(cn.getCreatedAt())
                 .amendments(cn.getAmendments().stream().map(
                         a -> SARCaseNoteAmendment.builder()
                                 .authorName(a.getAuthorName())
-                                .additionalNoteText(a.getNoteText())
-                                .creationDateTime(a.getCreateDateTime())
+                                .additionalNoteText(a.getText())
+                                .creationDateTime(a.getCreatedAt())
                                 .build()
                 ).sorted(comparing(SARCaseNoteAmendment::getCreationDateTime).reversed()).toList()).build();
     }

@@ -47,14 +47,14 @@ class CreateCaseNoteIntTest : ResourceTest() {
   @Test
   fun `cannot create a restricted case note without passing useRestrictedType`() {
     val type = givenRandomType(restricted = true)
-    val request = createCaseNoteRequest(type = type.parent.code, subType = type.code)
+    val request = createCaseNoteRequest(type = type.type.code, subType = type.code)
     createCaseNote(prisonNumber(), request, params = mapOf()).errorResponse(HttpStatus.FORBIDDEN)
   }
 
   @Test
   fun `cannot create a case note with an inactive type`() {
     val type = givenRandomType(active = false, restricted = false)
-    val request = createCaseNoteRequest(type = type.parent.code, subType = type.code)
+    val request = createCaseNoteRequest(type = type.type.code, subType = type.code)
     val response = createCaseNote(prisonNumber(), request, params = mapOf()).errorResponse(HttpStatus.BAD_REQUEST)
 
     with(response) {
@@ -67,7 +67,7 @@ class CreateCaseNoteIntTest : ResourceTest() {
     val username = "DeliusUser"
     oAuthApi.subGetUserDetails(username, nomisUser = false)
     val type = getAllTypes().first { it.syncToNomis }
-    val request = createCaseNoteRequest(type = type.parent.code, subType = type.code)
+    val request = createCaseNoteRequest(type = type.type.code, subType = type.code)
     val response = createCaseNote(prisonNumber(), request, params = mapOf(), tokenUsername = username)
       .errorResponse(HttpStatus.FORBIDDEN)
 
@@ -82,7 +82,7 @@ class CreateCaseNoteIntTest : ResourceTest() {
     val response = createCaseNote(prisonNumber(), request).success<CaseNote>(HttpStatus.CREATED)
 
     val saved = requireNotNull(
-      noteRepository.findByIdAndPrisonNumber(fromString(response.caseNoteId), response.offenderIdentifier),
+      noteRepository.findByIdAndPersonIdentifier(fromString(response.id), response.personIdentifier),
     )
     saved.verifyAgainst(request)
     assertThat(saved.authorUsername).isEqualTo(USERNAME)
@@ -128,7 +128,7 @@ class CreateCaseNoteIntTest : ResourceTest() {
     val response = createCaseNoteWithStringRequestBody(prisonNumber(), request).success<CaseNote>(HttpStatus.CREATED)
 
     val saved = requireNotNull(
-      noteRepository.findByIdAndPrisonNumber(fromString(response.caseNoteId), response.offenderIdentifier),
+      noteRepository.findByIdAndPersonIdentifier(fromString(response.id), response.personIdentifier),
     )
     saved.verifyAgainst(objectMapper.readValue<CreateCaseNoteRequest>(request))
     assertThat(saved.authorUsername).isEqualTo(USERNAME)
@@ -181,8 +181,8 @@ class CreateCaseNoteIntTest : ResourceTest() {
   private fun urlToTest(prisonNumber: String) = "/case-notes/$prisonNumber"
 
   private fun Note.verifyAgainst(request: CreateCaseNoteRequest) {
-    assertThat(type.parent.code).isEqualTo(request.type)
-    assertThat(type.code).isEqualTo(request.subType)
+    assertThat(subType.type.code).isEqualTo(request.type)
+    assertThat(subType.code).isEqualTo(request.subType)
     assertThat(text).isEqualTo(request.text)
   }
 

@@ -1,17 +1,20 @@
 package uk.gov.justice.hmpps.casenotes.notes
 
 import com.fasterxml.jackson.annotation.JsonInclude
+import com.fasterxml.jackson.annotation.JsonProperty
 import io.swagger.v3.oas.annotations.media.Schema
 import java.time.LocalDateTime
 
 @Schema(description = "Case Note")
 @JsonInclude(JsonInclude.Include.NON_NULL)
 data class CaseNote(
+  @JsonProperty("caseNoteId")
   @Schema(required = true, description = "Case Note Id (unique)", example = "12311312")
-  val caseNoteId: String,
+  val id: String,
 
+  @JsonProperty("offenderIdentifier")
   @Schema(required = true, description = "Offender Unique Identifier", example = "A1234AA")
-  val offenderIdentifier: String,
+  val personIdentifier: String,
 
   @Schema(required = true, description = "Case Note Type", example = "KA")
   val type: String,
@@ -28,15 +31,17 @@ data class CaseNote(
   @Schema(required = true, description = "Source Type", example = "INST")
   val source: String,
 
+  @JsonProperty("creationDateTime")
   @Schema(required = true, description = "Date and Time of Case Note creation", example = "2017-10-31T01:30:00")
-  val creationDateTime: LocalDateTime,
+  val createdAt: LocalDateTime,
 
+  @JsonProperty("occurrenceDateTime")
   @Schema(
     required = true,
     description = "Date and Time of when case note contact with offender was made",
     example = "2017-10-31T01:30:00",
   )
-  val occurrenceDateTime: LocalDateTime,
+  val occurredAt: LocalDateTime,
 
   @Schema(required = true, description = "Full name of case note author", example = "John Smith")
   val authorName: String,
@@ -55,8 +60,9 @@ data class CaseNote(
   val locationId: String? = null,
 
   @Schema(
+    deprecated = true,
     required = true,
-    description = "Delius number representation of the case note id - will be negative for sensitive case note types",
+    description = "Deprecated - replaced with legacyId",
     example = "-23",
   )
   val eventId: Long,
@@ -75,15 +81,15 @@ data class CaseNote(
 ) {
 
   class Builder internal constructor() {
-    private var caseNoteId: String? = null
-    private var offenderIdentifier: String? = null
+    private var id: String? = null
+    private var personIdentifier: String? = null
     private var type: String? = null
     private var typeDescription: String? = null
     private var subType: String? = null
     private var subTypeDescription: String? = null
     private var source: String? = null
-    private var creationDateTime: LocalDateTime? = null
-    private var occurrenceDateTime: LocalDateTime? = null
+    private var createdAt: LocalDateTime? = null
+    private var occurredAt: LocalDateTime? = null
     private var authorName: String? = null
     private var authorUserId: String? = null
     private var text: String? = null
@@ -94,12 +100,12 @@ data class CaseNote(
     private var systemGenerated = false
     private var legacyId: Long = 0
 
-    fun caseNoteId(caseNoteId: String): Builder = apply {
-      this.caseNoteId = caseNoteId
+    fun id(id: String): Builder = apply {
+      this.id = id
     }
 
-    fun offenderIdentifier(offenderIdentifier: String): Builder = apply {
-      this.offenderIdentifier = offenderIdentifier
+    fun personIdentifier(offenderIdentifier: String): Builder = apply {
+      this.personIdentifier = offenderIdentifier
     }
 
     fun type(type: String): Builder = apply {
@@ -122,12 +128,12 @@ data class CaseNote(
       this.source = source
     }
 
-    fun creationDateTime(creationDateTime: LocalDateTime): Builder = apply {
-      this.creationDateTime = creationDateTime
+    fun createdAt(creationDateTime: LocalDateTime): Builder = apply {
+      this.createdAt = creationDateTime
     }
 
-    fun occurrenceDateTime(occurrenceDateTime: LocalDateTime): Builder = apply {
-      this.occurrenceDateTime = occurrenceDateTime
+    fun occurredAt(occurrenceDateTime: LocalDateTime): Builder = apply {
+      this.occurredAt = occurrenceDateTime
     }
 
     fun authorName(authorName: String): Builder = apply {
@@ -168,15 +174,15 @@ data class CaseNote(
 
     fun build(): CaseNote {
       return CaseNote(
-        caseNoteId!!,
-        offenderIdentifier!!,
+        id!!,
+        personIdentifier!!,
         type!!,
         typeDescription!!,
         subType!!,
         subTypeDescription!!,
         source!!,
-        creationDateTime!!,
-        occurrenceDateTime!!,
+        createdAt!!,
+        occurredAt!!,
         authorName!!,
         authorUserId!!,
         text!!,

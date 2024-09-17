@@ -206,10 +206,10 @@ class Elite2MockServer : WireMockServer(WIREMOCK_PORT) {
 
   private fun createNomisCaseNote(): NomisCaseNote {
     return NomisCaseNote.builder()
-      .caseNoteId(131232)
+      .id(131232)
       .agencyId("LEI")
       .authorName("Mickey Mouse")
-      .creationDateTime(LocalDateTime.now().minusMonths(1))
+      .createdAt(LocalDateTime.now().minusMonths(1))
       .source("INST")
       .originalNoteText("Some Text")
       .staffId(1231232L)
@@ -218,7 +218,7 @@ class Elite2MockServer : WireMockServer(WIREMOCK_PORT) {
       .typeDescription("Observation")
       .subTypeDescription("General")
       .text("Some Text")
-      .occurrenceDateTime(LocalDateTime.now().minusMonths(1))
+      .occurredAt(LocalDateTime.now().minusMonths(1))
       .build()
   }
 
