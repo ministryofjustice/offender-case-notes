@@ -108,7 +108,7 @@ abstract class ResourceTest : IntegrationTest() {
     locationId: String = "MDI",
     authorUsername: String = "AuthorUsername",
     authorUserId: String = "AuthorId",
-    authorName: String = "AuthorName",
+    authorName: String = "Author Name",
     text: String = "Text about the case note saved in the case note database",
     systemGenerated: Boolean = false,
     legacyId: Long = NomisIdGenerator.newId(),
@@ -131,7 +131,7 @@ abstract class ResourceTest : IntegrationTest() {
   fun Note.withAmendment(
     authorUsername: String = "AuthorUsername",
     authorUserId: String = "AuthorId",
-    authorName: String = "AuthorName",
+    authorName: String = "Author Name",
     text: String = "An amendment to a case note saved in the case note database",
     createdAt: LocalDateTime = LocalDateTime.now(),
     id: UUID = Generators.timeBasedEpochGenerator().generate(),

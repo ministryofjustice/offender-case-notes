@@ -26,9 +26,7 @@ data class SyncCaseNoteRequest(
   override val occurrenceDateTime: LocalDateTime,
   override val text: String,
   override val systemGenerated: Boolean,
-  override val authorUsername: String,
-  override val authorUserId: String,
-  override val authorName: String,
+  override val author: Author,
   override val createdDateTime: LocalDateTime,
   override val createdByUsername: String,
   override val source: Source,
@@ -37,9 +35,7 @@ data class SyncCaseNoteRequest(
 
 data class SyncCaseNoteAmendmentRequest(
   override val text: String,
-  override val authorUsername: String,
-  override val authorUserId: String,
-  override val authorName: String,
+  override val author: Author,
   override val createdDateTime: LocalDateTime,
 ) : SyncAmendmentRequest
 
@@ -57,9 +53,9 @@ internal fun SyncNoteRequest.asNoteAndAmendments(typeSupplier: (String, String) 
 
 private fun SyncAmendmentRequest.asAmendment(note: Note) = Amendment(
   note,
-  authorUsername,
-  authorName,
-  authorUserId,
+  author.username,
+  author.fullName(),
+  author.userId,
   text,
   newUuid(),
 ).apply { this.createdAt = this@asAmendment.createdDateTime }
@@ -72,9 +68,9 @@ internal fun SyncNoteRequest.asNote(typeSupplier: (String, String) -> SubType) =
   typeSupplier(type, subType),
   occurrenceDateTime,
   locationId,
-  authorUsername,
-  authorUserId,
-  authorName,
+  author.username,
+  author.userId,
+  author.fullName(),
   text,
   systemGenerated,
 ).apply {

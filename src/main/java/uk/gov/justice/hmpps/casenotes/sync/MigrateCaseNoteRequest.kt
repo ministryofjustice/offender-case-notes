@@ -12,9 +12,7 @@ data class MigrateCaseNoteRequest(
   override val occurrenceDateTime: LocalDateTime,
   override val text: String,
   override val systemGenerated: Boolean,
-  override val authorUsername: String,
-  override val authorUserId: String,
-  override val authorName: String,
+  override val author: Author,
   override val createdDateTime: LocalDateTime,
   override val createdByUsername: String,
   override val source: Source,
@@ -23,8 +21,6 @@ data class MigrateCaseNoteRequest(
 
 data class MigrateAmendmentRequest(
   override val text: String,
-  override val authorUsername: String,
-  override val authorUserId: String,
-  override val authorName: String,
+  override val author: Author,
   override val createdDateTime: LocalDateTime,
 ) : SyncAmendmentRequest

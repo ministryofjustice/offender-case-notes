@@ -35,9 +35,9 @@ fun Note.verifyAgainst(request: SyncNoteRequest) {
   assertThat(text).isEqualTo(request.text)
   assertThat(occurredAt.truncatedTo(SECONDS)).isEqualTo(request.occurrenceDateTime.truncatedTo(SECONDS))
   assertThat(createdAt.truncatedTo(SECONDS)).isEqualTo(request.createdDateTime.truncatedTo(SECONDS))
-  assertThat(authorName).isEqualTo(request.authorName)
-  assertThat(authorUsername).isEqualTo(request.authorUsername)
-  assertThat(authorUserId).isEqualTo(request.authorUserId)
+  assertThat(authorName).isEqualTo(request.author.fullName())
+  assertThat(authorUsername).isEqualTo(request.author.username)
+  assertThat(authorUserId).isEqualTo(request.author.userId)
   assertThat(legacyId).isEqualTo(request.legacyId)
   assertThat(createdBy).isEqualTo(request.createdByUsername)
 }
@@ -45,9 +45,9 @@ fun Note.verifyAgainst(request: SyncNoteRequest) {
 fun Amendment.verifyAgainst(request: SyncAmendmentRequest) {
   assertThat(text).isEqualTo(request.text)
   assertThat(createdAt.truncatedTo(SECONDS)).isEqualTo(request.createdDateTime.truncatedTo(SECONDS))
-  assertThat(authorName).isEqualTo(request.authorName)
-  assertThat(authorUsername).isEqualTo(request.authorUsername)
-  assertThat(authorUserId).isEqualTo(request.authorUserId)
+  assertThat(authorName).isEqualTo(request.author.fullName())
+  assertThat(authorUsername).isEqualTo(request.author.username)
+  assertThat(authorUserId).isEqualTo(request.author.userId)
 }
 
 fun DeletedDetail.verifyAgainst(note: Note) {
