@@ -6,12 +6,11 @@ import jakarta.validation.Valid
 import jakarta.validation.constraints.NotBlank
 import org.hibernate.validator.constraints.Length
 import uk.gov.justice.hmpps.casenotes.config.Source
-import uk.gov.justice.hmpps.casenotes.notes.AuthoredRequest
 import uk.gov.justice.hmpps.casenotes.notes.NoteRequest
 import uk.gov.justice.hmpps.casenotes.notes.TextRequest
 import java.time.LocalDateTime
 
-interface SyncNoteRequest : NoteRequest, AuthoredRequest {
+interface SyncNoteRequest : NoteRequest {
   @get:Schema(
     requiredMode = REQUIRED,
     example = "1645251",
@@ -36,14 +35,9 @@ interface SyncNoteRequest : NoteRequest, AuthoredRequest {
   )
   override val occurrenceDateTime: LocalDateTime
 
-  @get:Schema(requiredMode = REQUIRED, description = "Username of the staff member that created the case note")
-  @get:NotBlank(message = "author username cannot be blank")
-  override val authorUsername: String
-
-  @get:Schema(requiredMode = REQUIRED, description = "Id of the staff member that created the case note")
-  @get:Length(max = 64, message = "author user id cannot be more than 64 characters")
-  @get:NotBlank(message = "author user id cannot be blank")
-  val authorUserId: String
+  @get:Schema(requiredMode = REQUIRED, description = "The details of the author of the case note")
+  @get:Valid
+  val author: Author
 
   @get:Schema(
     requiredMode = REQUIRED,
@@ -72,12 +66,33 @@ interface SyncNoteRequest : NoteRequest, AuthoredRequest {
   val amendments: Set<SyncAmendmentRequest>
 }
 
-interface SyncAmendmentRequest : TextRequest, AuthoredRequest {
-  @get:NotBlank(message = "author username cannot be blank")
-  override val authorUsername: String
-
-  @get:Length(max = 64, message = "author user id cannot be more than 64 characters")
-  @get:NotBlank(message = "author user id cannot be blank")
-  val authorUserId: String
+interface SyncAmendmentRequest : TextRequest {
+  @get:Valid
+  val author: Author
   val createdDateTime: LocalDateTime
+}
+
+data class Author(
+  @field:Schema(requiredMode = REQUIRED, description = "Username of the staff member that created the case note")
+  @field:Length(max = 64, message = "author username cannot be more than 64 characters")
+  @field:NotBlank(message = "author username cannot be blank")
+  val username: String,
+  @field:Schema(requiredMode = REQUIRED, description = "Id of the staff member that created the case note")
+  @field:Length(max = 64, message = "author user id cannot be more than 64 characters")
+  @field:NotBlank(message = "author user id cannot be blank")
+  val userId: String,
+  @field:Schema(requiredMode = REQUIRED, description = "The first name of the author")
+  @field:NotBlank(message = "author first name cannot be blank")
+  val firstName: String,
+  @field:Schema(requiredMode = REQUIRED, description = "The last name of the author")
+  @field:NotBlank(message = "author last name cannot be blank")
+  val lastName: String,
+) {
+  fun fullName(): String = "${firstName.capitalised()} ${lastName.capitalised()}"
+
+  private fun String.capitalised(): String {
+    return this.lowercase().replace("\\W+\\w".toRegex()) {
+      it.value.uppercase()
+    }.replaceFirstChar { it.uppercase() }
+  }
 }

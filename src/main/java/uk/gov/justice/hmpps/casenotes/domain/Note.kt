@@ -88,9 +88,9 @@ class Note(
       amendments.add(
         Amendment(
           this,
-          request.authorUsername,
-          request.authorName,
-          request.authorUserId,
+          request.author.username,
+          request.author.fullName(),
+          request.author.userId,
           request.text,
           newUuid(),
         ).apply { createdAt = request.createdDateTime },

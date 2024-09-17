@@ -8,6 +8,7 @@ import uk.gov.justice.hmpps.casenotes.config.SecurityUserContext.Companion.ROLE_
 import uk.gov.justice.hmpps.casenotes.config.Source
 import uk.gov.justice.hmpps.casenotes.domain.Note
 import uk.gov.justice.hmpps.casenotes.domain.matchesPrisonNumber
+import uk.gov.justice.hmpps.casenotes.sync.Author
 import uk.gov.justice.hmpps.casenotes.sync.MigrateAmendmentRequest
 import uk.gov.justice.hmpps.casenotes.sync.MigrateCaseNoteRequest
 import uk.gov.justice.hmpps.casenotes.sync.MigrationResult
@@ -82,9 +83,7 @@ class MigrateCaseNotesIntTest : ResourceTest() {
     val type = getAllTypes().first { it.syncToNomis }
     val amendment = migrateAmendmentRequest(
       text = "An amendment to the case note, to verify it is saved correctly",
-      authorName = "Simon Else",
-      authorUsername = "SM1ELSE",
-      authorUserId = "585153477",
+      author = Author("SM1ELSE", "585153477", "Simon", "Else"),
       createdDateTime = LocalDateTime.now().minusDays(3),
     )
     val request = migrateCaseNoteRequest(
@@ -93,9 +92,7 @@ class MigrateCaseNotesIntTest : ResourceTest() {
       type = type.type.code,
       subType = type.code,
       text = "This a larger, non default text block to determine that notes are correctly saved to the db",
-      authorName = "A N Other",
-      authorUsername = "anotherUser",
-      authorUserId = "564716341",
+      author = Author("anotherUser", "564716341", "An", "Other"),
       occurrenceDateTime = LocalDateTime.now().minusDays(10),
       createdDateTime = LocalDateTime.now().minusDays(7),
       amendments = setOf(amendment),
@@ -149,9 +146,7 @@ private fun migrateCaseNoteRequest(
   occurrenceDateTime: LocalDateTime = LocalDateTime.now().minusDays(2),
   text: String = "The text of the case note",
   systemGenerated: Boolean = false,
-  authorUsername: String = "AuthorUsername",
-  authorUserId: String = "12376471",
-  authorName: String = "Author Name",
+  author: Author = defaultAuthor(),
   createdDateTime: LocalDateTime = LocalDateTime.now().minusDays(1),
   createdBy: String = "CreatedByUsername",
   source: Source = Source.NOMIS,
@@ -165,9 +160,7 @@ private fun migrateCaseNoteRequest(
   occurrenceDateTime,
   text,
   systemGenerated,
-  authorUsername,
-  authorUserId,
-  authorName,
+  author,
   createdDateTime,
   createdBy,
   source,
@@ -176,23 +169,24 @@ private fun migrateCaseNoteRequest(
 
 private fun migrateAmendmentRequest(
   text: String = "The text of the case note",
-  authorUsername: String = "AuthorUsername",
-  authorUserId: String = "12376471",
-  authorName: String = "Author Name",
+  author: Author = defaultAuthor(),
   createdDateTime: LocalDateTime = LocalDateTime.now(),
-) = MigrateAmendmentRequest(text, authorUsername, authorUserId, authorName, createdDateTime)
+) = MigrateAmendmentRequest(text, author, createdDateTime)
 
-private fun Note.migrateRequest() = migrateCaseNoteRequest(
-  legacyId = legacyId,
-  locationId = locationId,
-  prisonIdentifier = personIdentifier,
-  text = text,
-  createdDateTime = createdAt,
-  occurrenceDateTime = occurredAt,
-  authorName = authorName,
-  authorUsername = authorUsername,
-  authorUserId = authorUserId,
-  createdBy = createdBy,
-  type = subType.type.code,
-  subType = subType.code,
-)
+private fun defaultAuthor() = Author("AuthorUsername", "12376471", "Author", "Name")
+
+private fun Note.migrateRequest(): MigrateCaseNoteRequest {
+  val authorNames = authorName.split(" ")
+  return migrateCaseNoteRequest(
+    legacyId = legacyId,
+    locationId = locationId,
+    prisonIdentifier = personIdentifier,
+    text = text,
+    createdDateTime = createdAt,
+    occurrenceDateTime = occurredAt,
+    author = Author(authorUsername, authorUserId, authorNames[0], authorNames[1]),
+    createdBy = createdBy,
+    type = subType.type.code,
+    subType = subType.code,
+  )
+}

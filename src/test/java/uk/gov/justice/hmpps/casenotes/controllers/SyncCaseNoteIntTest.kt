@@ -13,6 +13,7 @@ import uk.gov.justice.hmpps.casenotes.domain.DeletionCause.DELETE
 import uk.gov.justice.hmpps.casenotes.domain.DeletionCause.UPDATE
 import uk.gov.justice.hmpps.casenotes.domain.Note
 import uk.gov.justice.hmpps.casenotes.notes.DeletedCaseNoteRepository
+import uk.gov.justice.hmpps.casenotes.sync.Author
 import uk.gov.justice.hmpps.casenotes.sync.SyncCaseNoteAmendmentRequest
 import uk.gov.justice.hmpps.casenotes.sync.SyncCaseNoteRequest
 import uk.gov.justice.hmpps.casenotes.sync.SyncResult
@@ -47,14 +48,10 @@ class SyncCaseNoteIntTest : ResourceTest() {
       subType = "n".repeat(13),
       locationId = "n".repeat(13),
       text = "",
-      authorUsername = "n".repeat(65),
-      authorName = "n".repeat(81),
-      authorUserId = "n".repeat(65),
+      author = Author("n".repeat(65), "n".repeat(65), "Something", "Else"),
       amendments = setOf(
         syncAmendmentRequest(
-          authorUsername = "",
-          authorName = "",
-          authorUserId = "",
+          author = Author("", "", "", ""),
         ),
       ),
     )
@@ -64,8 +61,8 @@ class SyncCaseNoteIntTest : ResourceTest() {
       assertThat(developerMessage).isEqualTo(
         """
         |400 BAD_REQUEST Validation failures: 
-        |author name cannot be blank
-        |author name cannot be more than 80 characters
+        |author first name cannot be blank
+        |author last name cannot be blank
         |author user id cannot be blank
         |author user id cannot be more than 64 characters
         |author username cannot be blank
@@ -229,9 +226,7 @@ private fun syncCaseNoteRequest(
   occurrenceDateTime: LocalDateTime = LocalDateTime.now().minusDays(2),
   text: String = "The text of the case note",
   systemGenerated: Boolean = false,
-  authorUsername: String = "AuthorUsername",
-  authorUserId: String = "12376471",
-  authorName: String = "Author Name",
+  author: Author = defaultAuthor(),
   createdDateTime: LocalDateTime = LocalDateTime.now().minusDays(1),
   createdBy: String = "CreatedByUsername",
   source: Source = Source.NOMIS,
@@ -246,9 +241,7 @@ private fun syncCaseNoteRequest(
   occurrenceDateTime,
   text,
   systemGenerated,
-  authorUsername,
-  authorUserId,
-  authorName,
+  author,
   createdDateTime,
   createdBy,
   source,
@@ -257,31 +250,33 @@ private fun syncCaseNoteRequest(
 
 private fun syncAmendmentRequest(
   text: String = "The text of the case note",
-  authorUsername: String = "AuthorUsername",
-  authorUserId: String = "12376471",
-  authorName: String = "Author Name",
+  author: Author = defaultAuthor(),
   createdDateTime: LocalDateTime = LocalDateTime.now(),
-) = SyncCaseNoteAmendmentRequest(text, authorUsername, authorUserId, authorName, createdDateTime)
+) = SyncCaseNoteAmendmentRequest(text, author, createdDateTime)
 
-private fun Note.syncRequest() = syncCaseNoteRequest(
-  legacyId = legacyId,
-  id = id,
-  locationId = locationId,
-  prisonIdentifier = personIdentifier,
-  text = "The text has been updated from nomis",
-  createdDateTime = createdAt,
-  occurrenceDateTime = occurredAt,
-  authorName = authorName,
-  authorUsername = authorUsername,
-  authorUserId = authorUserId,
-  createdBy = createdBy,
-  amendments = amendments().map { it.syncRequest() }.toSortedSet(compareBy { it.createdDateTime }),
-)
+private fun defaultAuthor() = Author("AuthorUsername", "12376471", "Author", "Name")
 
-private fun Amendment.syncRequest() = syncAmendmentRequest(
-  text = "An updated amendment of the case note",
-  authorName = authorName,
-  authorUsername = authorUsername,
-  authorUserId = authorUserId,
-  createdDateTime = createdAt,
-)
+private fun Note.syncRequest(): SyncCaseNoteRequest {
+  val authorNames = authorName.split(" ")
+  return syncCaseNoteRequest(
+    legacyId = legacyId,
+    id = id,
+    locationId = locationId,
+    prisonIdentifier = personIdentifier,
+    text = "The text has been updated from nomis",
+    createdDateTime = createdAt,
+    occurrenceDateTime = occurredAt,
+    author = Author(authorUsername, authorUserId, authorNames[0], authorNames[1]),
+    createdBy = createdBy,
+    amendments = amendments().map { it.syncRequest() }.toSortedSet(compareBy { it.createdDateTime }),
+  )
+}
+
+private fun Amendment.syncRequest(): SyncCaseNoteAmendmentRequest {
+  val authorNames = authorName.split(" ")
+  return syncAmendmentRequest(
+    text = "An updated amendment of the case note",
+    author = Author(authorUsername, authorUserId, authorNames[0], authorNames[1]),
+    createdDateTime = createdAt,
+  )
+}
