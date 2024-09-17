@@ -64,12 +64,12 @@ public class SubjectAccessRequestService {
 
     private SubjectAccessRequestData toSubjectAccessRequestContent(final OffenderCaseNote cn) {
 
-        final var parentType = cn.getCaseNoteType().getParentType();
+        final var parentType = cn.getSubType().getType();
 
         return   SubjectAccessRequestData.builder()
                 .authorName(cn.getAuthorName())
-                .type(parentType.getType())
-                .subType(cn.getCaseNoteType().getType())
+                .type(parentType.getCode())
+                .subType(cn.getSubType().getCode())
                 .text(cn.getText())
                 .creationDateTime(cn.getCreatedAt())
                 .amendments(cn.getAmendments().stream().map(

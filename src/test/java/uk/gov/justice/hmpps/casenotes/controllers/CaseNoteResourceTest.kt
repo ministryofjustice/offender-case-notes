@@ -18,7 +18,7 @@ import uk.gov.justice.hmpps.casenotes.health.wiremock.Elite2Extension.Companion.
 import uk.gov.justice.hmpps.casenotes.health.wiremock.OAuthExtension.Companion.oAuthApi
 import uk.gov.justice.hmpps.casenotes.model.OffenderCaseNote
 import uk.gov.justice.hmpps.casenotes.notes.CaseNote
-import uk.gov.justice.hmpps.casenotes.repository.CaseNoteTypeRepository
+import uk.gov.justice.hmpps.casenotes.repository.CaseNoteSubTypeRepository
 import uk.gov.justice.hmpps.casenotes.repository.OffenderCaseNoteRepository
 import uk.gov.justice.hmpps.casenotes.services.ExternalApiService
 import java.time.LocalDateTime
@@ -29,7 +29,7 @@ class CaseNoteResourceTest : ResourceTest() {
   internal lateinit var externalApiService: ExternalApiService
 
   @Autowired
-  internal lateinit var caseNoteTypeRepository: CaseNoteTypeRepository
+  internal lateinit var caseNoteSubTypeRepository: CaseNoteSubTypeRepository
 
   @Autowired
   internal lateinit var ocnRepository: OffenderCaseNoteRepository
@@ -244,7 +244,7 @@ class CaseNoteResourceTest : ResourceTest() {
         .exchange()
         .expectStatus().isCreated
         .returnResult(CaseNote::class.java)
-      val id = postResponse.responseBody.blockFirst()!!.caseNoteId
+      val id = postResponse.responseBody.blockFirst()!!.id
       webTestClient.get().uri("/case-notes/{offenderIdentifier}/{caseNoteIdentifier}", "A1234AF", id)
         .headers(addBearerToken(token))
         .exchange()
@@ -261,11 +261,11 @@ class CaseNoteResourceTest : ResourceTest() {
       elite2Api.subGetCaseNotesForOffender(prisonNumber)
       val token = jwtHelper.createJwt("SECURE_CASENOTE_USER", roles = CASENOTES_ROLES)
 
-      val type = caseNoteTypeRepository.findByParentTypeAndType("CAB", "EDUCATION").orElseThrow()
+      val type = caseNoteSubTypeRepository.findByParentTypeAndType("CAB", "EDUCATION").orElseThrow()
       val caseNote = ocnRepository.save(
         OffenderCaseNote.builder()
           .personIdentifier(prisonNumber)
-          .caseNoteType(type)
+          .subType(type)
           .text("A case note that should not appear")
           .occurredAt(LocalDateTime.now().minusDays(1))
           .locationId("MDI")
@@ -489,7 +489,7 @@ class CaseNoteResourceTest : ResourceTest() {
     webTestClient.put().uri(
       "/case-notes/{offenderIdentifier}/{caseNoteId}",
       "A1234AB",
-      postResponse.responseBody.blockFirst()!!.caseNoteId,
+      postResponse.responseBody.blockFirst()!!.id,
     )
       .headers(addBearerToken(token))
       .bodyValue("""{ "text": "Amended case note" }""")
@@ -562,7 +562,7 @@ class CaseNoteResourceTest : ResourceTest() {
       .exchange()
       .expectStatus().isCreated
       .returnResult(CaseNote::class.java)
-    val id = postResponse.responseBody.blockFirst()!!.caseNoteId
+    val id = postResponse.responseBody.blockFirst()!!.id
 
     webTestClient.get().uri("/case-notes/{offenderIdentifier}/{caseNoteIdentifier}", "A1234BA", id)
       .headers(addBearerToken(token))
@@ -650,7 +650,7 @@ class CaseNoteResourceTest : ResourceTest() {
       .exchange()
       .expectStatus().isCreated
       .returnResult(CaseNote::class.java)
-    val id = postResponse.responseBody.blockFirst()!!.caseNoteId
+    val id = postResponse.responseBody.blockFirst()!!.id
 
     webTestClient.delete().uri("/case-notes/{offenderIdentifier}/{caseNoteId}", "Z1234ZZ", id)
       .headers(addBearerToken(token))

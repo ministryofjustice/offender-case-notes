@@ -230,7 +230,7 @@ class CaseNoteController(
 
   private fun createEventProperties(caseNote: CaseNote): Map<String, String> {
     return java.util.Map.of(
-      "caseNoteId", caseNote.caseNoteId,
+      "caseNoteId", caseNote.id,
       "caseNoteType", String.format("%s-%s", caseNote.type, caseNote.subType),
       "type", caseNote.type,
       "subType", caseNote.subType,

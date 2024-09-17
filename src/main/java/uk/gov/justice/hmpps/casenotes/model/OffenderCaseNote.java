@@ -42,9 +42,9 @@ import static java.time.LocalDateTime.now;
 @AllArgsConstructor
 @Getter
 @Builder(toBuilder = true)
-@EqualsAndHashCode(of = {"personIdentifier", "occurredAt", "locationId", "authorUsername", "caseNoteType", "text"})
-@ToString(of = {"id", "personIdentifier", "occurredAt", "locationId", "authorUsername", "caseNoteType"})
-@SQLRestriction("exists(select 1 from case_note_type ct where ct.case_note_type_id = type_id and ct.sync_to_nomis = false)")
+@EqualsAndHashCode(of = {"personIdentifier", "occurredAt", "locationId", "authorUsername", "subType", "text"})
+@ToString(of = {"id", "personIdentifier", "occurredAt", "locationId", "authorUsername", "subType"})
+@SQLRestriction("exists(select 1 from case_note_sub_type ct where ct.id = sub_type_id and ct.sync_to_nomis = false)")
 public class OffenderCaseNote implements NoteState {
 
     @Builder.Default
@@ -71,8 +71,8 @@ public class OffenderCaseNote implements NoteState {
     private String authorName;
 
     @ManyToOne
-    @JoinColumn(name = "type_id", nullable = false)
-    private CaseNoteType caseNoteType;
+    @JoinColumn(name = "sub_type_id", nullable = false)
+    private CaseNoteSubType subType;
 
     @Column(name = "note_text", nullable = false)
     private String text;
@@ -124,8 +124,8 @@ public class OffenderCaseNote implements NoteState {
     }
 
     @Override
-    public long getTypeId() {
-        return caseNoteType.getId();
+    public long getSubTypeId() {
+        return subType.getId();
     }
 
     @NotNull

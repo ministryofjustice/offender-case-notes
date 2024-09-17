@@ -8,7 +8,7 @@ import uk.gov.justice.hmpps.casenotes.domain.Note
 import uk.gov.justice.hmpps.casenotes.domain.NoteRepository
 import uk.gov.justice.hmpps.casenotes.domain.SubType
 import uk.gov.justice.hmpps.casenotes.domain.SubTypeRepository
-import uk.gov.justice.hmpps.casenotes.domain.getByParentCodeAndCode
+import uk.gov.justice.hmpps.casenotes.domain.getByTypeCodeAndCode
 import uk.gov.justice.hmpps.casenotes.domain.saveAndRefresh
 import uk.gov.justice.hmpps.casenotes.notes.CaseNote
 import uk.gov.justice.hmpps.casenotes.notes.toModel
@@ -20,7 +20,7 @@ class CreateSysGenNote(
   private val noteRepository: NoteRepository,
 ) {
   fun systemGeneratedCaseNote(personIdentifier: String, request: SystemGeneratedRequest): CaseNote {
-    val type = subTypeRepository.getByParentCodeAndCode(request.type, request.subType).validated()
+    val type = subTypeRepository.getByTypeCodeAndCode(request.type, request.subType).validated()
     return noteRepository.saveAndRefresh(request.toEntity(personIdentifier, type, get())).toModel()
   }
 

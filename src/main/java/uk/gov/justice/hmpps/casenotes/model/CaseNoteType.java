@@ -1,14 +1,5 @@
 package uk.gov.justice.hmpps.casenotes.model;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EntityListeners;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.EqualsAndHashCode;
@@ -16,70 +7,38 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 import org.hibernate.annotations.Immutable;
-import org.springframework.data.annotation.CreatedBy;
-import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.annotation.LastModifiedBy;
-import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
-import java.time.LocalDateTime;
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EntityListeners;
+import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.Table;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Immutable
 @Entity
-@Table(name = "CASE_NOTE_TYPE")
+@Table(name = "case_note_type")
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter
 @EntityListeners(AuditingEntityListener.class)
 @Builder(toBuilder = true)
-@EqualsAndHashCode(of = {"parentType", "type"})
-@ToString(of = {"parentType", "type", "description", "active"})
+@EqualsAndHashCode(of = {"code"})
+@ToString(of = {"code", "description"})
 public class CaseNoteType {
 
-    @Id()
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "CASE_NOTE_TYPE_ID", nullable = false)
-    private Long id;
-
-    @ManyToOne
-    @JoinColumn(name = "PARENT_TYPE", nullable = false)
-    private ParentNoteType parentType;
-
-    @Column(name = "SUB_TYPE", nullable = false)
-    private String type;
+    @Id
+    private String code;
 
     @Column(name = "DESCRIPTION", nullable = false)
     private String description;
 
-    @Column(name = "ACTIVE", nullable = false)
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "type")
     @Builder.Default
-    private boolean active = true;
-
-    @Column(name = "SENSITIVE", nullable = false)
-    @Builder.Default
-    private boolean sensitive = true;
-
-    @Column(name = "RESTRICTED_USE", nullable = false)
-    @Builder.Default
-    private boolean restrictedUse = true;
-
-    @CreatedDate
-    @Column(nullable = false)
-    private LocalDateTime createDateTime;
-
-    @CreatedBy
-    @Column(nullable = false)
-    private String createUserId;
-
-    @LastModifiedDate
-    private LocalDateTime modifyDateTime;
-
-    @LastModifiedBy
-    private String modifyUserId;
-
-    @Column(insertable = false, updatable = false)
-    private boolean syncToNomis;
-
-    @Column(insertable = false, updatable = false)
-    private boolean dpsUserSelectable;
+    private List<CaseNoteSubType> subTypes = new ArrayList<>();
 }

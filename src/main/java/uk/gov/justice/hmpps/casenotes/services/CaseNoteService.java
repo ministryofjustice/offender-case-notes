@@ -30,7 +30,7 @@ import uk.gov.justice.hmpps.casenotes.notes.AmendCaseNoteRequest;
 import uk.gov.justice.hmpps.casenotes.notes.CaseNote;
 import uk.gov.justice.hmpps.casenotes.notes.CaseNoteAmendment;
 import uk.gov.justice.hmpps.casenotes.notes.CreateCaseNoteRequest;
-import uk.gov.justice.hmpps.casenotes.repository.CaseNoteTypeRepository;
+import uk.gov.justice.hmpps.casenotes.repository.CaseNoteSubTypeRepository;
 import uk.gov.justice.hmpps.casenotes.repository.OffenderCaseNoteRepository;
 
 import java.util.Comparator;
@@ -54,7 +54,7 @@ public class CaseNoteService {
 
     private static final String SERVICE_NAME = "OCNS";
     private final OffenderCaseNoteRepository repository;
-    private final CaseNoteTypeRepository caseNoteTypeRepository;
+    private final CaseNoteSubTypeRepository caseNoteSubTypeRepository;
     private final SecurityUserContext securityUserContext;
     private final ExternalApiService externalApiService;
     private final TelemetryClient telemetryClient;
@@ -141,19 +141,19 @@ public class CaseNoteService {
     }
 
     private CaseNote mapper(final OffenderCaseNote cn) {
-        final var parentType = cn.getCaseNoteType().getParentType();
+        final var parentType = cn.getSubType().getType();
         return CaseNote.builder()
-            .caseNoteId(cn.getId().toString())
+            .id(cn.getId().toString())
             .personIdentifier(cn.getPersonIdentifier())
             .occurredAt(cn.getOccurredAt())
             .authorUserId(cn.getAuthorUserId())
             .authorName(cn.getAuthorName())
-            .type(parentType.getType())
+            .type(parentType.getCode())
             .typeDescription(parentType.getDescription())
-            .subType(cn.getCaseNoteType().getType())
-            .subTypeDescription(cn.getCaseNoteType().getDescription())
+            .subType(cn.getSubType().getCode())
+            .subTypeDescription(cn.getSubType().getDescription())
             .source(SERVICE_NAME) // Indicates its a Offender Case Note Service Type
-            .sensitive(cn.getCaseNoteType().isSensitive())
+            .sensitive(cn.getSubType().isSensitive())
             .text(cn.getText())
             .createdAt(cn.getCreatedAt())
             .systemGenerated(cn.getSystemGenerated())
@@ -174,8 +174,8 @@ public class CaseNoteService {
 
     private CaseNote mapper(final NomisCaseNote cn, final String offenderIdentifier) {
         return CaseNote.builder()
-            .caseNoteId(cn.getCaseNoteId().toString())
-            .eventId(cn.getCaseNoteId())
+            .id(cn.getId().toString())
+            .eventId(cn.getId())
             .personIdentifier(offenderIdentifier)
             .occurredAt(cn.getOccurredAt())
             .authorName(cn.getAuthorName())
@@ -189,7 +189,7 @@ public class CaseNoteService {
             .text(cn.getOriginalNoteText())
             .createdAt(cn.getCreatedAt())
             .systemGenerated(cn.getSource().equalsIgnoreCase("AUTO"))
-            .legacyId(cn.getCaseNoteId())
+            .legacyId(cn.getId())
             .amendments(cn.getAmendments().stream().map(
                 a -> new CaseNoteAmendment(
                     a.getCreationDateTime(),
@@ -208,7 +208,7 @@ public class CaseNoteService {
         @NotNull final String offenderIdentifier,
         @NotNull @Valid final CreateCaseNoteRequest newCaseNote
     ) {
-        final var type = caseNoteTypeRepository.findByParentTypeAndType(
+        final var type = caseNoteSubTypeRepository.findByParentTypeAndType(
             newCaseNote.getType(), newCaseNote.getSubType()
         ).orElseThrow(() ->
             new IllegalArgumentException(format(
@@ -235,7 +235,7 @@ public class CaseNoteService {
         if (!type.isActive()) {
             throw new ValidationException(format(
                 "Case Note Type %s/%s is not active",
-                type.getParentType().getType(),
+                type.getType().getCode(),
                 type.getType()
             ));
         }
@@ -251,7 +251,7 @@ public class CaseNoteService {
             .authorUserId(context.getUserId())
             .authorName(context.getUserDisplayName())
             .occurredAt(coalesce(newCaseNote.getOccurrenceDateTime(), context.getRequestAt()))
-            .caseNoteType(type)
+            .subType(type)
             .personIdentifier(offenderIdentifier)
             .locationId(locationId)
             .systemGenerated(TRUE.equals(newCaseNote.getSystemGenerated()))
@@ -279,8 +279,8 @@ public class CaseNoteService {
                 amendCaseNoteRequest
             ), offenderIdentifier);
         } else {
-            if (offenderCaseNote.getCaseNoteType().isRestrictedUse() && !isAllowedToCreateRestrictedCaseNote()) {
-                throw new AccessDeniedException("User not allowed to amend this case note type [" + offenderCaseNote.getCaseNoteType() + "]");
+            if (offenderCaseNote.getSubType().isRestrictedUse() && !isAllowedToCreateRestrictedCaseNote()) {
+                throw new AccessDeniedException("User not allowed to amend this case note type [" + offenderCaseNote.getSubType() + "]");
             }
 
             if (!offenderIdentifier.equals(offenderCaseNote.getPersonIdentifier())) {
@@ -313,7 +313,7 @@ public class CaseNoteService {
             ), offenderIdentifier);
         }
 
-        if (caseNote.getCaseNoteType().isSensitive() && !isAllowedToViewOrCreateSensitiveCaseNote()) {
+        if (caseNote.getSubType().isSensitive() && !isAllowedToViewOrCreateSensitiveCaseNote()) {
             throw new AccessDeniedException("User not allowed to view sensitive case notes");
         }
         return mapper(caseNote);

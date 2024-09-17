@@ -5,7 +5,7 @@ alter table offender_case_note
     rename column offender_identifier to person_identifier;
 
 alter table offender_case_note
-    rename column case_note_type_id to type_id;
+    rename column case_note_type_id to sub_type_id;
 
 alter table offender_case_note
     rename column occurrence_date_time to occurred_at;
@@ -35,6 +35,48 @@ alter table offender_case_note
 
 alter table offender_case_note_amendment
     rename to case_note_amendment;
+
+alter table case_note_parent_type
+    rename column note_type to code;
+
+alter table case_note_parent_type
+    rename column create_date_time to created_at;
+
+alter table case_note_parent_type
+    rename column create_user_id to created_by;
+
+alter table case_note_parent_type
+    rename column modify_date_time to last_modified_at;
+
+alter table case_note_parent_type
+    rename column modify_user_id to last_modified_by;
+
+alter table case_note_type
+    rename column case_note_type_id to id;
+
+alter table case_note_type
+    rename column parent_type to type_code;
+
+alter table case_note_type
+    rename column sub_type to code;
+
+alter table case_note_type
+    rename column create_date_time to created_at;
+
+alter table case_note_type
+    rename column create_user_id to created_by;
+
+alter table case_note_type
+    rename column modify_date_time to last_modified_at;
+
+alter table case_note_type
+    rename column modify_user_id to last_modified_by;
+
+alter table case_note_type
+    rename to case_note_sub_type;
+
+alter table case_note_parent_type
+    rename to case_note_type;
 
 create table if not exists case_note_deleted
 (
@@ -88,10 +130,18 @@ $$ language plpgsql;
 
 select hard_delete_soft_deleted();
 
+/* The following will be added in a future PR to remove columns and the function after confirmation of migration */
+
+/*
+drop function hard_delete_soft_deleted();
+
 alter table case_note
+    drop column soft_deleted,
     drop column modify_date_time,
     drop column modify_user_id;
 
 alter table case_note_amendment
+    drop column soft_deleted,
     drop column modify_date_time,
     drop column modify_user_id;
+ */

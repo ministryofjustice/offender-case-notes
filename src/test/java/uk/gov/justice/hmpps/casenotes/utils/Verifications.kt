@@ -11,10 +11,10 @@ import uk.gov.justice.hmpps.casenotes.sync.SyncNoteRequest
 import java.time.temporal.ChronoUnit.SECONDS
 
 fun CaseNote.verifyAgainst(note: Note) {
-  assertThat(type).isEqualTo(note.type.parent.code)
-  assertThat(typeDescription).isEqualTo(note.type.parent.description)
-  assertThat(subType).isEqualTo(note.type.code)
-  assertThat(subType).isEqualTo(note.type.code)
+  assertThat(type).isEqualTo(note.subType.type.code)
+  assertThat(typeDescription).isEqualTo(note.subType.type.description)
+  assertThat(subType).isEqualTo(note.subType.code)
+  assertThat(subType).isEqualTo(note.subType.code)
   assertThat(text).isEqualTo(note.text)
   assertThat(authorName).isEqualTo(note.authorName)
   assertThat(authorUserId).isEqualTo(note.authorUserId)
@@ -30,8 +30,8 @@ fun CaseNoteAmendment.verifyAgainst(amendment: Amendment) {
 
 fun Note.verifyAgainst(request: SyncNoteRequest) {
   assertThat(personIdentifier).isEqualTo(request.personIdentifier)
-  assertThat(type.parent.code).isEqualTo(request.type)
-  assertThat(type.code).isEqualTo(request.subType)
+  assertThat(subType.type.code).isEqualTo(request.type)
+  assertThat(subType.code).isEqualTo(request.subType)
   assertThat(text).isEqualTo(request.text)
   assertThat(occurredAt.truncatedTo(SECONDS)).isEqualTo(request.occurrenceDateTime.truncatedTo(SECONDS))
   assertThat(createdAt.truncatedTo(SECONDS)).isEqualTo(request.createdDateTime.truncatedTo(SECONDS))
@@ -52,7 +52,7 @@ fun Amendment.verifyAgainst(request: SyncAmendmentRequest) {
 
 fun DeletedDetail.verifyAgainst(note: Note) {
   assertThat(personIdentifier).isEqualTo(note.personIdentifier)
-  assertThat(typeId).isEqualTo(note.type.id)
+  assertThat(subTypeId).isEqualTo(note.subType.id)
   assertThat(text).isEqualTo(note.text)
   assertThat(occurredAt.truncatedTo(SECONDS)).isEqualTo(note.occurredAt.truncatedTo(SECONDS))
   assertThat(createdAt.truncatedTo(SECONDS)).isEqualTo(note.createdAt.truncatedTo(SECONDS))

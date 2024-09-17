@@ -55,7 +55,7 @@ interface DeletedCaseNoteRepository : JpaRepository<DeletedCaseNote, Long> {
 @JsonNaming(SnakeCaseStrategy::class)
 data class DeletedDetail(
   override val personIdentifier: String,
-  override val typeId: Long,
+  override val subTypeId: Long,
   override val occurredAt: LocalDateTime,
   override val locationId: String,
   override val authorUsername: String,
@@ -73,7 +73,7 @@ data class DeletedDetail(
 
   constructor(noteState: NoteState) : this(
     noteState.personIdentifier,
-    noteState.typeId,
+    noteState.subTypeId,
     noteState.occurredAt,
     noteState.locationId,
     noteState.authorUsername,

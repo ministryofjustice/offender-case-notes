@@ -12,7 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 import uk.gov.justice.hmpps.casenotes.config.AuthAwareAuthenticationToken;
 import uk.gov.justice.hmpps.casenotes.filters.OffenderCaseNoteFilter;
 import uk.gov.justice.hmpps.casenotes.health.IntegrationTest;
-import uk.gov.justice.hmpps.casenotes.model.CaseNoteType;
+import uk.gov.justice.hmpps.casenotes.model.CaseNoteSubType;
 import uk.gov.justice.hmpps.casenotes.model.OffenderCaseNote;
 import uk.gov.justice.hmpps.casenotes.model.OffenderCaseNote.OffenderCaseNoteBuilder;
 
@@ -34,19 +34,19 @@ public class OffenderCaseNoteRepositoryTest extends IntegrationTest {
     private OffenderCaseNoteRepository repository;
 
     @Autowired
-    private CaseNoteTypeRepository caseNoteTypeRepository;
+    private CaseNoteSubTypeRepository caseNoteSubTypeRepository;
 
     @Autowired
     private JdbcTemplate jdbcTemplate;
 
-    private CaseNoteType genType;
+    private CaseNoteSubType genType;
 
     @BeforeEach
     public void setUp() {
         final var jwt = Jwt.withTokenValue("some").subject("anonymous").header("head", "something").build();
         SecurityContextHolder.getContext()
             .setAuthentication(new AuthAwareAuthenticationToken(jwt, "userId", Collections.emptyList()));
-        genType = caseNoteTypeRepository.findByParentTypeAndType(PARENT_TYPE, SUB_TYPE).orElseThrow();
+        genType = caseNoteSubTypeRepository.findByParentTypeAndType(PARENT_TYPE, SUB_TYPE).orElseThrow();
     }
 
     @Test
@@ -58,7 +58,7 @@ public class OffenderCaseNoteRepositoryTest extends IntegrationTest {
                 .authorUserId("some id")
                 .authorName("Mickey Mouse")
                 .personIdentifier(OFFENDER_IDENTIFIER)
-                .caseNoteType(genType)
+                .subType(genType)
                 .text("HELLO")
                 .build();
         repository.save(entity);
@@ -183,7 +183,7 @@ public class OffenderCaseNoteRepositoryTest extends IntegrationTest {
                 .authorUserId("some id")
                 .authorName("Mickey Mouse")
                 .personIdentifier(offenderIdentifier)
-                .caseNoteType(genType)
+                .subType(genType)
                 .text("HELLO")
                 .createdBy("SYS")
                 .systemGenerated(false);

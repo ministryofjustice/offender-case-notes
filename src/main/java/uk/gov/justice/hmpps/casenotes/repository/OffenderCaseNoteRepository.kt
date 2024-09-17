@@ -14,10 +14,7 @@ interface OffenderCaseNoteRepository :
   JpaRepository<OffenderCaseNote, UUID> {
 
   @Modifying
-  @Query(
-    "update case_note set person_identifier = :new where person_identifier = :old",
-    nativeQuery = true,
-  )
+  @Query("update OffenderCaseNote set personIdentifier = :new where personIdentifier = :old")
   fun updateOffenderIdentifier(old: String, new: String): Int
 
   @Modifying

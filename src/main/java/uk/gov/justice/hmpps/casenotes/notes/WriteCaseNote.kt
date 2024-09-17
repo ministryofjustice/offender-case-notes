@@ -11,7 +11,7 @@ import uk.gov.justice.hmpps.casenotes.domain.Note
 import uk.gov.justice.hmpps.casenotes.domain.NoteRepository
 import uk.gov.justice.hmpps.casenotes.domain.SubType
 import uk.gov.justice.hmpps.casenotes.domain.SubTypeRepository
-import uk.gov.justice.hmpps.casenotes.domain.getByParentCodeAndCode
+import uk.gov.justice.hmpps.casenotes.domain.getByTypeCodeAndCode
 import uk.gov.justice.hmpps.casenotes.domain.saveAndRefresh
 import uk.gov.justice.hmpps.casenotes.services.EntityNotFoundException
 import java.util.UUID.fromString
@@ -24,7 +24,7 @@ class WriteCaseNote(
   private val noteRepository: NoteRepository,
 ) {
   fun createNote(personIdentifier: String, request: CreateCaseNoteRequest, useRestrictedType: Boolean): CaseNote {
-    val type = subTypeRepository.getByParentCodeAndCode(request.type, request.subType)
+    val type = subTypeRepository.getByTypeCodeAndCode(request.type, request.subType)
       .validateTypeUsage(useRestrictedType)
 
     if (!type.active) throw ValidationException("Case note type not active")
@@ -39,7 +39,7 @@ class WriteCaseNote(
     useRestrictedType: Boolean,
   ): CaseNote {
     val caseNote = getCaseNote(personIdentifier, caseNoteId).also {
-      it.type.validateTypeUsage(useRestrictedType)
+      it.subType.validateTypeUsage(useRestrictedType)
     }
 
     return noteRepository.saveAndFlush(caseNote.addAmendment(request)).toModel()

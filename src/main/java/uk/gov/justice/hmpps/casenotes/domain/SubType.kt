@@ -16,33 +16,23 @@ import org.springframework.data.jpa.repository.JpaRepository
 
 @Immutable
 @Entity
-@Table(name = "case_note_type")
+@Table(name = "case_note_sub_type")
 class SubType(
   @Embedded
   val key: TypeKey,
 
   @ManyToOne
-  @JoinColumn(name = "parent_type", nullable = false)
-  val parent: Type,
-
-  @Column(name = "sub_type", nullable = false)
+  @JoinColumn(name = "type_code", nullable = false)
+  val type: Type,
   override val code: String,
-
-  @Column(name = "description", nullable = false)
   val description: String,
-
-  @Column(name = "active", nullable = false)
   val active: Boolean,
-
-  @Column(name = "sensitive", nullable = false)
   val sensitive: Boolean,
-
-  @Column(name = "restricted_use", nullable = false)
   val restrictedUse: Boolean,
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
-  @Column(name = "case_note_type_id", nullable = false)
+  @Column(name = "id", nullable = false)
   val id: Long? = null,
 ) : TypeLookup by key {
   @Column(insertable = false, updatable = false)
@@ -54,34 +44,32 @@ class SubType(
   companion object {
     val CODE = SubType::code.name
     val SENSITIVE = SubType::sensitive.name
-    val PARENT = SubType::parent.name
+    val TYPE = SubType::type.name
   }
 }
 
 interface SubTypeRepository : JpaRepository<SubType, Long> {
-  @EntityGraph(attributePaths = ["parent"])
+  @EntityGraph(attributePaths = ["type"])
   fun findByKey(key: TypeKey): SubType?
 
-  @EntityGraph(attributePaths = ["parent"])
+  @EntityGraph(attributePaths = ["type"])
   fun findByKeyIn(keys: Set<TypeKey>): List<SubType>
 }
 
-fun SubTypeRepository.findByParentCodeAndCode(parentCode: String, code: String) =
-  findByKey(TypeKey(parentCode, code))
+fun SubTypeRepository.findByTypeCodeAndCode(typeCode: String, code: String) = findByKey(TypeKey(typeCode, code))
 
-fun SubTypeRepository.getByParentCodeAndCode(parentCode: String, code: String) =
-  findByParentCodeAndCode(parentCode, code)
-    ?: throw IllegalArgumentException("Unknown case note type $parentCode:$code")
+fun SubTypeRepository.getByTypeCodeAndCode(typeCode: String, code: String) = findByTypeCodeAndCode(typeCode, code)
+  ?: throw IllegalArgumentException("Unknown case note type $typeCode:$code")
 
 interface TypeLookup {
-  val parentCode: String
+  val typeCode: String
   val code: String
 }
 
 @Embeddable
 data class TypeKey(
-  @Column(name = "parent_type", nullable = false, insertable = false, updatable = false)
-  override val parentCode: String,
-  @Column(name = "sub_type", nullable = false, insertable = false, updatable = false)
+  @Column(name = "type_code", nullable = false, insertable = false, updatable = false)
+  override val typeCode: String,
+  @Column(name = "code", nullable = false, insertable = false, updatable = false)
   override val code: String,
 ) : TypeLookup

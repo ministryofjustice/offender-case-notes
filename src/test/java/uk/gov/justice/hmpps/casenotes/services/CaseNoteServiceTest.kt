@@ -38,16 +38,16 @@ import uk.gov.justice.hmpps.casenotes.dto.CaseNoteFilter
 import uk.gov.justice.hmpps.casenotes.dto.NomisCaseNote
 import uk.gov.justice.hmpps.casenotes.dto.NomisCaseNoteAmendment
 import uk.gov.justice.hmpps.casenotes.filters.OffenderCaseNoteFilter
+import uk.gov.justice.hmpps.casenotes.model.CaseNoteSubType
 import uk.gov.justice.hmpps.casenotes.model.CaseNoteType
 import uk.gov.justice.hmpps.casenotes.model.OffenderCaseNote
 import uk.gov.justice.hmpps.casenotes.model.OffenderCaseNote.AmendmentComparator
-import uk.gov.justice.hmpps.casenotes.model.ParentNoteType
 import uk.gov.justice.hmpps.casenotes.notes.AmendCaseNoteRequest
 import uk.gov.justice.hmpps.casenotes.notes.CaseNote
 import uk.gov.justice.hmpps.casenotes.notes.CaseNoteAmendment
 import uk.gov.justice.hmpps.casenotes.notes.CreateCaseNoteRequest
 import uk.gov.justice.hmpps.casenotes.notes.DeletedCaseNoteRepository
-import uk.gov.justice.hmpps.casenotes.repository.CaseNoteTypeRepository
+import uk.gov.justice.hmpps.casenotes.repository.CaseNoteSubTypeRepository
 import uk.gov.justice.hmpps.casenotes.repository.OffenderCaseNoteRepository
 import uk.gov.justice.hmpps.casenotes.utils.NomisIdGenerator
 import java.time.LocalDateTime
@@ -57,7 +57,7 @@ import java.util.UUID
 @ExtendWith(MockitoExtension::class)
 class CaseNoteServiceTest {
   private val repository: OffenderCaseNoteRepository = mock()
-  private val caseNoteTypeRepository: CaseNoteTypeRepository = mock()
+  private val caseNoteSubTypeRepository: CaseNoteSubTypeRepository = mock()
   private val securityUserContext: SecurityUserContext = mock()
   private val externalApiService: ExternalApiService = mock()
   private val telemetryClient: TelemetryClient = mock()
@@ -73,7 +73,7 @@ class CaseNoteServiceTest {
   fun setUp() {
     caseNoteService = CaseNoteService(
       repository,
-      caseNoteTypeRepository,
+      caseNoteSubTypeRepository,
       securityUserContext,
       externalApiService,
       telemetryClient,
@@ -91,11 +91,11 @@ class CaseNoteServiceTest {
     @Test
     fun `non sensitive explicit non system generated case note stored in NOMIS`() {
       whenever(
-        caseNoteTypeRepository.findByParentTypeAndType(
+        caseNoteSubTypeRepository.findByParentTypeAndType(
           any<String>(),
           any<String>(),
         ),
-      ).thenReturn(Optional.of(CaseNoteType.builder().syncToNomis(true).dpsUserSelectable(false).build()))
+      ).thenReturn(Optional.of(CaseNoteSubType.builder().syncToNomis(true).dpsUserSelectable(false).build()))
       val nomisCaseNote: NomisCaseNote = createNomisCaseNote()
       nomisCaseNote.source = "INT"
 
@@ -115,7 +115,7 @@ class CaseNoteServiceTest {
           "authorUsername",
           "locationId",
           "text",
-          "caseNoteId",
+          "id",
           "authorUserId",
           "eventId",
           "sensitive",
@@ -126,23 +126,23 @@ class CaseNoteServiceTest {
       assertThat(caseNote.text).isEqualTo("original")
       assertThat(caseNote.authorUserId).isEqualTo("23456")
       assertThat(caseNote.locationId).isEqualTo("agency")
-      assertThat(caseNote.caseNoteId).isEqualTo("12345")
+      assertThat(caseNote.id).isEqualTo("12345")
       assertThat(caseNote.eventId).isEqualTo(12345)
       assertThat(caseNote.systemGenerated).isFalse()
       assertThat(caseNote.legacyId).isEqualTo(12345)
-      Mockito.verify(caseNoteTypeRepository).findByParentTypeAndType("ACP", "POS1")
+      Mockito.verify(caseNoteSubTypeRepository).findByParentTypeAndType("ACP", "POS1")
     }
 
     @Test
     fun `non sensitive explicit system generated case note stored in NOMIS`() {
       whenever(
-        caseNoteTypeRepository.findByParentTypeAndType(
+        caseNoteSubTypeRepository.findByParentTypeAndType(
           any<String>(),
           any<String>(),
         ),
-      ).thenReturn(Optional.of(CaseNoteType.builder().syncToNomis(true).dpsUserSelectable(false).build()))
+      ).thenReturn(Optional.of(CaseNoteSubType.builder().syncToNomis(true).dpsUserSelectable(false).build()))
       val nomisCaseNote: NomisCaseNote = createNomisCaseNote()
-      nomisCaseNote.caseNoteId = 6574632
+      nomisCaseNote.id = 6574632
       nomisCaseNote.source = "AUTO"
 
       val caseNoteCaptor = argumentCaptor<CreateCaseNoteRequest>()
@@ -161,7 +161,7 @@ class CaseNoteServiceTest {
           "authorUsername",
           "locationId",
           "text",
-          "caseNoteId",
+          "id",
           "authorUserId",
           "eventId",
           "sensitive",
@@ -172,21 +172,21 @@ class CaseNoteServiceTest {
       assertThat(caseNote.text).isEqualTo("original")
       assertThat(caseNote.authorUserId).isEqualTo("23456")
       assertThat(caseNote.locationId).isEqualTo("agency")
-      assertThat(caseNote.caseNoteId).isEqualTo("6574632")
+      assertThat(caseNote.id).isEqualTo("6574632")
       assertThat(caseNote.eventId).isEqualTo(6574632)
       assertThat(caseNote.systemGenerated).isTrue()
       assertThat(caseNote.legacyId).isEqualTo(6574632)
-      Mockito.verify(caseNoteTypeRepository).findByParentTypeAndType("ACP", "POS1")
+      Mockito.verify(caseNoteSubTypeRepository).findByParentTypeAndType("ACP", "POS1")
     }
 
     @Test
     fun `non sensitive system generated case note stored in NOMIS`() {
       whenever(
-        caseNoteTypeRepository.findByParentTypeAndType(
+        caseNoteSubTypeRepository.findByParentTypeAndType(
           any<String>(),
           any<String>(),
         ),
-      ).thenReturn(Optional.of(CaseNoteType.builder().syncToNomis(true).dpsUserSelectable(false).build()))
+      ).thenReturn(Optional.of(CaseNoteSubType.builder().syncToNomis(true).dpsUserSelectable(false).build()))
       val nomisCaseNote: NomisCaseNote = createNomisCaseNote()
       nomisCaseNote.source = "AUTO"
 
@@ -203,7 +203,7 @@ class CaseNoteServiceTest {
           "authorUsername",
           "locationId",
           "text",
-          "caseNoteId",
+          "id",
           "authorUserId",
           "eventId",
           "sensitive",
@@ -214,21 +214,21 @@ class CaseNoteServiceTest {
       assertThat(caseNote.text).isEqualTo("original")
       assertThat(caseNote.authorUserId).isEqualTo("23456")
       assertThat(caseNote.locationId).isEqualTo("agency")
-      assertThat(caseNote.caseNoteId).isEqualTo("12345")
+      assertThat(caseNote.id).isEqualTo("12345")
       assertThat(caseNote.eventId).isEqualTo(12345)
       assertThat(caseNote.systemGenerated).isTrue()
       assertThat(caseNote.legacyId).isEqualTo(12345)
-      Mockito.verify(caseNoteTypeRepository).findByParentTypeAndType("ACP", "POS1")
+      Mockito.verify(caseNoteSubTypeRepository).findByParentTypeAndType("ACP", "POS1")
     }
 
     @Test
     fun `non sensitive and non system generated case note stored in NOMIS`() {
       whenever(
-        caseNoteTypeRepository.findByParentTypeAndType(
+        caseNoteSubTypeRepository.findByParentTypeAndType(
           any<String>(),
           any<String>(),
         ),
-      ).thenReturn(Optional.of(CaseNoteType.builder().syncToNomis(true).dpsUserSelectable(true).build()))
+      ).thenReturn(Optional.of(CaseNoteSubType.builder().syncToNomis(true).dpsUserSelectable(true).build()))
       val nomisCaseNote: NomisCaseNote = createNomisCaseNote()
       nomisCaseNote.source = "INST"
 
@@ -245,7 +245,7 @@ class CaseNoteServiceTest {
           "authorUsername",
           "locationId",
           "text",
-          "caseNoteId",
+          "id",
           "authorUserId",
           "eventId",
           "sensitive",
@@ -256,21 +256,21 @@ class CaseNoteServiceTest {
       assertThat(caseNote.text).isEqualTo("original")
       assertThat(caseNote.authorUserId).isEqualTo("23456")
       assertThat(caseNote.locationId).isEqualTo("agency")
-      assertThat(caseNote.caseNoteId).isEqualTo("12345")
+      assertThat(caseNote.id).isEqualTo("12345")
       assertThat(caseNote.eventId).isEqualTo(12345)
       assertThat(caseNote.systemGenerated).isFalse()
       assertThat(caseNote.legacyId).isEqualTo(12345)
-      Mockito.verify(caseNoteTypeRepository).findByParentTypeAndType("ACP", "POS1")
+      Mockito.verify(caseNoteSubTypeRepository).findByParentTypeAndType("ACP", "POS1")
     }
 
     @Test
     fun `cannot create case note without appropriate role`() {
       whenever(
-        caseNoteTypeRepository.findByParentTypeAndType(
+        caseNoteSubTypeRepository.findByParentTypeAndType(
           any<String>(),
           any<String>(),
         ),
-      ).thenReturn(Optional.of(CaseNoteType.builder().build()))
+      ).thenReturn(Optional.of(CaseNoteSubType.builder().build()))
       whenever(securityUserContext.isOverrideRole(any<String>(), any<String>())).thenReturn(false)
 
       assertThatThrownBy {
@@ -287,21 +287,19 @@ class CaseNoteServiceTest {
     inner class Sensitive {
       val caseNoteId = UUID.randomUUID()
       val now = LocalDateTime.now()
-      val noteType: CaseNoteType = CaseNoteType.builder()
-        .parentType(
-          ParentNoteType.builder().type("someparent").description("description of parent")
-            .createDateTime(LocalDateTime.MIN).build(),
+      val noteType: CaseNoteSubType = CaseNoteSubType.builder()
+        .type(
+          CaseNoteType.builder().code("someparent").description("description of parent").build(),
         )
-        .type("sometype")
+        .code("sometype")
         .description("description of some type")
         .sensitive(true)
-        .createDateTime(LocalDateTime.MIN)
         .build()
       val defaultContext = CaseNoteRequestContext("someuser", "Some User", "userId", source = Source.DPS)
 
       @BeforeEach
       fun beforeEach() {
-        whenever(caseNoteTypeRepository.findByParentTypeAndType(any(), any())).thenReturn(
+        whenever(caseNoteSubTypeRepository.findByParentTypeAndType(any(), any())).thenReturn(
           Optional.of(
             noteType,
           ),
@@ -345,7 +343,7 @@ class CaseNoteServiceTest {
 
         assertThat(createdNote).isEqualTo(
           CaseNote.builder()
-            .caseNoteId(caseNoteId.toString())
+            .id(caseNoteId.toString())
             .personIdentifier("A1234AA")
             .sensitive(true)
             .type("someparent")
@@ -389,7 +387,7 @@ class CaseNoteServiceTest {
 
         assertThat(createdNote).isEqualTo(
           CaseNote.builder()
-            .caseNoteId(caseNoteId.toString())
+            .id(caseNoteId.toString())
             .personIdentifier("A1234AA")
             .sensitive(true)
             .type("someparent")
@@ -482,8 +480,8 @@ class CaseNoteServiceTest {
 
   @Test
   fun caseNote_noAddRole() {
-    val noteType: CaseNoteType =
-      CaseNoteType.builder().type("sometype").parentType(ParentNoteType.builder().build()).build()
+    val noteType: CaseNoteSubType =
+      CaseNoteSubType.builder().code("sometype").type(CaseNoteType.builder().build()).build()
     val offenderCaseNote: OffenderCaseNote = createOffenderCaseNote(noteType)
     whenever(repository.findById(any())).thenReturn(Optional.of(offenderCaseNote))
 
@@ -504,10 +502,9 @@ class CaseNoteServiceTest {
 
   @Test
   fun getCaseNote() {
-    val noteType: CaseNoteType =
-      CaseNoteType.builder().type("sometype").description("Type Description")
-        .parentType(ParentNoteType.builder().type("parenttype").description("Parent Type Description").build())
-        .createDateTime(LocalDateTime.MIN)
+    val noteType: CaseNoteSubType =
+      CaseNoteSubType.builder().code("sometype").description("Type Description")
+        .type(CaseNoteType.builder().code("parenttype").description("Parent Type Description").build())
         .build()
     val offenderCaseNote: OffenderCaseNote = createOffenderCaseNote(noteType)
     whenever(repository.findById(any())).thenReturn(Optional.of(offenderCaseNote))
@@ -516,7 +513,7 @@ class CaseNoteServiceTest {
     val caseNote: CaseNote = caseNoteService.getCaseNote("12345", UUID.randomUUID().toString())
     assertThat(caseNote).usingRecursiveComparison()
       .ignoringFields(
-        "caseNoteId",
+        "id",
         "type",
         "typeDescription",
         "subType",
@@ -548,7 +545,7 @@ class CaseNoteServiceTest {
         "authorUsername",
         "locationId",
         "text",
-        "caseNoteId",
+        "id",
         "authorUserId",
         "eventId",
         "sensitive",
@@ -559,7 +556,7 @@ class CaseNoteServiceTest {
     assertThat(caseNote.text).isEqualTo("original")
     assertThat(caseNote.authorUserId).isEqualTo("23456")
     assertThat(caseNote.locationId).isEqualTo("agency")
-    assertThat(caseNote.caseNoteId).isEqualTo("12345")
+    assertThat(caseNote.id).isEqualTo("12345")
     assertThat(caseNote.eventId).isEqualTo(12345)
     assertThat(caseNote.legacyId).isEqualTo(12345)
     assertThat(caseNote.systemGenerated).isEqualTo(false)
@@ -588,7 +585,7 @@ class CaseNoteServiceTest {
         "authorUsername",
         "locationId",
         "text",
-        "caseNoteId",
+        "id",
         "authorUserId",
         "eventId",
         "sensitive",
@@ -600,12 +597,12 @@ class CaseNoteServiceTest {
     assertThat(caseNote.text).isEqualTo("original")
     assertThat(caseNote.authorUserId).isEqualTo("23456")
     assertThat(caseNote.locationId).isEqualTo("agency")
-    assertThat(caseNote.caseNoteId).isEqualTo("12345")
+    assertThat(caseNote.id).isEqualTo("12345")
     assertThat(caseNote.eventId).isEqualTo(12345)
     assertThat(caseNote.legacyId).isEqualTo(12345)
     assertThat(caseNote.amendments.get(0).additionalNoteText).isEqualTo("additional details")
     assertThat(caseNote.amendments.get(0).authorUserName).isEqualTo("AAA11B")
-    assertThat(caseNote.amendments.get(0).creationDateTime).isEqualTo("2019-03-24T11:22")
+    assertThat(caseNote.amendments.get(0).createdAt).isEqualTo("2019-03-24T11:22")
   }
 
   @Nested
@@ -626,7 +623,7 @@ class CaseNoteServiceTest {
           "authorUsername",
           "locationId",
           "text",
-          "caseNoteId",
+          "id",
           "authorUserId",
           "eventId",
           "sensitive",
@@ -638,15 +635,15 @@ class CaseNoteServiceTest {
       assertThat(caseNote.text).isEqualTo("original")
       assertThat(caseNote.authorUserId).isEqualTo("23456")
       assertThat(caseNote.locationId).isEqualTo("agency")
-      assertThat(caseNote.caseNoteId).isEqualTo("12345")
+      assertThat(caseNote.id).isEqualTo("12345")
       assertThat(caseNote.eventId).isEqualTo(12345)
       assertThat(caseNote.legacyId).isEqualTo(12345)
     }
 
     @Test
     fun `cannot amend case note without required roles`() {
-      val noteType: CaseNoteType =
-        CaseNoteType.builder().type("sometype").parentType(ParentNoteType.builder().build()).build()
+      val noteType: CaseNoteSubType =
+        CaseNoteSubType.builder().code("sometype").type(CaseNoteType.builder().build()).build()
       val offenderCaseNote: OffenderCaseNote = createOffenderCaseNote(noteType)
       whenever(repository.findById(any())).thenReturn(Optional.of(offenderCaseNote))
 
@@ -679,8 +676,8 @@ class CaseNoteServiceTest {
 
     @Test
     fun `cannot amend case note when wrong offender identifier supplied`() {
-      val noteType: CaseNoteType =
-        CaseNoteType.builder().type("sometype").restrictedUse(false).parentType(ParentNoteType.builder().build())
+      val noteType: CaseNoteSubType =
+        CaseNoteSubType.builder().code("sometype").restrictedUse(false).type(CaseNoteType.builder().build())
           .build()
       val offenderCaseNote: OffenderCaseNote = createOffenderCaseNote(noteType)
       whenever(repository.findById(any())).thenReturn(Optional.of(offenderCaseNote))
@@ -701,10 +698,9 @@ class CaseNoteServiceTest {
 
       @BeforeEach
       fun beforeEach() {
-        val noteType: CaseNoteType =
-          CaseNoteType.builder().type("sometype").description("Type Description")
-            .parentType(ParentNoteType.builder().type("ParentType").description("Parent Type Description").build())
-            .createDateTime(LocalDateTime.MIN)
+        val noteType: CaseNoteSubType =
+          CaseNoteSubType.builder().code("sometype").description("Type Description")
+            .type(CaseNoteType.builder().code("ParentType").description("Parent Type Description").build())
             .restrictedUse(false)
             .build()
         val offenderCaseNote: OffenderCaseNote = createOffenderCaseNote(noteType)
@@ -736,7 +732,7 @@ class CaseNoteServiceTest {
         assertThat(caseNote.amendments).hasSize(1)
 
         val expected = CaseNoteAmendment(
-          creationDateTime = LocalDateTime.now(),
+          createdAt = LocalDateTime.now(),
           authorUserName = "user",
           authorName = "author",
           authorUserId = "12345",
@@ -846,9 +842,9 @@ class CaseNoteServiceTest {
   @Test
   fun getCaseNotes_GetFromRepositoryAndPrisonApi() {
     val noteType =
-      CaseNoteType.builder()
-        .type("someSubType").description("Type Description")
-        .parentType(ParentNoteType.builder().type("someType").description("Parent Type Description").build())
+      CaseNoteSubType.builder()
+        .code("someSubType").description("Type Description")
+        .type(CaseNoteType.builder().code("someType").description("Parent Type Description").build())
         .build()
     val offenderCaseNote = createOffenderCaseNote(noteType)
     val pageable = PageRequest.of(0, 10, Direction.DESC, "occurrenceDateTime")
@@ -908,7 +904,7 @@ class CaseNoteServiceTest {
     return NomisCaseNote.builder()
       .agencyId("agency")
       .authorName("somebody")
-      .caseNoteId(12345)
+      .id(12345)
       .createdAt(LocalDateTime.parse("2019-03-23T11:22"))
       .occurredAt(LocalDateTime.parse("2019-04-16T10:42"))
       .originalNoteText("original")
@@ -927,7 +923,7 @@ class CaseNoteServiceTest {
     return NomisCaseNote.builder()
       .agencyId("agency")
       .authorName("somebody")
-      .caseNoteId(12345)
+      .id(12345)
       .createdAt(LocalDateTime.parse("2019-03-23T11:22"))
       .occurredAt(LocalDateTime.parse("2019-04-16T10:42"))
       .originalNoteText("original")
@@ -942,7 +938,7 @@ class CaseNoteServiceTest {
       .build()
   }
 
-  private fun createOffenderCaseNote(caseNoteType: CaseNoteType): OffenderCaseNote {
+  private fun createOffenderCaseNote(caseNoteSubType: CaseNoteSubType): OffenderCaseNote {
     return OffenderCaseNote.builder()
       .id(UUID.randomUUID())
       .occurredAt(LocalDateTime.now())
@@ -951,7 +947,7 @@ class CaseNoteServiceTest {
       .authorUserId("some user")
       .authorName("Mickey Mouse")
       .personIdentifier("A1234AC")
-      .caseNoteType(caseNoteType)
+      .subType(caseNoteSubType)
       .text("HELLO")
       .legacyId(1234)
       .createdAt(LocalDateTime.now().minusDays(7))

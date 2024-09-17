@@ -19,7 +19,8 @@ import java.util.List;
 @Data
 public class NomisCaseNote {
 
-    private Integer caseNoteId;
+    @JsonProperty("caseNoteId")
+    private Integer id;
     @JsonProperty("offenderIdentifier")
     private String personIdentifier;
     private String type;

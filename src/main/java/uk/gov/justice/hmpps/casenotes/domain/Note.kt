@@ -24,8 +24,6 @@ import uk.gov.justice.hmpps.casenotes.domain.Note.Companion.AUTHOR_USERNAME
 import uk.gov.justice.hmpps.casenotes.domain.Note.Companion.LOCATION_ID
 import uk.gov.justice.hmpps.casenotes.domain.Note.Companion.OCCURRED_AT
 import uk.gov.justice.hmpps.casenotes.domain.Note.Companion.PERSON_IDENTIFIER
-import uk.gov.justice.hmpps.casenotes.domain.Note.Companion.TYPE
-import uk.gov.justice.hmpps.casenotes.domain.SubType.Companion.PARENT
 import uk.gov.justice.hmpps.casenotes.domain.audit.DeletedEntityListener
 import uk.gov.justice.hmpps.casenotes.domain.audit.SimpleAudited
 import uk.gov.justice.hmpps.casenotes.notes.TextRequest
@@ -45,8 +43,8 @@ class Note(
   override val personIdentifier: String,
 
   @ManyToOne
-  @JoinColumn(name = "type_id", nullable = false)
-  val type: SubType,
+  @JoinColumn(name = "sub_type_id", nullable = false)
+  val subType: SubType,
 
   @Column(nullable = false)
   override val occurredAt: LocalDateTime,
@@ -76,8 +74,8 @@ class Note(
   @Column(updatable = false, nullable = false)
   override val id: UUID = newUuid()
 
-  @Column(name = "type_id", insertable = false, updatable = false, nullable = false)
-  override val typeId: Long = type.id!!
+  @Column(name = "sub_type_id", insertable = false, updatable = false, nullable = false)
+  override val subTypeId: Long = subType.id!!
   override var legacyId: Long = 0
 
   @OneToMany(cascade = [CascadeType.ALL], mappedBy = "note")
@@ -113,7 +111,7 @@ class Note(
   }
 
   companion object {
-    val TYPE = Note::type.name
+    val SUB_TYPE = Note::subType.name
     val PERSON_IDENTIFIER = Note::personIdentifier.name
     val AUTHOR_USERNAME = Note::authorUsername.name
     val LOCATION_ID = Note::locationId.name
@@ -124,16 +122,16 @@ class Note(
 }
 
 interface NoteRepository : JpaSpecificationExecutor<Note>, JpaRepository<Note, UUID>, RefreshRepository<Note, UUID> {
-  @EntityGraph(attributePaths = ["type.parent", "amendments"])
+  @EntityGraph(attributePaths = ["subType.type", "amendments"])
   fun findByIdAndPersonIdentifier(id: UUID, prisonNumber: String): Note?
 
-  @EntityGraph(attributePaths = ["type.parent", "amendments"])
+  @EntityGraph(attributePaths = ["subType.type", "amendments"])
   fun findByLegacyIdAndPersonIdentifier(legacyId: Long, prisonNumber: String): Note?
 
-  @EntityGraph(attributePaths = ["type.parent", "amendments"])
+  @EntityGraph(attributePaths = ["subType.type", "amendments"])
   override fun findById(id: UUID): Optional<Note>
 
-  @EntityGraph(attributePaths = ["type.parent", "amendments"])
+  @EntityGraph(attributePaths = ["subType.type", "amendments"])
   fun findByLegacyId(legacyId: Long): Note?
 
   @Query("select nextval('case_note_legacy_id_seq')", nativeQuery = true)
@@ -170,13 +168,13 @@ fun occurredAfter(from: LocalDateTime) =
 fun matchesOnType(includeSensitive: Boolean, typeMap: Map<String, Set<String>>) =
   Specification<Note> { cn, _, cb ->
     @Suppress("UNCHECKED_CAST")
-    val subType = cn.fetch<Note, SubType>(TYPE, JoinType.INNER) as Join<Note, SubType>
+    val subType = cn.fetch<Note, SubType>(Note.SUB_TYPE, JoinType.INNER) as Join<Note, SubType>
 
     @Suppress("UNCHECKED_CAST")
-    val parentType = subType.fetch<SubType, Type>(PARENT, JoinType.INNER) as Join<SubType, Type>
+    val type = subType.fetch<SubType, Type>(SubType.TYPE, JoinType.INNER) as Join<SubType, Type>
 
     val typePredicate = typeMap.entries.map {
-      val matchParent = cb.equal(parentType.get<String>(Type.CODE), it.key)
+      val matchParent = cb.equal(type.get<String>(Type.CODE), it.key)
       if (it.value.isEmpty()) {
         matchParent
       } else {

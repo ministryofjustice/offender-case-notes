@@ -12,7 +12,7 @@ import uk.gov.justice.hmpps.casenotes.domain.SubType
 import uk.gov.justice.hmpps.casenotes.domain.SubTypeRepository
 import uk.gov.justice.hmpps.casenotes.domain.TypeKey
 import uk.gov.justice.hmpps.casenotes.domain.TypeLookup
-import uk.gov.justice.hmpps.casenotes.domain.getByParentCodeAndCode
+import uk.gov.justice.hmpps.casenotes.domain.getByTypeCodeAndCode
 import uk.gov.justice.hmpps.casenotes.domain.saveAndRefresh
 import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit
@@ -46,7 +46,7 @@ class SyncCaseNotes(
     }
 
     val saved = existing?.sync(request)
-      ?: noteRepository.saveAndRefresh(request.asNoteWithAmendments(typeRepository::getByParentCodeAndCode))
+      ?: noteRepository.saveAndRefresh(request.asNoteWithAmendments(typeRepository::getByTypeCodeAndCode))
 
     return SyncResult(
       saved.id,
@@ -63,7 +63,7 @@ class SyncCaseNotes(
   }
 
   private fun Note.sync(request: SyncNoteRequest): Note? =
-    if (!type.matches(request.type, request.subType) || text != request.text) {
+    if (!subType.matches(request.type, request.subType) || text != request.text) {
       noteRepository.delete(this)
       noteRepository.flush()
       null
@@ -95,8 +95,8 @@ class SyncCaseNotes(
 }
 
 private fun <T : TypeLookup> Collection<T>.exceptionMessage() =
-  sortedBy { it.parentCode }
-    .groupBy { it.parentCode }
+  sortedBy { it.typeCode }
+    .groupBy { it.typeCode }
     .map { e ->
       "${e.key}:${
         e.value.sortedBy { it.code }.joinToString(prefix = "[", postfix = "]", separator = ", ") { it.code }
@@ -105,7 +105,7 @@ private fun <T : TypeLookup> Collection<T>.exceptionMessage() =
     .joinToString(separator = ", ", prefix = "{ ", postfix = " }")
 
 private fun SubType.matches(parentCode: String, code: String): Boolean {
-  return this.code == code && this.parentCode == parentCode
+  return this.code == code && this.typeCode == parentCode
 }
 
 private fun Note.matchAmendment(request: SyncAmendmentRequest): Amendment? {

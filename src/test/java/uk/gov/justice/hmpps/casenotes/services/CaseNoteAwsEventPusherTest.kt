@@ -81,7 +81,7 @@ class CaseNoteAwsEventPusherTest {
 
   private fun caseCaseNote(): CaseNote {
     return CaseNote.builder()
-      .caseNoteId("abcde")
+      .id("abcde")
       .createdAt(LocalDateTime.parse("2019-03-04T10:11:12"))
       .occurredAt(LocalDateTime.parse("2018-02-03T10:11:12"))
       .locationId("MDI")

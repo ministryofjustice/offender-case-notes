@@ -8,8 +8,9 @@ import java.time.LocalDateTime
 @Schema(description = "Case Note")
 @JsonInclude(JsonInclude.Include.NON_NULL)
 data class CaseNote(
+  @JsonProperty("caseNoteId")
   @Schema(required = true, description = "Case Note Id (unique)", example = "12311312")
-  val caseNoteId: String,
+  val id: String,
 
   @JsonProperty("offenderIdentifier")
   @Schema(required = true, description = "Offender Unique Identifier", example = "A1234AA")
@@ -80,7 +81,7 @@ data class CaseNote(
 ) {
 
   class Builder internal constructor() {
-    private var caseNoteId: String? = null
+    private var id: String? = null
     private var personIdentifier: String? = null
     private var type: String? = null
     private var typeDescription: String? = null
@@ -99,8 +100,8 @@ data class CaseNote(
     private var systemGenerated = false
     private var legacyId: Long = 0
 
-    fun caseNoteId(caseNoteId: String): Builder = apply {
-      this.caseNoteId = caseNoteId
+    fun id(id: String): Builder = apply {
+      this.id = id
     }
 
     fun personIdentifier(offenderIdentifier: String): Builder = apply {
@@ -173,7 +174,7 @@ data class CaseNote(
 
     fun build(): CaseNote {
       return CaseNote(
-        caseNoteId!!,
+        id!!,
         personIdentifier!!,
         type!!,
         typeDescription!!,

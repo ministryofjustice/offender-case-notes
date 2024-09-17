@@ -6,7 +6,7 @@ import java.util.UUID
 
 interface NoteState {
   val personIdentifier: String
-  val typeId: Long
+  val subTypeId: Long
   val occurredAt: LocalDateTime
   val locationId: String
   val authorUsername: String

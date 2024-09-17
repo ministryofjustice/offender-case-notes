@@ -35,7 +35,7 @@ class OffenderCaseNoteFilter(
       predicateBuilder.add(cb.equal(root.get<Any>("authorUsername"), authorUsername))
     }
     if (excludeSensitive) {
-      val caseNoteType: Join<Any, Any> = root.join("caseNoteType", JoinType.INNER)
+      val caseNoteType: Join<Any, Any> = root.join("subType", JoinType.INNER)
       predicateBuilder.add(cb.equal(caseNoteType.get<Any>("sensitive"), false))
     }
     startDate?.let {
@@ -49,8 +49,8 @@ class OffenderCaseNoteFilter(
     }
 
     root.fetch<Any, Any>("amendments", JoinType.LEFT)
-    val type = root.fetch<Any, Any>("caseNoteType", JoinType.INNER)
-    type.fetch<Any, Any>("parentType", JoinType.INNER)
+    val type = root.fetch<Any, Any>("subType", JoinType.INNER)
+    type.fetch<Any, Any>("type", JoinType.INNER)
     return cb.and(*predicateBuilder.toTypedArray())
   }
 
@@ -70,26 +70,26 @@ class OffenderCaseNoteFilter(
     return cb.or(*typesPredicates.toTypedArray<Predicate>())
   }
 
-  private fun getTypePredicate(root: Root<OffenderCaseNote>, cb: CriteriaBuilder, type: String?): Predicate {
-    val caseNoteType: Join<Any, Any> = root.join("caseNoteType", JoinType.INNER)
-    val parentType: Join<Any, Any> = caseNoteType.join("parentType", JoinType.INNER)
-    return cb.equal(parentType.get<Any>("type"), type)
+  private fun getTypePredicate(root: Root<OffenderCaseNote>, cb: CriteriaBuilder, typeCode: String?): Predicate {
+    val subType: Join<Any, Any> = root.join("subType", JoinType.INNER)
+    val type: Join<Any, Any> = subType.join("type", JoinType.INNER)
+    return cb.equal(type.get<Any>("code"), typeCode)
   }
 
   private fun getSubtypesPredicate(
     root: Root<OffenderCaseNote>,
     cb: CriteriaBuilder,
-    type: String,
-    subTypes: Set<String>,
+    typeCode: String,
+    subTypeCodes: Set<String>,
   ): Predicate {
     val typePredicateBuilder: ImmutableList.Builder<Predicate> = ImmutableList.builder()
 
-    typePredicateBuilder.add(getTypePredicate(root, cb, type))
+    typePredicateBuilder.add(getTypePredicate(root, cb, typeCode))
 
-    val caseNoteType: Join<Any, Any> = root.join("caseNoteType", JoinType.INNER)
-    val inTypes: CriteriaBuilder.In<Any> = cb.`in`(caseNoteType.get("type"))
-    subTypes.forEach(Consumer { t: String -> inTypes.value(t) })
-    typePredicateBuilder.add(inTypes)
+    val caseNoteType: Join<Any, Any> = root.join("subType", JoinType.INNER)
+    val inCodes: CriteriaBuilder.In<Any> = cb.`in`(caseNoteType.get("code"))
+    subTypeCodes.forEach(Consumer { t: String -> inCodes.value(t) })
+    typePredicateBuilder.add(inCodes)
 
     val typePredicates = typePredicateBuilder.build()
     return cb.and(*typePredicates.toTypedArray<Predicate>())

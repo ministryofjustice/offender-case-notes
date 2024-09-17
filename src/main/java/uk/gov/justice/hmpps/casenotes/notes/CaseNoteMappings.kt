@@ -5,12 +5,12 @@ import uk.gov.justice.hmpps.casenotes.domain.Note
 import uk.gov.justice.hmpps.casenotes.notes.ReadCaseNote.Companion.SOURCE
 
 internal fun Note.toModel() = CaseNote(
-  caseNoteId = id.toString(),
+  id = id.toString(),
   personIdentifier = personIdentifier,
-  type = type.parent.code,
-  typeDescription = type.parent.description,
-  subType = type.code,
-  subTypeDescription = type.description,
+  type = subType.type.code,
+  typeDescription = subType.type.description,
+  subType = subType.code,
+  subTypeDescription = subType.description,
   source = SOURCE,
   createdAt = createdAt,
   occurredAt = occurredAt,
@@ -19,7 +19,7 @@ internal fun Note.toModel() = CaseNote(
   text = text,
   locationId = locationId,
   eventId = legacyId,
-  sensitive = type.sensitive,
+  sensitive = subType.sensitive,
   systemGenerated = systemGenerated,
   legacyId = legacyId,
   amendments = amendments().map { it.toModel() },
