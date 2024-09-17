@@ -35,6 +35,10 @@ class AuthorTest {
         DEFAULT.copy(firstName = "zoë", lastName = "FRANÇOIS"),
         "Zoë François",
       ),
+      Arguments.of(
+        DEFAULT.copy(firstName = "MULTI FIRST NAME", lastName = "MULTIPLE SURNAMES"),
+        "Multi First Name Multiple Surnames",
+      ),
     )
   }
 }
