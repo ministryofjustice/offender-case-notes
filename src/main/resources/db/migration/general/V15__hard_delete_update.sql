@@ -26,6 +26,7 @@ begin
     from case_notes cn
     where not exists(select 1 from case_note_deleted where case_note_id = cn.id);
 
+    delete from case_note_amendment where case_note_id = any (case_note_ids);
     delete from case_note where id = any (case_note_ids);
 end ;
 $$ language plpgsql;
