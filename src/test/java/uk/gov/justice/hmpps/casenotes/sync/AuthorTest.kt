@@ -27,6 +27,14 @@ class AuthorTest {
         DEFAULT.copy(firstName = "o'leary", lastName = "O'NEIL"),
         "O'Leary O'Neil",
       ),
+      Arguments.of(
+        DEFAULT.copy(firstName = "Andrés", lastName = "CEPEDA"),
+        "Andrés Cepeda",
+      ),
+      Arguments.of(
+        DEFAULT.copy(firstName = "zoë", lastName = "FRANÇOIS"),
+        "Zoë François",
+      ),
     )
   }
 }

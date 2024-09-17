@@ -91,7 +91,7 @@ data class Author(
   fun fullName(): String = "${firstName.capitalised()} ${lastName.capitalised()}"
 
   private fun String.capitalised(): String {
-    return this.lowercase().replace("\\W+\\w".toRegex()) {
+    return this.lowercase().replace("[^\\pL]+\\pL".toRegex()) {
       it.value.uppercase()
     }.replaceFirstChar { it.uppercase() }
   }
