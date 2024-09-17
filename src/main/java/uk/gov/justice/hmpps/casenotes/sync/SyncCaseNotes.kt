@@ -4,7 +4,6 @@ import com.microsoft.applicationinsights.TelemetryClient
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
-import uk.gov.justice.hmpps.casenotes.domain.Amendment
 import uk.gov.justice.hmpps.casenotes.domain.AmendmentRepository
 import uk.gov.justice.hmpps.casenotes.domain.Note
 import uk.gov.justice.hmpps.casenotes.domain.NoteRepository
@@ -14,8 +13,6 @@ import uk.gov.justice.hmpps.casenotes.domain.TypeKey
 import uk.gov.justice.hmpps.casenotes.domain.TypeLookup
 import uk.gov.justice.hmpps.casenotes.domain.getByTypeCodeAndCode
 import uk.gov.justice.hmpps.casenotes.domain.saveAndRefresh
-import java.time.LocalDateTime
-import java.time.temporal.ChronoUnit
 import java.util.UUID
 
 @Transactional
@@ -43,10 +40,11 @@ class SyncCaseNotes(
 
     existing?.also {
       check(it.personIdentifier == request.personIdentifier) { "Case note belongs to another prisoner or prisoner records have been merged" }
+      noteRepository.delete(it)
+      noteRepository.flush()
     }
 
-    val saved = existing?.sync(request)
-      ?: noteRepository.saveAndRefresh(request.asNoteWithAmendments(typeRepository::getByTypeCodeAndCode))
+    val saved = noteRepository.saveAndRefresh(request.asNoteWithAmendments(typeRepository::getByTypeCodeAndCode))
 
     return SyncResult(
       saved.id,
@@ -61,18 +59,6 @@ class SyncCaseNotes(
       telemetryClient.trackEvent("CaseNoteDeletedViaSync", mapOf("id" to it.toString()), mapOf())
     }
   }
-
-  private fun Note.sync(request: SyncNoteRequest): Note? =
-    if (!subType.matches(request.type, request.subType) || text != request.text) {
-      noteRepository.delete(this)
-      noteRepository.flush()
-      null
-    } else {
-      request.amendments.forEach {
-        matchAmendment(it) ?: addAmendment(it)
-      }
-      this
-    }
 
   private fun getTypesForSync(keys: Set<TypeKey>): Map<TypeKey, SubType> {
     val types = typeRepository.findByKeyIn(keys).associateBy { it.key }
@@ -103,20 +89,3 @@ private fun <T : TypeLookup> Collection<T>.exceptionMessage() =
       }"
     }
     .joinToString(separator = ", ", prefix = "{ ", postfix = " }")
-
-private fun SubType.matches(parentCode: String, code: String): Boolean {
-  return this.code == code && this.typeCode == parentCode
-}
-
-private fun Note.matchAmendment(request: SyncAmendmentRequest): Amendment? {
-  val matching = amendments().filter {
-    request.authorUsername == it.authorUsername && request.createdDateTime.sameSecond(it.createdAt)
-  }
-  return when (matching.size) {
-    1 -> matching.single()
-    else -> null
-  }
-}
-
-private fun LocalDateTime.sameSecond(other: LocalDateTime): Boolean =
-  truncatedTo(ChronoUnit.SECONDS) == other.truncatedTo(ChronoUnit.SECONDS)

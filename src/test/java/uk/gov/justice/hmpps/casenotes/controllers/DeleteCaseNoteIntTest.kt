@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
 import uk.gov.justice.hmpps.casenotes.config.SecurityUserContext.Companion.ROLE_CASE_NOTES_READ
 import uk.gov.justice.hmpps.casenotes.config.SecurityUserContext.Companion.ROLE_CASE_NOTES_WRITE
+import uk.gov.justice.hmpps.casenotes.domain.DeletionCause.DELETE
 import uk.gov.justice.hmpps.casenotes.health.wiremock.OAuthExtension.Companion.oAuthApi
 import uk.gov.justice.hmpps.casenotes.notes.DeletedCaseNoteRepository
 import uk.gov.justice.hmpps.casenotes.utils.NomisIdGenerator.prisonNumber
@@ -53,6 +54,7 @@ class DeleteCaseNoteIntTest : ResourceTest() {
     assertThat(saved).isNull()
     val deleted = deletedCaseNoteRepository.findByCaseNoteId(caseNote.id)
     assertThat(deleted!!.caseNote).isNotNull()
+    assertThat(deleted.cause).isEqualTo(DELETE)
     deleted.caseNote.verifyAgainst(caseNote)
   }
 
@@ -71,6 +73,7 @@ class DeleteCaseNoteIntTest : ResourceTest() {
     assertThat(saved).isNull()
     val deleted = deletedCaseNoteRepository.findByCaseNoteId(caseNote.id)
     assertThat(deleted!!.caseNote).isNotNull()
+    assertThat(deleted.cause).isEqualTo(DELETE)
     deleted.caseNote.verifyAgainst(caseNote)
   }
 
