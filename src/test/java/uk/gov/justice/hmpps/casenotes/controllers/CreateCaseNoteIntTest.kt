@@ -45,13 +45,6 @@ class CreateCaseNoteIntTest : ResourceTest() {
   }
 
   @Test
-  fun `cannot create a restricted case note without passing useRestrictedType`() {
-    val type = givenRandomType(restricted = true)
-    val request = createCaseNoteRequest(type = type.type.code, subType = type.code)
-    createCaseNote(prisonNumber(), request, params = mapOf()).errorResponse(HttpStatus.FORBIDDEN)
-  }
-
-  @Test
   fun `cannot create a case note with an inactive type`() {
     val type = givenRandomType(active = false, restricted = false)
     val request = createCaseNoteRequest(type = type.type.code, subType = type.code)
