@@ -6,7 +6,7 @@ generic-service:
 
   env:
     SENTRY_ENVIRONMENT: preprod
-    CASENOTES_API_BASE_URL: "https://preprod.offender-case-notes.service.justice.gov.uk"
+    SERVICE_BASE_URL: "https://preprod.offender-case-notes.service.justice.gov.uk"
     ELITE2_API_BASE_URL: "https://prison-api-preprod.prison.service.justice.gov.uk"
     OAUTH_API_BASE_URL: "https://sign-in-preprod.hmpps.service.justice.gov.uk/auth"
     PRISONER_SEARCH_API_BASE_URL: "https://prisoner-search-preprod.prison.service.justice.gov.uk"
@@ -14,6 +14,7 @@ generic-service:
     TOKENVERIFICATION_ENABLED: "false"
     SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_JWK_SET_URI: "https://sign-in-preprod.hmpps.service.justice.gov.uk/auth/.well-known/jwks.json"
     APPLICATIONINSIGHTS_CONFIGURATION_FILE: applicationinsights.json
+    SERVICE_PUBLISH_PERSON_EVENTS: "true"
 
   allowlist:
     delius-pre-prod-1: 52.56.240.62/32

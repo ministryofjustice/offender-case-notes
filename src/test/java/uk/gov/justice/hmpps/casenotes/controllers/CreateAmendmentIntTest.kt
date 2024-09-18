@@ -5,11 +5,14 @@ import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.springframework.http.HttpStatus
 import uk.gov.justice.hmpps.casenotes.config.SecurityUserContext
+import uk.gov.justice.hmpps.casenotes.config.Source
+import uk.gov.justice.hmpps.casenotes.events.PersonCaseNoteEvent
 import uk.gov.justice.hmpps.casenotes.health.wiremock.OAuthExtension.Companion.oAuthApi
 import uk.gov.justice.hmpps.casenotes.notes.AmendCaseNoteRequest
 import uk.gov.justice.hmpps.casenotes.notes.CaseNote
 import uk.gov.justice.hmpps.casenotes.utils.NomisIdGenerator.newId
 import uk.gov.justice.hmpps.casenotes.utils.NomisIdGenerator.prisonNumber
+import uk.gov.justice.hmpps.casenotes.utils.verifyAgainst
 import java.util.UUID
 
 class CreateAmendmentIntTest : ResourceTest() {
@@ -77,6 +80,8 @@ class CreateAmendmentIntTest : ResourceTest() {
       assertThat(text).isEqualTo(request.text)
       assertThat(authorUsername).isEqualTo(USERNAME)
     }
+
+    hmppsEventsQueue.receiveDomainEvent().verifyAgainst(PersonCaseNoteEvent.Type.UPDATED, Source.DPS, saved)
   }
 
   @Test
@@ -93,6 +98,8 @@ class CreateAmendmentIntTest : ResourceTest() {
       assertThat(text).isEqualTo(request.text)
       assertThat(authorUsername).isEqualTo(USERNAME)
     }
+
+    hmppsEventsQueue.receiveDomainEvent().verifyAgainst(PersonCaseNoteEvent.Type.UPDATED, Source.DPS, saved)
   }
 
   @Test
@@ -111,6 +118,8 @@ class CreateAmendmentIntTest : ResourceTest() {
       assertThat(text).isEqualTo(request.text)
       assertThat(authorUsername).isEqualTo(USERNAME)
     }
+
+    assertThat(hmppsEventsQueue.receiveDomainEventsOnQueue()).isEmpty()
   }
 
   private fun amendCaseNoteRequest(

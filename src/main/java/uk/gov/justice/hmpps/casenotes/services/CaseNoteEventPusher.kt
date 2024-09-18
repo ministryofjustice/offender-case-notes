@@ -26,7 +26,7 @@ interface CaseNoteEventPusher {
 class CaseNoteAwsEventPusher(
   private val hmppsQueueService: HmppsQueueService,
   private val objectMapper: ObjectMapper,
-  @Value("\${casenotes.api.base.url}") private val caseNotesApiBaseUrl: String,
+  @Value("\${service.base-url}") private val serviceBaseUrl: String,
 ) : CaseNoteEventPusher {
   companion object {
     val log: Logger = LoggerFactory.getLogger(this::class.java)
@@ -36,7 +36,7 @@ class CaseNoteAwsEventPusher(
 
   override fun sendEvent(caseNote: CaseNote) {
     if (isSensitiveCaseNote(caseNote.id)) {
-      val cne = HmppsDomainEvent(caseNote, caseNotesApiBaseUrl)
+      val cne = HmppsDomainEvent(caseNote, serviceBaseUrl)
       log.info("Pushing case note {} to event topic with event type of {}", caseNote.id, cne.eventType)
       try {
         val publishResponse = eventTopic.publish(
