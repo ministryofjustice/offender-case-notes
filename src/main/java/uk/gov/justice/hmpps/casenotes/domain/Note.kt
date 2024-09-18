@@ -148,8 +148,10 @@ fun NoteRepository.saveAndRefresh(note: Note): Note {
 }
 
 fun matchesPrisonNumber(prisonNumber: String) =
-  Specification<Note> { cn, _, cb ->
-    cn.fetch<Note, Amendment>(AMENDMENTS, JoinType.LEFT)
+  Specification<Note> { cn, q, cb ->
+    if (q.resultType == cn.javaType) {
+      cn.join<Note, Amendment>(AMENDMENTS, JoinType.LEFT)
+    }
     cb.equal(cb.lower(cn[PERSON_IDENTIFIER]), prisonNumber.lowercase())
   }
 
@@ -166,12 +168,19 @@ fun occurredAfter(from: LocalDateTime) =
   Specification<Note> { csip, _, cb -> cb.greaterThanOrEqualTo(csip[OCCURRED_AT], from) }
 
 fun matchesOnType(includeSensitive: Boolean, typeMap: Map<String, Set<String>>) =
-  Specification<Note> { cn, _, cb ->
-    @Suppress("UNCHECKED_CAST")
-    val subType = cn.fetch<Note, SubType>(Note.SUB_TYPE, JoinType.INNER) as Join<Note, SubType>
+  Specification<Note> { cn, q, cb ->
+    val (type, subType) = if (q.resultType == cn.javaType) {
+      @Suppress("UNCHECKED_CAST")
+      val subType = cn.fetch<Note, SubType>(Note.SUB_TYPE, JoinType.INNER) as Join<Note, SubType>
 
-    @Suppress("UNCHECKED_CAST")
-    val type = subType.fetch<SubType, Type>(SubType.TYPE, JoinType.INNER) as Join<SubType, Type>
+      @Suppress("UNCHECKED_CAST")
+      val type = subType.fetch<SubType, Type>(SubType.TYPE, JoinType.INNER) as Join<SubType, Type>
+      (type to subType)
+    } else {
+      val subType = cn.join<Note, SubType>(Note.SUB_TYPE, JoinType.INNER)
+      val type = subType.join<SubType, Type>(SubType.TYPE, JoinType.INNER)
+      (type to subType)
+    }
 
     val typePredicate = typeMap.entries.map {
       val matchParent = cb.equal(type.get<String>(Type.CODE), it.key)
