@@ -27,7 +27,7 @@ spring:
     hikari:
       pool-name: OffenderCaseNotes-CP
       connectionTimeout: 10000
-      validationTimeout:  500
+      validationTimeout: 500
       maximum-pool-size: 10
 
   jackson:
@@ -87,4 +87,7 @@ management:
       cache:
         time-to-live: 2000ms
 
-service.active-prisons:
+service:
+  active-prisons:
+  publish-person-events: false
+  base-url:

@@ -24,8 +24,8 @@ management.endpoint:
   health.cache.time-to-live: 0
   info.cache.time-to-live: 0
 
-casenotes:
-  api.base.url: http://localhost:8080
+service.base-url: http://localhost:8080
+
 elite2:
   api.base.url: http://localhost:8999
 oauth:
@@ -45,6 +45,10 @@ token: eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJpbnRlcm5hbFVzZXIiOnRydWUsInVzZXJf
 hmpps.sqs:
   provider: localstack
   queues:
+    hmppseventtestqueue:
+      queueName: ${random.uuid}
+      dlqName: ${random.uuid}
+      subscribeTopicId: domainevents
     event:
       queueName: ${random.uuid}
       dlqName: ${random.uuid}

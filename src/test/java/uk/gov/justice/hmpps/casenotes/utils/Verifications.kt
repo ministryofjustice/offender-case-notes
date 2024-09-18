@@ -1,13 +1,18 @@
 package uk.gov.justice.hmpps.casenotes.utils
 
 import org.assertj.core.api.Assertions.assertThat
+import org.springframework.data.jpa.domain.AbstractAuditable_.createdBy
+import uk.gov.justice.hmpps.casenotes.config.Source
 import uk.gov.justice.hmpps.casenotes.domain.Amendment
 import uk.gov.justice.hmpps.casenotes.domain.Note
+import uk.gov.justice.hmpps.casenotes.events.DomainEvent
+import uk.gov.justice.hmpps.casenotes.events.PersonCaseNoteEvent
 import uk.gov.justice.hmpps.casenotes.notes.CaseNote
 import uk.gov.justice.hmpps.casenotes.notes.CaseNoteAmendment
 import uk.gov.justice.hmpps.casenotes.notes.DeletedDetail
 import uk.gov.justice.hmpps.casenotes.sync.SyncAmendmentRequest
 import uk.gov.justice.hmpps.casenotes.sync.SyncNoteRequest
+import java.awt.SystemColor.text
 import java.time.temporal.ChronoUnit.SECONDS
 
 fun CaseNote.verifyAgainst(note: Note) {
@@ -61,4 +66,18 @@ fun DeletedDetail.verifyAgainst(note: Note) {
   assertThat(authorUserId).isEqualTo(note.authorUserId)
   assertThat(legacyId).isEqualTo(note.legacyId)
   assertThat(createdBy).isEqualTo(note.createdBy)
+}
+
+fun DomainEvent.verifyAgainst(eventType: PersonCaseNoteEvent.Type, source: Source, saved: Note) {
+  assertThat(this.eventType).isEqualTo("person.case-note.${eventType.name.lowercase()}")
+  assertThat(detailUrl).isEqualTo("http://localhost:8080/case-notes/${saved.personIdentifier}/${saved.id}")
+  assertThat(personReference.findNomsNumber()).isEqualTo(saved.personIdentifier)
+  with(additionalInformation) {
+    assertThat(id).isEqualTo(saved.id)
+    assertThat(type).isEqualTo(saved.subType.type.code)
+    assertThat(subType).isEqualTo(saved.subType.code)
+    assertThat(legacyId).isEqualTo(saved.legacyId)
+    assertThat(this.source).isEqualTo(source)
+    assertThat(syncToNomis).isEqualTo(saved.subType.syncToNomis)
+  }
 }

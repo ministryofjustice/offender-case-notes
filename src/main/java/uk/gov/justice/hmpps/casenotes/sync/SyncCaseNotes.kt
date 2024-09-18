@@ -1,6 +1,7 @@
 package uk.gov.justice.hmpps.casenotes.sync
 
 import com.microsoft.applicationinsights.TelemetryClient
+import org.springframework.context.ApplicationEventPublisher
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -13,6 +14,10 @@ import uk.gov.justice.hmpps.casenotes.domain.TypeKey
 import uk.gov.justice.hmpps.casenotes.domain.TypeLookup
 import uk.gov.justice.hmpps.casenotes.domain.getByTypeCodeAndCode
 import uk.gov.justice.hmpps.casenotes.domain.saveAndRefresh
+import uk.gov.justice.hmpps.casenotes.events.PersonCaseNoteEvent.Companion.createEvent
+import uk.gov.justice.hmpps.casenotes.events.PersonCaseNoteEvent.Type.CREATED
+import uk.gov.justice.hmpps.casenotes.events.PersonCaseNoteEvent.Type.DELETED
+import uk.gov.justice.hmpps.casenotes.events.PersonCaseNoteEvent.Type.UPDATED
 import java.util.UUID
 
 @Transactional
@@ -21,6 +26,7 @@ class SyncCaseNotes(
   private val typeRepository: SubTypeRepository,
   private val noteRepository: NoteRepository,
   private val amendmentRepository: AmendmentRepository,
+  private val eventPublisher: ApplicationEventPublisher,
   private val telemetryClient: TelemetryClient,
 ) {
   fun migrateNotes(toMigrate: List<MigrateCaseNoteRequest>): List<MigrationResult> {
@@ -46,6 +52,8 @@ class SyncCaseNotes(
 
     val saved = noteRepository.saveAndRefresh(request.asNoteWithAmendments(typeRepository::getByTypeCodeAndCode))
 
+    eventPublisher.publishEvent(saved.createEvent(existing?.let { UPDATED } ?: CREATED))
+
     return SyncResult(
       saved.id,
       saved.legacyId,
@@ -56,7 +64,8 @@ class SyncCaseNotes(
   fun deleteCaseNote(id: UUID) {
     noteRepository.findByIdOrNull(id)?.also {
       noteRepository.delete(it)
-      telemetryClient.trackEvent("CaseNoteDeletedViaSync", mapOf("id" to it.toString()), mapOf())
+      eventPublisher.publishEvent(it.createEvent(DELETED))
+      telemetryClient.trackEvent("CaseNoteDeletedViaSync", it.eventProperties(), mapOf())
     }
   }
 
@@ -89,3 +98,16 @@ private fun <T : TypeLookup> Collection<T>.exceptionMessage() =
       }"
     }
     .joinToString(separator = ", ", prefix = "{ ", postfix = " }")
+
+private fun Note.eventProperties(): Map<String, String> {
+  return java.util.Map.of(
+    "caseNoteId",
+    id.toString(),
+    "type",
+    subType.type.code,
+    "subType",
+    subType.code,
+    "personIdentifier",
+    personIdentifier,
+  )
+}

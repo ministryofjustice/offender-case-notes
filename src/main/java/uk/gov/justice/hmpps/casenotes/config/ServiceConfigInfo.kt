@@ -6,15 +6,19 @@ import org.springframework.boot.context.properties.ConfigurationProperties
 import org.springframework.stereotype.Component
 
 @Component
-class ActivePrisonsInfo(
+class ServiceConfigInfo(
   private val serviceConfig: ServiceConfig,
 ) : InfoContributor {
-  override fun contribute(builder: Info.Builder?) {
-    builder?.withDetail("activeAgencies", serviceConfig.activePrisons)
+  override fun contribute(builder: Info.Builder) {
+    builder
+      .withDetail("activeAgencies", serviceConfig.activePrisons)
+      .withDetail("publishPersonEvents", serviceConfig.publishPersonEvents)
   }
 }
 
 @ConfigurationProperties(prefix = "service")
 data class ServiceConfig(
   val activePrisons: Set<String>,
+  val baseUrl: String,
+  val publishPersonEvents: Boolean,
 )

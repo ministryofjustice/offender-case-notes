@@ -69,8 +69,10 @@ class CaseNoteAwsEventPusherTest {
         .topicArn("topicArn")
         .messageAttributes(
           mapOf(
-            "eventType" to MessageAttributeValue.builder().dataType("String").stringValue("prison.case-note.published").build(),
-            "contentType" to MessageAttributeValue.builder().dataType("String").stringValue("text/plain;charset=UTF-8").build(),
+            "eventType" to MessageAttributeValue.builder().dataType("String").stringValue("prison.case-note.published")
+              .build(),
+            "contentType" to MessageAttributeValue.builder().dataType("String").stringValue("text/plain;charset=UTF-8")
+              .build(),
             "caseNoteType" to MessageAttributeValue.builder().dataType("String").stringValue("GEN-OSE").build(),
           ),
         )
