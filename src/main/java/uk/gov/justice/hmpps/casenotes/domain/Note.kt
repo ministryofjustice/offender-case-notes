@@ -169,7 +169,7 @@ fun occurredAfter(from: LocalDateTime) =
 
 fun matchesOnType(includeSensitive: Boolean, typeMap: Map<String, Set<String>>) =
   Specification<Note> { cn, q, cb ->
-    val (type, subType) =  if (q.resultType == cn.javaType)  {
+    val (type, subType) = if (q.resultType == cn.javaType) {
       @Suppress("UNCHECKED_CAST")
       val subType = cn.fetch<Note, SubType>(Note.SUB_TYPE, JoinType.INNER) as Join<Note, SubType>
 
