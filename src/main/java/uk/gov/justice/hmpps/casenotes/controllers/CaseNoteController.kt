@@ -22,7 +22,6 @@ import org.springframework.web.bind.annotation.PutMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestHeader
 import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestController
 import uk.gov.justice.hmpps.casenotes.config.CaseNoteRequestContext
@@ -136,8 +135,6 @@ class CaseNoteController(
     @Parameter(description = "Person Identifier", required = true, example = "A1234AA")
     @PathVariable personIdentifier: String,
     @Valid @RequestBody createCaseNote: CreateCaseNoteRequest,
-    @Parameter(description = "Boolean to indicate that the user creating the case note has privileges to use restricted use case note types")
-    @RequestParam(required = false, defaultValue = "false") useRestrictedType: Boolean,
     @RequestHeader(required = false, value = CASELOAD_ID) caseloadId: String? = null,
   ): CaseNote {
     val caseNote = if (caseloadId in serviceConfig.activePrisons) {
@@ -146,7 +143,7 @@ class CaseNoteController(
       } else {
         createCaseNote
       }
-      save.createNote(personIdentifier, request, useRestrictedType)
+      save.createNote(personIdentifier, request)
     } else {
       caseNoteService.createCaseNote(personIdentifier, createCaseNote)
     }
@@ -180,11 +177,10 @@ class CaseNoteController(
     @Parameter(description = "Case Note Id", required = true, example = "518b2200-6489-4c77-8514-10cf80ccd488")
     @PathVariable caseNoteIdentifier: String,
     @Valid @RequestBody amendedText: AmendCaseNoteRequest,
-    @RequestParam(required = false, defaultValue = "false") useRestrictedType: Boolean,
     @RequestHeader(required = false, value = CASELOAD_ID) caseloadId: String? = null,
   ): CaseNote {
     val caseNote = if (caseloadId in serviceConfig.activePrisons) {
-      save.createAmendment(personIdentifier, caseNoteIdentifier, amendedText, useRestrictedType)
+      save.createAmendment(personIdentifier, caseNoteIdentifier, amendedText)
     } else {
       caseNoteService.amendCaseNote(personIdentifier, caseNoteIdentifier, amendedText)
     }

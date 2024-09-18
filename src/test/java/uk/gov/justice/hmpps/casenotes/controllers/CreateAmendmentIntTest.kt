@@ -43,14 +43,6 @@ class CreateAmendmentIntTest : ResourceTest() {
   }
 
   @Test
-  fun `cannot amend a restricted case note without passing useRestrictedType`() {
-    val type = givenRandomType(restricted = true)
-    val caseNote = givenCaseNote(generateCaseNote(prisonNumber(), type))
-    val request = amendCaseNoteRequest()
-    amendCaseNote(caseNote.personIdentifier, caseNote.id.toString(), request, mapOf()).expectStatus().isForbidden
-  }
-
-  @Test
   fun `cannot amend a sync to nomis case note with non nomis user`() {
     val username = "DeliusUser"
     oAuthApi.subGetUserDetails(username, nomisUser = false)

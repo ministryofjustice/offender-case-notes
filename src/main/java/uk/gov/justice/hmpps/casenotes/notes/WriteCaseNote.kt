@@ -23,9 +23,9 @@ class WriteCaseNote(
   private val subTypeRepository: SubTypeRepository,
   private val noteRepository: NoteRepository,
 ) {
-  fun createNote(personIdentifier: String, request: CreateCaseNoteRequest, useRestrictedType: Boolean): CaseNote {
+  fun createNote(personIdentifier: String, request: CreateCaseNoteRequest): CaseNote {
     val type = subTypeRepository.getByTypeCodeAndCode(request.type, request.subType)
-      .validateTypeUsage(useRestrictedType)
+      .validateTypeUsage()
 
     if (!type.active) throw ValidationException("Case note type not active")
 
@@ -36,10 +36,9 @@ class WriteCaseNote(
     personIdentifier: String,
     caseNoteId: String,
     request: AmendCaseNoteRequest,
-    useRestrictedType: Boolean,
   ): CaseNote {
     val caseNote = getCaseNote(personIdentifier, caseNoteId).also {
-      it.subType.validateTypeUsage(useRestrictedType)
+      it.subType.validateTypeUsage()
     }
 
     return noteRepository.saveAndFlush(caseNote.addAmendment(request)).toModel()
@@ -55,10 +54,7 @@ class WriteCaseNote(
       else -> noteRepository.findByLegacyIdAndPersonIdentifier(legacyId, personIdentifier)
     }?.takeIf { it.personIdentifier == personIdentifier } ?: throw EntityNotFoundException.withId(caseNoteId)
 
-  private fun SubType.validateTypeUsage(useRestrictedType: Boolean) = apply {
-    if (restrictedUse && !useRestrictedType) {
-      throw AccessDeniedException("Case note type is for restricted use, but useRestrictedType was not set")
-    }
+  private fun SubType.validateTypeUsage() = apply {
     if (!CaseNoteRequestContext.get().nomisUser && syncToNomis) {
       throw AccessDeniedException("Unable to author 'sync to nomis' type without a nomis user")
     }
