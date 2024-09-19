@@ -172,6 +172,20 @@ class ReadCaseNotesIntTest : ResourceTest() {
     assertThat(found.subTypeDescription).isEqualTo(toFind.subType.description)
   }
 
+  @Test
+  fun `can retrieve paginated case notes with amendments`() {
+    val prisonNumber = prisonNumber()
+    val types = getAllTypes().asSequence().take(20)
+    types.forEach { givenCaseNote(generateCaseNote(prisonNumber, it)).withAmendment().withAmendment().withAmendment() }
+
+    val response = getCaseNotes(
+      prisonNumber,
+      mapOf("includeSensitive" to "true"),
+    ).page()
+
+    assertThat(response.totalElements).isEqualTo(20)
+  }
+
   private fun getCaseNotes(
     prisonNumber: String,
     queryParams: Map<String, String> = mapOf(),
