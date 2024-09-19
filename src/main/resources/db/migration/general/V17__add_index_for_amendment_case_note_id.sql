@@ -1,0 +1,22 @@
+alter index offender_case_note_pkey rename to case_note_pkey;
+alter index idx_case_note_prison_number_lower rename to idx_case_note_person_identifier_lower;
+alter index offender_case_note_idx1 rename to idx_case_note_person_identifier;
+alter index offender_case_note_idx2 rename to idx_case_note_location_id;
+alter index offender_case_note_idx3 rename to idx_case_note_author_username;
+alter index offender_case_note_idx4 rename to idx_case_note_sub_type_id;
+alter index offender_case_note_idx5 rename to idx_case_note_occurred_at_location_id;
+alter table case_note
+    rename constraint offender_case_note_case_note_type_id_fkey to fk_case_note_sub_type_id;
+
+create index case_note_amendment_case_note_id on case_note_amendment (case_note_id);
+alter table case_note_amendment
+    rename constraint offender_case_note_amendment_offender_case_note_id_fkey to fk_case_note_amendment_case_note_id;
+
+alter table case_note_sub_type
+    rename constraint case_note_type_parent_type_fkey to case_note_sub_type_type_code;
+alter index case_note_type_pkey rename to case_note_sub_type_pkey;
+alter index case_note_type_uk rename to unq_case_note_type_code_and_code;
+
+alter index case_note_parent_type_pkey rename to case_note_type_pkey;
+
+alter sequence case_note_type_case_note_type_id_seq rename to case_note_sub_type_id_seq;

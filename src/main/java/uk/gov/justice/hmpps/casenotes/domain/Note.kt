@@ -19,7 +19,6 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor
 import org.springframework.data.jpa.repository.Query
 import uk.gov.justice.hmpps.casenotes.config.CaseNoteRequestContext
 import uk.gov.justice.hmpps.casenotes.domain.IdGenerator.newUuid
-import uk.gov.justice.hmpps.casenotes.domain.Note.Companion.AMENDMENTS
 import uk.gov.justice.hmpps.casenotes.domain.Note.Companion.AUTHOR_USERNAME
 import uk.gov.justice.hmpps.casenotes.domain.Note.Companion.LOCATION_ID
 import uk.gov.justice.hmpps.casenotes.domain.Note.Companion.OCCURRED_AT
@@ -117,7 +116,6 @@ class Note(
     val LOCATION_ID = Note::locationId.name
     val OCCURRED_AT = Note::occurredAt.name
     val CREATED_AT = Note::createdAt.name
-    const val AMENDMENTS = "amendments"
   }
 }
 
@@ -139,6 +137,9 @@ interface NoteRepository : JpaSpecificationExecutor<Note>, JpaRepository<Note, U
 
   @Query("select new uk.gov.justice.hmpps.casenotes.sync.MigrationResult(n.id, n.legacyId) from Note n where n.legacyId in (:legacyIds)")
   fun findMigratedIds(legacyIds: List<Long>): List<MigrationResult>
+
+  @EntityGraph(attributePaths = ["subType.type", "amendments"])
+  fun findAllByIdIn(ids: Collection<UUID>): List<Note>
 }
 
 fun NoteRepository.saveAndRefresh(note: Note): Note {
@@ -148,10 +149,7 @@ fun NoteRepository.saveAndRefresh(note: Note): Note {
 }
 
 fun matchesPrisonNumber(prisonNumber: String) =
-  Specification<Note> { cn, q, cb ->
-    if (q.resultType == cn.javaType) {
-      cn.join<Note, Amendment>(AMENDMENTS, JoinType.LEFT)
-    }
+  Specification<Note> { cn, _, cb ->
     cb.equal(cb.lower(cn[PERSON_IDENTIFIER]), prisonNumber.lowercase())
   }
 

@@ -28,8 +28,11 @@ import java.util.UUID.fromString
 class ReadCaseNote(
   private val noteRepository: NoteRepository,
 ) {
-  fun caseNotes(prisonNumber: String, filter: CaseNoteFilter, pageable: Pageable): Page<CaseNote> =
-    noteRepository.findAll(filter.asSpecification(prisonNumber), pageable.forSpecification()).map { it.toModel() }
+  fun caseNotes(prisonNumber: String, filter: CaseNoteFilter, pageable: Pageable): Page<CaseNote> {
+    val page = noteRepository.findAll(filter.asSpecification(prisonNumber), pageable.forSpecification())
+    val records = noteRepository.findAllByIdIn(page.content.map { it.id }).associateBy { it.id }
+    return page.map { records[it.id]!!.toModel() }
+  }
 
   fun caseNote(prisonNumber: String, caseNoteId: String): CaseNote {
     val caseNote = when (val legacyId = caseNoteId.asLegacyId()) {
