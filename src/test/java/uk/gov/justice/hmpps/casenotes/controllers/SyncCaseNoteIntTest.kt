@@ -52,6 +52,7 @@ class SyncCaseNoteIntTest : ResourceTest() {
       amendments = setOf(
         syncAmendmentRequest(
           author = Author("", "", "", ""),
+          text = "",
         ),
       ),
     )
@@ -70,7 +71,6 @@ class SyncCaseNoteIntTest : ResourceTest() {
         |location must be no more than 12 characters
         |person identifier cannot be more than 12 characters
         |sub type must be no more than 12 characters
-        |text cannot be blank
         |type must be no more than 12 characters
         |
         """.trimMargin(),
