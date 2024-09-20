@@ -15,6 +15,7 @@ data class PersonCaseNoteEvent(
   val subType: String,
   val source: Source,
   val syncToNomis: Boolean,
+  val systemGenerated: Boolean,
 ) {
   enum class Type {
     CREATED,
@@ -37,6 +38,7 @@ data class PersonCaseNoteEvent(
       subType.code,
       CaseNoteRequestContext.get().source,
       subType.syncToNomis,
+      systemGenerated,
     )
   }
 }
@@ -46,6 +48,6 @@ fun PersonCaseNoteEvent.asDomainEvent(baseUrl: String): DomainEvent = DomainEven
   eventName,
   baseUrl + detailUrl,
   description = "A case note has been ${eventType.name.lowercase()}",
-  AdditionalInformation(id, legacyId, type, subType, source, syncToNomis),
+  AdditionalInformation(id, legacyId, type, subType, source, syncToNomis, systemGenerated),
   PersonReference.withIdentifier(personIdentifier),
 )

@@ -79,5 +79,6 @@ fun DomainEvent.verifyAgainst(eventType: PersonCaseNoteEvent.Type, source: Sourc
     assertThat(legacyId).isEqualTo(saved.legacyId)
     assertThat(this.source).isEqualTo(source)
     assertThat(syncToNomis).isEqualTo(saved.subType.syncToNomis)
+    assertThat(systemGenerated).isEqualTo(saved.systemGenerated)
   }
 }

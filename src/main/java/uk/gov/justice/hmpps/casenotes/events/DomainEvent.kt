@@ -21,6 +21,7 @@ data class AdditionalInformation(
   val subType: String,
   val source: Source,
   val syncToNomis: Boolean,
+  val systemGenerated: Boolean,
 )
 
 data class PersonReference(val identifiers: Set<Identifier> = setOf()) {
