@@ -1,5 +1,6 @@
 package uk.gov.justice.hmpps.casenotes.systemgenerated
 
+import org.springframework.context.ApplicationEventPublisher
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import uk.gov.justice.hmpps.casenotes.config.CaseNoteRequestContext
@@ -10,6 +11,8 @@ import uk.gov.justice.hmpps.casenotes.domain.SubType
 import uk.gov.justice.hmpps.casenotes.domain.SubTypeRepository
 import uk.gov.justice.hmpps.casenotes.domain.getByTypeCodeAndCode
 import uk.gov.justice.hmpps.casenotes.domain.saveAndRefresh
+import uk.gov.justice.hmpps.casenotes.events.PersonCaseNoteEvent.Companion.createEvent
+import uk.gov.justice.hmpps.casenotes.events.PersonCaseNoteEvent.Type.CREATED
 import uk.gov.justice.hmpps.casenotes.notes.CaseNote
 import uk.gov.justice.hmpps.casenotes.notes.toModel
 
@@ -18,10 +21,13 @@ import uk.gov.justice.hmpps.casenotes.notes.toModel
 class CreateSysGenNote(
   private val subTypeRepository: SubTypeRepository,
   private val noteRepository: NoteRepository,
+  private val eventPublisher: ApplicationEventPublisher,
 ) {
   fun systemGeneratedCaseNote(personIdentifier: String, request: SystemGeneratedRequest): CaseNote {
     val type = subTypeRepository.getByTypeCodeAndCode(request.type, request.subType).validated()
-    return noteRepository.saveAndRefresh(request.toEntity(personIdentifier, type, get())).toModel()
+    val saved = noteRepository.saveAndRefresh(request.toEntity(personIdentifier, type, get()))
+    eventPublisher.publishEvent(saved.createEvent(CREATED))
+    return saved.toModel()
   }
 
   private fun SubType.validated() = apply {

@@ -58,11 +58,26 @@ class CreateAmendmentIntTest : ResourceTest() {
         amendCaseNoteRequest(),
         mapOf(),
         tokenUsername = username,
-      )
-        .errorResponse(HttpStatus.FORBIDDEN)
+      ).errorResponse(HttpStatus.FORBIDDEN)
 
     with(response) {
       assertThat(developerMessage).isEqualTo("Unable to author 'sync to nomis' type without a nomis user")
+    }
+  }
+
+  @Test
+  fun `400 bad request - cannot amend empty text`() {
+    val caseNote = givenCaseNote(generateCaseNote())
+    val response =
+      amendCaseNote(
+        caseNote.personIdentifier,
+        caseNote.id.toString(),
+        amendCaseNoteRequest(text = ""),
+        mapOf(),
+      ).errorResponse(HttpStatus.BAD_REQUEST)
+
+    with(response) {
+      assertThat(userMessage).isEqualTo("Validation failure: text cannot be blank")
     }
   }
 

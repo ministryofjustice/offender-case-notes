@@ -43,5 +43,6 @@ class PersonCaseNoteEventListener(
     "subType" to subType,
     "source" to source.toString(),
     "syncToNomis" to syncToNomis.toString(),
+    "systemGenerated" to systemGenerated.toString(),
   )
 }

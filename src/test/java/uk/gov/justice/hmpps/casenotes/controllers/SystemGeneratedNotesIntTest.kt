@@ -5,12 +5,15 @@ import org.junit.jupiter.api.Test
 import org.springframework.http.HttpStatus
 import uk.gov.justice.hmpps.casenotes.config.SecurityUserContext.Companion.ROLE_CASE_NOTES_WRITE
 import uk.gov.justice.hmpps.casenotes.config.SecurityUserContext.Companion.ROLE_SYSTEM_GENERATED_RW
+import uk.gov.justice.hmpps.casenotes.config.Source
 import uk.gov.justice.hmpps.casenotes.domain.Note
+import uk.gov.justice.hmpps.casenotes.events.PersonCaseNoteEvent
 import uk.gov.justice.hmpps.casenotes.health.wiremock.OAuthExtension.Companion.oAuthApi
 import uk.gov.justice.hmpps.casenotes.health.wiremock.PrisonerSearchApiExtension.Companion.prisonerSearchApi
 import uk.gov.justice.hmpps.casenotes.notes.CaseNote
 import uk.gov.justice.hmpps.casenotes.systemgenerated.SystemGeneratedRequest
 import uk.gov.justice.hmpps.casenotes.utils.NomisIdGenerator.prisonNumber
+import uk.gov.justice.hmpps.casenotes.utils.verifyAgainst
 import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit.SECONDS
 import java.util.UUID
@@ -92,6 +95,8 @@ class SystemGeneratedNotesIntTest : ResourceTest() {
     val response = sysGenNote(personIdentifier, request, username = apiClientId).success<CaseNote>(HttpStatus.CREATED)
     val saved = noteRepository.findByIdAndPersonIdentifier(UUID.fromString(response.id), personIdentifier)
     requireNotNull(saved).verifyAgainst(request, apiClientId)
+
+    hmppsEventsQueue.receiveDomainEvent().verifyAgainst(PersonCaseNoteEvent.Type.CREATED, Source.DPS, saved)
   }
 
   @Test
@@ -111,6 +116,8 @@ class SystemGeneratedNotesIntTest : ResourceTest() {
     val response = sysGenNote(personIdentifier, request, username = apiClientId).success<CaseNote>(HttpStatus.CREATED)
     val saved = noteRepository.findByIdAndPersonIdentifier(UUID.fromString(response.id), personIdentifier)
     requireNotNull(saved).verifyAgainst(request, apiClientId)
+
+    hmppsEventsQueue.receiveDomainEvent().verifyAgainst(PersonCaseNoteEvent.Type.CREATED, Source.DPS, saved)
   }
 
   @Test
@@ -134,6 +141,8 @@ class SystemGeneratedNotesIntTest : ResourceTest() {
     val saved = noteRepository.findByIdAndPersonIdentifier(UUID.fromString(response.id), personIdentifier)
     requireNotNull(saved).verifyAgainst(request, apiClientId)
     assertThat(saved.locationId).isEqualTo(prisonId)
+
+    hmppsEventsQueue.receiveDomainEvent().verifyAgainst(PersonCaseNoteEvent.Type.CREATED, Source.DPS, saved)
   }
 
   private fun Note.verifyAgainst(request: SystemGeneratedRequest, userId: String) {
