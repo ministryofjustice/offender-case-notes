@@ -8,6 +8,8 @@ import jakarta.persistence.ManyToOne
 import jakarta.persistence.Table
 import jakarta.persistence.Version
 import org.springframework.data.jpa.repository.JpaRepository
+import org.springframework.data.jpa.repository.Modifying
+import org.springframework.data.jpa.repository.Query
 import uk.gov.justice.hmpps.casenotes.domain.audit.SimpleAudited
 import java.util.UUID
 
@@ -41,4 +43,8 @@ class Amendment(
   override fun compareTo(other: Amendment): Int = createdAt.compareTo(other.createdAt)
 }
 
-interface AmendmentRepository : JpaRepository<Amendment, UUID>
+interface AmendmentRepository : JpaRepository<Amendment, UUID> {
+  @Modifying
+  @Query("delete from Amendment a where a.note.personIdentifier = :personIdentifier and a.note.legacyId > 0 ")
+  fun deleteLegacyAmendments(personIdentifier: String)
+}

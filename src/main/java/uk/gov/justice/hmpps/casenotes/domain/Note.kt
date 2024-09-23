@@ -16,6 +16,7 @@ import org.springframework.data.jpa.domain.Specification
 import org.springframework.data.jpa.repository.EntityGraph
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor
+import org.springframework.data.jpa.repository.Modifying
 import org.springframework.data.jpa.repository.Query
 import uk.gov.justice.hmpps.casenotes.config.CaseNoteRequestContext
 import uk.gov.justice.hmpps.casenotes.domain.IdGenerator.newUuid
@@ -26,7 +27,6 @@ import uk.gov.justice.hmpps.casenotes.domain.Note.Companion.PERSON_IDENTIFIER
 import uk.gov.justice.hmpps.casenotes.domain.audit.DeletedEntityListener
 import uk.gov.justice.hmpps.casenotes.domain.audit.SimpleAudited
 import uk.gov.justice.hmpps.casenotes.notes.TextRequest
-import uk.gov.justice.hmpps.casenotes.sync.MigrationResult
 import uk.gov.justice.hmpps.casenotes.sync.SyncAmendmentRequest
 import java.time.LocalDateTime
 import java.util.Optional
@@ -135,11 +135,12 @@ interface NoteRepository : JpaSpecificationExecutor<Note>, JpaRepository<Note, U
   @Query("select nextval('case_note_legacy_id_seq')", nativeQuery = true)
   fun getNextLegacyId(): Long
 
-  @Query("select new uk.gov.justice.hmpps.casenotes.sync.MigrationResult(n.id, n.legacyId) from Note n where n.legacyId in (:legacyIds)")
-  fun findMigratedIds(legacyIds: List<Long>): List<MigrationResult>
-
   @EntityGraph(attributePaths = ["subType.type", "amendments"])
   fun findAllByIdIn(ids: Collection<UUID>): List<Note>
+
+  @Modifying
+  @Query("delete from Note n where n.personIdentifier = :personIdentifier and n.legacyId > 0 ")
+  fun deleteLegacyCaseNotes(personIdentifier: String)
 }
 
 fun NoteRepository.saveAndRefresh(note: Note): Note {

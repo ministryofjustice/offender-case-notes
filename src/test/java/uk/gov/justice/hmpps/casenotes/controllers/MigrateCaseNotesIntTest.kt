@@ -13,7 +13,7 @@ import uk.gov.justice.hmpps.casenotes.sync.MigrateAmendmentRequest
 import uk.gov.justice.hmpps.casenotes.sync.MigrateCaseNoteRequest
 import uk.gov.justice.hmpps.casenotes.sync.MigrationResult
 import uk.gov.justice.hmpps.casenotes.utils.NomisIdGenerator
-import uk.gov.justice.hmpps.casenotes.utils.NomisIdGenerator.prisonNumber
+import uk.gov.justice.hmpps.casenotes.utils.NomisIdGenerator.personIdentifier
 import uk.gov.justice.hmpps.casenotes.utils.verifyAgainst
 import java.time.Duration
 import java.time.LocalDateTime
@@ -62,12 +62,12 @@ class MigrateCaseNotesIntTest : ResourceTest() {
 
   @Test
   fun `200 ok - new case notes created`() {
-    val prisonNumbers = (0..100).map { prisonNumber() }
+    val personIdentifier = personIdentifier()
     val types = getAllTypes().filter { it.syncToNomis }
-    val request = (0..2_500).map {
+    val request = (0..500).map {
       val type = types.random()
       migrateCaseNoteRequest(
-        prisonIdentifier = prisonNumbers.random(),
+        prisonIdentifier = personIdentifier,
         type = type.type.code,
         subType = type.code,
         amendments = if (it % 5 == 0) setOf(migrateAmendmentRequest(), migrateAmendmentRequest()) else setOf(),
@@ -87,7 +87,7 @@ class MigrateCaseNotesIntTest : ResourceTest() {
       createdDateTime = LocalDateTime.now().minusDays(3),
     )
     val request = migrateCaseNoteRequest(
-      prisonIdentifier = prisonNumber(),
+      prisonIdentifier = personIdentifier(),
       locationId = "LEI",
       type = type.type.code,
       subType = type.code,
@@ -106,9 +106,9 @@ class MigrateCaseNotesIntTest : ResourceTest() {
 
   @Test
   fun `200 ok - some case note already exists`() {
-    val prisonNumber = prisonNumber()
+    val prisonNumber = personIdentifier()
     val types = getAllTypes().filter { it.syncToNomis }
-    val migrated = givenCaseNote(generateCaseNote(prisonNumber, types.random()))
+    val migrated = givenCaseNote(generateCaseNote(prisonNumber, types.random()).withAmendment().withAmendment())
     val secondType = types.random()
     val request = listOf(
       migrateCaseNoteRequest(prisonIdentifier = prisonNumber, type = secondType.typeCode, subType = secondType.code),
@@ -139,7 +139,7 @@ class MigrateCaseNotesIntTest : ResourceTest() {
 
 private fun migrateCaseNoteRequest(
   legacyId: Long = NomisIdGenerator.newId(),
-  prisonIdentifier: String = prisonNumber(),
+  prisonIdentifier: String = personIdentifier(),
   locationId: String = "SWI",
   type: String = "OMIC",
   subType: String = "GEN",

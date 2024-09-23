@@ -2,9 +2,12 @@ package uk.gov.justice.hmpps.casenotes.sync
 
 import com.microsoft.applicationinsights.TelemetryClient
 import org.springframework.context.ApplicationEventPublisher
+import org.springframework.dao.DataIntegrityViolationException
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Propagation
 import org.springframework.transaction.annotation.Transactional
+import org.springframework.transaction.support.TransactionTemplate
 import uk.gov.justice.hmpps.casenotes.domain.AmendmentRepository
 import uk.gov.justice.hmpps.casenotes.domain.Note
 import uk.gov.justice.hmpps.casenotes.domain.NoteRepository
@@ -28,14 +31,34 @@ class SyncCaseNotes(
   private val amendmentRepository: AmendmentRepository,
   private val eventPublisher: ApplicationEventPublisher,
   private val telemetryClient: TelemetryClient,
+  private val transactionTemplate: TransactionTemplate,
 ) {
+  @Transactional(propagation = Propagation.NEVER)
   fun migrateNotes(toMigrate: List<MigrateCaseNoteRequest>): List<MigrationResult> {
+    val personIdentifiers = toMigrate.map { it.personIdentifier }
     val types = getTypesForSync(toMigrate.map { it.typeKey() }.toSet())
-    val existingIds = noteRepository.findMigratedIds(toMigrate.map { it.legacyId })
-    val existingLegacyIds = existingIds.map { it.legacyId }.toSet()
-    val new = toMigrate.filter { it.legacyId !in existingLegacyIds }
-      .map { it.asNoteAndAmendments { t, st -> requireNotNull(types[TypeKey(t, st)]) } }
-    return create(new).map { MigrationResult(it.id, it.legacyId) } + existingIds
+    val new = toMigrate.map { it.asNoteAndAmendments { t, st -> requireNotNull(types[TypeKey(t, st)]) } }
+    val created = try {
+      transactionTemplate.execute {
+        create(new)
+      }
+    } catch (dive: DataIntegrityViolationException) {
+      transactionTemplate.execute {
+        personIdentifiers.forEach {
+          amendmentRepository.deleteLegacyAmendments(it)
+          noteRepository.deleteLegacyCaseNotes(it)
+        }
+        create(new)
+      }
+    }
+
+    return created.map { MigrationResult(it.id, it.legacyId) }.also {
+      telemetryClient.trackEvent(
+        "MigrateCaseNotes",
+        mapOf("personIdentifier" to personIdentifiers.toString(), "count" to toMigrate.count().toString()),
+        mapOf(),
+      )
+    }
   }
 
   fun syncNote(request: SyncCaseNoteRequest): SyncResult {
@@ -85,6 +108,7 @@ class SyncCaseNotes(
   private fun create(new: List<NoteAndAmendments>): List<Note> {
     val notes = noteRepository.saveAll(new.map { it.note })
     amendmentRepository.saveAll(new.flatMap { it.amendments })
+    noteRepository.flush()
     return notes
   }
 }

@@ -21,7 +21,7 @@ import uk.gov.justice.hmpps.casenotes.sync.SyncResult
 import uk.gov.justice.hmpps.casenotes.sync.SyncResult.Action.CREATED
 import uk.gov.justice.hmpps.casenotes.sync.SyncResult.Action.UPDATED
 import uk.gov.justice.hmpps.casenotes.utils.NomisIdGenerator
-import uk.gov.justice.hmpps.casenotes.utils.NomisIdGenerator.prisonNumber
+import uk.gov.justice.hmpps.casenotes.utils.NomisIdGenerator.personIdentifier
 import uk.gov.justice.hmpps.casenotes.utils.verifyAgainst
 import java.time.LocalDateTime
 import java.util.UUID
@@ -82,7 +82,7 @@ class SyncCaseNoteIntTest : ResourceTest() {
   @Test
   fun `400 bad request - exception thrown if person identifier doesn't match`() {
     val existing = givenCaseNote(generateCaseNote())
-    val request = existing.syncRequest().copy(personIdentifier = prisonNumber())
+    val request = existing.syncRequest().copy(personIdentifier = personIdentifier())
     val response = syncCaseNote(request).errorResponse(HttpStatus.BAD_REQUEST)
     assertThat(response.developerMessage)
       .isEqualTo("Case note belongs to another prisoner or prisoner records have been merged")
@@ -116,7 +116,7 @@ class SyncCaseNoteIntTest : ResourceTest() {
 
   @Test
   fun `200 ok - sync updates an existing case note using id`() {
-    val prisonNumber = prisonNumber()
+    val prisonNumber = personIdentifier()
     val existing = givenCaseNote(generateCaseNote(prisonNumber))
     val request = existing.syncRequest()
     val response = syncCaseNote(request).success<SyncResult>(HttpStatus.OK)
@@ -135,7 +135,7 @@ class SyncCaseNoteIntTest : ResourceTest() {
 
   @Test
   fun `200 ok - sync updates an existing case note using legacy id`() {
-    val prisonNumber = prisonNumber()
+    val prisonNumber = personIdentifier()
     val existing = givenCaseNote(generateCaseNote(prisonNumber))
     val request = existing.syncRequest().copy(id = null)
     val response = syncCaseNote(request).success<SyncResult>(HttpStatus.OK)
@@ -154,7 +154,7 @@ class SyncCaseNoteIntTest : ResourceTest() {
 
   @Test
   fun `200 ok - sync updates an existing case note with amendments`() {
-    val prisonNumber = prisonNumber()
+    val prisonNumber = personIdentifier()
     val existing = givenCaseNote(
       generateCaseNote(prisonNumber).withAmendment(createdAt = LocalDateTime.now().minusSeconds(5)),
     )
@@ -187,7 +187,7 @@ class SyncCaseNoteIntTest : ResourceTest() {
 
   @Test
   fun `204 no content - delete case note`() {
-    val prisonNumber = prisonNumber()
+    val prisonNumber = personIdentifier()
     val note = givenCaseNote(generateCaseNote(prisonNumber))
     val cns = { noteRepository.findByIdOrNull(note.id) }
     assertThat(cns()).isNotNull()
@@ -232,7 +232,7 @@ class SyncCaseNoteIntTest : ResourceTest() {
 private fun syncCaseNoteRequest(
   legacyId: Long = NomisIdGenerator.newId(),
   id: UUID? = null,
-  prisonIdentifier: String = prisonNumber(),
+  prisonIdentifier: String = personIdentifier(),
   locationId: String = "SWI",
   type: String = "OMIC",
   subType: String = "GEN",

@@ -12,7 +12,7 @@ import uk.gov.justice.hmpps.casenotes.health.wiremock.OAuthExtension.Companion.o
 import uk.gov.justice.hmpps.casenotes.health.wiremock.PrisonerSearchApiExtension.Companion.prisonerSearchApi
 import uk.gov.justice.hmpps.casenotes.notes.CaseNote
 import uk.gov.justice.hmpps.casenotes.systemgenerated.SystemGeneratedRequest
-import uk.gov.justice.hmpps.casenotes.utils.NomisIdGenerator.prisonNumber
+import uk.gov.justice.hmpps.casenotes.utils.NomisIdGenerator.personIdentifier
 import uk.gov.justice.hmpps.casenotes.utils.verifyAgainst
 import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit.SECONDS
@@ -21,18 +21,18 @@ import java.util.UUID
 class SystemGeneratedNotesIntTest : ResourceTest() {
   @Test
   fun `401 unauthorised`() {
-    webTestClient.post().uri(urlToTest(prisonNumber())).exchange().expectStatus().isUnauthorized
+    webTestClient.post().uri(urlToTest(personIdentifier())).exchange().expectStatus().isUnauthorized
   }
 
   @Test
   fun `403 forbidden - does not have the right role`() {
-    sysGenNote(prisonNumber(), sysGenRequest(), roles = listOf(ROLE_CASE_NOTES_WRITE)).expectStatus().isForbidden
+    sysGenNote(personIdentifier(), sysGenRequest(), roles = listOf(ROLE_CASE_NOTES_WRITE)).expectStatus().isForbidden
   }
 
   @Test
   fun `400 bad request - case note type must exist`() {
     val request = sysGenRequest(type = "NON_EXISTENT", subType = "NOT_THERE")
-    val response = sysGenNote(prisonNumber(), request).errorResponse(HttpStatus.BAD_REQUEST)
+    val response = sysGenNote(personIdentifier(), request).errorResponse(HttpStatus.BAD_REQUEST)
     with(response) {
       assertThat(status).isEqualTo(HttpStatus.BAD_REQUEST.value())
       assertThat(developerMessage).isEqualTo("Unknown case note type NON_EXISTENT:NOT_THERE")
@@ -43,7 +43,7 @@ class SystemGeneratedNotesIntTest : ResourceTest() {
   fun `400 bad request - case note types cannot be sync to nomis type`() {
     val type = getAllTypes().filter { it.syncToNomis }.random()
     val request = sysGenRequest(type = type.type.code, subType = type.code)
-    val response = sysGenNote(prisonNumber(), request).errorResponse(HttpStatus.BAD_REQUEST)
+    val response = sysGenNote(personIdentifier(), request).errorResponse(HttpStatus.BAD_REQUEST)
     with(response) {
       assertThat(status).isEqualTo(HttpStatus.BAD_REQUEST.value())
       assertThat(developerMessage).isEqualTo("System generated case notes cannot use a sync to nomis type")
@@ -60,7 +60,7 @@ class SystemGeneratedNotesIntTest : ResourceTest() {
       authorName = "n".repeat(81),
       text = "",
     )
-    val response = sysGenNote(prisonNumber(), request).errorResponse(HttpStatus.BAD_REQUEST)
+    val response = sysGenNote(personIdentifier(), request).errorResponse(HttpStatus.BAD_REQUEST)
     with(response) {
       assertThat(status).isEqualTo(HttpStatus.BAD_REQUEST.value())
       assertThat(developerMessage).isEqualTo(
@@ -81,7 +81,7 @@ class SystemGeneratedNotesIntTest : ResourceTest() {
   @Test
   fun `201 ok - new case note is correctly stored`() {
     val type = getAllTypes().filter { it.typeCode == "ACP" && !it.syncToNomis }.random()
-    val personIdentifier = prisonNumber()
+    val personIdentifier = personIdentifier()
 
     val request = sysGenRequest(
       type = type.type.code,
@@ -102,7 +102,7 @@ class SystemGeneratedNotesIntTest : ResourceTest() {
   @Test
   fun `201 ok - new case note stored when optional fields are null`() {
     val type = getAllTypes().filter { it.typeCode == "ACP" && !it.syncToNomis }.random()
-    val personIdentifier = prisonNumber()
+    val personIdentifier = personIdentifier()
 
     val request = sysGenRequest(
       type = type.type.code,
@@ -122,7 +122,7 @@ class SystemGeneratedNotesIntTest : ResourceTest() {
 
   @Test
   fun `201 ok - use prison id from prisoner search when location id not provided`() {
-    val personIdentifier = prisonNumber()
+    val personIdentifier = personIdentifier()
     val prisonId = "LEI"
     oAuthApi.stubGrantToken()
     prisonerSearchApi.stubPrisonerDetails(personIdentifier, prisonId)

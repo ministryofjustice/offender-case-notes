@@ -13,7 +13,7 @@ import uk.gov.justice.hmpps.casenotes.events.PersonCaseNoteEvent
 import uk.gov.justice.hmpps.casenotes.health.wiremock.OAuthExtension.Companion.oAuthApi
 import uk.gov.justice.hmpps.casenotes.notes.CaseNote
 import uk.gov.justice.hmpps.casenotes.notes.CreateCaseNoteRequest
-import uk.gov.justice.hmpps.casenotes.utils.NomisIdGenerator.prisonNumber
+import uk.gov.justice.hmpps.casenotes.utils.NomisIdGenerator.personIdentifier
 import uk.gov.justice.hmpps.casenotes.utils.verifyAgainst
 import java.time.LocalDateTime
 import java.util.UUID.fromString
@@ -21,13 +21,13 @@ import java.util.UUID.fromString
 class CreateCaseNoteIntTest : ResourceTest() {
   @Test
   fun `401 unauthorised`() {
-    webTestClient.post().uri(urlToTest(prisonNumber())).exchange().expectStatus().isUnauthorized
+    webTestClient.post().uri(urlToTest(personIdentifier())).exchange().expectStatus().isUnauthorized
   }
 
   @Test
   fun `403 forbidden - does not have the right role`() {
     createCaseNote(
-      prisonNumber(),
+      personIdentifier(),
       createCaseNoteRequest(),
       roles = listOf(ROLE_CASE_NOTES_READ),
     ).expectStatus().isForbidden
@@ -36,7 +36,7 @@ class CreateCaseNoteIntTest : ResourceTest() {
   @Test
   fun `cannot create case note without user details`() {
     val request = createCaseNoteRequest()
-    val response = createCaseNote(prisonNumber(), request, tokenUsername = "NoneExistentUser")
+    val response = createCaseNote(personIdentifier(), request, tokenUsername = "NoneExistentUser")
       .errorResponse(HttpStatus.BAD_REQUEST)
 
     with(response) {
@@ -49,7 +49,7 @@ class CreateCaseNoteIntTest : ResourceTest() {
   fun `cannot create a case note with an inactive type`() {
     val type = givenRandomType(active = false, restricted = false)
     val request = createCaseNoteRequest(type = type.type.code, subType = type.code)
-    val response = createCaseNote(prisonNumber(), request, params = mapOf()).errorResponse(HttpStatus.BAD_REQUEST)
+    val response = createCaseNote(personIdentifier(), request, params = mapOf()).errorResponse(HttpStatus.BAD_REQUEST)
 
     with(response) {
       assertThat(developerMessage).isEqualTo("Case note type not active")
@@ -62,7 +62,7 @@ class CreateCaseNoteIntTest : ResourceTest() {
     oAuthApi.subGetUserDetails(username, nomisUser = false)
     val type = getAllTypes().first { it.syncToNomis }
     val request = createCaseNoteRequest(type = type.type.code, subType = type.code)
-    val response = createCaseNote(prisonNumber(), request, params = mapOf(), tokenUsername = username)
+    val response = createCaseNote(personIdentifier(), request, params = mapOf(), tokenUsername = username)
       .errorResponse(HttpStatus.FORBIDDEN)
 
     with(response) {
@@ -73,7 +73,7 @@ class CreateCaseNoteIntTest : ResourceTest() {
   @Test
   fun `can create a case note with write role using jwt subject`() {
     val request = createCaseNoteRequest()
-    val response = createCaseNote(prisonNumber(), request).success<CaseNote>(HttpStatus.CREATED)
+    val response = createCaseNote(personIdentifier(), request).success<CaseNote>(HttpStatus.CREATED)
 
     val saved = requireNotNull(
       noteRepository.findByIdAndPersonIdentifier(fromString(response.id), response.personIdentifier),
@@ -93,7 +93,7 @@ class CreateCaseNoteIntTest : ResourceTest() {
       locationId = "n".repeat(13),
       text = "",
     )
-    val response = createCaseNote(prisonNumber(), request).errorResponse(HttpStatus.BAD_REQUEST)
+    val response = createCaseNote(personIdentifier(), request).errorResponse(HttpStatus.BAD_REQUEST)
     with(response) {
       assertThat(status).isEqualTo(HttpStatus.BAD_REQUEST.value())
       assertThat(developerMessage).isEqualTo(
@@ -121,7 +121,7 @@ class CreateCaseNoteIntTest : ResourceTest() {
         "systemGenerated": null
       }
     """.trimMargin()
-    val response = createCaseNoteWithStringRequestBody(prisonNumber(), request).success<CaseNote>(HttpStatus.CREATED)
+    val response = createCaseNoteWithStringRequestBody(personIdentifier(), request).success<CaseNote>(HttpStatus.CREATED)
 
     val saved = requireNotNull(
       noteRepository.findByIdAndPersonIdentifier(fromString(response.id), response.personIdentifier),

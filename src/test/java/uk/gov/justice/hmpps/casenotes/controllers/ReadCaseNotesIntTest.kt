@@ -8,19 +8,19 @@ import org.springframework.test.web.reactive.server.WebTestClient
 import uk.gov.justice.hmpps.casenotes.config.SecurityUserContext.Companion.ROLE_CASE_NOTES_READ
 import uk.gov.justice.hmpps.casenotes.config.SecurityUserContext.Companion.ROLE_CASE_NOTES_WRITE
 import uk.gov.justice.hmpps.casenotes.notes.CaseNote
-import uk.gov.justice.hmpps.casenotes.utils.NomisIdGenerator.prisonNumber
+import uk.gov.justice.hmpps.casenotes.utils.NomisIdGenerator.personIdentifier
 import uk.gov.justice.hmpps.casenotes.utils.verifyAgainst
 import java.time.LocalDateTime
 
 class ReadCaseNotesIntTest : ResourceTest() {
   @Test
   fun `401 unauthorised`() {
-    webTestClient.get().uri(urlToTest(prisonNumber())).exchange().expectStatus().isUnauthorized
+    webTestClient.get().uri(urlToTest(personIdentifier())).exchange().expectStatus().isUnauthorized
   }
 
   @Test
   fun `403 forbidden - does not have the right role`() {
-    getCaseNotes(prisonNumber(), roles = listOf("ANY_OTHER_ROLE")).expectStatus().isForbidden
+    getCaseNotes(personIdentifier(), roles = listOf("ANY_OTHER_ROLE")).expectStatus().isForbidden
   }
 
   @ParameterizedTest
@@ -37,7 +37,7 @@ class ReadCaseNotesIntTest : ResourceTest() {
 
   @Test
   fun `can filter case notes by author name`() {
-    val prisonNumber = prisonNumber()
+    val prisonNumber = personIdentifier()
     val caseNote = givenCaseNote(generateCaseNote(prisonNumber, authorUsername = "AuCn2"))
     givenCaseNote(generateCaseNote(prisonNumber, authorUsername = "AuCn1"))
     assertThat(getCaseNotes(prisonNumber).page().totalElements).isEqualTo(2)
@@ -50,7 +50,7 @@ class ReadCaseNotesIntTest : ResourceTest() {
 
   @Test
   fun `can filter case notes by location id`() {
-    val prisonNumber = prisonNumber()
+    val prisonNumber = personIdentifier()
     val caseNote = givenCaseNote(generateCaseNote(prisonNumber, locationId = "SWI"))
     givenCaseNote(generateCaseNote(prisonNumber, locationId = "LEI"))
     assertThat(getCaseNotes(prisonNumber).page().totalElements).isEqualTo(2)
@@ -63,7 +63,7 @@ class ReadCaseNotesIntTest : ResourceTest() {
 
   @Test
   fun `can filter sensitive case notes`() {
-    val prisonNumber = prisonNumber()
+    val prisonNumber = personIdentifier()
     val sensitiveType = givenRandomType(sensitive = true)
     val nonSensitiveType = givenRandomType(sensitive = false)
     val caseNote = givenCaseNote(generateCaseNote(prisonNumber, nonSensitiveType))
@@ -78,7 +78,7 @@ class ReadCaseNotesIntTest : ResourceTest() {
 
   @Test
   fun `can filter by occurrence date time`() {
-    val prisonNumber = prisonNumber()
+    val prisonNumber = personIdentifier()
     givenCaseNote(generateCaseNote(prisonNumber, occurredAt = LocalDateTime.now().minusDays(7)))
     val caseNote = givenCaseNote(generateCaseNote(prisonNumber, occurredAt = LocalDateTime.now().minusDays(5)))
     givenCaseNote(generateCaseNote(prisonNumber, occurredAt = LocalDateTime.now().minusDays(3)))
@@ -98,7 +98,7 @@ class ReadCaseNotesIntTest : ResourceTest() {
 
   @Test
   fun `can sort by occurred at`() {
-    val prisonNumber = prisonNumber()
+    val prisonNumber = personIdentifier()
     givenCaseNote(generateCaseNote(prisonNumber, text = "SEVEN", occurredAt = LocalDateTime.now().minusDays(7)))
     givenCaseNote(generateCaseNote(prisonNumber, text = "FIVE", occurredAt = LocalDateTime.now().minusDays(5)))
     givenCaseNote(generateCaseNote(prisonNumber, text = "THREE", occurredAt = LocalDateTime.now().minusDays(3)))
@@ -114,7 +114,7 @@ class ReadCaseNotesIntTest : ResourceTest() {
 
   @Test
   fun `can sort by created at`() {
-    val prisonNumber = prisonNumber()
+    val prisonNumber = personIdentifier()
     givenCaseNote(generateCaseNote(prisonNumber, text = "SEVEN", createdAt = LocalDateTime.now().minusDays(7)))
     givenCaseNote(generateCaseNote(prisonNumber, text = "FIVE", createdAt = LocalDateTime.now().minusDays(5)))
     givenCaseNote(generateCaseNote(prisonNumber, text = "THREE", createdAt = LocalDateTime.now().minusDays(3)))
@@ -130,7 +130,7 @@ class ReadCaseNotesIntTest : ResourceTest() {
 
   @Test
   fun `can filter by parent type`() {
-    val prisonNumber = prisonNumber()
+    val prisonNumber = personIdentifier()
     val types = getAllTypes().asSequence()
       .filter { !it.sensitive }
       .groupBy { it.type.code }
@@ -149,7 +149,7 @@ class ReadCaseNotesIntTest : ResourceTest() {
 
   @Test
   fun `can filter by a single sub type`() {
-    val prisonNumber = prisonNumber()
+    val prisonNumber = personIdentifier()
     val types = getAllTypes().asSequence()
       .filter { !it.sensitive }
       .groupBy { it.type.code }
@@ -174,7 +174,7 @@ class ReadCaseNotesIntTest : ResourceTest() {
 
   @Test
   fun `can retrieve paginated case notes with amendments`() {
-    val prisonNumber = prisonNumber()
+    val prisonNumber = personIdentifier()
     val types = getAllTypes().asSequence().take(20)
     types.forEach { givenCaseNote(generateCaseNote(prisonNumber, it)).withAmendment().withAmendment().withAmendment() }
 

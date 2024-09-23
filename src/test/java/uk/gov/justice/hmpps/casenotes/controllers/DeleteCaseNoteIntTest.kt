@@ -12,7 +12,7 @@ import uk.gov.justice.hmpps.casenotes.domain.DeletionCause.DELETE
 import uk.gov.justice.hmpps.casenotes.events.PersonCaseNoteEvent
 import uk.gov.justice.hmpps.casenotes.health.wiremock.OAuthExtension.Companion.oAuthApi
 import uk.gov.justice.hmpps.casenotes.notes.DeletedCaseNoteRepository
-import uk.gov.justice.hmpps.casenotes.utils.NomisIdGenerator.prisonNumber
+import uk.gov.justice.hmpps.casenotes.utils.NomisIdGenerator.personIdentifier
 import uk.gov.justice.hmpps.casenotes.utils.verifyAgainst
 import java.util.UUID
 
@@ -23,14 +23,14 @@ class DeleteCaseNoteIntTest : ResourceTest() {
 
   @Test
   fun `401 unauthorised`() {
-    webTestClient.post().uri(urlToTest(prisonNumber(), UUID.randomUUID().toString()))
+    webTestClient.post().uri(urlToTest(personIdentifier(), UUID.randomUUID().toString()))
       .exchange().expectStatus().isUnauthorized
   }
 
   @Test
   fun `403 forbidden - does not have the right role`() {
     deleteCaseNote(
-      prisonNumber(),
+      personIdentifier(),
       UUID.randomUUID().toString(),
       roles = listOf(ROLE_CASE_NOTES_READ),
     ).expectStatus().isForbidden
@@ -38,7 +38,7 @@ class DeleteCaseNoteIntTest : ResourceTest() {
 
   @Test
   fun `cannot delete case note without user details`() {
-    val response = deleteCaseNote(prisonNumber(), UUID.randomUUID().toString(), username = "NoneExistentUser")
+    val response = deleteCaseNote(personIdentifier(), UUID.randomUUID().toString(), username = "NoneExistentUser")
       .errorResponse(HttpStatus.BAD_REQUEST)
 
     with(response) {
@@ -49,7 +49,7 @@ class DeleteCaseNoteIntTest : ResourceTest() {
 
   @Test
   fun `can delete a case note with write role`() {
-    val caseNote = givenCaseNote(generateCaseNote(prisonNumber()).withAmendment())
+    val caseNote = givenCaseNote(generateCaseNote(personIdentifier()).withAmendment())
     deleteCaseNote(caseNote.personIdentifier, caseNote.id.toString()).expectStatus().isOk
 
     val saved = noteRepository.findByIdAndPersonIdentifier(caseNote.id, caseNote.personIdentifier)
@@ -65,7 +65,7 @@ class DeleteCaseNoteIntTest : ResourceTest() {
   @Test
   fun `can delete using legacy api`() {
     val type = getAllTypes().first { !it.syncToNomis }
-    val caseNote = givenCaseNote(generateCaseNote(prisonNumber(), type).withAmendment())
+    val caseNote = givenCaseNote(generateCaseNote(personIdentifier(), type).withAmendment())
     deleteCaseNote(
       caseNote.personIdentifier,
       caseNote.id.toString(),
