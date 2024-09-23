@@ -31,7 +31,10 @@ class SyncCaseNotes(
 ) {
   fun migrateNotes(toMigrate: List<MigrateCaseNoteRequest>): List<MigrationResult> {
     val personIdentifiers = toMigrate.map { it.personIdentifier }
-    personIdentifiers.forEach(noteRepository::deleteLegacyCaseNotes)
+    personIdentifiers.forEach {
+      amendmentRepository.deleteLegacyAmendments(it)
+      noteRepository.deleteLegacyCaseNotes(it)
+    }
     val types = getTypesForSync(toMigrate.map { it.typeKey() }.toSet())
     val new = toMigrate.map { it.asNoteAndAmendments { t, st -> requireNotNull(types[TypeKey(t, st)]) } }
     return create(new).map { MigrationResult(it.id, it.legacyId) }.also {

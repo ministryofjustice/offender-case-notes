@@ -108,7 +108,7 @@ class MigrateCaseNotesIntTest : ResourceTest() {
   fun `200 ok - some case note already exists`() {
     val prisonNumber = prisonNumber()
     val types = getAllTypes().filter { it.syncToNomis }
-    val migrated = givenCaseNote(generateCaseNote(prisonNumber, types.random()))
+    val migrated = givenCaseNote(generateCaseNote(prisonNumber, types.random()).withAmendment().withAmendment())
     val secondType = types.random()
     val request = listOf(
       migrateCaseNoteRequest(prisonIdentifier = prisonNumber, type = secondType.typeCode, subType = secondType.code),
