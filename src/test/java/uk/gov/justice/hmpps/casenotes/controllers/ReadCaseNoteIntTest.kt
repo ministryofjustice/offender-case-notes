@@ -12,14 +12,14 @@ import java.util.UUID
 class ReadCaseNoteIntTest : ResourceTest() {
   @Test
   fun `401 unauthorised`() {
-    webTestClient.get().uri(urlToTest(NomisIdGenerator.prisonNumber(), UUID.randomUUID().toString()))
+    webTestClient.get().uri(urlToTest(NomisIdGenerator.personIdentifier(), UUID.randomUUID().toString()))
       .exchange().expectStatus().isUnauthorized
   }
 
   @Test
   fun `403 forbidden - does not have the right role`() {
     getCaseNote(
-      NomisIdGenerator.prisonNumber(),
+      NomisIdGenerator.personIdentifier(),
       UUID.randomUUID().toString(),
       listOf("ANY_OTHER_ROLE"),
     ).expectStatus().isForbidden

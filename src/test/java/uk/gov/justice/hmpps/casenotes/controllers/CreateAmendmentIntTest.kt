@@ -11,21 +11,21 @@ import uk.gov.justice.hmpps.casenotes.health.wiremock.OAuthExtension.Companion.o
 import uk.gov.justice.hmpps.casenotes.notes.AmendCaseNoteRequest
 import uk.gov.justice.hmpps.casenotes.notes.CaseNote
 import uk.gov.justice.hmpps.casenotes.utils.NomisIdGenerator.newId
-import uk.gov.justice.hmpps.casenotes.utils.NomisIdGenerator.prisonNumber
+import uk.gov.justice.hmpps.casenotes.utils.NomisIdGenerator.personIdentifier
 import uk.gov.justice.hmpps.casenotes.utils.verifyAgainst
 import java.util.UUID
 
 class CreateAmendmentIntTest : ResourceTest() {
   @Test
   fun `401 unauthorised`() {
-    webTestClient.put().uri(urlToTest(), prisonNumber(), UUID.randomUUID().toString())
+    webTestClient.put().uri(urlToTest(), personIdentifier(), UUID.randomUUID().toString())
       .exchange().expectStatus().isUnauthorized
   }
 
   @Test
   fun `403 forbidden - does not have the right role`() {
     amendCaseNote(
-      prisonNumber(),
+      personIdentifier(),
       UUID.randomUUID().toString(),
       amendCaseNoteRequest(),
       roles = listOf(SecurityUserContext.ROLE_CASE_NOTES_READ),
@@ -36,7 +36,7 @@ class CreateAmendmentIntTest : ResourceTest() {
   fun `cannot create case note without user details`() {
     val request = amendCaseNoteRequest()
     val response =
-      amendCaseNote(prisonNumber(), UUID.randomUUID().toString(), request, tokenUsername = "NoneExistentUser")
+      amendCaseNote(personIdentifier(), UUID.randomUUID().toString(), request, tokenUsername = "NoneExistentUser")
         .errorResponse(HttpStatus.BAD_REQUEST)
 
     with(response) {
@@ -50,7 +50,7 @@ class CreateAmendmentIntTest : ResourceTest() {
     val username = "DeliusUser"
     oAuthApi.subGetUserDetails(username, nomisUser = false)
     val type = getAllTypes().first { it.syncToNomis }
-    val caseNote = givenCaseNote(generateCaseNote(prisonNumber(), type))
+    val caseNote = givenCaseNote(generateCaseNote(personIdentifier(), type))
     val response =
       amendCaseNote(
         caseNote.personIdentifier,
@@ -83,7 +83,7 @@ class CreateAmendmentIntTest : ResourceTest() {
 
   @Test
   fun `can amend a case note with write role`() {
-    val caseNote = givenCaseNote(generateCaseNote(prisonNumber()))
+    val caseNote = givenCaseNote(generateCaseNote(personIdentifier()))
     val request = amendCaseNoteRequest()
     val response = amendCaseNote(caseNote.personIdentifier, caseNote.id.toString(), request).success<CaseNote>()
 
@@ -101,7 +101,7 @@ class CreateAmendmentIntTest : ResourceTest() {
 
   @Test
   fun `can amend a case note with write role using legacyId`() {
-    val caseNote = givenCaseNote(generateCaseNote(prisonNumber(), legacyId = newId()))
+    val caseNote = givenCaseNote(generateCaseNote(personIdentifier(), legacyId = newId()))
     val request = amendCaseNoteRequest()
     val response = amendCaseNote(caseNote.personIdentifier, caseNote.legacyId.toString(), request).success<CaseNote>()
 
@@ -120,7 +120,7 @@ class CreateAmendmentIntTest : ResourceTest() {
   @Test
   fun `can amend a case note without caseload id when not sync to nomis`() {
     val type = getAllTypes().first { !it.syncToNomis }
-    val caseNote = givenCaseNote(generateCaseNote(prisonNumber(), type = type))
+    val caseNote = givenCaseNote(generateCaseNote(personIdentifier(), type = type))
     val request = amendCaseNoteRequest()
     val response = amendCaseNote(caseNote.personIdentifier, caseNote.id.toString(), request, caseloadId = null)
       .success<CaseNote>()

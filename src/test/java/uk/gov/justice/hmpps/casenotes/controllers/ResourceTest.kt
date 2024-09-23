@@ -34,7 +34,6 @@ import uk.gov.justice.hmpps.casenotes.health.wiremock.Elite2Extension
 import uk.gov.justice.hmpps.casenotes.health.wiremock.OAuthExtension
 import uk.gov.justice.hmpps.casenotes.health.wiremock.PrisonerSearchApiExtension
 import uk.gov.justice.hmpps.casenotes.health.wiremock.TokenVerificationExtension
-import uk.gov.justice.hmpps.casenotes.services.MessageAttributes
 import uk.gov.justice.hmpps.casenotes.utils.JwtAuthHelper
 import uk.gov.justice.hmpps.casenotes.utils.NomisIdGenerator
 import uk.gov.justice.hmpps.casenotes.utils.setByName
@@ -167,7 +166,7 @@ abstract class ResourceTest : IntegrationTest() {
     }.random()
 
   fun generateCaseNote(
-    prisonNumber: String = NomisIdGenerator.prisonNumber(),
+    prisonNumber: String = NomisIdGenerator.personIdentifier(),
     type: SubType = givenRandomType(),
     occurredAt: LocalDateTime = LocalDateTime.now().minusDays(3),
     locationId: String = "MDI",

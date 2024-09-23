@@ -8,5 +8,5 @@ object NomisIdGenerator {
   private val numbers = (1111..9999)
 
   fun newId(): Long = id.getAndIncrement()
-  fun prisonNumber(): String = "${letters.random()}${numbers.random()}${letters.random()}${letters.random()}"
+  fun personIdentifier(): String = "${letters.random()}${numbers.random()}${letters.random()}${letters.random()}"
 }
