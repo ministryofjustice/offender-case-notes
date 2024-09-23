@@ -31,13 +31,19 @@ class SyncCaseNotes(
 ) {
   fun migrateNotes(toMigrate: List<MigrateCaseNoteRequest>): List<MigrationResult> {
     val personIdentifiers = toMigrate.map { it.personIdentifier }
-    personIdentifiers.forEach {
-      amendmentRepository.deleteLegacyAmendments(it)
-      noteRepository.deleteLegacyCaseNotes(it)
-    }
     val types = getTypesForSync(toMigrate.map { it.typeKey() }.toSet())
     val new = toMigrate.map { it.asNoteAndAmendments { t, st -> requireNotNull(types[TypeKey(t, st)]) } }
-    return create(new).map { MigrationResult(it.id, it.legacyId) }.also {
+    val created = try {
+      create(new)
+    } catch (e: Exception) {
+      personIdentifiers.forEach {
+        amendmentRepository.deleteLegacyAmendments(it)
+        noteRepository.deleteLegacyCaseNotes(it)
+      }
+      create(new)
+    }
+
+    return created.map { MigrationResult(it.id, it.legacyId) }.also {
       telemetryClient.trackEvent(
         "MigrateCaseNotes",
         mapOf("personIdentifier" to personIdentifiers.toString(), "count" to toMigrate.count().toString()),
