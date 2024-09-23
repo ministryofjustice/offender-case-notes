@@ -55,7 +55,7 @@ class SyncCaseNotes(
     return created.map { MigrationResult(it.id, it.legacyId) }.also {
       telemetryClient.trackEvent(
         "MigrateCaseNotes",
-        mapOf("personIdentifier" to personIdentifiers.toString(), "count" to toMigrate.count().toString()),
+        mapOf("personIdentifier" to personIdentifiers.toSet().toString(), "count" to toMigrate.count().toString()),
         mapOf(),
       )
     }
