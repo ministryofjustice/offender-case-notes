@@ -35,7 +35,7 @@ class SyncCaseNotes(
 ) {
   @Transactional(propagation = Propagation.NEVER)
   fun migrateNotes(toMigrate: List<MigrateCaseNoteRequest>): List<MigrationResult> {
-    val personIdentifiers = toMigrate.map { it.personIdentifier }
+    val personIdentifiers = toMigrate.map { it.personIdentifier }.toSet()
     val types = getTypesForSync(toMigrate.map { it.typeKey() }.toSet())
     val new = toMigrate.map { it.asNoteAndAmendments { t, st -> requireNotNull(types[TypeKey(t, st)]) } }
     val created = try {
@@ -55,7 +55,7 @@ class SyncCaseNotes(
     return created.map { MigrationResult(it.id, it.legacyId) }.also {
       telemetryClient.trackEvent(
         "MigrateCaseNotes",
-        mapOf("personIdentifier" to personIdentifiers.toSet().toString(), "count" to toMigrate.count().toString()),
+        mapOf("personIdentifier" to personIdentifiers.toString(), "count" to toMigrate.count().toString()),
         mapOf(),
       )
     }
