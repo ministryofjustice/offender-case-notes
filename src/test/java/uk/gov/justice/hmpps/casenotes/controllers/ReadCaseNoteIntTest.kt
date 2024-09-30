@@ -26,7 +26,7 @@ class ReadCaseNoteIntTest : ResourceTest() {
   }
 
   @ParameterizedTest
-  @ValueSource(strings = [SecurityUserContext.ROLE_CASE_NOTES_READ, SecurityUserContext.ROLE_CASE_NOTES_WRITE])
+  @ValueSource(strings = [SecurityUserContext.ROLE_CASE_NOTES_READ, SecurityUserContext.ROLE_CASE_NOTES_WRITE, SecurityUserContext.ROLE_CASE_NOTES_SYNC])
   fun `can read a case note by id with appropriate role`(role: String) {
     val caseNote = givenCaseNote(generateCaseNote().withAmendment())
     val response = getCaseNote(caseNote.personIdentifier, caseNote.id.toString(), listOf(role))
@@ -46,14 +46,25 @@ class ReadCaseNoteIntTest : ResourceTest() {
     response.amendments.first().verifyAgainst(caseNote.amendments().first())
   }
 
+  @Test
+  fun `calls from sync retrieve NOMIS case notes from local database`() {
+    val caseNote = givenCaseNote(generateCaseNote().withAmendment())
+    val response = getCaseNote(caseNote.personIdentifier, caseNote.id.toString(), listOf(SecurityUserContext.ROLE_CASE_NOTES_SYNC), caseloadId = null)
+      .success<CaseNote>()
+
+    response.verifyAgainst(caseNote)
+    response.amendments.first().verifyAgainst(caseNote.amendments().first())
+  }
+
   private fun getCaseNote(
     prisonNumber: String,
     caseNoteId: String,
     roles: List<String> = listOf(SecurityUserContext.ROLE_CASE_NOTES_READ),
     username: String = USERNAME,
+    caseloadId: String? = ACTIVE_PRISON,
   ) = webTestClient.get().uri(urlToTest(prisonNumber, caseNoteId))
     .headers(addBearerAuthorisation(username, roles))
-    .header(CASELOAD_ID, ACTIVE_PRISON)
+    .header(CASELOAD_ID, caseloadId)
     .exchange()
 
   private fun urlToTest(prisonNumber: String, caseNoteId: String) = "/case-notes/$prisonNumber/$caseNoteId"
