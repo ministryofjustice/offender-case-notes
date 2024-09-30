@@ -34,6 +34,7 @@ import uk.gov.justice.hmpps.casenotes.notes.CaseNote
 import uk.gov.justice.hmpps.casenotes.notes.CreateCaseNoteRequest
 import uk.gov.justice.hmpps.casenotes.notes.ReadCaseNote
 import uk.gov.justice.hmpps.casenotes.notes.WriteCaseNote
+import uk.gov.justice.hmpps.casenotes.notes.asLegacyId
 import uk.gov.justice.hmpps.casenotes.services.CaseNoteEventPusher
 import uk.gov.justice.hmpps.casenotes.services.CaseNoteService
 import uk.gov.justice.hmpps.casenotes.services.ExternalApiService
@@ -69,12 +70,9 @@ class CaseNoteController(
     @Parameter(description = "Case Note Id", required = true, example = "518b2200-6489-4c77-8514-10cf80ccd488")
     @PathVariable caseNoteIdentifier: String,
     @RequestHeader(CASELOAD_ID) caseloadId: String? = null,
-  ): CaseNote {
-    return if (caseloadId in serviceConfig.activePrisons) {
-      find.caseNote(personIdentifier, caseNoteIdentifier)
-    } else {
-      caseNoteService.getCaseNote(personIdentifier, caseNoteIdentifier)
-    }
+  ): CaseNote = when (val legacyId = caseNoteIdentifier.asLegacyId()) {
+    null -> find.caseNote(personIdentifier, caseNoteIdentifier)
+    else -> caseNoteService.getCaseNote(personIdentifier, legacyId.toString())
   }
 
   @Operation(
