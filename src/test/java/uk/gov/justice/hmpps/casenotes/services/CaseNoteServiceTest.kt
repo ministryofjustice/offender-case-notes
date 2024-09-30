@@ -327,7 +327,7 @@ class CaseNoteServiceTest {
         RequestContextHolder.getRequestAttributes()!!
           .setAttribute(
             CaseNoteRequestContext::class.simpleName!!,
-            defaultContext.copy(userDisplayName = "John Smith", userId = "4321"),
+            defaultContext.copy(userDisplayName = "John Smith", userId = "4321", username = "JOHN_SMITH"),
             0,
           )
 
@@ -354,6 +354,7 @@ class CaseNoteServiceTest {
             .occurredAt(now)
             .authorName("John Smith")
             .authorUserId("4321")
+            .authorUsername("JOHN_SMITH")
             .source("OCNS")
             .systemGenerated(false)
             .amendments(emptyList())
@@ -370,7 +371,7 @@ class CaseNoteServiceTest {
         RequestContextHolder.getRequestAttributes()!!
           .setAttribute(
             CaseNoteRequestContext::class.simpleName!!,
-            defaultContext.copy(userDisplayName = "John Smith", userId = "4321"),
+            defaultContext.copy(userDisplayName = "John Smith", userId = "4321", username = "JOHN_SMITH"),
             0,
           )
 
@@ -398,6 +399,7 @@ class CaseNoteServiceTest {
             .occurredAt(now)
             .authorName("John Smith")
             .authorUserId("4321")
+            .authorUsername("JOHN_SMITH")
             .source("OCNS")
             .amendments(emptyList())
             .createdAt(now)
