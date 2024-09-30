@@ -16,6 +16,7 @@ internal fun Note.toModel() = CaseNote(
   occurredAt = occurredAt,
   authorName = authorName,
   authorUserId = authorUserId,
+  authorUsername = authorUsername,
   text = text,
   locationId = locationId,
   eventId = legacyId,

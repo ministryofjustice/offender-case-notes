@@ -88,6 +88,7 @@ class CaseNoteAwsEventPusherTest {
       .occurredAt(LocalDateTime.parse("2018-02-03T10:11:12"))
       .locationId("MDI")
       .authorUserId("some user")
+      .authorUsername("SOME_USER")
       .authorName("Mickey Mouse")
       .personIdentifier("A1234AC")
       .type("GEN")
