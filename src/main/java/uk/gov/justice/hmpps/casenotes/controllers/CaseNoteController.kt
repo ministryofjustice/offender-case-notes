@@ -70,9 +70,12 @@ class CaseNoteController(
     @Parameter(description = "Case Note Id", required = true, example = "518b2200-6489-4c77-8514-10cf80ccd488")
     @PathVariable caseNoteIdentifier: String,
     @RequestHeader(CASELOAD_ID) caseloadId: String? = null,
-  ): CaseNote = when (val legacyId = caseNoteIdentifier.asLegacyId()) {
-    null -> find.caseNote(personIdentifier, caseNoteIdentifier)
-    else -> caseNoteService.getCaseNote(personIdentifier, legacyId.toString())
+  ): CaseNote {
+    return if (caseloadId in serviceConfig.activePrisons || (caseloadId != null && caseloadId.asLegacyId() == null)) {
+      find.caseNote(personIdentifier, caseNoteIdentifier)
+    } else {
+      caseNoteService.getCaseNote(personIdentifier, caseNoteIdentifier)
+    }
   }
 
   @Operation(

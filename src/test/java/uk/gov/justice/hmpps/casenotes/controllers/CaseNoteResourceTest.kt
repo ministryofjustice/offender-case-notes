@@ -237,7 +237,7 @@ class CaseNoteResourceTest : ResourceTest() {
     fun testRetrieveCaseNoteForOffenderSensitive() {
       oAuthApi.subGetUserDetails("SECURE_CASENOTE_USER")
       elite2Api.subGetOffender("A1234AF")
-      val token = jwtHelper.createJwt("SECURE_CASENOTE_USER", roles = SECURE_CASENOTES_ROLES)
+      val token = jwtHelper.createJwt("SECURE_CASENOTE_USER", roles = CASENOTES_ROLES)
       val postResponse = webTestClient.post().uri("/case-notes/{offenderIdentifier}", "A1234AF")
         .headers(addBearerToken(token))
         .bodyValue(CREATE_CASE_NOTE_WITHOUT_LOC.format("This is a case note"))
@@ -259,7 +259,7 @@ class CaseNoteResourceTest : ResourceTest() {
       val prisonNumber = "S2234TN"
       elite2Api.subGetOffender(prisonNumber)
       elite2Api.subGetCaseNotesForOffender(prisonNumber)
-      val token = jwtHelper.createJwt("SECURE_CASENOTE_USER", roles = SECURE_CASENOTES_ROLES)
+      val token = jwtHelper.createJwt("SECURE_CASENOTE_USER", roles = CASENOTES_ROLES)
 
       val type = caseNoteSubTypeRepository.findByParentTypeAndType("CAB", "EDUCATION").orElseThrow()
       val caseNote = ocnRepository.save(
@@ -676,9 +676,7 @@ class CaseNoteResourceTest : ResourceTest() {
       """{"type": "%s", "subType": "%s", "text": "%s"}"""
     private val POM_ROLE = listOf("ROLE_POM")
     private val CASENOTES_ROLES = listOf("ROLE_VIEW_SENSITIVE_CASE_NOTES", "ROLE_ADD_SENSITIVE_CASE_NOTES")
-    private val SECURE_CASENOTES_ROLES = listOf("ROLE_VIEW_SENSITIVE_CASE_NOTES", "ROLE_ADD_SENSITIVE_CASE_NOTES", "ROLE_PRISONER_CASE_NOTES__RO", "ROLE_PRISONER_CASE_NOTES__RW")
     private val DELETE_CASENOTE_ROLES = listOf(
-      "ROLE_PRISONER_CASE_NOTES__RO",
       "ROLE_DELETE_SENSITIVE_CASE_NOTES",
       "ROLE_SYSTEM_USER",
       "ROLE_VIEW_SENSITIVE_CASE_NOTES",
