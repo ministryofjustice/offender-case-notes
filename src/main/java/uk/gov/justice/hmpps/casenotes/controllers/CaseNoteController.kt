@@ -25,6 +25,8 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestController
 import uk.gov.justice.hmpps.casenotes.config.CaseNoteRequestContext
+import uk.gov.justice.hmpps.casenotes.config.SecurityUserContext
+import uk.gov.justice.hmpps.casenotes.config.SecurityUserContext.Companion.ROLE_CASE_NOTES_SYNC
 import uk.gov.justice.hmpps.casenotes.config.ServiceConfig
 import uk.gov.justice.hmpps.casenotes.dto.CaseNoteFilter
 import uk.gov.justice.hmpps.casenotes.dto.ErrorResponse
@@ -48,6 +50,7 @@ class CaseNoteController(
   private val find: ReadCaseNote,
   private val save: WriteCaseNote,
   private val telemetryClient: TelemetryClient,
+  private val securityUserContext: SecurityUserContext,
   private val caseNoteEventPusher: CaseNoteEventPusher,
   private val externalApiService: ExternalApiService,
 ) {
@@ -68,7 +71,7 @@ class CaseNoteController(
     @PathVariable caseNoteIdentifier: String,
     @RequestHeader(CASELOAD_ID) caseloadId: String? = null,
   ): CaseNote {
-    return if (caseloadId in serviceConfig.activePrisons) {
+    return if (caseloadId in serviceConfig.activePrisons || securityUserContext.hasAnyRole(ROLE_CASE_NOTES_SYNC)) {
       find.caseNote(personIdentifier, caseNoteIdentifier)
     } else {
       caseNoteService.getCaseNote(personIdentifier, caseNoteIdentifier)

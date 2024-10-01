@@ -31,8 +31,10 @@ class SecurityUserContext {
 
   private fun hasMatchingRole(roles: List<String>): Boolean =
     getAuthentication().authorities?.any { a: GrantedAuthority? ->
-      roles.contains(RegExUtils.replaceFirst(a!!.authority, "ROLE_", ""))
+      roles.map { it.removeRolePrefix() }.contains(a!!.authority.removeRolePrefix())
     } == true
+
+  private fun String.removeRolePrefix(): String = RegExUtils.replaceFirst(this, "ROLE_", "")
 
   data class UserIdUser(val username: String, val userId: String)
 

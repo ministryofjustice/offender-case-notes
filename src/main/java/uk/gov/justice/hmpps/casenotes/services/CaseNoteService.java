@@ -147,6 +147,7 @@ public class CaseNoteService {
             .personIdentifier(cn.getPersonIdentifier())
             .occurredAt(cn.getOccurredAt())
             .authorUserId(cn.getAuthorUserId())
+            .authorUsername(cn.getAuthorUsername())
             .authorName(cn.getAuthorName())
             .type(parentType.getCode())
             .typeDescription(parentType.getDescription())
@@ -180,6 +181,7 @@ public class CaseNoteService {
             .occurredAt(cn.getOccurredAt())
             .authorName(cn.getAuthorName())
             .authorUserId(valueOf(cn.getStaffId()))
+            .authorUsername(valueOf(cn.getStaffId())) //TODO: This should be mapped to created by once the Prison API has been changed to return it
             .type(cn.getType())
             .typeDescription(cn.getTypeDescription())
             .subType(cn.getSubType())

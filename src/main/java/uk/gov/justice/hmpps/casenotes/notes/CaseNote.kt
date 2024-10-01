@@ -54,6 +54,9 @@ data class CaseNote(
   )
   val authorUserId: String,
 
+  @Schema(requiredMode = REQUIRED, description = "Username of the case note author", example = "USER1")
+  val authorUsername: String,
+
   @Schema(requiredMode = REQUIRED, description = "Case Note Text", example = "This is some text")
   val text: String,
 
@@ -93,6 +96,7 @@ data class CaseNote(
     private var occurredAt: LocalDateTime? = null
     private var authorName: String? = null
     private var authorUserId: String? = null
+    private var authorUsername: String? = null
     private var text: String? = null
     private var locationId: String? = null
     private var eventId: Long = 0
@@ -145,6 +149,10 @@ data class CaseNote(
       this.authorUserId = authorUserId
     }
 
+    fun authorUsername(authorUsername: String): Builder = apply {
+      this.authorUsername = authorUsername
+    }
+
     fun text(text: String): Builder = apply {
       this.text = text
     }
@@ -186,6 +194,7 @@ data class CaseNote(
         occurredAt!!,
         authorName!!,
         authorUserId!!,
+        authorUsername!!,
         text!!,
         locationId,
         eventId,
