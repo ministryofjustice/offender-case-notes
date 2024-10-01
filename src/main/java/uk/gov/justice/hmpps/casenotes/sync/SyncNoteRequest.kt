@@ -17,15 +17,6 @@ interface SyncNoteRequest : NoteRequest {
     description = "The nomis id for the case note, reflected back for mapping",
   )
   val legacyId: Long
-
-  @get:Schema(
-    requiredMode = REQUIRED,
-    example = "A1234BC",
-    description = "The offender/prison/prisoner/noms number - used to identify the person in prison",
-  )
-  @get:Length(max = 12, message = "person identifier cannot be more than 12 characters")
-  @get:NotBlank(message = "person identifier cannot be blank")
-  val personIdentifier: String
   override val locationId: String
 
   @get:Schema(

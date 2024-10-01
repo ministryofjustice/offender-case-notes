@@ -7,7 +7,7 @@ import uk.gov.justice.hmpps.casenotes.config.SecurityUserContext.Companion.ROLE_
 import uk.gov.justice.hmpps.casenotes.config.SecurityUserContext.Companion.ROLE_CASE_NOTES_WRITE
 import uk.gov.justice.hmpps.casenotes.config.Source
 import uk.gov.justice.hmpps.casenotes.domain.Note
-import uk.gov.justice.hmpps.casenotes.domain.matchesPrisonNumber
+import uk.gov.justice.hmpps.casenotes.domain.matchesPersonIdentifier
 import uk.gov.justice.hmpps.casenotes.sync.Author
 import uk.gov.justice.hmpps.casenotes.sync.MigrateAmendmentRequest
 import uk.gov.justice.hmpps.casenotes.sync.MigrateCaseNoteRequest
@@ -23,22 +23,24 @@ import kotlin.time.toJavaDuration
 class MigrateCaseNotesIntTest : ResourceTest() {
   @Test
   fun `401 unauthorised`() {
-    webTestClient.post().uri(SYNC_URL).exchange().expectStatus().isUnauthorized
+    webTestClient.post().uri(urlToTest(personIdentifier())).exchange().expectStatus().isUnauthorized
   }
 
   @Test
   fun `403 forbidden - does not have the right role`() {
-    migrateCaseNotes(listOf(migrateCaseNoteRequest()), listOf(ROLE_CASE_NOTES_WRITE)).expectStatus().isForbidden
+    migrateCaseNotes(personIdentifier(), listOf(migrateCaseNoteRequest()), listOf(ROLE_CASE_NOTES_WRITE))
+      .expectStatus().isForbidden
   }
 
   @Test
   fun `400 bad request - case note types must exist`() {
+    val personIdentifier = personIdentifier()
     val request = listOf(
       migrateCaseNoteRequest(type = "NON_EXISTENT", subType = "GARBAGE"),
       migrateCaseNoteRequest(type = "NON_EXISTENT", subType = "NOT_THERE"),
       migrateCaseNoteRequest(type = "ANOTHER_TYPE", subType = "GARBAGE"),
     )
-    val response = migrateCaseNotes(request).errorResponse(HttpStatus.BAD_REQUEST)
+    val response = migrateCaseNotes(personIdentifier, request).errorResponse(HttpStatus.BAD_REQUEST)
     with(response) {
       assertThat(status).isEqualTo(HttpStatus.BAD_REQUEST.value())
       assertThat(developerMessage).isEqualTo("Case note types missing: { ANOTHER_TYPE:[GARBAGE], NON_EXISTENT:[GARBAGE, NOT_THERE] }")
@@ -53,7 +55,7 @@ class MigrateCaseNotesIntTest : ResourceTest() {
       migrateCaseNoteRequest(type = "OMIC", subType = "GEN"),
       migrateCaseNoteRequest(type = "OMIC", subType = "OMIC_OPEN"),
     )
-    val response = migrateCaseNotes(request).errorResponse(HttpStatus.BAD_REQUEST)
+    val response = migrateCaseNotes(personIdentifier(), request).errorResponse(HttpStatus.BAD_REQUEST)
     with(response) {
       assertThat(status).isEqualTo(HttpStatus.BAD_REQUEST.value())
       assertThat(developerMessage).isEqualTo("Case note types are not sync to nomis types: { OMIC:[GEN, OMIC_OPEN], POM:[GEN, SPECIAL] }")
@@ -67,19 +69,21 @@ class MigrateCaseNotesIntTest : ResourceTest() {
     val request = (0..500).map {
       val type = types.random()
       migrateCaseNoteRequest(
-        prisonIdentifier = personIdentifier,
         type = type.type.code,
         subType = type.code,
         amendments = if (it % 5 == 0) setOf(migrateAmendmentRequest(), migrateAmendmentRequest()) else setOf(),
       )
     }
-    val (response, elapsed) = measureTimedValue { migrateCaseNotes(request).successList<MigrationResult>() }
+    val (response, elapsed) = measureTimedValue {
+      migrateCaseNotes(personIdentifier, request).successList<MigrationResult>()
+    }
     assertThat(response.size).isEqualTo(request.size)
     assertThat(elapsed.toJavaDuration()).isLessThanOrEqualTo(Duration.ofSeconds(2))
   }
 
   @Test
   fun `200 ok - new case note with amendments is correctly stored`() {
+    val personIdentifier = personIdentifier()
     val type = getAllTypes().first { it.syncToNomis }
     val amendment = migrateAmendmentRequest(
       text = "An amendment to the case note, to verify it is saved correctly",
@@ -87,7 +91,6 @@ class MigrateCaseNotesIntTest : ResourceTest() {
       createdDateTime = LocalDateTime.now().minusDays(3),
     )
     val request = migrateCaseNoteRequest(
-      prisonIdentifier = personIdentifier(),
       locationId = "LEI",
       type = type.type.code,
       subType = type.code,
@@ -98,48 +101,48 @@ class MigrateCaseNotesIntTest : ResourceTest() {
       amendments = setOf(amendment),
     )
 
-    val response = migrateCaseNotes(listOf(request)).successList<MigrationResult>()
-    val saved = noteRepository.findByIdAndPersonIdentifier(response.first().id, request.personIdentifier)
+    val response = migrateCaseNotes(personIdentifier, listOf(request)).successList<MigrationResult>()
+    val saved = noteRepository.findByIdAndPersonIdentifier(response.first().id, personIdentifier)
     requireNotNull(saved).verifyAgainst(request)
     saved.amendments().first().verifyAgainst(request.amendments.first())
   }
 
   @Test
   fun `200 ok - some case note already exists`() {
-    val prisonNumber = personIdentifier()
+    val personIdentifier = personIdentifier()
     val types = getAllTypes().filter { it.syncToNomis }
-    val migrated = givenCaseNote(generateCaseNote(prisonNumber, types.random()).withAmendment().withAmendment())
+    val migrated = givenCaseNote(generateCaseNote(personIdentifier, types.random()).withAmendment().withAmendment())
     val secondType = types.random()
     val request = listOf(
-      migrateCaseNoteRequest(prisonIdentifier = prisonNumber, type = secondType.typeCode, subType = secondType.code),
+      migrateCaseNoteRequest(type = secondType.typeCode, subType = secondType.code),
       migrated.migrateRequest(),
     )
 
-    val response = migrateCaseNotes(request).successList<MigrationResult>()
+    val response = migrateCaseNotes(personIdentifier, request).successList<MigrationResult>()
     assertThat(response.size).isEqualTo(request.size)
     assertThat(response.map { it.legacyId }).containsExactlyInAnyOrderElementsOf(request.map { it.legacyId })
 
-    val saved = noteRepository.findAll(matchesPrisonNumber(prisonNumber))
+    val saved = noteRepository.findAll(matchesPersonIdentifier(personIdentifier))
     assertThat(saved.size).isEqualTo(request.size)
   }
 
   private fun migrateCaseNotes(
+    personIdentifier: String,
     request: List<MigrateCaseNoteRequest>,
     roles: List<String> = listOf(ROLE_CASE_NOTES_SYNC),
     username: String = "NOMIS_TO_DPS",
-  ) = webTestClient.post().uri(SYNC_URL)
+  ) = webTestClient.post().uri(urlToTest(personIdentifier))
     .headers(addBearerAuthorisation(username, roles))
     .bodyValue(request)
     .exchange()
 
   companion object {
-    private const val SYNC_URL = "/migrate/case-notes"
+    private fun urlToTest(personIdentifier: String) = "/migrate/case-notes/$personIdentifier"
   }
 }
 
 private fun migrateCaseNoteRequest(
   legacyId: Long = NomisIdGenerator.newId(),
-  prisonIdentifier: String = personIdentifier(),
   locationId: String = "SWI",
   type: String = "OMIC",
   subType: String = "GEN",
@@ -153,7 +156,6 @@ private fun migrateCaseNoteRequest(
   amendments: Set<MigrateAmendmentRequest> = setOf(),
 ) = MigrateCaseNoteRequest(
   legacyId,
-  prisonIdentifier,
   locationId,
   type,
   subType,
@@ -180,7 +182,6 @@ private fun Note.migrateRequest(): MigrateCaseNoteRequest {
   return migrateCaseNoteRequest(
     legacyId = legacyId,
     locationId = locationId,
-    prisonIdentifier = personIdentifier,
     text = text,
     createdDateTime = createdAt,
     occurrenceDateTime = occurredAt,

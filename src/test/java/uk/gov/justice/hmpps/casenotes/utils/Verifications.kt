@@ -34,7 +34,6 @@ fun CaseNoteAmendment.verifyAgainst(amendment: Amendment) {
 }
 
 fun Note.verifyAgainst(request: SyncNoteRequest) {
-  assertThat(personIdentifier).isEqualTo(request.personIdentifier)
   assertThat(subType.type.code).isEqualTo(request.type)
   assertThat(subType.code).isEqualTo(request.subType)
   assertThat(text).isEqualTo(request.text)

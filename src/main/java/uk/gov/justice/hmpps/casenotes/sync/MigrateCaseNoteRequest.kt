@@ -5,7 +5,6 @@ import java.time.LocalDateTime
 
 data class MigrateCaseNoteRequest(
   override val legacyId: Long,
-  override val personIdentifier: String,
   override val locationId: String,
   override val type: String,
   override val subType: String,

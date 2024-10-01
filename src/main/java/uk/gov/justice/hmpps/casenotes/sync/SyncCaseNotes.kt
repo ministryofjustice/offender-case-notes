@@ -34,28 +34,27 @@ class SyncCaseNotes(
   private val transactionTemplate: TransactionTemplate,
 ) {
   @Transactional(propagation = Propagation.NEVER)
-  fun migrateNotes(toMigrate: List<MigrateCaseNoteRequest>): List<MigrationResult> {
-    val personIdentifiers = toMigrate.map { it.personIdentifier }.toSet()
-    val types = getTypesForSync(toMigrate.map { it.typeKey() }.toSet())
-    val new = toMigrate.map { it.asNoteAndAmendments { t, st -> requireNotNull(types[TypeKey(t, st)]) } }
-    val created = try {
+  fun migrateNotes(personIdentifier: String, toMigrate: List<MigrateCaseNoteRequest>): List<MigrationResult> {
+    val (created, replaced) = try {
       transactionTemplate.execute {
-        create(new)
+        create(toMigrate.mapToEntities(personIdentifier)) to false
       }
     } catch (dive: DataIntegrityViolationException) {
       transactionTemplate.execute {
-        personIdentifiers.forEach {
-          amendmentRepository.deleteLegacyAmendments(it)
-          noteRepository.deleteLegacyCaseNotes(it)
-        }
-        create(new)
+        amendmentRepository.deleteLegacyAmendments(personIdentifier)
+        noteRepository.deleteLegacyCaseNotes(personIdentifier)
+        create(toMigrate.mapToEntities(personIdentifier)) to true
       }
     }
 
     return created.map { MigrationResult(it.id, it.legacyId) }.also {
       telemetryClient.trackEvent(
-        "MigrateCaseNotes",
-        mapOf("personIdentifier" to personIdentifiers.toString(), "count" to toMigrate.count().toString()),
+        "CaseNotesMigrated",
+        mapOf(
+          "personIdentifier" to personIdentifier,
+          "count" to toMigrate.count().toString(),
+          "replaced" to replaced.toString(),
+        ),
         mapOf(),
       )
     }
@@ -68,12 +67,19 @@ class SyncCaseNotes(
     }
 
     existing?.also {
-      check(it.personIdentifier == request.personIdentifier) { "Case note belongs to another prisoner or prisoner records have been merged" }
+      check(it.personIdentifier == request.personIdentifier) {
+        "Case note belongs to another prisoner or prisoner records have been merged"
+      }
       noteRepository.delete(it)
       noteRepository.flush()
     }
 
-    val saved = noteRepository.saveAndRefresh(request.asNoteWithAmendments(typeRepository::getByTypeCodeAndCode))
+    val saved = noteRepository.saveAndRefresh(
+      request.asNoteWithAmendments(
+        request.personIdentifier,
+        typeRepository::getByTypeCodeAndCode,
+      ),
+    )
 
     eventPublisher.publishEvent(saved.createEvent(existing?.let { UPDATED } ?: CREATED))
 
@@ -81,7 +87,13 @@ class SyncCaseNotes(
       saved.id,
       saved.legacyId,
       if (existing == null) SyncResult.Action.CREATED else SyncResult.Action.UPDATED,
-    )
+    ).also {
+      telemetryClient.trackEvent(
+        "CaseNoteSynced",
+        saved.eventProperties() + listOfNotNull(existing?.id?.let { "previousId" to it.toString() }),
+        mapOf(),
+      )
+    }
   }
 
   fun deleteCaseNote(id: UUID) {
@@ -105,6 +117,11 @@ class SyncCaseNotes(
     return types
   }
 
+  private fun List<MigrateCaseNoteRequest>.mapToEntities(personIdentifier: String): List<NoteAndAmendments> {
+    val types = getTypesForSync(map { it.typeKey() }.toSet())
+    return map { it.asNoteAndAmendments(personIdentifier) { t, st -> requireNotNull(types[TypeKey(t, st)]) } }
+  }
+
   private fun create(new: List<NoteAndAmendments>): List<Note> {
     val notes = noteRepository.saveAll(new.map { it.note })
     amendmentRepository.saveAll(new.flatMap { it.amendments })
@@ -124,14 +141,10 @@ private fun <T : TypeLookup> Collection<T>.exceptionMessage() =
     .joinToString(separator = ", ", prefix = "{ ", postfix = " }")
 
 private fun Note.eventProperties(): Map<String, String> {
-  return java.util.Map.of(
-    "caseNoteId",
-    id.toString(),
-    "type",
-    subType.type.code,
-    "subType",
-    subType.code,
-    "personIdentifier",
-    personIdentifier,
+  return mapOf(
+    "id" to id.toString(),
+    "type" to subType.type.code,
+    "subType" to subType.code,
+    "personIdentifier" to personIdentifier,
   )
 }

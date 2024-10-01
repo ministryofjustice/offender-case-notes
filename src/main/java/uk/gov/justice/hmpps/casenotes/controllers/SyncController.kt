@@ -1,6 +1,7 @@
 package uk.gov.justice.hmpps.casenotes.controllers
 
 import io.swagger.v3.oas.annotations.Operation
+import io.swagger.v3.oas.annotations.Parameter
 import io.swagger.v3.oas.annotations.media.Content
 import io.swagger.v3.oas.annotations.media.Schema
 import io.swagger.v3.oas.annotations.responses.ApiResponse
@@ -31,8 +32,12 @@ import java.util.UUID
 @RestController
 class SyncController(private val sync: SyncCaseNotes) {
   @Operation(
-    summary = "Endpoint to migrate case notes from nomis to dps.",
-    description = "Case notes that don't exist in dps will be created.",
+    summary = "Endpoint to migrate all the case notes for a person from NOMIS to DPS.",
+    description =
+    """
+    Existing case notes associated with the person will be deleted and recreated. 
+    This will change the mapping information for the recreated notes therefore the caller should replace all existing mapping information with the response.
+    """,
   )
   @ApiResponses(
     value = [
@@ -57,10 +62,13 @@ class SyncController(private val sync: SyncCaseNotes) {
       ),
     ],
   )
-  @PostMapping("migrate/case-notes")
+  @PostMapping("migrate/case-notes/{personIdentifier}")
   @PreAuthorize("hasRole('$ROLE_CASE_NOTES_SYNC')")
-  fun migrateCaseNotes(@Valid @RequestBody caseNotes: List<MigrateCaseNoteRequest>): List<MigrationResult> =
-    sync.migrateNotes(caseNotes)
+  fun migrateCaseNotes(
+    @Parameter(description = "Person Identifier", required = true, example = "A1234AA")
+    @PathVariable personIdentifier: String,
+    @Valid @RequestBody caseNotes: List<MigrateCaseNoteRequest>,
+  ): List<MigrationResult> = sync.migrateNotes(personIdentifier, caseNotes)
 
   @Operation(
     summary = "Endpoint to sync a case note from nomis to dps.",
