@@ -170,8 +170,9 @@ class SyncCaseNoteIntTest : ResourceTest() {
     }
     val response = syncCaseNote(request).success<SyncResult>(HttpStatus.OK)
     assertThat(response.action).isEqualTo(UPDATED)
+    assertThat(response.id).isEqualTo(existing.id)
 
-    val saved = requireNotNull(noteRepository.findByIdAndPersonIdentifier(response.id, request.personIdentifier))
+    val saved = requireNotNull(noteRepository.findByIdAndPersonIdentifier(existing.id, request.personIdentifier))
     saved.verifyAgainst(request)
     assertThat(saved.amendments().size).isEqualTo(2)
     val amend = saved.amendments().first()

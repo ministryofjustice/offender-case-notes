@@ -53,13 +53,16 @@ internal data class NoteAndAmendments(val note: Note, val amendments: List<Amend
 
 internal fun SyncNoteRequest.typeKey() = TypeKey(type, subType)
 
-internal fun SyncNoteRequest.asNoteAndAmendments(personIdentifier: String, typeSupplier: (String, String) -> SubType) =
-  asNote(personIdentifier, typeSupplier).let { note ->
-    note.legacyId = this.legacyId
-    note.createdAt = createdDateTime
-    note.createdBy = createdByUsername
-    NoteAndAmendments(note, amendments.map { it.asAmendment(note) })
-  }
+internal fun SyncNoteRequest.asNoteAndAmendments(
+  personIdentifier: String,
+  id: UUID?,
+  typeSupplier: (String, String) -> SubType,
+) = asNote(personIdentifier, id, typeSupplier).let { note ->
+  note.legacyId = this.legacyId
+  note.createdAt = createdDateTime
+  note.createdBy = createdByUsername
+  NoteAndAmendments(note, amendments.map { it.asAmendment(note) })
+}
 
 private fun SyncAmendmentRequest.asAmendment(note: Note) = Amendment(
   note,
@@ -70,21 +73,26 @@ private fun SyncAmendmentRequest.asAmendment(note: Note) = Amendment(
   newUuid(),
 ).apply { this.createdAt = this@asAmendment.createdDateTime }
 
-internal fun SyncNoteRequest.asNoteWithAmendments(personIdentifier: String, typeSupplier: (String, String) -> SubType) =
-  asNote(personIdentifier, typeSupplier).also { note -> amendments.forEach { note.addAmendment(it) } }
+internal fun SyncNoteRequest.asNoteWithAmendments(
+  personIdentifier: String,
+  id: UUID?,
+  typeSupplier: (String, String) -> SubType,
+) = asNote(personIdentifier, id, typeSupplier).also { note -> amendments.forEach { note.addAmendment(it) } }
 
-internal fun SyncNoteRequest.asNote(personIdentifier: String, typeSupplier: (String, String) -> SubType) = Note(
-  personIdentifier,
-  typeSupplier(type, subType),
-  occurrenceDateTime,
-  locationId,
-  author.username,
-  author.userId,
-  author.fullName(),
-  text,
-  systemGenerated,
-).apply {
-  this.legacyId = this@asNote.legacyId
-  this.createdAt = this@asNote.createdDateTime
-  this.createdBy = this@asNote.createdByUsername
-}
+internal fun SyncNoteRequest.asNote(personIdentifier: String, id: UUID?, typeSupplier: (String, String) -> SubType) =
+  Note(
+    personIdentifier,
+    typeSupplier(type, subType),
+    occurrenceDateTime,
+    locationId,
+    author.username,
+    author.userId,
+    author.fullName(),
+    text,
+    systemGenerated,
+    id = id ?: newUuid(),
+  ).apply {
+    this.legacyId = this@asNote.legacyId
+    this.createdAt = this@asNote.createdDateTime
+    this.createdBy = this@asNote.createdByUsername
+  }

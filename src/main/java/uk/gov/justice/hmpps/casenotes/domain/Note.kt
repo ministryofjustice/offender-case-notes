@@ -64,14 +64,14 @@ class Note(
   override val text: String,
 
   override val systemGenerated: Boolean,
+
+  @Id
+  @Column(updatable = false, nullable = false)
+  override val id: UUID = newUuid(),
 ) : SimpleAudited(), NoteState {
 
   @Version
   val version: Long? = null
-
-  @Id
-  @Column(updatable = false, nullable = false)
-  override val id: UUID = newUuid()
 
   @Column(name = "sub_type_id", insertable = false, updatable = false, nullable = false)
   override val subTypeId: Long = subType.id!!

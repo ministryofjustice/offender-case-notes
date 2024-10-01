@@ -77,6 +77,7 @@ class SyncCaseNotes(
     val saved = noteRepository.saveAndRefresh(
       request.asNoteWithAmendments(
         request.personIdentifier,
+        existing?.id,
         typeRepository::getByTypeCodeAndCode,
       ),
     )
@@ -119,7 +120,7 @@ class SyncCaseNotes(
 
   private fun List<MigrateCaseNoteRequest>.mapToEntities(personIdentifier: String): List<NoteAndAmendments> {
     val types = getTypesForSync(map { it.typeKey() }.toSet())
-    return map { it.asNoteAndAmendments(personIdentifier) { t, st -> requireNotNull(types[TypeKey(t, st)]) } }
+    return map { it.asNoteAndAmendments(personIdentifier, null) { t, st -> requireNotNull(types[TypeKey(t, st)]) } }
   }
 
   private fun create(new: List<NoteAndAmendments>): List<Note> {
