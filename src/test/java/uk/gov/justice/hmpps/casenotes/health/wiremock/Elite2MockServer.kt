@@ -124,6 +124,7 @@ class Elite2MockServer : WireMockServer(WIREMOCK_PORT) {
             "creationDateTime": "2021-06-07T14:58:14.917306",
             "occurrenceDateTime": "2021-06-07T14:58:14.917397",
             "staffId": 1231232,
+            "authorUsername": "MIC123",
             "authorName": "Mickey Mouse",
             "text": "Some Text",
             "originalNoteText": "Some Text",
@@ -208,6 +209,7 @@ class Elite2MockServer : WireMockServer(WIREMOCK_PORT) {
     return NomisCaseNote.builder()
       .id(131232)
       .agencyId("LEI")
+      .authorUsername("MIC123")
       .authorName("Mickey Mouse")
       .createdAt(LocalDateTime.now().minusMonths(1))
       .source("INST")
