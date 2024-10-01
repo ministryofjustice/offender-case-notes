@@ -33,6 +33,7 @@ public class NomisCaseNote {
     @JsonProperty("occurrenceDateTime")
     private LocalDateTime occurredAt;
     private Long staffId;
+    private String authorUsername;
     private String authorName;
     private String text;
     private String originalNoteText;

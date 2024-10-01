@@ -905,6 +905,7 @@ class CaseNoteServiceTest {
   private fun createNomisCaseNote(): NomisCaseNote {
     return NomisCaseNote.builder()
       .agencyId("agency")
+      .authorUsername("SOME1")
       .authorName("somebody")
       .id(12345)
       .createdAt(LocalDateTime.parse("2019-03-23T11:22"))
@@ -924,6 +925,7 @@ class CaseNoteServiceTest {
   private fun createNomisCaseNote(type: String, subType: String): NomisCaseNote {
     return NomisCaseNote.builder()
       .agencyId("agency")
+      .authorUsername("SOME1")
       .authorName("somebody")
       .id(12345)
       .createdAt(LocalDateTime.parse("2019-03-23T11:22"))
