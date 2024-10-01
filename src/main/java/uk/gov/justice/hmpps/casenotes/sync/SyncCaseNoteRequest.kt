@@ -1,6 +1,9 @@
 package uk.gov.justice.hmpps.casenotes.sync
 
 import io.swagger.v3.oas.annotations.media.Schema
+import io.swagger.v3.oas.annotations.media.Schema.RequiredMode.REQUIRED
+import jakarta.validation.constraints.NotBlank
+import org.hibernate.validator.constraints.Length
 import uk.gov.justice.hmpps.casenotes.config.Source
 import uk.gov.justice.hmpps.casenotes.domain.Amendment
 import uk.gov.justice.hmpps.casenotes.domain.IdGenerator.newUuid
@@ -19,7 +22,14 @@ data class SyncCaseNoteRequest(
   )
   val id: UUID?,
 
-  override val personIdentifier: String,
+  @get:Schema(
+    requiredMode = REQUIRED,
+    example = "A1234BC",
+    description = "The offender/prison/prisoner/noms number - used to identify the person in prison",
+  )
+  @get:Length(max = 12, message = "person identifier cannot be more than 12 characters")
+  @get:NotBlank(message = "person identifier cannot be blank")
+  val personIdentifier: String,
   override val locationId: String,
   override val type: String,
   override val subType: String,
@@ -43,8 +53,8 @@ internal data class NoteAndAmendments(val note: Note, val amendments: List<Amend
 
 internal fun SyncNoteRequest.typeKey() = TypeKey(type, subType)
 
-internal fun SyncNoteRequest.asNoteAndAmendments(typeSupplier: (String, String) -> SubType) =
-  asNote(typeSupplier).let { note ->
+internal fun SyncNoteRequest.asNoteAndAmendments(personIdentifier: String, typeSupplier: (String, String) -> SubType) =
+  asNote(personIdentifier, typeSupplier).let { note ->
     note.legacyId = this.legacyId
     note.createdAt = createdDateTime
     note.createdBy = createdByUsername
@@ -60,10 +70,10 @@ private fun SyncAmendmentRequest.asAmendment(note: Note) = Amendment(
   newUuid(),
 ).apply { this.createdAt = this@asAmendment.createdDateTime }
 
-internal fun SyncNoteRequest.asNoteWithAmendments(typeSupplier: (String, String) -> SubType) =
-  asNote(typeSupplier).also { note -> amendments.forEach { note.addAmendment(it) } }
+internal fun SyncNoteRequest.asNoteWithAmendments(personIdentifier: String, typeSupplier: (String, String) -> SubType) =
+  asNote(personIdentifier, typeSupplier).also { note -> amendments.forEach { note.addAmendment(it) } }
 
-internal fun SyncNoteRequest.asNote(typeSupplier: (String, String) -> SubType) = Note(
+internal fun SyncNoteRequest.asNote(personIdentifier: String, typeSupplier: (String, String) -> SubType) = Note(
   personIdentifier,
   typeSupplier(type, subType),
   occurrenceDateTime,

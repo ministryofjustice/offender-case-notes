@@ -338,7 +338,7 @@ public class CaseNoteService {
     }
 
     @Transactional
-    @PreAuthorize("hasRole('DELETE_SENSITIVE_CASE_NOTES')")
+    @PreAuthorize("hasAnyRole('DELETE_SENSITIVE_CASE_NOTES', 'ROLE_PRISONER_CASE_NOTES__RW')")
     public void deleteCaseNote(final String offenderIdentifier, final String caseNoteId) {
         if (isLegacyId(caseNoteId)) {
             throw new ValidationException("Case note id not a sensitive case note, please delete through NOMIS");

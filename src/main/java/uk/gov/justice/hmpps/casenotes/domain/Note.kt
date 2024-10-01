@@ -149,7 +149,7 @@ fun NoteRepository.saveAndRefresh(note: Note): Note {
   return saved
 }
 
-fun matchesPrisonNumber(prisonNumber: String) =
+fun matchesPersonIdentifier(prisonNumber: String) =
   Specification<Note> { cn, _, cb ->
     cb.equal(cb.lower(cn[PERSON_IDENTIFIER]), prisonNumber.lowercase())
   }

@@ -15,7 +15,7 @@ import uk.gov.justice.hmpps.casenotes.domain.NoteRepository
 import uk.gov.justice.hmpps.casenotes.domain.matchesAuthorUsername
 import uk.gov.justice.hmpps.casenotes.domain.matchesLocationId
 import uk.gov.justice.hmpps.casenotes.domain.matchesOnType
-import uk.gov.justice.hmpps.casenotes.domain.matchesPrisonNumber
+import uk.gov.justice.hmpps.casenotes.domain.matchesPersonIdentifier
 import uk.gov.justice.hmpps.casenotes.domain.occurredAfter
 import uk.gov.justice.hmpps.casenotes.domain.occurredBefore
 import uk.gov.justice.hmpps.casenotes.dto.CaseNoteFilter
@@ -41,15 +41,11 @@ class ReadCaseNote(
     } ?: throw EntityNotFoundException.withId(caseNoteId)
     return caseNote.toModel()
   }
-
-  companion object {
-    const val SOURCE = "OCNS"
-  }
 }
 
 private fun CaseNoteFilter.asSpecification(prisonNumber: String) =
   listOfNotNull(
-    matchesPrisonNumber(prisonNumber),
+    matchesPersonIdentifier(prisonNumber),
     matchesOnType(includeSensitive, getTypesAndSubTypes()),
     locationId?.let { matchesLocationId(it) },
     authorUsername?.let { matchesAuthorUsername(it) },

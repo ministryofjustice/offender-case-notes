@@ -25,7 +25,6 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestController
 import uk.gov.justice.hmpps.casenotes.config.CaseNoteRequestContext
-import uk.gov.justice.hmpps.casenotes.config.SecurityUserContext
 import uk.gov.justice.hmpps.casenotes.config.ServiceConfig
 import uk.gov.justice.hmpps.casenotes.dto.CaseNoteFilter
 import uk.gov.justice.hmpps.casenotes.dto.ErrorResponse
@@ -49,7 +48,6 @@ class CaseNoteController(
   private val find: ReadCaseNote,
   private val save: WriteCaseNote,
   private val telemetryClient: TelemetryClient,
-  private val securityUserContext: SecurityUserContext,
   private val caseNoteEventPusher: CaseNoteEventPusher,
   private val externalApiService: ExternalApiService,
 ) {
@@ -148,7 +146,7 @@ class CaseNoteController(
       caseNoteService.createCaseNote(personIdentifier, createCaseNote)
     }
 
-    telemetryClient.trackEvent("CaseNoteCreated", createEventProperties(caseNote), null)
+    telemetryClient.trackEvent("CaseNoteCreated", caseNote.eventProperties(caseloadId), null)
     caseNoteEventPusher.sendEvent(caseNote)
     return caseNote
   }
@@ -184,7 +182,7 @@ class CaseNoteController(
     } else {
       caseNoteService.amendCaseNote(personIdentifier, caseNoteIdentifier, amendedText)
     }
-    telemetryClient.trackEvent("CaseNoteUpdated", createEventProperties(caseNote), null)
+    telemetryClient.trackEvent("CaseNoteUpdated", caseNote.eventProperties(caseloadId), null)
     caseNoteEventPusher.sendEvent(caseNote)
     return caseNote
   }
@@ -200,7 +198,7 @@ class CaseNoteController(
   )
   @ResponseStatus(HttpStatus.OK)
   @DeleteMapping("/{personIdentifier}/{caseNoteId}")
-  fun softDeleteCaseNote(
+  fun deleteCaseNote(
     @Parameter(description = "Person Identifier", required = true, example = "A1234AA")
     @PathVariable personIdentifier: String,
     @Parameter(description = "Case Note Id", required = true, example = "518b2200-6489-4c77-8514-10cf80ccd488")
@@ -214,24 +212,24 @@ class CaseNoteController(
     }
 
     telemetryClient.trackEvent(
-      "CaseNoteDelete",
+      "CaseNoteDeleted",
       mapOf(
         "userName" to CaseNoteRequestContext.get().username,
         "personIdentifier" to personIdentifier,
         "caseNoteId" to caseNoteId,
+        "caseloadId" to caseloadId,
       ),
       null,
     )
   }
 
-  private fun createEventProperties(caseNote: CaseNote): Map<String, String> {
-    return java.util.Map.of(
-      "caseNoteId", caseNote.id,
-      "caseNoteType", String.format("%s-%s", caseNote.type, caseNote.subType),
-      "type", caseNote.type,
-      "subType", caseNote.subType,
-      "personIdentifier", caseNote.personIdentifier,
-      "authorUsername", securityUserContext.getCurrentUsername() ?: "unknown",
-    )
+  private fun CaseNote.eventProperties(caseloadId: String?): Map<String, String> {
+    return listOfNotNull(
+      "id" to id,
+      "type" to type,
+      "subType" to subType,
+      "personIdentifier" to personIdentifier,
+      caseloadId?.let { "caseloadId" to it },
+    ).toMap()
   }
 }

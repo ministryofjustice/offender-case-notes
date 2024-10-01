@@ -2,7 +2,10 @@ package uk.gov.justice.hmpps.casenotes.notes
 
 import uk.gov.justice.hmpps.casenotes.domain.Amendment
 import uk.gov.justice.hmpps.casenotes.domain.Note
-import uk.gov.justice.hmpps.casenotes.notes.ReadCaseNote.Companion.SOURCE
+
+const val SOURCE_OCNS = "OCNS"
+const val SOURCE_AUTO = "AUTO"
+const val SOURCE_INST = "INST"
 
 internal fun Note.toModel() = CaseNote(
   id = id.toString(),
@@ -11,7 +14,11 @@ internal fun Note.toModel() = CaseNote(
   typeDescription = subType.type.description,
   subType = subType.code,
   subTypeDescription = subType.description,
-  source = SOURCE,
+  source = when {
+    !subType.syncToNomis -> SOURCE_OCNS
+    !subType.dpsUserSelectable -> SOURCE_AUTO
+    else -> SOURCE_INST
+  },
   createdAt = createdAt,
   occurredAt = occurredAt,
   authorName = authorName,
