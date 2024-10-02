@@ -4,6 +4,9 @@ generic-service:
   ingress:
     host: preprod.offender-case-notes.service.justice.gov.uk
 
+  scheduledDowntime:
+    enabled: true
+
   env:
     SENTRY_ENVIRONMENT: preprod
     SERVICE_BASE_URL: "https://preprod.offender-case-notes.service.justice.gov.uk"

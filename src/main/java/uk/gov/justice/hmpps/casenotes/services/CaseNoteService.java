@@ -1,7 +1,5 @@
 package uk.gov.justice.hmpps.casenotes.services;
 
-import com.microsoft.applicationinsights.TelemetryClient;
-import jakarta.persistence.EntityManager;
 import jakarta.validation.Valid;
 import jakarta.validation.ValidationException;
 import jakarta.validation.constraints.NotNull;
@@ -35,7 +33,6 @@ import uk.gov.justice.hmpps.casenotes.repository.OffenderCaseNoteRepository;
 
 import java.util.Comparator;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -57,8 +54,6 @@ public class CaseNoteService {
     private final CaseNoteSubTypeRepository caseNoteSubTypeRepository;
     private final SecurityUserContext securityUserContext;
     private final ExternalApiService externalApiService;
-    private final TelemetryClient telemetryClient;
-    private final EntityManager entityManager;
     private final DeletedCaseNoteRepository deletedCaseNoteRepository;
 
     public Page<CaseNote> getCaseNotes(
@@ -244,9 +239,6 @@ public class CaseNoteService {
 
         final CaseNoteRequestContext context = CaseNoteRequestContext.Companion.get();
 
-        final var locationId =
-            newCaseNote.getLocationId() == null ? externalApiService.getOffenderLocation(offenderIdentifier) : newCaseNote.getLocationId();
-
         final var caseNote = OffenderCaseNote.builder()
             .text(newCaseNote.getText())
             .authorUsername(context.getUsername())
@@ -255,14 +247,14 @@ public class CaseNoteService {
             .occurredAt(coalesce(newCaseNote.getOccurrenceDateTime(), context.getRequestAt()))
             .subType(type)
             .personIdentifier(offenderIdentifier)
-            .locationId(locationId)
+            .locationId(newCaseNote.getLocationId())
             .systemGenerated(TRUE.equals(newCaseNote.getSystemGenerated()))
             .build();
 
         // save and flush to activate database event id generation
         var saved = repository.saveAndFlush(caseNote);
         // refresh so the entity is populated with the event id before attempting to map
-        entityManager.refresh(saved);
+        repository.refresh(saved);
         return mapper(saved);
     }
 
@@ -330,12 +322,6 @@ public class CaseNoteService {
         repository.deleteCaseNoteAmendmentsByPersonIdentifier(personIdentifier);
         final var deletedCaseNotesCount = repository.deleteCaseNoteByPersonIdentifier(personIdentifier);
         deletedCaseNoteRepository.deleteByPersonIdentifier(personIdentifier);
-
-        telemetryClient.trackEvent(
-            "DataComplianceDelete",
-            Map.of("personIdentifier", personIdentifier, "count", valueOf(deletedCaseNotesCount)),
-            null
-        );
         return deletedCaseNotesCount;
     }
 

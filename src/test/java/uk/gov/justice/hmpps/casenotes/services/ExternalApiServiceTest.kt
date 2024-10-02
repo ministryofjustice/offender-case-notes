@@ -106,20 +106,6 @@ class ExternalApiServiceTest {
   }
 
   @Nested
-  inner class getOffenderLocation {
-    @Test
-    fun `test calls Prison API`() {
-      whenever(responseSpecMock.bodyToMono(any<ParameterizedTypeReference<OffenderBooking>>())).thenReturn(
-        Mono.just(OffenderBooking(agencyId = "MDI", bookingId = 12345L, offenderNo = "AA123B")),
-      )
-      assertThat(externalApiService.getOffenderLocation("AA123B")).isEqualTo("MDI")
-
-      verify(prisonApiWebClient).get()
-      verify(requestHeadersUriSpec).uri("/api/bookings/offenderNo/{offenderNo}", "AA123B")
-    }
-  }
-
-  @Nested
   inner class getOffenderCaseNotes {
     @Test
     fun `test calls Prison API for first page with correct page size`() {

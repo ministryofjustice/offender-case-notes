@@ -39,13 +39,4 @@ data class CaseNoteSubType(
 
   @Schema(description = "Shows the actors that can select this case note type")
   val selectableBy: List<SelectableBy>,
-) : CodedValue {
-
-  @Deprecated("to be replaced with 'active' boolean")
-  val activeFlag: ActiveYn = if (active) ActiveYn.Y else ActiveYn.N
-}
-
-enum class ActiveYn {
-  Y,
-  N,
-}
+) : CodedValue

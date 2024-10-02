@@ -1,6 +1,5 @@
 package uk.gov.justice.hmpps.casenotes.controllers
 
-import com.microsoft.applicationinsights.TelemetryClient
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.Parameter
 import io.swagger.v3.oas.annotations.media.Content
@@ -24,12 +23,12 @@ import org.springframework.web.bind.annotation.RequestHeader
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestController
-import uk.gov.justice.hmpps.casenotes.config.CaseNoteRequestContext
 import uk.gov.justice.hmpps.casenotes.config.SecurityUserContext
 import uk.gov.justice.hmpps.casenotes.config.SecurityUserContext.Companion.ROLE_CASE_NOTES_SYNC
 import uk.gov.justice.hmpps.casenotes.config.ServiceConfig
 import uk.gov.justice.hmpps.casenotes.dto.CaseNoteFilter
 import uk.gov.justice.hmpps.casenotes.dto.ErrorResponse
+import uk.gov.justice.hmpps.casenotes.integrations.PrisonerSearchService
 import uk.gov.justice.hmpps.casenotes.notes.AmendCaseNoteRequest
 import uk.gov.justice.hmpps.casenotes.notes.CaseNote
 import uk.gov.justice.hmpps.casenotes.notes.CreateCaseNoteRequest
@@ -37,7 +36,6 @@ import uk.gov.justice.hmpps.casenotes.notes.ReadCaseNote
 import uk.gov.justice.hmpps.casenotes.notes.WriteCaseNote
 import uk.gov.justice.hmpps.casenotes.services.CaseNoteEventPusher
 import uk.gov.justice.hmpps.casenotes.services.CaseNoteService
-import uk.gov.justice.hmpps.casenotes.services.ExternalApiService
 
 const val CASELOAD_ID = "CaseloadId"
 
@@ -49,10 +47,9 @@ class CaseNoteController(
   private val caseNoteService: CaseNoteService,
   private val find: ReadCaseNote,
   private val save: WriteCaseNote,
-  private val telemetryClient: TelemetryClient,
   private val securityUserContext: SecurityUserContext,
   private val caseNoteEventPusher: CaseNoteEventPusher,
-  private val externalApiService: ExternalApiService,
+  private val search: PrisonerSearchService,
 ) {
   @Operation(summary = "Retrieves a case note")
   @ApiResponses(
@@ -138,18 +135,16 @@ class CaseNoteController(
     @Valid @RequestBody createCaseNote: CreateCaseNoteRequest,
     @RequestHeader(required = false, value = CASELOAD_ID) caseloadId: String? = null,
   ): CaseNote {
+    val request = if (createCaseNote.locationId == null) {
+      createCaseNote.copy(locationId = search.getPrisonerDetails(personIdentifier).prisonId)
+    } else {
+      createCaseNote
+    }
     val caseNote = if (caseloadId in serviceConfig.activePrisons) {
-      val request = if (createCaseNote.locationId == null) {
-        createCaseNote.copy(locationId = externalApiService.getOffenderLocation(personIdentifier))
-      } else {
-        createCaseNote
-      }
       save.createNote(personIdentifier, request)
     } else {
-      caseNoteService.createCaseNote(personIdentifier, createCaseNote)
+      caseNoteService.createCaseNote(personIdentifier, request)
     }
-
-    telemetryClient.trackEvent("CaseNoteCreated", caseNote.eventProperties(caseloadId), null)
     caseNoteEventPusher.sendEvent(caseNote)
     return caseNote
   }
@@ -185,7 +180,6 @@ class CaseNoteController(
     } else {
       caseNoteService.amendCaseNote(personIdentifier, caseNoteIdentifier, amendedText)
     }
-    telemetryClient.trackEvent("CaseNoteUpdated", caseNote.eventProperties(caseloadId), null)
     caseNoteEventPusher.sendEvent(caseNote)
     return caseNote
   }
@@ -213,26 +207,5 @@ class CaseNoteController(
     } else {
       caseNoteService.deleteCaseNote(personIdentifier, caseNoteId)
     }
-
-    telemetryClient.trackEvent(
-      "CaseNoteDeleted",
-      mapOf(
-        "userName" to CaseNoteRequestContext.get().username,
-        "personIdentifier" to personIdentifier,
-        "caseNoteId" to caseNoteId,
-        "caseloadId" to caseloadId,
-      ),
-      null,
-    )
-  }
-
-  private fun CaseNote.eventProperties(caseloadId: String?): Map<String, String> {
-    return listOfNotNull(
-      "id" to id,
-      "type" to type,
-      "subType" to subType,
-      "personIdentifier" to personIdentifier,
-      caseloadId?.let { "caseloadId" to it },
-    ).toMap()
   }
 }

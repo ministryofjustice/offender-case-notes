@@ -55,14 +55,6 @@ class ExternalApiService(
       .retryOnTransientException()
       .block()
 
-  fun getOffenderLocation(offenderIdentifier: String): String =
-    elite2ApiWebClient.get().uri("/api/bookings/offenderNo/{offenderNo}", offenderIdentifier)
-      .retrieve()
-      .bodyToMono<OffenderBooking>()
-      .retryOnTransientException()
-      .map { it.agencyId }
-      .block()!!
-
   fun getOffenderCaseNotes(
     offenderIdentifier: String,
     filter: CaseNoteFilter,
