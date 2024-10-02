@@ -1,0 +1,53 @@
+asyncapi: 3.0.0
+info:
+  title: HMPPS Case Notes
+  version: 1.0.0
+  description: Reflect changes to Case Notes
+
+servers:
+  development:
+    host: "hmpps-domain-events-dev.live-1.cloud-platform.service.justice.gov.uk"
+    protocol: sqs
+    description: Development Environment
+  preproduction:
+    host: "hmpps-domain-events-preprod.live-1.cloud-platform.service.justice.gov.uk"
+    protocol: sqs
+    description: Pre-production Environment
+  production:
+    host: "hmpps-domain-events-prod.live-1.cloud-platform.service.justice.gov.uk"
+    protocol: sqs
+    description: Production Environment
+
+components:
+  messages:
+    person.case-note.created:
+      $ref: https://raw.githubusercontent.com/ministryofjustice/hmpps-domain-events/main/spec/schemas/case-notes/person-case-note-created.yaml
+    person.case-note.updated:
+      $ref: https://raw.githubusercontent.com/ministryofjustice/hmpps-domain-events/main/spec/schemas/case-notes/person-case-note-updated.yaml
+    person.case-note.deleted:
+      $ref: https://raw.githubusercontent.com/ministryofjustice/hmpps-domain-events/main/spec/schemas/case-notes/person-case-note-deleted.yaml
+
+
+channels:
+  hmpps-domain-events:
+    description: HMPPS domain events SNS topic
+    bindings:
+      sns:
+        name: domainevents
+    messages:
+      person.case-note.created:
+        $ref: '#/components/messages/person.case-note.created'
+      person.case-note.updated:
+        $ref: '#/components/messages/person.case-note.updated'
+      person.case-note.deleted:
+        $ref: '#/components/messages/person.case-note.deleted'
+
+operations:
+  publish-event:
+    action: send
+    channel:
+      $ref: '#/channels/hmpps-domain-events'
+    messages:
+      - $ref: '#/channels/hmpps-domain-events/messages/person.case-note.created'
+      - $ref: '#/channels/hmpps-domain-events/messages/person.case-note.deleted'
+      - $ref: '#/channels/hmpps-domain-events/messages/person.case-note.updated'
