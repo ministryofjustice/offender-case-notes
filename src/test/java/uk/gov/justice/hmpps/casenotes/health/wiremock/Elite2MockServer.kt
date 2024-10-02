@@ -35,25 +35,6 @@ class Elite2Extension : BeforeAllCallback, AfterAllCallback, BeforeEachCallback 
 
 class Elite2MockServer : WireMockServer(WIREMOCK_PORT) {
 
-  fun subGetOffender(offenderIdentifier: String) {
-    val getCaseNoteTypes = "$API_PREFIX/bookings/offenderNo/$offenderIdentifier"
-    stubFor(
-      get(urlPathMatching(getCaseNoteTypes))
-        .willReturn(
-          aResponse()
-            .withHeader("Content-Type", "application/json")
-            .withBody(
-              "{\n" +
-                "  \"bookingId\": 1,\n" +
-                "  \"offenderNo\": \"" + offenderIdentifier + "\",\n" +
-                "  \"agencyId\": \"LEI\"" +
-                "}",
-            )
-            .withStatus(200),
-        ),
-    )
-  }
-
   fun stubGetBookingIdentifiers(bookingIdentifier: Long) {
     val getBookingIdentifiers = "$API_PREFIX/bookings/$bookingIdentifier/identifiers"
     stubFor(

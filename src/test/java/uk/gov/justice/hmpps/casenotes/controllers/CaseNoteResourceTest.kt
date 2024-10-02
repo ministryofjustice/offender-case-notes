@@ -7,6 +7,7 @@ import com.github.tomakehurst.wiremock.client.WireMock.getRequestedFor
 import com.github.tomakehurst.wiremock.client.WireMock.havingExactly
 import com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo
 import com.github.tomakehurst.wiremock.matching.ExactMatchMultiValuePattern
+import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.any
@@ -16,6 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.mock.mockito.SpyBean
 import uk.gov.justice.hmpps.casenotes.health.wiremock.Elite2Extension.Companion.elite2Api
 import uk.gov.justice.hmpps.casenotes.health.wiremock.OAuthExtension.Companion.oAuthApi
+import uk.gov.justice.hmpps.casenotes.health.wiremock.PrisonerSearchApiExtension.Companion.prisonerSearchApi
 import uk.gov.justice.hmpps.casenotes.model.OffenderCaseNote
 import uk.gov.justice.hmpps.casenotes.notes.CaseNote
 import uk.gov.justice.hmpps.casenotes.repository.CaseNoteSubTypeRepository
@@ -39,7 +41,7 @@ class CaseNoteResourceTest : ResourceTest() {
     @Test
     fun testRetrieveCaseNotesForOffenderSensitive() {
       oAuthApi.subGetUserDetails("SECURE_CASENOTE_USER")
-      elite2Api.subGetOffender("A1234AA")
+      prisonerSearchApi.stubPrisonerDetails("A1234AA", "LEI")
       elite2Api.subGetCaseNotesForOffender("A1234AA")
       val token = jwtHelper.createJwt("SECURE_CASENOTE_USER", roles = CASENOTES_ROLES)
       webTestClient.post().uri("/case-notes/{offenderIdentifier}", "A1234AA")
@@ -223,7 +225,6 @@ class CaseNoteResourceTest : ResourceTest() {
     @Test
     fun testCanRetrieveCaseNoteForOffender() {
       oAuthApi.subGetUserDetails("API_TEST_USER")
-      elite2Api.subGetOffender("A1234AA")
       elite2Api.subGetCaseNoteForOffender("A1234AA", 131232L)
       webTestClient.get().uri("/case-notes/{offenderIdentifier}/{caseNoteIdentifier}", "A1234AA", "131232")
         .headers(addBearerAuthorisation("API_TEST_USER"))
@@ -236,7 +237,7 @@ class CaseNoteResourceTest : ResourceTest() {
     @Test
     fun testRetrieveCaseNoteForOffenderSensitive() {
       oAuthApi.subGetUserDetails("SECURE_CASENOTE_USER")
-      elite2Api.subGetOffender("A1234AF")
+      prisonerSearchApi.stubPrisonerDetails("A1234AF", "LEI")
       val token = jwtHelper.createJwt("SECURE_CASENOTE_USER", roles = CASENOTES_ROLES)
       val postResponse = webTestClient.post().uri("/case-notes/{offenderIdentifier}", "A1234AF")
         .headers(addBearerToken(token))
@@ -257,7 +258,6 @@ class CaseNoteResourceTest : ResourceTest() {
     fun `case note of type sync to nomis stored in the db is not returned`() {
       oAuthApi.subGetUserDetails("SECURE_CASENOTE_USER")
       val prisonNumber = "S2234TN"
-      elite2Api.subGetOffender(prisonNumber)
       elite2Api.subGetCaseNotesForOffender(prisonNumber)
       val token = jwtHelper.createJwt("SECURE_CASENOTE_USER", roles = CASENOTES_ROLES)
 
@@ -287,7 +287,6 @@ class CaseNoteResourceTest : ResourceTest() {
     fun `case notes of type sync to nomis stored in the db are not returned`() {
       oAuthApi.subGetUserDetails("SECURE_CASENOTE_USER")
       val personIdentifier = "S1234TN"
-      elite2Api.subGetOffender(personIdentifier)
       elite2Api.subGetCaseNotesForOffender(personIdentifier)
       val token = jwtHelper.createJwt("SECURE_CASENOTE_USER", roles = CASENOTES_ROLES)
 
@@ -371,7 +370,7 @@ class CaseNoteResourceTest : ResourceTest() {
   fun `request with username of 64 characters succeeds`() {
     val username = "A_VERY_LONG_USERNAME_THAT_NEARLY_THE_SIXTY_FOUR_CHARACTERS_LIMIT"
     oAuthApi.subGetUserDetails(username)
-    elite2Api.subGetOffender("A1234AD")
+    prisonerSearchApi.stubPrisonerDetails("A1234AD", "LEI")
 
     // create the case note
     webTestClient.post().uri("/case-notes/{offenderIdentifier}", "A1234AD")
@@ -387,6 +386,7 @@ class CaseNoteResourceTest : ResourceTest() {
   fun testCanCreateCaseNote_Normal() {
     oAuthApi.subGetUserDetails("SECURE_CASENOTE_USER")
     elite2Api.subCreateCaseNote("A1234AE")
+    prisonerSearchApi.stubPrisonerDetails("A1234AE", "LEI")
 
     // create the case note
     webTestClient.post().uri("/case-notes/{offenderIdentifier}", "A1234AE")
@@ -401,7 +401,7 @@ class CaseNoteResourceTest : ResourceTest() {
   @Test
   fun testCanCreateCaseNote_Secure() {
     oAuthApi.subGetUserDetails("SECURE_CASENOTE_USER")
-    elite2Api.subGetOffender("A1234AD")
+    prisonerSearchApi.stubPrisonerDetails("A1234AD", "LEI")
 
     // create the case note
     webTestClient.post().uri("/case-notes/{offenderIdentifier}", "A1234AD")
@@ -416,7 +416,7 @@ class CaseNoteResourceTest : ResourceTest() {
   @Test
   fun `create a case note with type sync to nomis is sent to prison api`() {
     oAuthApi.subGetUserDetails("SECURE_CASENOTE_USER")
-    elite2Api.subGetOffender("N1234CT")
+    prisonerSearchApi.stubPrisonerDetails("N1234CT")
     elite2Api.subCreateCaseNote("N1234CT")
 
     // create the case note
@@ -439,7 +439,7 @@ class CaseNoteResourceTest : ResourceTest() {
   @Test
   fun testCanCreateCaseNote_SecureWithPomRole() {
     oAuthApi.subGetUserDetails("SECURE_CASENOTE_USER")
-    elite2Api.subGetOffender("A1234AD")
+    prisonerSearchApi.stubPrisonerDetails("A1234AD", "LEI")
 
     // create the case note
     webTestClient.post().uri("/case-notes/{offenderIdentifier}", "A1234AD")
@@ -454,7 +454,7 @@ class CaseNoteResourceTest : ResourceTest() {
   @Test
   fun testCannotCreateInactiveCaseNote_Secure() {
     oAuthApi.subGetUserDetails("SECURE_CASENOTE_USER")
-    elite2Api.subGetOffender("A1234AD")
+    prisonerSearchApi.stubPrisonerDetails("A1234AD")
 
     // create the case note
     webTestClient.post().uri("/case-notes/{offenderIdentifier}", "A1234AD")
@@ -473,7 +473,7 @@ class CaseNoteResourceTest : ResourceTest() {
   @Test
   fun testCanCreateAmendments() {
     oAuthApi.subGetUserDetails("SECURE_CASENOTE_USER")
-    elite2Api.subGetOffender("A1234AB")
+    prisonerSearchApi.stubPrisonerDetails("A1234AB", "LEI")
     elite2Api.subGetCaseNotesForOffender("A1234AB")
     val token = jwtHelper.createJwt("SECURE_CASENOTE_USER", roles = CASENOTES_ROLES)
 
@@ -524,7 +524,7 @@ class CaseNoteResourceTest : ResourceTest() {
   @Test
   fun testCanFilterCaseNotes() {
     oAuthApi.subGetUserDetails("SECURE_CASENOTE_USER")
-    elite2Api.subGetOffender("A1234AC")
+    prisonerSearchApi.stubPrisonerDetails("A1234AC", "LEI")
     elite2Api.subGetCaseNotesForOffender("A1234AC")
     val token = jwtHelper.createJwt("SECURE_CASENOTE_USER", roles = CASENOTES_ROLES)
     webTestClient.post().uri("/case-notes/{offenderIdentifier}", "A1234AC")
@@ -553,7 +553,7 @@ class CaseNoteResourceTest : ResourceTest() {
   @Test
   fun testCanSoftDeleteCaseNote() {
     oAuthApi.subGetUserDetails("DELETE_CASE_NOTE_USER")
-    elite2Api.subGetOffender("A1234BA")
+    prisonerSearchApi.stubPrisonerDetails("A1234BA", "LEI")
     val token = jwtHelper.createJwt("DELETE_CASE_NOTE_USER", roles = DELETE_CASENOTE_ROLES)
 
     val postResponse = webTestClient.post().uri("/case-notes/{offenderIdentifier}", "A1234BA")
@@ -641,7 +641,7 @@ class CaseNoteResourceTest : ResourceTest() {
   @Test
   fun testSoftDeleteCaseNoteIDAndOffenderIdNotLinked() {
     oAuthApi.subGetUserDetails("DELETE_CASE_NOTE_USER")
-    elite2Api.subGetOffender("A1234BC")
+    prisonerSearchApi.stubPrisonerDetails("A1234BC")
     val token = jwtHelper.createJwt("DELETE_CASE_NOTE_USER", roles = DELETE_CASENOTE_ROLES)
 
     val postResponse = webTestClient.post().uri("/case-notes/{offenderIdentifier}", "A1234BC")
@@ -682,5 +682,11 @@ class CaseNoteResourceTest : ResourceTest() {
       "ROLE_VIEW_SENSITIVE_CASE_NOTES",
       "ROLE_ADD_SENSITIVE_CASE_NOTES",
     )
+
+    @BeforeAll
+    @JvmStatic
+    fun setUp() {
+      oAuthApi.stubGrantToken()
+    }
   }
 }

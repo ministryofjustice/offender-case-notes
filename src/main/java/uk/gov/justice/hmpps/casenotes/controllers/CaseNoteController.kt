@@ -30,6 +30,7 @@ import uk.gov.justice.hmpps.casenotes.config.SecurityUserContext.Companion.ROLE_
 import uk.gov.justice.hmpps.casenotes.config.ServiceConfig
 import uk.gov.justice.hmpps.casenotes.dto.CaseNoteFilter
 import uk.gov.justice.hmpps.casenotes.dto.ErrorResponse
+import uk.gov.justice.hmpps.casenotes.integrations.PrisonerSearchService
 import uk.gov.justice.hmpps.casenotes.notes.AmendCaseNoteRequest
 import uk.gov.justice.hmpps.casenotes.notes.CaseNote
 import uk.gov.justice.hmpps.casenotes.notes.CreateCaseNoteRequest
@@ -37,7 +38,6 @@ import uk.gov.justice.hmpps.casenotes.notes.ReadCaseNote
 import uk.gov.justice.hmpps.casenotes.notes.WriteCaseNote
 import uk.gov.justice.hmpps.casenotes.services.CaseNoteEventPusher
 import uk.gov.justice.hmpps.casenotes.services.CaseNoteService
-import uk.gov.justice.hmpps.casenotes.services.ExternalApiService
 
 const val CASELOAD_ID = "CaseloadId"
 
@@ -52,7 +52,7 @@ class CaseNoteController(
   private val telemetryClient: TelemetryClient,
   private val securityUserContext: SecurityUserContext,
   private val caseNoteEventPusher: CaseNoteEventPusher,
-  private val externalApiService: ExternalApiService,
+  private val search: PrisonerSearchService,
 ) {
   @Operation(summary = "Retrieves a case note")
   @ApiResponses(
@@ -138,17 +138,16 @@ class CaseNoteController(
     @Valid @RequestBody createCaseNote: CreateCaseNoteRequest,
     @RequestHeader(required = false, value = CASELOAD_ID) caseloadId: String? = null,
   ): CaseNote {
+    val request = if (createCaseNote.locationId == null) {
+      createCaseNote.copy(locationId = search.getPrisonerDetails(personIdentifier).prisonId)
+    } else {
+      createCaseNote
+    }
     val caseNote = if (caseloadId in serviceConfig.activePrisons) {
-      val request = if (createCaseNote.locationId == null) {
-        createCaseNote.copy(locationId = externalApiService.getOffenderLocation(personIdentifier))
-      } else {
-        createCaseNote
-      }
       save.createNote(personIdentifier, request)
     } else {
-      caseNoteService.createCaseNote(personIdentifier, createCaseNote)
+      caseNoteService.createCaseNote(personIdentifier, request)
     }
-
     telemetryClient.trackEvent("CaseNoteCreated", caseNote.eventProperties(caseloadId), null)
     caseNoteEventPusher.sendEvent(caseNote)
     return caseNote

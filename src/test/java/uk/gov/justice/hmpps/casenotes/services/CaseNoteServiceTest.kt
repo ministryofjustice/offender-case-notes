@@ -1,7 +1,5 @@
 package uk.gov.justice.hmpps.casenotes.services
 
-import com.microsoft.applicationinsights.TelemetryClient
-import jakarta.persistence.EntityManager
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.BeforeEach
@@ -60,9 +58,7 @@ class CaseNoteServiceTest {
   private val caseNoteSubTypeRepository: CaseNoteSubTypeRepository = mock()
   private val securityUserContext: SecurityUserContext = mock()
   private val externalApiService: ExternalApiService = mock()
-  private val telemetryClient: TelemetryClient = mock()
   private var caseNoteService: CaseNoteService = mock()
-  private var entityManager: EntityManager = mock()
   private var deletedCaseNoteRepository: DeletedCaseNoteRepository = mock()
   private val requestAttributes: RequestAttributes = mock()
 
@@ -76,8 +72,6 @@ class CaseNoteServiceTest {
       caseNoteSubTypeRepository,
       securityUserContext,
       externalApiService,
-      telemetryClient,
-      entityManager,
       deletedCaseNoteRepository,
     )
     RequestContextHolder.setRequestAttributes(requestAttributes)
@@ -805,15 +799,6 @@ class CaseNoteServiceTest {
     whenever(repository.deleteCaseNoteByPersonIdentifier(eq("A1234AC"))).thenReturn(3)
     val offendersDeleted: Int = caseNoteService.deleteCaseNotesForOffender("A1234AC")
     assertThat(offendersDeleted).isEqualTo(3)
-  }
-
-  @Test
-  fun deleteOffenderTest_telemetry() {
-    whenever(repository.deleteCaseNoteByPersonIdentifier(eq("A1234AC")))
-      .thenReturn(3)
-    caseNoteService.deleteCaseNotesForOffender("A1234AC")
-    Mockito.verify(telemetryClient)
-      .trackEvent("DataComplianceDelete", mapOf("personIdentifier" to "A1234AC", "count" to "3"), null)
   }
 
   @Test
