@@ -1,6 +1,5 @@
 package uk.gov.justice.hmpps.casenotes.controllers
 
-import com.microsoft.applicationinsights.TelemetryClient
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.Parameter
 import io.swagger.v3.oas.annotations.media.Content
@@ -24,7 +23,6 @@ import org.springframework.web.bind.annotation.RequestHeader
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestController
-import uk.gov.justice.hmpps.casenotes.config.CaseNoteRequestContext
 import uk.gov.justice.hmpps.casenotes.config.SecurityUserContext
 import uk.gov.justice.hmpps.casenotes.config.SecurityUserContext.Companion.ROLE_CASE_NOTES_SYNC
 import uk.gov.justice.hmpps.casenotes.config.ServiceConfig
@@ -49,7 +47,6 @@ class CaseNoteController(
   private val caseNoteService: CaseNoteService,
   private val find: ReadCaseNote,
   private val save: WriteCaseNote,
-  private val telemetryClient: TelemetryClient,
   private val securityUserContext: SecurityUserContext,
   private val caseNoteEventPusher: CaseNoteEventPusher,
   private val search: PrisonerSearchService,
@@ -148,7 +145,6 @@ class CaseNoteController(
     } else {
       caseNoteService.createCaseNote(personIdentifier, request)
     }
-    telemetryClient.trackEvent("CaseNoteCreated", caseNote.eventProperties(caseloadId), null)
     caseNoteEventPusher.sendEvent(caseNote)
     return caseNote
   }
@@ -184,7 +180,6 @@ class CaseNoteController(
     } else {
       caseNoteService.amendCaseNote(personIdentifier, caseNoteIdentifier, amendedText)
     }
-    telemetryClient.trackEvent("CaseNoteUpdated", caseNote.eventProperties(caseloadId), null)
     caseNoteEventPusher.sendEvent(caseNote)
     return caseNote
   }
@@ -212,26 +207,5 @@ class CaseNoteController(
     } else {
       caseNoteService.deleteCaseNote(personIdentifier, caseNoteId)
     }
-
-    telemetryClient.trackEvent(
-      "CaseNoteDeleted",
-      mapOf(
-        "userName" to CaseNoteRequestContext.get().username,
-        "personIdentifier" to personIdentifier,
-        "caseNoteId" to caseNoteId,
-        "caseloadId" to caseloadId,
-      ),
-      null,
-    )
-  }
-
-  private fun CaseNote.eventProperties(caseloadId: String?): Map<String, String> {
-    return listOfNotNull(
-      "id" to id,
-      "type" to type,
-      "subType" to subType,
-      "personIdentifier" to personIdentifier,
-      caseloadId?.let { "caseloadId" to it },
-    ).toMap()
   }
 }

@@ -1,6 +1,5 @@
 package uk.gov.justice.hmpps.casenotes.sync
 
-import com.microsoft.applicationinsights.TelemetryClient
 import org.springframework.context.ApplicationEventPublisher
 import org.springframework.dao.DataIntegrityViolationException
 import org.springframework.data.repository.findByIdOrNull
@@ -30,34 +29,23 @@ class SyncCaseNotes(
   private val noteRepository: NoteRepository,
   private val amendmentRepository: AmendmentRepository,
   private val eventPublisher: ApplicationEventPublisher,
-  private val telemetryClient: TelemetryClient,
   private val transactionTemplate: TransactionTemplate,
 ) {
   @Transactional(propagation = Propagation.NEVER)
   fun migrateNotes(personIdentifier: String, toMigrate: List<MigrateCaseNoteRequest>): List<MigrationResult> {
-    val (created, replaced) = try {
+    val created = try {
       transactionTemplate.execute {
-        create(toMigrate.mapToEntities(personIdentifier)) to false
+        create(toMigrate.mapToEntities(personIdentifier))
       }
     } catch (dive: DataIntegrityViolationException) {
       transactionTemplate.execute {
         amendmentRepository.deleteLegacyAmendments(personIdentifier)
         noteRepository.deleteLegacyCaseNotes(personIdentifier)
-        create(toMigrate.mapToEntities(personIdentifier)) to true
+        create(toMigrate.mapToEntities(personIdentifier))
       }
     }
 
-    return created.map { MigrationResult(it.id, it.legacyId) }.also {
-      telemetryClient.trackEvent(
-        "CaseNotesMigrated",
-        mapOf(
-          "personIdentifier" to personIdentifier,
-          "count" to toMigrate.count().toString(),
-          "replaced" to replaced.toString(),
-        ),
-        mapOf(),
-      )
-    }
+    return created.map { MigrationResult(it.id, it.legacyId) }
   }
 
   fun syncNote(request: SyncCaseNoteRequest): SyncResult {
@@ -88,20 +76,13 @@ class SyncCaseNotes(
       saved.id,
       saved.legacyId,
       if (existing == null) SyncResult.Action.CREATED else SyncResult.Action.UPDATED,
-    ).also {
-      telemetryClient.trackEvent(
-        "CaseNoteSynced",
-        saved.eventProperties() + listOfNotNull(existing?.id?.let { "previousId" to it.toString() }),
-        mapOf(),
-      )
-    }
+    )
   }
 
   fun deleteCaseNote(id: UUID) {
     noteRepository.findByIdOrNull(id)?.also {
       noteRepository.delete(it)
       eventPublisher.publishEvent(it.createEvent(DELETED))
-      telemetryClient.trackEvent("CaseNoteDeletedViaSync", it.eventProperties(), mapOf())
     }
   }
 
@@ -140,12 +121,3 @@ private fun <T : TypeLookup> Collection<T>.exceptionMessage() =
       }"
     }
     .joinToString(separator = ", ", prefix = "{ ", postfix = " }")
-
-private fun Note.eventProperties(): Map<String, String> {
-  return mapOf(
-    "id" to id.toString(),
-    "type" to subType.type.code,
-    "subType" to subType.code,
-    "personIdentifier" to personIdentifier,
-  )
-}

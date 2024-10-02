@@ -1,7 +1,6 @@
 package uk.gov.justice.hmpps.casenotes.services;
 
 
-import com.microsoft.applicationinsights.TelemetryClient;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -17,10 +16,8 @@ import uk.gov.justice.hmpps.casenotes.repository.OffenderCaseNoteRepository;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
-import static java.lang.String.valueOf;
 import static java.util.Comparator.comparing;
 
 @Service
@@ -32,11 +29,7 @@ public class SubjectAccessRequestService {
 
     private final OffenderCaseNoteAmendmentRepository amendmentRepository;
 
-    private final TelemetryClient telemetryClient;
-
     public List< SubjectAccessRequestData> getCaseNotes(final String offenderIdentifier, final LocalDate fromDate, final LocalDate toDate) {
-
-        final List< SubjectAccessRequestData> sensitiveCaseNotes;
 
         final var sarOffenderCaseNoteFilter = new SAROffenderCaseNoteFilter(offenderIdentifier, fromDate, toDate);
 
@@ -53,13 +46,10 @@ public class SubjectAccessRequestService {
         //remove duplicate case notes
         offenderCaseNoteList = offenderCaseNoteList.stream().distinct().toList();
 
-        sensitiveCaseNotes = offenderCaseNoteList.stream()
+        return offenderCaseNoteList.stream()
                 .map(this::toSubjectAccessRequestContent)
                 .sorted(comparing(SubjectAccessRequestData::getCreationDateTime).reversed())
                 .toList();
-        log.debug("{} Case notes for Subject access request fetched for offender identifier {}", sensitiveCaseNotes.size(), offenderIdentifier);
-        telemetryClient.trackEvent("SAROffenderCaseNotes", Map.of("offenderNo", offenderIdentifier, "fromDate", valueOf(fromDate),"toDate", valueOf(toDate),"count", valueOf(sensitiveCaseNotes.size())), null);
-        return sensitiveCaseNotes;
     }
 
     private SubjectAccessRequestData toSubjectAccessRequestContent(final OffenderCaseNote cn) {

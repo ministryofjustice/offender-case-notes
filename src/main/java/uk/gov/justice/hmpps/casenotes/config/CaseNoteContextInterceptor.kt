@@ -1,6 +1,7 @@
 package uk.gov.justice.hmpps.casenotes.config
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import io.opentelemetry.api.trace.Span
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
 import jakarta.validation.ValidationException
@@ -36,6 +37,8 @@ class CaseNoteContextInterceptor(
 ) : HandlerInterceptor {
   override fun preHandle(request: HttpServletRequest, response: HttpServletResponse, handler: Any): Boolean {
     if (request.method in listOf(POST.name(), PUT.name(), PATCH.name(), DELETE.name())) {
+      // add request header to request in app insights to avoid having custom events
+      request.getHeader("CaseloadId")?.also { Span.current().setAttribute("caseloadId", it) }
       val username = username()
       return externalApiService.getUserDetails(username)?.let {
         val context = CaseNoteRequestContext(
