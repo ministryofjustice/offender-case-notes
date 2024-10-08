@@ -200,12 +200,5 @@ class CaseNoteController(
     @PathVariable personIdentifier: String,
     @Parameter(description = "Case Note Id", required = true, example = "518b2200-6489-4c77-8514-10cf80ccd488")
     @PathVariable caseNoteId: String,
-    @RequestHeader(CASELOAD_ID) caseloadId: String? = null,
-  ) {
-    if (caseloadId in serviceConfig.activePrisons) {
-      save.deleteNote(personIdentifier, caseNoteId)
-    } else {
-      caseNoteService.deleteCaseNote(personIdentifier, caseNoteId)
-    }
-  }
+  ) = save.deleteNote(personIdentifier, caseNoteId)
 }

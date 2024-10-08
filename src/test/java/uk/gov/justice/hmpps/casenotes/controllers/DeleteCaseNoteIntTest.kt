@@ -62,25 +62,6 @@ class DeleteCaseNoteIntTest : ResourceTest() {
     hmppsEventsQueue.receiveDomainEvent().verifyAgainst(PersonCaseNoteEvent.Type.DELETED, Source.DPS, caseNote)
   }
 
-  @Test
-  fun `can delete using legacy api`() {
-    val type = getAllTypes().first { !it.syncToNomis }
-    val caseNote = givenCaseNote(generateCaseNote(personIdentifier(), type).withAmendment())
-    deleteCaseNote(
-      caseNote.personIdentifier,
-      caseNote.id.toString(),
-      caseloadId = null,
-      roles = listOf("ROLE_DELETE_SENSITIVE_CASE_NOTES"),
-    ).expectStatus().isOk
-
-    val saved = noteRepository.findByIdAndPersonIdentifier(caseNote.id, caseNote.personIdentifier)
-    assertThat(saved).isNull()
-    val deleted = deletedCaseNoteRepository.findByCaseNoteId(caseNote.id)
-    assertThat(deleted!!.caseNote).isNotNull()
-    assertThat(deleted.cause).isEqualTo(DELETE)
-    deleted.caseNote.verifyAgainst(caseNote)
-  }
-
   private fun deleteCaseNote(
     prisonNumber: String,
     caseNoteId: String,
