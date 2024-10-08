@@ -42,7 +42,7 @@ class CaseNoteAwsEventPusher(
         val publishResponse = eventTopic.publish(
           cne.eventType,
           objectMapper.writeValueAsString(cne),
-          mapOf(
+          attributes = mapOf(
             "eventType" to MessageAttributeValue.builder().dataType("String").stringValue(cne.eventType).build(),
             "contentType" to MessageAttributeValue.builder().dataType("String")
               .stringValue("text/plain;charset=UTF-8").build(),

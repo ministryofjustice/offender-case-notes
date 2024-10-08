@@ -13,13 +13,11 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.security.access.AccessDeniedException;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 import uk.gov.justice.hmpps.casenotes.config.CaseNoteRequestContext;
 import uk.gov.justice.hmpps.casenotes.config.SecurityUserContext;
-import uk.gov.justice.hmpps.casenotes.notes.DeletedCaseNoteRepository;
 import uk.gov.justice.hmpps.casenotes.dto.CaseNoteFilter;
 import uk.gov.justice.hmpps.casenotes.dto.NomisCaseNote;
 import uk.gov.justice.hmpps.casenotes.filters.OffenderCaseNoteFilter;
@@ -28,6 +26,7 @@ import uk.gov.justice.hmpps.casenotes.notes.AmendCaseNoteRequest;
 import uk.gov.justice.hmpps.casenotes.notes.CaseNote;
 import uk.gov.justice.hmpps.casenotes.notes.CaseNoteAmendment;
 import uk.gov.justice.hmpps.casenotes.notes.CreateCaseNoteRequest;
+import uk.gov.justice.hmpps.casenotes.notes.DeletedCaseNoteRepository;
 import uk.gov.justice.hmpps.casenotes.repository.CaseNoteSubTypeRepository;
 import uk.gov.justice.hmpps.casenotes.repository.OffenderCaseNoteRepository;
 
@@ -315,28 +314,6 @@ public class CaseNoteService {
 
     private boolean isLegacyId(final String caseNoteIdentifier) {
         return NumberUtils.isDigits(caseNoteIdentifier);
-    }
-
-    @Transactional
-    public int deleteCaseNotesForOffender(final String personIdentifier) {
-        repository.deleteCaseNoteAmendmentsByPersonIdentifier(personIdentifier);
-        final var deletedCaseNotesCount = repository.deleteCaseNoteByPersonIdentifier(personIdentifier);
-        deletedCaseNoteRepository.deleteByPersonIdentifier(personIdentifier);
-        return deletedCaseNotesCount;
-    }
-
-    @Transactional
-    @PreAuthorize("hasAnyRole('DELETE_SENSITIVE_CASE_NOTES', 'ROLE_PRISONER_CASE_NOTES__RW')")
-    public void deleteCaseNote(final String offenderIdentifier, final String caseNoteId) {
-        if (isLegacyId(caseNoteId)) {
-            throw new ValidationException("Case note id not a sensitive case note, please delete through NOMIS");
-        }
-        final var caseNote = repository.findById(UUID.fromString(caseNoteId))
-            .orElseThrow(() -> new EntityNotFoundException("Case note not found"));
-        if (!caseNote.getPersonIdentifier().equalsIgnoreCase(offenderIdentifier)) {
-            throw new ValidationException("case note id not connected with offenderIdentifier");
-        }
-        repository.delete(caseNote);
     }
 
     private boolean isAllowedToCreateRestrictedCaseNote() {

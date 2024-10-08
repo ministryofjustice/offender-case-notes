@@ -15,6 +15,7 @@ import org.mockito.kotlin.eq
 import org.mockito.kotlin.verify
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.mock.mockito.SpyBean
+import uk.gov.justice.hmpps.casenotes.config.SecurityUserContext.Companion.ROLE_CASE_NOTES_WRITE
 import uk.gov.justice.hmpps.casenotes.health.wiremock.Elite2Extension.Companion.elite2Api
 import uk.gov.justice.hmpps.casenotes.health.wiremock.OAuthExtension.Companion.oAuthApi
 import uk.gov.justice.hmpps.casenotes.health.wiremock.PrisonerSearchApiExtension.Companion.prisonerSearchApi
@@ -551,13 +552,14 @@ class CaseNoteResourceTest : ResourceTest() {
   }
 
   @Test
-  fun testCanSoftDeleteCaseNote() {
+  fun testCanDeleteCaseNote() {
     oAuthApi.subGetUserDetails("DELETE_CASE_NOTE_USER")
     prisonerSearchApi.stubPrisonerDetails("A1234BA", "LEI")
-    val token = jwtHelper.createJwt("DELETE_CASE_NOTE_USER", roles = DELETE_CASENOTE_ROLES)
+    val token = jwtHelper.createJwt("DELETE_CASE_NOTE_USER", roles = listOf(ROLE_CASE_NOTES_WRITE))
 
     val postResponse = webTestClient.post().uri("/case-notes/{offenderIdentifier}", "A1234BA")
       .headers(addBearerToken(token))
+      .header(CASELOAD_ID, "MDI")
       .bodyValue(CREATE_CASE_NOTE_WITHOUT_LOC.format("This is a case note"))
       .exchange()
       .expectStatus().isCreated
@@ -566,6 +568,7 @@ class CaseNoteResourceTest : ResourceTest() {
 
     webTestClient.get().uri("/case-notes/{offenderIdentifier}/{caseNoteIdentifier}", "A1234BA", id)
       .headers(addBearerToken(token))
+      .header(CASELOAD_ID, "MDI")
       .exchange()
       .expectStatus().isOk
       .expectBody()
@@ -602,28 +605,9 @@ class CaseNoteResourceTest : ResourceTest() {
   }
 
   @Test
-  fun testDeleteNOMISCaseNoteNotFound() {
+  fun testDeleteCaseNoteNotFound() {
     oAuthApi.subGetUserDetails("DELETE_CASE_NOTE_USER")
-    val token = jwtHelper.createJwt("DELETE_CASE_NOTE_USER", roles = DELETE_CASENOTE_ROLES)
-
-    webTestClient.delete().uri("/case-notes/{offenderIdentifier}/{caseNoteId}", "Z1234ZZ", "12345678")
-      .headers(addBearerToken(token))
-      .exchange()
-      .expectStatus().isBadRequest
-      .expectBody()
-      .json(
-        "{" +
-          "'status':400," +
-          "'developerMessage':'Case note id not a sensitive case note, please delete through NOMIS'" +
-          "}",
-      )
-  }
-
-  @Test
-  fun testSoftDeleteCaseNoteNotFound() {
-    oAuthApi.subGetUserDetails("DELETE_CASE_NOTE_USER")
-    val token = jwtHelper.createJwt("DELETE_CASE_NOTE_USER", roles = DELETE_CASENOTE_ROLES)
-
+    val token = jwtHelper.createJwt("DELETE_CASE_NOTE_USER", roles = listOf(ROLE_CASE_NOTES_WRITE))
     webTestClient.delete()
       .uri("/case-notes/{offenderIdentifier}/{caseNoteId}", "Z1234ZZ", "231eb4ee-c06c-49a3-846c-1b542cc0ed6b")
       .headers(addBearerToken(token))
@@ -633,34 +617,7 @@ class CaseNoteResourceTest : ResourceTest() {
       .json(
         "{" +
           "'status':404," +
-          "'developerMessage':'Case note not found'" +
-          "}",
-      )
-  }
-
-  @Test
-  fun testSoftDeleteCaseNoteIDAndOffenderIdNotLinked() {
-    oAuthApi.subGetUserDetails("DELETE_CASE_NOTE_USER")
-    prisonerSearchApi.stubPrisonerDetails("A1234BC")
-    val token = jwtHelper.createJwt("DELETE_CASE_NOTE_USER", roles = DELETE_CASENOTE_ROLES)
-
-    val postResponse = webTestClient.post().uri("/case-notes/{offenderIdentifier}", "A1234BC")
-      .headers(addBearerToken(token))
-      .bodyValue(CREATE_CASE_NOTE_WITHOUT_LOC.format("This is a case note"))
-      .exchange()
-      .expectStatus().isCreated
-      .returnResult(CaseNote::class.java)
-    val id = postResponse.responseBody.blockFirst()!!.id
-
-    webTestClient.delete().uri("/case-notes/{offenderIdentifier}/{caseNoteId}", "Z1234ZZ", id)
-      .headers(addBearerToken(token))
-      .exchange()
-      .expectStatus().isBadRequest
-      .expectBody()
-      .json(
-        "{" +
-          "'status\':400," +
-          "'developerMessage':'case note id not connected with offenderIdentifier'" +
+          "'developerMessage':'Resource with id [231eb4ee-c06c-49a3-846c-1b542cc0ed6b] not found.'" +
           "}",
       )
   }
@@ -676,12 +633,6 @@ class CaseNoteResourceTest : ResourceTest() {
       """{"type": "%s", "subType": "%s", "text": "%s"}"""
     private val POM_ROLE = listOf("ROLE_POM")
     private val CASENOTES_ROLES = listOf("ROLE_VIEW_SENSITIVE_CASE_NOTES", "ROLE_ADD_SENSITIVE_CASE_NOTES")
-    private val DELETE_CASENOTE_ROLES = listOf(
-      "ROLE_DELETE_SENSITIVE_CASE_NOTES",
-      "ROLE_SYSTEM_USER",
-      "ROLE_VIEW_SENSITIVE_CASE_NOTES",
-      "ROLE_ADD_SENSITIVE_CASE_NOTES",
-    )
 
     @BeforeAll
     @JvmStatic

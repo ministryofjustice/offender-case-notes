@@ -14,7 +14,6 @@ import org.mockito.Mockito
 import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.any
 import org.mockito.kotlin.argumentCaptor
-import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
@@ -792,13 +791,6 @@ class CaseNoteServiceTest {
         assertThat(caseNote.amendments[0].authorUserId).isEqualTo("user")
       }
     }
-  }
-
-  @Test
-  fun deleteOffenderTest() {
-    whenever(repository.deleteCaseNoteByPersonIdentifier(eq("A1234AC"))).thenReturn(3)
-    val offendersDeleted: Int = caseNoteService.deleteCaseNotesForOffender("A1234AC")
-    assertThat(offendersDeleted).isEqualTo(3)
   }
 
   @Test
