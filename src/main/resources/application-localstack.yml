@@ -5,7 +5,7 @@ hmpps.sqs:
       queueName: offender_case_notes_queue
       dlqName: offender_case_notes_dlq
       subscribeTopicId: offenderevents
-      subscribeFilter: '{"eventType":[ "BOOKING_NUMBER-CHANGED", "DATA_COMPLIANCE_DELETE-OFFENDER"] }'
+      subscribeFilter: '{"eventType":["BOOKING_NUMBER-CHANGED"] }'
   topics:
     offenderevents:
       arn: arn:aws:sns:eu-west-2:000000000000:offender_events

@@ -9,7 +9,6 @@ import org.springframework.stereotype.Service
 
 @Service
 class EventListener(
-  private val caseNoteService: CaseNoteService,
   private val mergeOffenderService: MergeOffenderService,
   private val objectMapper: ObjectMapper,
 ) {
@@ -20,14 +19,13 @@ class EventListener(
   @SqsListener("event", factory = "hmppsQueueContainerFactoryProxy")
   fun handleEvents(requestJson: String) {
     val (message, messageAttributes) = objectMapper.readValue<Message>(requestJson)
-    val (offenderIdDisplay, bookingId) = objectMapper.readValue<EventMessage>(message)
+    val bookingId = objectMapper.readValue<EventMessage>(message).bookingId
 
     val eventType = messageAttributes.eventType.value
     log.info("Processing message of type {}", eventType)
 
     when (eventType) {
       "BOOKING_NUMBER-CHANGED" -> mergeOffenderService.checkAndMerge(bookingId)
-      "DATA_COMPLIANCE_DELETE-OFFENDER" -> caseNoteService.deleteCaseNotesForOffender(offenderIdDisplay)
     }
   }
 }

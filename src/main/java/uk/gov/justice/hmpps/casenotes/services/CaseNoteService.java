@@ -316,14 +316,6 @@ public class CaseNoteService {
         return NumberUtils.isDigits(caseNoteIdentifier);
     }
 
-    @Transactional
-    public int deleteCaseNotesForOffender(final String personIdentifier) {
-        repository.deleteCaseNoteAmendmentsByPersonIdentifier(personIdentifier);
-        final var deletedCaseNotesCount = repository.deleteCaseNoteByPersonIdentifier(personIdentifier);
-        deletedCaseNoteRepository.deleteByPersonIdentifier(personIdentifier);
-        return deletedCaseNotesCount;
-    }
-
     private boolean isAllowedToCreateRestrictedCaseNote() {
         return securityUserContext.isOverrideRole("POM", "ADD_SENSITIVE_CASE_NOTES");
     }

@@ -17,12 +17,4 @@ interface OffenderCaseNoteRepository :
   @Modifying
   @Query("update OffenderCaseNote set personIdentifier = :new where personIdentifier = :old")
   fun updateOffenderIdentifier(old: String, new: String): Int
-
-  @Modifying
-  @Query("delete from OffenderCaseNote ocn WHERE ocn.personIdentifier = :personIdentifier")
-  fun deleteCaseNoteByPersonIdentifier(personIdentifier: String): Int
-
-  @Modifying
-  @Query("delete from OffenderCaseNoteAmendment ocna where ocna.caseNote.personIdentifier = :personIdentifier")
-  fun deleteCaseNoteAmendmentsByPersonIdentifier(personIdentifier: String): Int
 }

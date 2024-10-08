@@ -53,7 +53,7 @@ hmpps.sqs:
       queueName: ${random.uuid}
       dlqName: ${random.uuid}
       subscribeTopicId: offenderevents
-      subscribeFilter: '{"eventType":[ "BOOKING_NUMBER-CHANGED", "DATA_COMPLIANCE_DELETE-OFFENDER"] }'
+      subscribeFilter: '{"eventType":["BOOKING_NUMBER-CHANGED"] }'
   topics:
     offenderevents:
       arn: arn:aws:sns:eu-west-2:000000000000:${random.uuid}

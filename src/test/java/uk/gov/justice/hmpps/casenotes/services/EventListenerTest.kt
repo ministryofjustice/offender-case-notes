@@ -13,16 +13,8 @@ import java.nio.charset.StandardCharsets
 
 @JsonTest
 class EventListenerTest(@Autowired objectMapper: ObjectMapper) {
-  private val caseNoteService: CaseNoteService = mock()
   private val mergeOffenderService: MergeOffenderService = mock()
-  private var eventListener: EventListener = EventListener(caseNoteService, mergeOffenderService, objectMapper)
-
-  @Test
-  fun testDeleteEvent() {
-    whenever(caseNoteService.deleteCaseNotesForOffender(any())).thenReturn(3)
-    eventListener.handleEvents(getJson("offender-deletion-request.json"))
-    verify(caseNoteService).deleteCaseNotesForOffender("A1234AA")
-  }
+  private var eventListener: EventListener = EventListener(mergeOffenderService, objectMapper)
 
   @Test
   fun testMergeEvent() {

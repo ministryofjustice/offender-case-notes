@@ -49,7 +49,6 @@ class DeletedCaseNote(
 
 interface DeletedCaseNoteRepository : JpaRepository<DeletedCaseNote, Long> {
   fun findByCaseNoteId(caseNoteId: UUID): DeletedCaseNote?
-  fun deleteByPersonIdentifier(personIdentifier: String)
 }
 
 @JsonNaming(SnakeCaseStrategy::class)
