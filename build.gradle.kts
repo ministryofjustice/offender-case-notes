@@ -1,5 +1,5 @@
 plugins {
-  id("uk.gov.justice.hmpps.gradle-spring-boot") version "6.0.5"
+  id("uk.gov.justice.hmpps.gradle-spring-boot") version "6.0.6"
   kotlin("plugin.spring") version "2.0.20"
   kotlin("plugin.jpa") version "2.0.20"
 }
@@ -37,10 +37,10 @@ dependencies {
   implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.17.2")
   implementation("com.fasterxml.uuid:java-uuid-generator:5.1.0")
   implementation("com.pauldijou:jwt-core_2.11:5.0.0")
-  implementation("com.google.guava:guava:33.3.0-jre")
+  implementation("com.google.guava:guava:33.3.1-jre")
 
-  implementation(platform("com.amazonaws:aws-java-sdk-bom:1.12.772"))
-  implementation("software.amazon.awssdk:sns:2.28.3")
+  implementation(platform("com.amazonaws:aws-java-sdk-bom:1.12.773"))
+  implementation("software.amazon.awssdk:sns:2.28.17")
 
   testAnnotationProcessor("org.projectlombok:lombok:1.18.34")
   testCompileOnly("org.projectlombok:lombok:1.18.34")
@@ -49,8 +49,8 @@ dependencies {
   testImplementation("net.javacrumbs.json-unit:json-unit-assertj:3.4.1")
   testImplementation("io.github.http-builder-ng:http-builder-ng-apache:1.0.4")
   testImplementation("org.wiremock:wiremock-standalone:3.9.1")
-  testImplementation("org.testcontainers:postgresql:1.20.1")
-  testImplementation("org.testcontainers:localstack:1.20.1")
+  testImplementation("org.testcontainers:postgresql:1.20.2")
+  testImplementation("org.testcontainers:localstack:1.20.2")
   testImplementation("io.jsonwebtoken:jjwt-impl:0.12.6")
   testImplementation("io.jsonwebtoken:jjwt-jackson:0.12.6")
   testImplementation("org.awaitility:awaitility:4.2.2")
