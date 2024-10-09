@@ -27,12 +27,9 @@ import org.springframework.web.reactive.function.client.WebClient.RequestHeaders
 import org.springframework.web.reactive.function.client.WebClient.RequestHeadersUriSpec
 import org.springframework.web.reactive.function.client.WebClient.ResponseSpec
 import org.springframework.web.util.UriComponentsBuilder
-import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
-import uk.gov.justice.hmpps.casenotes.legacy.dto.BookingIdentifier
 import uk.gov.justice.hmpps.casenotes.legacy.dto.CaseNoteFilter
 import uk.gov.justice.hmpps.casenotes.legacy.dto.NomisCaseNote
-import uk.gov.justice.hmpps.casenotes.legacy.dto.OffenderBooking
 import uk.gov.justice.hmpps.casenotes.legacy.service.ExternalApiService
 import uk.gov.justice.hmpps.casenotes.legacy.service.RestResponsePage
 import uk.gov.justice.hmpps.casenotes.notes.AmendCaseNoteRequest
@@ -52,7 +49,6 @@ class ExternalApiServiceTest {
   private val externalApiService: ExternalApiService = ExternalApiService(
     prisonApiWebClient,
     authWebClient,
-    prisonApiClientCredentialsWebClient,
   )
 
   @BeforeEach
@@ -75,36 +71,6 @@ class ExternalApiServiceTest {
     whenever(requestBodyUriSpec.uri(any<String>(), any<Any>(), any<Any>())).thenReturn(requestBodySpec)
     whenever(requestHeadersSpec.retrieve()).thenReturn(responseSpecMock)
     whenever(requestBodySpec.retrieve()).thenReturn(responseSpecMock)
-  }
-
-  @Nested
-  inner class getMergedIdentifiersByBookingId {
-    @Test
-    fun `test calls Prison API`() {
-      val result = listOf(BookingIdentifier(type = "MERGED", value = "AB12345C"))
-      whenever(responseSpecMock.bodyToFlux(any<ParameterizedTypeReference<BookingIdentifier>>())).thenReturn(
-        Flux.fromIterable(result),
-      )
-      assertThat(externalApiService.getMergedIdentifiersByBookingId(12345)).containsExactlyElementsOf(result)
-
-      verify(prisonApiClientCredentialsWebClient).get()
-      verify(requestHeadersUriSpec).uri("/api/bookings/{bookingId}/identifiers?type={type}", 12345L, "MERGED")
-    }
-  }
-
-  @Nested
-  inner class getBooking {
-    @Test
-    fun `test calls Prison API`() {
-      val result = OffenderBooking(bookingId = 12345L, offenderNo = "AA123B", agencyId = "LSI")
-      whenever(responseSpecMock.bodyToMono(any<ParameterizedTypeReference<OffenderBooking>>())).thenReturn(
-        Mono.just(result),
-      )
-      assertThat(externalApiService.getBooking(12345)).isSameAs(result)
-
-      verify(prisonApiClientCredentialsWebClient).get()
-      verify(requestHeadersUriSpec).uri("/api/bookings/{bookingId}?basicInfo=true", 12345L)
-    }
   }
 
   @Nested

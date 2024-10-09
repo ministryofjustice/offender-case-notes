@@ -8,14 +8,11 @@ import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Service
 import org.springframework.web.reactive.function.client.WebClient
-import org.springframework.web.reactive.function.client.bodyToFlux
 import org.springframework.web.reactive.function.client.bodyToMono
 import reactor.core.publisher.Mono
 import uk.gov.justice.hmpps.casenotes.integrations.retryOnTransientException
-import uk.gov.justice.hmpps.casenotes.legacy.dto.BookingIdentifier
 import uk.gov.justice.hmpps.casenotes.legacy.dto.CaseNoteFilter
 import uk.gov.justice.hmpps.casenotes.legacy.dto.NomisCaseNote
-import uk.gov.justice.hmpps.casenotes.legacy.dto.OffenderBooking
 import uk.gov.justice.hmpps.casenotes.legacy.dto.UserDetails
 import uk.gov.justice.hmpps.casenotes.notes.AmendCaseNoteRequest
 import uk.gov.justice.hmpps.casenotes.notes.CreateCaseNoteRequest
@@ -25,23 +22,7 @@ import java.time.format.DateTimeFormatter
 class ExternalApiService(
   private val elite2ApiWebClient: WebClient,
   private val oauthApiWebClient: WebClient,
-  private val elite2ClientCredentialsWebClient: WebClient,
 ) {
-
-  fun getMergedIdentifiersByBookingId(bookingId: Long): List<BookingIdentifier> =
-    elite2ClientCredentialsWebClient.get()
-      .uri("/api/bookings/{bookingId}/identifiers?type={type}", bookingId, "MERGED")
-      .retrieve()
-      .bodyToFlux<BookingIdentifier>()
-      .collectList()
-      .block()!!
-
-  fun getBooking(bookingId: Long): OffenderBooking =
-    elite2ClientCredentialsWebClient.get().uri("/api/bookings/{bookingId}?basicInfo=true", bookingId)
-      .retrieve()
-      .bodyToMono<OffenderBooking>()
-      .retryOnTransientException()
-      .block()!!
 
   fun getUserDetails(currentUsername: String): UserDetails? =
     oauthApiWebClient.get().uri("/api/user/{username}", currentUsername)
