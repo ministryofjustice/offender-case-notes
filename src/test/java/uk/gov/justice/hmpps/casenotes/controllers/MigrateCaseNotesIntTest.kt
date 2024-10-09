@@ -20,7 +20,7 @@ import java.time.LocalDateTime
 import kotlin.time.measureTimedValue
 import kotlin.time.toJavaDuration
 
-class MigrateCaseNotesIntTest : ResourceTest() {
+class MigrateCaseNotesIntTest : IntegrationTest() {
   @Test
   fun `401 unauthorised`() {
     webTestClient.post().uri(urlToTest(personIdentifier())).exchange().expectStatus().isUnauthorized

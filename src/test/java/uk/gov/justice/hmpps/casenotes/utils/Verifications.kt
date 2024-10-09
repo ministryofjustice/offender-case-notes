@@ -5,6 +5,7 @@ import org.springframework.data.jpa.domain.AbstractAuditable_.createdBy
 import uk.gov.justice.hmpps.casenotes.config.Source
 import uk.gov.justice.hmpps.casenotes.domain.Amendment
 import uk.gov.justice.hmpps.casenotes.domain.Note
+import uk.gov.justice.hmpps.casenotes.events.CaseNoteInformation
 import uk.gov.justice.hmpps.casenotes.events.DomainEvent
 import uk.gov.justice.hmpps.casenotes.events.PersonCaseNoteEvent
 import uk.gov.justice.hmpps.casenotes.notes.CaseNote
@@ -67,7 +68,7 @@ fun DeletedDetail.verifyAgainst(note: Note) {
   assertThat(createdBy).isEqualTo(note.createdBy)
 }
 
-fun DomainEvent.verifyAgainst(eventType: PersonCaseNoteEvent.Type, source: Source, saved: Note) {
+fun DomainEvent<CaseNoteInformation>.verifyAgainst(eventType: PersonCaseNoteEvent.Type, source: Source, saved: Note) {
   assertThat(this.eventType).isEqualTo("person.case-note.${eventType.name.lowercase()}")
   assertThat(detailUrl).isEqualTo("http://localhost:8080/case-notes/${saved.personIdentifier}/${saved.id}")
   assertThat(personReference.findNomsNumber()).isEqualTo(saved.personIdentifier)

@@ -41,6 +41,7 @@ class DeletedEntityListener {
   }
 
   private fun causeOfDelete() = when (getRequestPath()) {
+    null -> DeletionCause.MERGE
     "/sync/case-notes" -> DeletionCause.UPDATE
     else -> DeletionCause.DELETE
   }

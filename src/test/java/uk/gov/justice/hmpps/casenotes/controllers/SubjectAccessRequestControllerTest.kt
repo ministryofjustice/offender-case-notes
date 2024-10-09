@@ -10,7 +10,7 @@ import uk.gov.justice.hmpps.casenotes.services.SubjectAccessRequestService
 import java.time.LocalDate
 import java.time.LocalDateTime
 
-class SubjectAccessRequestControllerTest : ResourceTest() {
+class SubjectAccessRequestControllerTest : IntegrationTest() {
 
   @MockBean
   private lateinit var service: SubjectAccessRequestService

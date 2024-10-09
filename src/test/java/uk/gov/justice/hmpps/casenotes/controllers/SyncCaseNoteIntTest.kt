@@ -26,7 +26,7 @@ import uk.gov.justice.hmpps.casenotes.utils.verifyAgainst
 import java.time.LocalDateTime
 import java.util.UUID
 
-class SyncCaseNoteIntTest : ResourceTest() {
+class SyncCaseNoteIntTest : IntegrationTest() {
 
   @Autowired
   lateinit var deletedCaseNoteRepository: DeletedCaseNoteRepository
@@ -97,7 +97,7 @@ class SyncCaseNoteIntTest : ResourceTest() {
     val saved = requireNotNull(noteRepository.findByIdAndPersonIdentifier(response.id, request.personIdentifier))
     saved.verifyAgainst(request)
 
-    hmppsEventsQueue.receiveDomainEvent().verifyAgainst(PersonCaseNoteEvent.Type.CREATED, Source.NOMIS, saved)
+    hmppsEventsQueue.receivePersonCaseNoteEvent().verifyAgainst(PersonCaseNoteEvent.Type.CREATED, Source.NOMIS, saved)
   }
 
   @Test
@@ -111,7 +111,7 @@ class SyncCaseNoteIntTest : ResourceTest() {
     val amended = saved.amendments().first()
     amended.verifyAgainst(request.amendments.first())
 
-    hmppsEventsQueue.receiveDomainEvent().verifyAgainst(PersonCaseNoteEvent.Type.CREATED, Source.NOMIS, saved)
+    hmppsEventsQueue.receivePersonCaseNoteEvent().verifyAgainst(PersonCaseNoteEvent.Type.CREATED, Source.NOMIS, saved)
   }
 
   @Test
@@ -130,7 +130,7 @@ class SyncCaseNoteIntTest : ResourceTest() {
     assertThat(deleted.cause).isEqualTo(UPDATE)
     deleted.caseNote.verifyAgainst(existing)
 
-    hmppsEventsQueue.receiveDomainEvent().verifyAgainst(PersonCaseNoteEvent.Type.UPDATED, Source.NOMIS, saved)
+    hmppsEventsQueue.receivePersonCaseNoteEvent().verifyAgainst(PersonCaseNoteEvent.Type.UPDATED, Source.NOMIS, saved)
   }
 
   @Test
@@ -149,7 +149,7 @@ class SyncCaseNoteIntTest : ResourceTest() {
     assertThat(deleted.cause).isEqualTo(UPDATE)
     deleted.caseNote.verifyAgainst(existing)
 
-    hmppsEventsQueue.receiveDomainEvent().verifyAgainst(PersonCaseNoteEvent.Type.UPDATED, Source.NOMIS, saved)
+    hmppsEventsQueue.receivePersonCaseNoteEvent().verifyAgainst(PersonCaseNoteEvent.Type.UPDATED, Source.NOMIS, saved)
   }
 
   @Test
@@ -183,7 +183,7 @@ class SyncCaseNoteIntTest : ResourceTest() {
     assertThat(deleted.cause).isEqualTo(UPDATE)
     deleted.caseNote.verifyAgainst(existing)
 
-    hmppsEventsQueue.receiveDomainEvent().verifyAgainst(PersonCaseNoteEvent.Type.UPDATED, Source.NOMIS, saved)
+    hmppsEventsQueue.receivePersonCaseNoteEvent().verifyAgainst(PersonCaseNoteEvent.Type.UPDATED, Source.NOMIS, saved)
   }
 
   @Test
@@ -202,7 +202,7 @@ class SyncCaseNoteIntTest : ResourceTest() {
     assertThat(deleted.cause).isEqualTo(DELETE)
     deleted.caseNote.verifyAgainst(note)
 
-    hmppsEventsQueue.receiveDomainEvent().verifyAgainst(PersonCaseNoteEvent.Type.DELETED, Source.NOMIS, note)
+    hmppsEventsQueue.receivePersonCaseNoteEvent().verifyAgainst(PersonCaseNoteEvent.Type.DELETED, Source.NOMIS, note)
   }
 
   @Test

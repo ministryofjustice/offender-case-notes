@@ -9,6 +9,7 @@ import jakarta.persistence.JoinColumn
 import jakarta.persistence.ManyToOne
 import jakarta.persistence.OneToMany
 import jakarta.persistence.Table
+import jakarta.persistence.Transient
 import jakarta.persistence.Version
 import jakarta.persistence.criteria.Join
 import jakarta.persistence.criteria.JoinType
@@ -82,6 +83,10 @@ class Note(
 
   override fun amendments() = amendments.toSortedSet()
 
+  @Transient
+  var mergedAmendments: SortedSet<Amendment> = TreeSet()
+    private set
+
   fun addAmendment(request: TextRequest) = apply {
     if (request is SyncAmendmentRequest) {
       amendments.add(
@@ -107,6 +112,36 @@ class Note(
         ).apply { createdAt = context.requestAt },
       )
     }
+  }
+
+  fun merge(personIdentifier: String): Note = Note(
+    personIdentifier,
+    subType,
+    occurredAt,
+    locationId,
+    authorUsername,
+    authorUserId,
+    authorName,
+    text,
+    systemGenerated,
+    id,
+  ).apply {
+    legacyId = this@Note.legacyId
+    createdAt = this@Note.createdAt
+    createdBy = this@Note.createdBy
+    mergedAmendments = this@Note.amendments.map {
+      Amendment(
+        this,
+        it.authorUsername,
+        it.authorName,
+        it.authorUserId,
+        it.text,
+        it.id,
+      ).apply {
+        createdAt = it.createdAt
+        createdBy = it.createdBy
+      }
+    }.toSortedSet()
   }
 
   companion object {

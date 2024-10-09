@@ -18,7 +18,7 @@ import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit.SECONDS
 import java.util.UUID
 
-class SystemGeneratedNotesIntTest : ResourceTest() {
+class SystemGeneratedNotesIntTest : IntegrationTest() {
   @Test
   fun `401 unauthorised`() {
     webTestClient.post().uri(urlToTest(personIdentifier())).exchange().expectStatus().isUnauthorized
@@ -96,7 +96,7 @@ class SystemGeneratedNotesIntTest : ResourceTest() {
     val saved = noteRepository.findByIdAndPersonIdentifier(UUID.fromString(response.id), personIdentifier)
     requireNotNull(saved).verifyAgainst(request, apiClientId)
 
-    hmppsEventsQueue.receiveDomainEvent().verifyAgainst(PersonCaseNoteEvent.Type.CREATED, Source.DPS, saved)
+    hmppsEventsQueue.receivePersonCaseNoteEvent().verifyAgainst(PersonCaseNoteEvent.Type.CREATED, Source.DPS, saved)
   }
 
   @Test
@@ -117,7 +117,7 @@ class SystemGeneratedNotesIntTest : ResourceTest() {
     val saved = noteRepository.findByIdAndPersonIdentifier(UUID.fromString(response.id), personIdentifier)
     requireNotNull(saved).verifyAgainst(request, apiClientId)
 
-    hmppsEventsQueue.receiveDomainEvent().verifyAgainst(PersonCaseNoteEvent.Type.CREATED, Source.DPS, saved)
+    hmppsEventsQueue.receivePersonCaseNoteEvent().verifyAgainst(PersonCaseNoteEvent.Type.CREATED, Source.DPS, saved)
   }
 
   @Test
@@ -142,7 +142,7 @@ class SystemGeneratedNotesIntTest : ResourceTest() {
     requireNotNull(saved).verifyAgainst(request, apiClientId)
     assertThat(saved.locationId).isEqualTo(prisonId)
 
-    hmppsEventsQueue.receiveDomainEvent().verifyAgainst(PersonCaseNoteEvent.Type.CREATED, Source.DPS, saved)
+    hmppsEventsQueue.receivePersonCaseNoteEvent().verifyAgainst(PersonCaseNoteEvent.Type.CREATED, Source.DPS, saved)
   }
 
   private fun Note.verifyAgainst(request: SystemGeneratedRequest, userId: String) {

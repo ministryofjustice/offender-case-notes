@@ -2,20 +2,20 @@ package uk.gov.justice.hmpps.casenotes.notes
 
 import com.fasterxml.jackson.databind.PropertyNamingStrategies.SnakeCaseStrategy
 import com.fasterxml.jackson.databind.annotation.JsonNaming
+import jakarta.persistence.Column
 import jakarta.persistence.Entity
 import jakarta.persistence.EnumType
 import jakarta.persistence.Enumerated
-import jakarta.persistence.GeneratedValue
-import jakarta.persistence.GenerationType
 import jakarta.persistence.Id
-import jakarta.persistence.SequenceGenerator
 import jakarta.persistence.Table
 import org.hibernate.annotations.JdbcTypeCode
 import org.hibernate.type.SqlTypes
+import org.springframework.data.domain.Persistable
 import org.springframework.data.jpa.repository.JpaRepository
 import uk.gov.justice.hmpps.casenotes.config.Source
 import uk.gov.justice.hmpps.casenotes.domain.AmendmentState
 import uk.gov.justice.hmpps.casenotes.domain.DeletionCause
+import uk.gov.justice.hmpps.casenotes.domain.IdGenerator.newUuid
 import uk.gov.justice.hmpps.casenotes.domain.NoteState
 import java.time.LocalDateTime
 import java.util.SortedSet
@@ -23,7 +23,6 @@ import java.util.UUID
 
 @Entity
 @Table(name = "case_note_deleted")
-@SequenceGenerator(name = "case_note_deleted_id_seq", sequenceName = "case_note_deleted_id_seq", allocationSize = 1)
 class DeletedCaseNote(
 
   val personIdentifier: String,
@@ -43,9 +42,12 @@ class DeletedCaseNote(
   val cause: DeletionCause,
 
   @Id
-  @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "case_note_deleted_id_seq")
-  val id: Long? = null,
-)
+  @Column(name = "id")
+  val uuid: UUID = newUuid(),
+) : Persistable<UUID> {
+  override fun getId(): UUID = uuid
+  override fun isNew(): Boolean = true
+}
 
 interface DeletedCaseNoteRepository : JpaRepository<DeletedCaseNote, Long> {
   fun findByCaseNoteId(caseNoteId: UUID): DeletedCaseNote?

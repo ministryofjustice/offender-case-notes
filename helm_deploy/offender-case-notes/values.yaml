@@ -55,6 +55,10 @@ generic-service:
       HMPPS_SQS_QUEUES_EVENT_QUEUE_NAME: "sqs_ocne_name"
     ocn-events-sqs-dl-instance-output:
       HMPPS_SQS_QUEUES_EVENT_DLQ_NAME: "sqs_ocne_name"
+    domain-events-secret:
+      HMPPS_SQS_QUEUES_DOMAINEVENTSQUEUE_QUEUE_NAME: "queue_name"
+    domain-events-dlq-secret:
+      HMPPS_SQS_QUEUES_DOMAINEVENTSQUEUE_DLQ_NAME: "queue_name"
 
   allowlist:
     groups:

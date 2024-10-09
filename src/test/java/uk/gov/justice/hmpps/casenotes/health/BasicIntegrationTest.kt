@@ -20,7 +20,7 @@ import uk.gov.justice.hmpps.casenotes.health.wiremock.TokenVerificationExtension
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("test")
 @ExtendWith(Elite2Extension::class, OAuthExtension::class, TokenVerificationExtension::class)
-abstract class IntegrationTest {
+abstract class BasicIntegrationTest {
   @Autowired
   lateinit var webTestClient: WebTestClient
 

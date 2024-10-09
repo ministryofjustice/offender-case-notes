@@ -12,7 +12,7 @@ import uk.gov.justice.hmpps.casenotes.utils.NomisIdGenerator.personIdentifier
 import uk.gov.justice.hmpps.casenotes.utils.verifyAgainst
 import java.time.LocalDateTime
 
-class ReadCaseNotesIntTest : ResourceTest() {
+class ReadCaseNotesIntTest : IntegrationTest() {
   @Test
   fun `401 unauthorised`() {
     webTestClient.get().uri(urlToTest(personIdentifier())).exchange().expectStatus().isUnauthorized

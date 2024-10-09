@@ -16,7 +16,7 @@ import uk.gov.justice.hmpps.casenotes.utils.NomisIdGenerator.personIdentifier
 import uk.gov.justice.hmpps.casenotes.utils.verifyAgainst
 import java.util.UUID
 
-class DeleteCaseNoteIntTest : ResourceTest() {
+class DeleteCaseNoteIntTest : IntegrationTest() {
 
   @Autowired
   lateinit var deletedCaseNoteRepository: DeletedCaseNoteRepository
@@ -59,7 +59,7 @@ class DeleteCaseNoteIntTest : ResourceTest() {
     assertThat(deleted.cause).isEqualTo(DELETE)
     deleted.caseNote.verifyAgainst(caseNote)
 
-    hmppsEventsQueue.receiveDomainEvent().verifyAgainst(PersonCaseNoteEvent.Type.DELETED, Source.DPS, caseNote)
+    hmppsEventsQueue.receivePersonCaseNoteEvent().verifyAgainst(PersonCaseNoteEvent.Type.DELETED, Source.DPS, caseNote)
   }
 
   private fun deleteCaseNote(

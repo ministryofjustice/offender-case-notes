@@ -26,7 +26,7 @@ import uk.gov.justice.hmpps.casenotes.repository.OffenderCaseNoteRepository
 import uk.gov.justice.hmpps.casenotes.services.ExternalApiService
 import java.time.LocalDateTime
 
-class CaseNoteResourceTest : ResourceTest() {
+class CaseNoteResourceTest : IntegrationTest() {
 
   @SpyBean
   internal lateinit var externalApiService: ExternalApiService

@@ -18,7 +18,7 @@ import uk.gov.justice.hmpps.casenotes.utils.verifyAgainst
 import java.time.LocalDateTime
 import java.util.UUID.fromString
 
-class CreateCaseNoteIntTest : ResourceTest() {
+class CreateCaseNoteIntTest : IntegrationTest() {
   @Test
   fun `401 unauthorised`() {
     webTestClient.post().uri(urlToTest(personIdentifier())).exchange().expectStatus().isUnauthorized
@@ -82,7 +82,7 @@ class CreateCaseNoteIntTest : ResourceTest() {
     assertThat(saved.authorUsername).isEqualTo(USERNAME)
     response.verifyAgainst(saved)
 
-    hmppsEventsQueue.receiveDomainEvent().verifyAgainst(PersonCaseNoteEvent.Type.CREATED, Source.DPS, saved)
+    hmppsEventsQueue.receivePersonCaseNoteEvent().verifyAgainst(PersonCaseNoteEvent.Type.CREATED, Source.DPS, saved)
   }
 
   @Test
@@ -130,7 +130,7 @@ class CreateCaseNoteIntTest : ResourceTest() {
     assertThat(saved.authorUsername).isEqualTo(USERNAME)
     response.verifyAgainst(saved)
 
-    hmppsEventsQueue.receiveDomainEvent().verifyAgainst(PersonCaseNoteEvent.Type.CREATED, Source.DPS, saved)
+    hmppsEventsQueue.receivePersonCaseNoteEvent().verifyAgainst(PersonCaseNoteEvent.Type.CREATED, Source.DPS, saved)
   }
 
   private fun createCaseNoteRequest(

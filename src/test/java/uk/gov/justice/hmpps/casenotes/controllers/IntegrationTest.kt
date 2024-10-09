@@ -1,9 +1,5 @@
 package uk.gov.justice.hmpps.casenotes.controllers
 
-import com.fasterxml.jackson.annotation.JsonAnyGetter
-import com.fasterxml.jackson.annotation.JsonAnySetter
-import com.fasterxml.jackson.annotation.JsonIgnore
-import com.fasterxml.jackson.annotation.JsonProperty
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import com.fasterxml.uuid.Generators
@@ -27,9 +23,11 @@ import uk.gov.justice.hmpps.casenotes.domain.NoteRepository
 import uk.gov.justice.hmpps.casenotes.domain.ParentTypeRepository
 import uk.gov.justice.hmpps.casenotes.domain.SubType
 import uk.gov.justice.hmpps.casenotes.dto.ErrorResponse
+import uk.gov.justice.hmpps.casenotes.events.CaseNoteInformation
 import uk.gov.justice.hmpps.casenotes.events.DomainEvent
+import uk.gov.justice.hmpps.casenotes.events.Notification
 import uk.gov.justice.hmpps.casenotes.events.PersonCaseNoteEvent
-import uk.gov.justice.hmpps.casenotes.health.IntegrationTest
+import uk.gov.justice.hmpps.casenotes.health.BasicIntegrationTest
 import uk.gov.justice.hmpps.casenotes.health.wiremock.Elite2Extension
 import uk.gov.justice.hmpps.casenotes.health.wiremock.OAuthExtension
 import uk.gov.justice.hmpps.casenotes.health.wiremock.PrisonerSearchApiExtension
@@ -40,7 +38,9 @@ import uk.gov.justice.hmpps.casenotes.utils.setByName
 import uk.gov.justice.hmpps.sqs.HmppsQueue
 import uk.gov.justice.hmpps.sqs.HmppsQueueService
 import uk.gov.justice.hmpps.sqs.MissingQueueException
+import uk.gov.justice.hmpps.sqs.MissingTopicException
 import uk.gov.justice.hmpps.sqs.countAllMessagesOnQueue
+import uk.gov.justice.hmpps.sqs.publish
 import java.time.LocalDateTime
 import java.util.UUID
 import java.util.function.Consumer
@@ -56,7 +56,7 @@ internal const val USERNAME = "TestUser"
   TokenVerificationExtension::class,
   PrisonerSearchApiExtension::class,
 )
-abstract class ResourceTest : IntegrationTest() {
+abstract class IntegrationTest : BasicIntegrationTest() {
 
   @Autowired
   private lateinit var parentTypeRepository: ParentTypeRepository
@@ -78,42 +78,35 @@ abstract class ResourceTest : IntegrationTest() {
       ?: throw MissingQueueException("hmppseventtestqueue queue not found")
   }
 
-  private fun HmppsQueue.countAllMessagesOnQueue() = sqsClient.countAllMessagesOnQueue(queueUrl).get()
+  val domainEventsTopic by lazy {
+    hmppsQueueService.findByTopicId("domainevents") ?: throw MissingTopicException("domain events topic not found")
+  }
 
-  fun HmppsQueue.receiveDomainEventsOnQueue(maxMessages: Int = 10): List<DomainEvent> {
+  val domainEventsQueue by lazy {
+    hmppsQueueService.findByQueueId("domaineventsqueue") ?: throw MissingQueueException("domain events queue not found")
+  }
+
+  internal fun publishEventToTopic(event: DomainEvent<*>) {
+    domainEventsTopic.publish(event.eventType, objectMapper.writeValueAsString(event))
+  }
+
+  internal fun HmppsQueue.countAllMessagesOnQueue() = sqsClient.countAllMessagesOnQueue(queueUrl).get()
+
+  internal fun HmppsQueue.receivePersonCaseNoteEventsOnQueue(maxMessages: Int = 10): List<DomainEvent<CaseNoteInformation>> {
     await untilCallTo { hmppsEventsQueue.countAllMessagesOnQueue() } matches { (it ?: 0) > 0 }
     return sqsClient.receiveMessage(
       ReceiveMessageRequest.builder().queueUrl(queueUrl).maxNumberOfMessages(maxMessages).build(),
     ).get().messages()
       .map { objectMapper.readValue<Notification>(it.body()) }
       .filter { e -> e.eventType in PersonCaseNoteEvent.Type.entries.map { "person.case-note.${it.name.lowercase()}" } }
-      .map { objectMapper.readValue<DomainEvent>(it.message) }
+      .map { objectMapper.readValue<DomainEvent<CaseNoteInformation>>(it.message) }
   }
 
-  fun HmppsQueue.receiveDomainEvent(): DomainEvent {
-    val event = receiveDomainEventsOnQueue().single()
+  internal fun HmppsQueue.receivePersonCaseNoteEvent(): DomainEvent<CaseNoteInformation> {
+    val event = receivePersonCaseNoteEventsOnQueue().single()
     sqsClient.purgeQueue { it.queueUrl(queueUrl) }
     return event
   }
-
-  private data class Notification(
-    @JsonProperty("Message") val message: String,
-    @JsonProperty("MessageAttributes") val attributes: MessageAttributes = MessageAttributes(),
-  ) {
-    val eventType: String? @JsonIgnore get() = attributes["eventType"]?.value
-  }
-
-  private data class MessageAttributes(
-    @JsonAnyGetter @JsonAnySetter
-    private val attributes: MutableMap<String, MessageAttribute> = mutableMapOf(),
-  ) : MutableMap<String, MessageAttribute> by attributes {
-    override operator fun get(key: String): MessageAttribute? = attributes[key]
-    operator fun set(key: String, value: MessageAttribute) {
-      attributes[key] = value
-    }
-  }
-
-  private data class MessageAttribute(@JsonProperty("Type") val type: String, @JsonProperty("Value") val value: String)
 
   fun addBearerAuthorisation(user: String, roles: List<String> = listOf()): Consumer<HttpHeaders> {
     val jwt = jwtHelper.createJwt(user, roles = roles)
