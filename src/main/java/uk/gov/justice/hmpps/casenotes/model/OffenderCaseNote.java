@@ -100,9 +100,6 @@ public class OffenderCaseNote implements NoteState {
         return systemGenerated;
     }
 
-    @Version
-    private Long version;
-
     public void addAmendment(
         final String noteText,
         final String authorUsername,

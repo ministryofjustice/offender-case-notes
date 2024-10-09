@@ -3,6 +3,7 @@ package uk.gov.justice.hmpps.casenotes.domain.audit
 import jakarta.persistence.PreRemove
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Lazy
+import org.springframework.http.HttpMethod
 import org.springframework.stereotype.Component
 import org.springframework.web.context.request.RequestContextHolder
 import org.springframework.web.context.request.ServletRequestAttributes
@@ -29,7 +30,7 @@ class DeletedEntityListener {
     deletedRepository.save(
       DeletedCaseNote(
         noteState.personIdentifier,
-        noteState.id,
+        noteState.getId(),
         noteState.legacyId,
         DeletedDetail(noteState),
         context.requestAt,
@@ -40,12 +41,12 @@ class DeletedEntityListener {
     )
   }
 
-  private fun causeOfDelete() = when (getRequestPath()) {
+  private fun causeOfDelete() = when (getRequestMethod()) {
     null -> DeletionCause.MERGE
-    "/sync/case-notes" -> DeletionCause.UPDATE
-    else -> DeletionCause.DELETE
+    HttpMethod.DELETE -> DeletionCause.DELETE
+    else -> DeletionCause.UPDATE
   }
 
-  private fun getRequestPath(): String? =
-    (RequestContextHolder.getRequestAttributes() as ServletRequestAttributes?)?.request?.requestURI
+  private fun getRequestMethod(): HttpMethod? =
+    (RequestContextHolder.getRequestAttributes() as ServletRequestAttributes?)?.request?.let { HttpMethod.valueOf(it.method) }
 }

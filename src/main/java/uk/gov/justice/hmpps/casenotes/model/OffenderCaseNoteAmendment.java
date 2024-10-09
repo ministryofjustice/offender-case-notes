@@ -61,7 +61,4 @@ public class OffenderCaseNoteAmendment implements AmendmentState {
     @Column(nullable = false)
     private String createdBy;
 
-    @Version
-    private Long version;
-
 }

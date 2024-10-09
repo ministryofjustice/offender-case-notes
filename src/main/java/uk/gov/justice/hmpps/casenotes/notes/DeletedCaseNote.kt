@@ -8,6 +8,7 @@ import jakarta.persistence.EnumType
 import jakarta.persistence.Enumerated
 import jakarta.persistence.Id
 import jakarta.persistence.Table
+import jakarta.persistence.Transient
 import org.hibernate.annotations.JdbcTypeCode
 import org.hibernate.type.SqlTypes
 import org.springframework.data.domain.Persistable
@@ -42,11 +43,14 @@ class DeletedCaseNote(
   val cause: DeletionCause,
 
   @Id
-  @Column(name = "id")
-  val uuid: UUID = newUuid(),
+  @Column(name = "id", updatable = false, nullable = false)
+  private val id: UUID = newUuid(),
 ) : Persistable<UUID> {
-  override fun getId(): UUID = uuid
-  override fun isNew(): Boolean = true
+  override fun getId(): UUID = id
+
+  @Transient
+  private val new: Boolean = true
+  override fun isNew(): Boolean = new
 }
 
 interface DeletedCaseNoteRepository : JpaRepository<DeletedCaseNote, Long> {
@@ -65,11 +69,12 @@ data class DeletedDetail(
   override val text: String,
   override val systemGenerated: Boolean,
   override val legacyId: Long?,
-  override val id: UUID,
+  private val id: UUID,
   override val createdAt: LocalDateTime,
   override val createdBy: String,
   val amendments: Set<NestedDetail>,
 ) : NoteState {
+  override fun getId(): UUID = id
   override fun amendments(): SortedSet<out AmendmentState> = amendments.toSortedSet()
 
   constructor(noteState: NoteState) : this(
@@ -83,7 +88,7 @@ data class DeletedDetail(
     noteState.text,
     noteState.systemGenerated,
     noteState.legacyId,
-    noteState.id,
+    noteState.getId(),
     noteState.createdAt,
     noteState.createdBy,
     noteState.amendments().map {
@@ -92,7 +97,7 @@ data class DeletedDetail(
         it.authorName,
         it.authorUserId,
         it.text,
-        it.id,
+        it.getId(),
         it.createdAt,
         it.createdBy,
       )
@@ -106,9 +111,10 @@ data class NestedDetail(
   override val authorName: String,
   override val authorUserId: String,
   override val text: String,
-  override val id: UUID,
+  private val id: UUID,
   override val createdAt: LocalDateTime,
   override val createdBy: String,
 ) : AmendmentState, Comparable<NestedDetail> {
+  override fun getId(): UUID = id
   override fun compareTo(other: NestedDetail): Int = createdAt.compareTo(other.createdAt)
 }
