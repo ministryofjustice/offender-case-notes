@@ -3,10 +3,11 @@ package uk.gov.justice.hmpps.casenotes.services
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
-import uk.gov.justice.hmpps.casenotes.health.IntegrationTest
+import uk.gov.justice.hmpps.casenotes.health.BasicIntegrationTest
+import uk.gov.justice.hmpps.casenotes.legacy.service.SubjectAccessRequestService
 import java.time.LocalDate
 
-class SubjectAccessRequestServiceTest : IntegrationTest() {
+class SubjectAccessRequestServiceTest : BasicIntegrationTest() {
 
   @Autowired
   lateinit var subjectAccessRequestService: SubjectAccessRequestService

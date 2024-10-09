@@ -18,7 +18,7 @@ import uk.gov.justice.hmpps.casenotes.utils.verifyAgainst
 import java.util.UUID
 import java.util.function.Predicate
 
-class ReadCaseNoteIntTest : ResourceTest() {
+class ReadCaseNoteIntTest : IntegrationTest() {
   @Test
   fun `401 unauthorised`() {
     webTestClient.get().uri(urlToTest(personIdentifier(), UUID.randomUUID().toString()))

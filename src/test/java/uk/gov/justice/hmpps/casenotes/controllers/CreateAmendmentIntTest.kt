@@ -1,6 +1,10 @@
 package uk.gov.justice.hmpps.casenotes.controllers
 
 import org.assertj.core.api.Assertions.assertThat
+import org.awaitility.kotlin.await
+import org.awaitility.kotlin.matches
+import org.awaitility.kotlin.untilCallTo
+import org.awaitility.kotlin.withPollDelay
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.springframework.http.HttpStatus
@@ -13,9 +17,10 @@ import uk.gov.justice.hmpps.casenotes.notes.CaseNote
 import uk.gov.justice.hmpps.casenotes.utils.NomisIdGenerator.newId
 import uk.gov.justice.hmpps.casenotes.utils.NomisIdGenerator.personIdentifier
 import uk.gov.justice.hmpps.casenotes.utils.verifyAgainst
+import java.time.Duration.ofSeconds
 import java.util.UUID
 
-class CreateAmendmentIntTest : ResourceTest() {
+class CreateAmendmentIntTest : IntegrationTest() {
   @Test
   fun `401 unauthorised`() {
     webTestClient.put().uri(urlToTest(), personIdentifier(), UUID.randomUUID().toString())
@@ -96,7 +101,7 @@ class CreateAmendmentIntTest : ResourceTest() {
       assertThat(authorUsername).isEqualTo(USERNAME)
     }
 
-    hmppsEventsQueue.receiveDomainEvent().verifyAgainst(PersonCaseNoteEvent.Type.UPDATED, Source.DPS, saved)
+    hmppsEventsQueue.receivePersonCaseNoteEvent().verifyAgainst(PersonCaseNoteEvent.Type.UPDATED, Source.DPS, saved)
   }
 
   @Test
@@ -114,7 +119,7 @@ class CreateAmendmentIntTest : ResourceTest() {
       assertThat(authorUsername).isEqualTo(USERNAME)
     }
 
-    hmppsEventsQueue.receiveDomainEvent().verifyAgainst(PersonCaseNoteEvent.Type.UPDATED, Source.DPS, saved)
+    hmppsEventsQueue.receivePersonCaseNoteEvent().verifyAgainst(PersonCaseNoteEvent.Type.UPDATED, Source.DPS, saved)
   }
 
   @Test
@@ -134,7 +139,7 @@ class CreateAmendmentIntTest : ResourceTest() {
       assertThat(authorUsername).isEqualTo(USERNAME)
     }
 
-    assertThat(hmppsEventsQueue.receiveDomainEventsOnQueue()).isEmpty()
+    await withPollDelay ofSeconds(1) untilCallTo { hmppsEventsQueue.countAllMessagesOnQueue() } matches { it == 0 }
   }
 
   private fun amendCaseNoteRequest(

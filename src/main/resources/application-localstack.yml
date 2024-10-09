@@ -1,11 +1,11 @@
 hmpps.sqs:
   provider: localstack
   queues:
-    event:
-      queueName: offender_case_notes_queue
-      dlqName: offender_case_notes_dlq
-      subscribeTopicId: offenderevents
-      subscribeFilter: '{"eventType":["BOOKING_NUMBER-CHANGED"] }'
+    domaineventsqueue:
+      queueName: ${random.uuid}
+      dlqName: ${random.uuid}
+      subscribeTopicId: domainevents
+      subscribeFilter: '{"eventType":["prison-offender-events.prisoner.merged"]}'
   topics:
     offenderevents:
       arn: arn:aws:sns:eu-west-2:000000000000:offender_events

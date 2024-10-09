@@ -43,11 +43,11 @@ data class PersonCaseNoteEvent(
   }
 }
 
-fun PersonCaseNoteEvent.asDomainEvent(baseUrl: String): DomainEvent = DomainEvent(
+fun PersonCaseNoteEvent.asDomainEvent(baseUrl: String): DomainEvent<CaseNoteInformation> = DomainEvent(
   CaseNoteRequestContext.get().requestAt.atZone(ZoneId.systemDefault()),
   eventName,
   baseUrl + detailUrl,
   description = "A case note has been ${eventType.name.lowercase()}",
-  AdditionalInformation(id, legacyId, type, subType, source, syncToNomis, systemGenerated),
+  CaseNoteInformation(id, legacyId, type, subType, source, syncToNomis, systemGenerated),
   PersonReference.withIdentifier(personIdentifier),
 )

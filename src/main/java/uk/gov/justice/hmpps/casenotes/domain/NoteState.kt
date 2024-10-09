@@ -15,9 +15,9 @@ interface NoteState {
   val text: String
   val systemGenerated: Boolean
   val legacyId: Long?
-  val id: UUID
   val createdAt: LocalDateTime
   val createdBy: String
+  fun getId(): UUID
   fun amendments(): SortedSet<out AmendmentState>
 }
 
@@ -26,7 +26,7 @@ interface AmendmentState {
   val authorName: String
   val authorUserId: String
   val text: String
-  val id: UUID
   val createdAt: LocalDateTime
   val createdBy: String
+  fun getId(): UUID
 }

@@ -31,21 +31,24 @@ import uk.gov.justice.hmpps.casenotes.config.CaseNoteRequestContext
 import uk.gov.justice.hmpps.casenotes.config.SecurityUserContext
 import uk.gov.justice.hmpps.casenotes.config.SecurityUserContext.UserIdUser
 import uk.gov.justice.hmpps.casenotes.config.Source
-import uk.gov.justice.hmpps.casenotes.dto.CaseNoteFilter
-import uk.gov.justice.hmpps.casenotes.dto.NomisCaseNote
-import uk.gov.justice.hmpps.casenotes.dto.NomisCaseNoteAmendment
-import uk.gov.justice.hmpps.casenotes.filters.OffenderCaseNoteFilter
-import uk.gov.justice.hmpps.casenotes.model.CaseNoteSubType
-import uk.gov.justice.hmpps.casenotes.model.CaseNoteType
-import uk.gov.justice.hmpps.casenotes.model.OffenderCaseNote
-import uk.gov.justice.hmpps.casenotes.model.OffenderCaseNote.AmendmentComparator
+import uk.gov.justice.hmpps.casenotes.legacy.dto.CaseNoteFilter
+import uk.gov.justice.hmpps.casenotes.legacy.dto.NomisCaseNote
+import uk.gov.justice.hmpps.casenotes.legacy.dto.NomisCaseNoteAmendment
+import uk.gov.justice.hmpps.casenotes.legacy.filters.OffenderCaseNoteFilter
+import uk.gov.justice.hmpps.casenotes.legacy.model.CaseNoteSubType
+import uk.gov.justice.hmpps.casenotes.legacy.model.CaseNoteType
+import uk.gov.justice.hmpps.casenotes.legacy.model.OffenderCaseNote
+import uk.gov.justice.hmpps.casenotes.legacy.model.OffenderCaseNote.AmendmentComparator
+import uk.gov.justice.hmpps.casenotes.legacy.repository.CaseNoteSubTypeRepository
+import uk.gov.justice.hmpps.casenotes.legacy.repository.OffenderCaseNoteRepository
+import uk.gov.justice.hmpps.casenotes.legacy.service.CaseNoteService
+import uk.gov.justice.hmpps.casenotes.legacy.service.EntityNotFoundException
+import uk.gov.justice.hmpps.casenotes.legacy.service.ExternalApiService
 import uk.gov.justice.hmpps.casenotes.notes.AmendCaseNoteRequest
 import uk.gov.justice.hmpps.casenotes.notes.CaseNote
 import uk.gov.justice.hmpps.casenotes.notes.CaseNoteAmendment
 import uk.gov.justice.hmpps.casenotes.notes.CreateCaseNoteRequest
 import uk.gov.justice.hmpps.casenotes.notes.DeletedCaseNoteRepository
-import uk.gov.justice.hmpps.casenotes.repository.CaseNoteSubTypeRepository
-import uk.gov.justice.hmpps.casenotes.repository.OffenderCaseNoteRepository
 import uk.gov.justice.hmpps.casenotes.utils.NomisIdGenerator
 import java.time.LocalDateTime
 import java.util.Optional
@@ -476,7 +479,9 @@ class CaseNoteServiceTest {
   @Test
   fun caseNote_noAddRole() {
     val noteType: CaseNoteSubType =
-      CaseNoteSubType.builder().code("sometype").type(CaseNoteType.builder().build()).build()
+      CaseNoteSubType.builder().code("sometype").type(
+        CaseNoteType.builder().build(),
+      ).build()
     val offenderCaseNote: OffenderCaseNote = createOffenderCaseNote(noteType)
     whenever(repository.findById(any())).thenReturn(Optional.of(offenderCaseNote))
 
@@ -638,7 +643,9 @@ class CaseNoteServiceTest {
     @Test
     fun `cannot amend case note without required roles`() {
       val noteType: CaseNoteSubType =
-        CaseNoteSubType.builder().code("sometype").type(CaseNoteType.builder().build()).build()
+        CaseNoteSubType.builder().code("sometype").type(
+          CaseNoteType.builder().build(),
+        ).build()
       val offenderCaseNote: OffenderCaseNote = createOffenderCaseNote(noteType)
       whenever(repository.findById(any())).thenReturn(Optional.of(offenderCaseNote))
 
@@ -672,7 +679,9 @@ class CaseNoteServiceTest {
     @Test
     fun `cannot amend case note when wrong offender identifier supplied`() {
       val noteType: CaseNoteSubType =
-        CaseNoteSubType.builder().code("sometype").restrictedUse(false).type(CaseNoteType.builder().build())
+        CaseNoteSubType.builder().code("sometype").restrictedUse(false).type(
+          CaseNoteType.builder().build(),
+        )
           .build()
       val offenderCaseNote: OffenderCaseNote = createOffenderCaseNote(noteType)
       whenever(repository.findById(any())).thenReturn(Optional.of(offenderCaseNote))

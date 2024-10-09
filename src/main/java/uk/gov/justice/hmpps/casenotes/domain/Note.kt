@@ -9,9 +9,10 @@ import jakarta.persistence.JoinColumn
 import jakarta.persistence.ManyToOne
 import jakarta.persistence.OneToMany
 import jakarta.persistence.Table
-import jakarta.persistence.Version
+import jakarta.persistence.Transient
 import jakarta.persistence.criteria.Join
 import jakarta.persistence.criteria.JoinType
+import org.springframework.data.domain.Persistable
 import org.springframework.data.jpa.domain.Specification
 import org.springframework.data.jpa.repository.EntityGraph
 import org.springframework.data.jpa.repository.JpaRepository
@@ -66,12 +67,15 @@ class Note(
   override val systemGenerated: Boolean,
 
   @Id
-  @Column(updatable = false, nullable = false)
-  override val id: UUID = newUuid(),
-) : SimpleAudited(), NoteState {
+  @Column(name = "id", updatable = false, nullable = false)
+  private val id: UUID = newUuid(),
+) : SimpleAudited(), NoteState, Persistable<UUID> {
 
-  @Version
-  val version: Long? = null
+  override fun getId(): UUID = id
+
+  @Transient
+  private var new: Boolean = true
+  override fun isNew(): Boolean = new
 
   @Column(name = "sub_type_id", insertable = false, updatable = false, nullable = false)
   override val subTypeId: Long = subType.id!!
@@ -81,6 +85,10 @@ class Note(
   private val amendments: SortedSet<Amendment> = TreeSet()
 
   override fun amendments() = amendments.toSortedSet()
+
+  @Transient
+  var mergedAmendments: SortedSet<Amendment> = TreeSet()
+    private set
 
   fun addAmendment(request: TextRequest) = apply {
     if (request is SyncAmendmentRequest) {
@@ -107,6 +115,36 @@ class Note(
         ).apply { createdAt = context.requestAt },
       )
     }
+  }
+
+  fun merge(personIdentifier: String): Note = Note(
+    personIdentifier,
+    subType,
+    occurredAt,
+    locationId,
+    authorUsername,
+    authorUserId,
+    authorName,
+    text,
+    systemGenerated,
+    id,
+  ).apply {
+    legacyId = this@Note.legacyId
+    createdAt = this@Note.createdAt
+    createdBy = this@Note.createdBy
+    mergedAmendments = this@Note.amendments.map {
+      Amendment(
+        this,
+        it.authorUsername,
+        it.authorName,
+        it.authorUserId,
+        it.text,
+        it.id,
+      ).apply {
+        createdAt = it.createdAt
+        createdBy = it.createdBy
+      }
+    }.toSortedSet()
   }
 
   companion object {

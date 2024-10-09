@@ -2,11 +2,11 @@ package uk.gov.justice.hmpps.casenotes.config
 
 import org.junit.jupiter.api.Test
 import org.springframework.http.MediaType
-import uk.gov.justice.hmpps.casenotes.controllers.ResourceTest
+import uk.gov.justice.hmpps.casenotes.controllers.IntegrationTest
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
-class OpenApiDocsTest : ResourceTest() {
+class OpenApiDocsTest : IntegrationTest() {
 
   @Test
   fun `open api docs are available`() {

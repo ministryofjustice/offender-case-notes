@@ -6,7 +6,8 @@ import jakarta.persistence.Id
 import jakarta.persistence.JoinColumn
 import jakarta.persistence.ManyToOne
 import jakarta.persistence.Table
-import jakarta.persistence.Version
+import jakarta.persistence.Transient
+import org.springframework.data.domain.Persistable
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Modifying
 import org.springframework.data.jpa.repository.Query
@@ -33,14 +34,16 @@ class Amendment(
   override val text: String,
 
   @Id
-  @Column(nullable = false)
-  override val id: UUID,
-) : SimpleAudited(), Comparable<Amendment>, AmendmentState {
-
-  @Version
-  val version: Long? = null
+  @Column(name = "id", updatable = false, nullable = false)
+  private val id: UUID,
+) : SimpleAudited(), Comparable<Amendment>, AmendmentState, Persistable<UUID> {
 
   override fun compareTo(other: Amendment): Int = createdAt.compareTo(other.createdAt)
+  override fun getId(): UUID = id
+
+  @Transient
+  private var new: Boolean = true
+  override fun isNew(): Boolean = new
 }
 
 interface AmendmentRepository : JpaRepository<Amendment, UUID> {

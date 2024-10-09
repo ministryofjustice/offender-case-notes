@@ -15,9 +15,9 @@ import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
-import uk.gov.justice.hmpps.casenotes.dto.ErrorResponse
-import uk.gov.justice.hmpps.casenotes.dto.SubjectAccessRequestData
-import uk.gov.justice.hmpps.casenotes.services.SubjectAccessRequestService
+import uk.gov.justice.hmpps.casenotes.legacy.dto.ErrorResponse
+import uk.gov.justice.hmpps.casenotes.legacy.dto.SubjectAccessRequestData
+import uk.gov.justice.hmpps.casenotes.legacy.service.SubjectAccessRequestService
 import java.time.LocalDate
 
 @RestController

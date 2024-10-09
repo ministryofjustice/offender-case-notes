@@ -10,14 +10,15 @@ import org.springframework.http.HttpMethod.DELETE
 import org.springframework.http.HttpMethod.PATCH
 import org.springframework.http.HttpMethod.POST
 import org.springframework.http.HttpMethod.PUT
+import org.springframework.http.HttpStatus
 import org.springframework.security.access.AccessDeniedException
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.web.servlet.HandlerInterceptor
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer
-import uk.gov.justice.hmpps.casenotes.dto.ErrorResponse
-import uk.gov.justice.hmpps.casenotes.dto.UserDetails.Companion.NOMIS
-import uk.gov.justice.hmpps.casenotes.services.ExternalApiService
+import uk.gov.justice.hmpps.casenotes.legacy.dto.ErrorResponse
+import uk.gov.justice.hmpps.casenotes.legacy.dto.UserDetails.Companion.NOMIS
+import uk.gov.justice.hmpps.casenotes.legacy.service.ExternalApiService
 
 @Configuration
 class CaseNoteContextConfiguration(private val caseNoteContextInterceptor: CaseNoteContextInterceptor) :
@@ -62,7 +63,7 @@ class CaseNoteContextInterceptor(
     writer.write(
       objectMapper.writeValueAsString(
         ErrorResponse(
-          org.springframework.http.HttpStatus.BAD_REQUEST.value(),
+          HttpStatus.BAD_REQUEST.value(),
           developerMessage = "Invalid username provided in token",
         ),
       ),

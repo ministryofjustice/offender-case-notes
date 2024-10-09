@@ -6,15 +6,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.jwt.Jwt;
-import org.springframework.security.test.context.support.WithAnonymousUser;
 import org.springframework.test.context.transaction.TestTransaction;
 import org.springframework.transaction.annotation.Transactional;
 import uk.gov.justice.hmpps.casenotes.config.AuthAwareAuthenticationToken;
-import uk.gov.justice.hmpps.casenotes.filters.OffenderCaseNoteFilter;
-import uk.gov.justice.hmpps.casenotes.health.IntegrationTest;
-import uk.gov.justice.hmpps.casenotes.model.CaseNoteSubType;
-import uk.gov.justice.hmpps.casenotes.model.OffenderCaseNote;
-import uk.gov.justice.hmpps.casenotes.model.OffenderCaseNote.OffenderCaseNoteBuilder;
+import uk.gov.justice.hmpps.casenotes.legacy.filters.OffenderCaseNoteFilter;
+import uk.gov.justice.hmpps.casenotes.health.BasicIntegrationTest;
+import uk.gov.justice.hmpps.casenotes.legacy.model.CaseNoteSubType;
+import uk.gov.justice.hmpps.casenotes.legacy.model.OffenderCaseNote;
+import uk.gov.justice.hmpps.casenotes.legacy.model.OffenderCaseNote.OffenderCaseNoteBuilder;
+import uk.gov.justice.hmpps.casenotes.legacy.repository.CaseNoteSubTypeRepository;
+import uk.gov.justice.hmpps.casenotes.legacy.repository.OffenderCaseNoteRepository;
 
 import java.util.Collections;
 import java.util.Map;
@@ -24,7 +25,7 @@ import static java.time.LocalDateTime.now;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @Transactional
-public class OffenderCaseNoteRepositoryTest extends IntegrationTest {
+public class OffenderCaseNoteRepositoryTest extends BasicIntegrationTest {
 
     private static final String PARENT_TYPE = "POM";
     private static final String SUB_TYPE = "GEN";
@@ -78,34 +79,7 @@ public class OffenderCaseNoteRepositoryTest extends IntegrationTest {
         TestTransaction.end();
         TestTransaction.start();
 
-        assertThat(repository.findById(note.getId()).orElseThrow().getLegacyId()).isLessThan(0);
-    }
-
-    @Test
-    @WithAnonymousUser
-    public void testModifyOffenderIdentifier() {
-        final var caseNote = transientEntity("A1234ZZ");
-        caseNote.addAmendment("Another Note 0", "someuser", "Some User", "user id");
-        final var persistedEntity = repository.save(caseNote);
-        TestTransaction.flagForCommit();
-        TestTransaction.end();
-        TestTransaction.start();
-
-        final var retrievedCaseNote = repository.findById(persistedEntity.getId()).orElseThrow();
-        assertThat(retrievedCaseNote.getPersonIdentifier()).isEqualTo("A1234ZZ");
-
-        TestTransaction.end();
-        TestTransaction.start();
-
-        final var rows = repository.updateOffenderIdentifier("A1234ZZ", OFFENDER_IDENTIFIER);
-
-        assertThat(rows).isEqualTo(1);
-        TestTransaction.flagForCommit();
-        TestTransaction.end();
-        TestTransaction.start();
-
-        final var modifiedIdentity = repository.findById(persistedEntity.getId()).orElseThrow();
-        assertThat(modifiedIdentity.getPersonIdentifier()).isEqualTo(OFFENDER_IDENTIFIER);
+        assertThat(repository.findById(note.getId()).orElseThrow().getLegacyId()).isNegative();
     }
 
     private OffenderCaseNote transientEntity(final String offenderIdentifier) {

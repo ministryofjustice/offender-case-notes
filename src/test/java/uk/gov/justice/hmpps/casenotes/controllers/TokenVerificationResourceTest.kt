@@ -8,7 +8,7 @@ import uk.gov.justice.hmpps.casenotes.config.SecurityUserContext.Companion.ROLE_
 import uk.gov.justice.hmpps.casenotes.health.wiremock.TokenVerificationExtension.Companion.tokenVerificationApi
 import wiremock.org.eclipse.jetty.http.HttpHeader
 
-class TokenVerificationResourceTest : ResourceTest() {
+class TokenVerificationResourceTest : IntegrationTest() {
   @Test
   fun `test jwt gets passed through to token verification`() {
     val jwt = jwtHelper.createJwt("API_TEST_USER", roles = listOf(ROLE_CASE_NOTES_READ))

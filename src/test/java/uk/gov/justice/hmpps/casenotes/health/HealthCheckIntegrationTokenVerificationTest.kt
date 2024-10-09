@@ -13,7 +13,7 @@ import uk.gov.justice.hmpps.casenotes.health.wiremock.TokenVerificationExtension
   webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
   properties = ["tokenverification.enabled=true", "sqs.provider=false"],
 )
-class HealthCheckIntegrationTokenVerificationTest : IntegrationTest() {
+class HealthCheckIntegrationTokenVerificationTest : BasicIntegrationTest() {
 
   @Test
   fun `Health page reports ok`() {

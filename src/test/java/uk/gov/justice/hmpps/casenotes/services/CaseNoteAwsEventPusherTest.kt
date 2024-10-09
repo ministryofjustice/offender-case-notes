@@ -12,6 +12,11 @@ import software.amazon.awssdk.services.sns.SnsAsyncClient
 import software.amazon.awssdk.services.sns.model.MessageAttributeValue
 import software.amazon.awssdk.services.sns.model.PublishRequest
 import software.amazon.awssdk.services.sns.model.PublishResponse
+import uk.gov.justice.hmpps.casenotes.legacy.service.CaseNoteAdditionalInformation
+import uk.gov.justice.hmpps.casenotes.legacy.service.CaseNoteAwsEventPusher
+import uk.gov.justice.hmpps.casenotes.legacy.service.HmppsDomainEvent
+import uk.gov.justice.hmpps.casenotes.legacy.service.PersonIdentifier
+import uk.gov.justice.hmpps.casenotes.legacy.service.PersonReference
 import uk.gov.justice.hmpps.casenotes.notes.CaseNote
 import uk.gov.justice.hmpps.sqs.HmppsQueueService
 import uk.gov.justice.hmpps.sqs.HmppsTopic

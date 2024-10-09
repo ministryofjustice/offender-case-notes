@@ -20,10 +20,10 @@ import org.springframework.web.context.request.RequestContextHolder.getRequestAt
 import uk.gov.justice.hmpps.casenotes.config.AuthAwareAuthenticationToken
 import uk.gov.justice.hmpps.casenotes.config.CaseNoteRequestContext
 import uk.gov.justice.hmpps.casenotes.config.SecurityUserContext.Companion.ROLE_SYSTEM_GENERATED_RW
-import uk.gov.justice.hmpps.casenotes.dto.ErrorResponse
 import uk.gov.justice.hmpps.casenotes.integrations.PrisonerSearchService
+import uk.gov.justice.hmpps.casenotes.legacy.dto.ErrorResponse
+import uk.gov.justice.hmpps.casenotes.legacy.service.CaseNoteEventPusher
 import uk.gov.justice.hmpps.casenotes.notes.CaseNote
-import uk.gov.justice.hmpps.casenotes.services.CaseNoteEventPusher
 import uk.gov.justice.hmpps.casenotes.systemgenerated.CreateSysGenNote
 import uk.gov.justice.hmpps.casenotes.systemgenerated.SystemGeneratedRequest
 

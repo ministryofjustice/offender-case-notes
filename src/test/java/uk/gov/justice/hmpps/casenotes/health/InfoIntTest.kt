@@ -6,7 +6,7 @@ import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter.ISO_DATE
 
 @ActiveProfiles("noqueue")
-class InfoIntTest : IntegrationTest() {
+class InfoIntTest : BasicIntegrationTest() {
   @Test
   fun `Info page contains git information`() {
     webTestClient.get().uri("/info").exchange().expectBody().jsonPath("git.commit.id").isNotEmpty()
