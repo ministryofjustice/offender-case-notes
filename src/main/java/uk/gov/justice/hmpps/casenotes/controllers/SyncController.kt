@@ -20,7 +20,7 @@ import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestController
 import uk.gov.justice.hmpps.casenotes.config.SecurityUserContext.Companion.ROLE_CASE_NOTES_SYNC
-import uk.gov.justice.hmpps.casenotes.dto.ErrorResponse
+import uk.gov.justice.hmpps.casenotes.legacy.dto.ErrorResponse
 import uk.gov.justice.hmpps.casenotes.sync.MigrateCaseNoteRequest
 import uk.gov.justice.hmpps.casenotes.sync.MigrationResult
 import uk.gov.justice.hmpps.casenotes.sync.SyncCaseNoteRequest

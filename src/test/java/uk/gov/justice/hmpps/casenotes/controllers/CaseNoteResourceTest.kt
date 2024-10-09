@@ -19,11 +19,11 @@ import uk.gov.justice.hmpps.casenotes.config.SecurityUserContext.Companion.ROLE_
 import uk.gov.justice.hmpps.casenotes.health.wiremock.Elite2Extension.Companion.elite2Api
 import uk.gov.justice.hmpps.casenotes.health.wiremock.OAuthExtension.Companion.oAuthApi
 import uk.gov.justice.hmpps.casenotes.health.wiremock.PrisonerSearchApiExtension.Companion.prisonerSearchApi
-import uk.gov.justice.hmpps.casenotes.model.OffenderCaseNote
+import uk.gov.justice.hmpps.casenotes.legacy.model.OffenderCaseNote
+import uk.gov.justice.hmpps.casenotes.legacy.repository.CaseNoteSubTypeRepository
+import uk.gov.justice.hmpps.casenotes.legacy.repository.OffenderCaseNoteRepository
+import uk.gov.justice.hmpps.casenotes.legacy.service.ExternalApiService
 import uk.gov.justice.hmpps.casenotes.notes.CaseNote
-import uk.gov.justice.hmpps.casenotes.repository.CaseNoteSubTypeRepository
-import uk.gov.justice.hmpps.casenotes.repository.OffenderCaseNoteRepository
-import uk.gov.justice.hmpps.casenotes.services.ExternalApiService
 import java.time.LocalDateTime
 
 class CaseNoteResourceTest : IntegrationTest() {

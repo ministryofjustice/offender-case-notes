@@ -29,10 +29,12 @@ import org.springframework.web.reactive.function.client.WebClient.ResponseSpec
 import org.springframework.web.util.UriComponentsBuilder
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
-import uk.gov.justice.hmpps.casenotes.dto.BookingIdentifier
-import uk.gov.justice.hmpps.casenotes.dto.CaseNoteFilter
-import uk.gov.justice.hmpps.casenotes.dto.NomisCaseNote
-import uk.gov.justice.hmpps.casenotes.dto.OffenderBooking
+import uk.gov.justice.hmpps.casenotes.legacy.dto.BookingIdentifier
+import uk.gov.justice.hmpps.casenotes.legacy.dto.CaseNoteFilter
+import uk.gov.justice.hmpps.casenotes.legacy.dto.NomisCaseNote
+import uk.gov.justice.hmpps.casenotes.legacy.dto.OffenderBooking
+import uk.gov.justice.hmpps.casenotes.legacy.service.ExternalApiService
+import uk.gov.justice.hmpps.casenotes.legacy.service.RestResponsePage
 import uk.gov.justice.hmpps.casenotes.notes.AmendCaseNoteRequest
 import uk.gov.justice.hmpps.casenotes.notes.CreateCaseNoteRequest
 import java.time.LocalDateTime

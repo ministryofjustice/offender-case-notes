@@ -5,8 +5,8 @@ import org.mockito.kotlin.verify
 import org.mockito.kotlin.verifyNoInteractions
 import org.mockito.kotlin.whenever
 import org.springframework.boot.test.mock.mockito.MockBean
-import uk.gov.justice.hmpps.casenotes.dto.SubjectAccessRequestData
-import uk.gov.justice.hmpps.casenotes.services.SubjectAccessRequestService
+import uk.gov.justice.hmpps.casenotes.legacy.dto.SubjectAccessRequestData
+import uk.gov.justice.hmpps.casenotes.legacy.service.SubjectAccessRequestService
 import java.time.LocalDate
 import java.time.LocalDateTime
 

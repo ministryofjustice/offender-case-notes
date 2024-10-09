@@ -9,11 +9,13 @@ import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.test.context.transaction.TestTransaction;
 import org.springframework.transaction.annotation.Transactional;
 import uk.gov.justice.hmpps.casenotes.config.AuthAwareAuthenticationToken;
-import uk.gov.justice.hmpps.casenotes.filters.OffenderCaseNoteFilter;
+import uk.gov.justice.hmpps.casenotes.legacy.filters.OffenderCaseNoteFilter;
 import uk.gov.justice.hmpps.casenotes.health.BasicIntegrationTest;
-import uk.gov.justice.hmpps.casenotes.model.CaseNoteSubType;
-import uk.gov.justice.hmpps.casenotes.model.OffenderCaseNote;
-import uk.gov.justice.hmpps.casenotes.model.OffenderCaseNote.OffenderCaseNoteBuilder;
+import uk.gov.justice.hmpps.casenotes.legacy.model.CaseNoteSubType;
+import uk.gov.justice.hmpps.casenotes.legacy.model.OffenderCaseNote;
+import uk.gov.justice.hmpps.casenotes.legacy.model.OffenderCaseNote.OffenderCaseNoteBuilder;
+import uk.gov.justice.hmpps.casenotes.legacy.repository.CaseNoteSubTypeRepository;
+import uk.gov.justice.hmpps.casenotes.legacy.repository.OffenderCaseNoteRepository;
 
 import java.util.Collections;
 import java.util.Map;

@@ -22,7 +22,6 @@ import uk.gov.justice.hmpps.casenotes.domain.Note
 import uk.gov.justice.hmpps.casenotes.domain.NoteRepository
 import uk.gov.justice.hmpps.casenotes.domain.ParentTypeRepository
 import uk.gov.justice.hmpps.casenotes.domain.SubType
-import uk.gov.justice.hmpps.casenotes.dto.ErrorResponse
 import uk.gov.justice.hmpps.casenotes.events.CaseNoteInformation
 import uk.gov.justice.hmpps.casenotes.events.DomainEvent
 import uk.gov.justice.hmpps.casenotes.events.Notification
@@ -32,6 +31,7 @@ import uk.gov.justice.hmpps.casenotes.health.wiremock.Elite2Extension
 import uk.gov.justice.hmpps.casenotes.health.wiremock.OAuthExtension
 import uk.gov.justice.hmpps.casenotes.health.wiremock.PrisonerSearchApiExtension
 import uk.gov.justice.hmpps.casenotes.health.wiremock.TokenVerificationExtension
+import uk.gov.justice.hmpps.casenotes.legacy.dto.ErrorResponse
 import uk.gov.justice.hmpps.casenotes.utils.JwtAuthHelper
 import uk.gov.justice.hmpps.casenotes.utils.NomisIdGenerator
 import uk.gov.justice.hmpps.casenotes.utils.setByName
