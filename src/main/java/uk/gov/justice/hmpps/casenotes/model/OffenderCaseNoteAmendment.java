@@ -16,6 +16,7 @@ import lombok.NoArgsConstructor;
 import lombok.ToString;
 import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.domain.Persistable;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import uk.gov.justice.hmpps.casenotes.domain.AmendmentState;
 
@@ -31,7 +32,7 @@ import java.util.UUID;
 @Builder(toBuilder = true)
 @EqualsAndHashCode
 @ToString(of = {"id", "caseNote"})
-public class OffenderCaseNoteAmendment implements AmendmentState {
+public class OffenderCaseNoteAmendment implements AmendmentState, Persistable<UUID> {
 
     @Id
     @Column(nullable = false)
@@ -60,5 +61,10 @@ public class OffenderCaseNoteAmendment implements AmendmentState {
     @CreatedBy
     @Column(nullable = false)
     private String createdBy;
+
+    @Override
+    public boolean isNew() {
+        return true;
+    }
 
 }

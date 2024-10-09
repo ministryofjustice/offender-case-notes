@@ -21,6 +21,7 @@ import org.hibernate.annotations.SortComparator;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.domain.Persistable;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import uk.gov.justice.hmpps.casenotes.domain.NoteState;
 import uk.gov.justice.hmpps.casenotes.domain.audit.DeletedEntityListener;
@@ -45,7 +46,7 @@ import static java.time.LocalDateTime.now;
 @EqualsAndHashCode(of = {"personIdentifier", "occurredAt", "locationId", "authorUsername", "subType", "text"})
 @ToString(of = {"id", "personIdentifier", "occurredAt", "locationId", "authorUsername", "subType"})
 @SQLRestriction("exists(select 1 from case_note_sub_type ct where ct.id = sub_type_id and ct.sync_to_nomis = false)")
-public class OffenderCaseNote implements NoteState {
+public class OffenderCaseNote implements NoteState, Persistable<UUID> {
 
     @Builder.Default
     @Id
@@ -129,6 +130,11 @@ public class OffenderCaseNote implements NoteState {
     @Override
     public SortedSet<OffenderCaseNoteAmendment> amendments() {
         return Collections.unmodifiableSortedSet(amendments);
+    }
+
+    @Override
+    public boolean isNew() {
+        return true;
     }
 
     public static class AmendmentComparator implements Comparator<OffenderCaseNoteAmendment> {
