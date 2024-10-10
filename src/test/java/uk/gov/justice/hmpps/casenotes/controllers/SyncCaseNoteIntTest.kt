@@ -369,7 +369,7 @@ private fun Note.syncRequest(): SyncCaseNoteRequest {
 private fun Amendment.syncRequest(): SyncCaseNoteAmendmentRequest {
   val authorNames = authorName.split(" ")
   return syncAmendmentRequest(
-    text = "An updated amendment of the case note",
+    text = text,
     author = Author(authorUsername, authorUserId, authorNames[0], authorNames[1]),
     createdDateTime = createdAt,
   )

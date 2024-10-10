@@ -143,7 +143,7 @@ private infix fun SyncCaseNoteRequest.updates(note: Note): Boolean {
 }
 
 private infix fun SyncCaseNoteAmendmentRequest.updates(note: Note): Boolean =
-  note.findAmendment(this)?.let { text == it.text } ?: false
+  note.findAmendment(this)?.let { text != it.text } ?: false
 
 private fun Note.findAmendment(request: SyncCaseNoteAmendmentRequest): Amendment? =
   amendments().singleOrNull { it.authorUsername == request.author.username && it.createdAt.isSameSecond(request.createdDateTime) }
