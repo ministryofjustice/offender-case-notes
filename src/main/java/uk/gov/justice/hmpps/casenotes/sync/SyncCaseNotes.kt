@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Propagation
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.transaction.support.TransactionTemplate
+import uk.gov.justice.hmpps.casenotes.domain.Amendment
 import uk.gov.justice.hmpps.casenotes.domain.AmendmentRepository
 import uk.gov.justice.hmpps.casenotes.domain.Note
 import uk.gov.justice.hmpps.casenotes.domain.NoteRepository
@@ -22,6 +23,8 @@ import uk.gov.justice.hmpps.casenotes.events.PersonCaseNoteEvent.Type.DELETED
 import uk.gov.justice.hmpps.casenotes.events.PersonCaseNoteEvent.Type.UPDATED
 import uk.gov.justice.hmpps.casenotes.notes.CaseNote
 import uk.gov.justice.hmpps.casenotes.notes.toModel
+import java.time.LocalDateTime
+import java.time.temporal.ChronoUnit
 import java.util.UUID
 
 @Transactional
@@ -56,18 +59,24 @@ class SyncCaseNotes(
       else -> noteRepository.findByIdOrNull(request.id)
     }
 
-    existing?.also {
+    val amended: Note? = existing?.let {
       check(it.personIdentifier == request.personIdentifier) {
         "Case note belongs to another prisoner or prisoner records have been merged"
       }
-      noteRepository.delete(it)
-      noteRepository.flush()
+
+      if (request updates existing) {
+        noteRepository.delete(it)
+        noteRepository.flush()
+        null
+      } else {
+        existing amendWith request
+      }
     }
 
-    val saved = noteRepository.saveAndRefresh(
+    val saved = amended ?: noteRepository.saveAndRefresh(
       request.asNoteWithAmendments(
         request.personIdentifier,
-        existing?.id,
+        SyncOverrides.of(existing?.id, existing?.system),
         typeRepository::getByTypeCodeAndCode,
       ),
     )
@@ -126,3 +135,22 @@ private fun <T : TypeLookup> Collection<T>.exceptionMessage() =
       }"
     }
     .joinToString(separator = ", ", prefix = "{ ", postfix = " }")
+
+private infix fun SyncCaseNoteRequest.updates(note: Note): Boolean {
+  val typeChanged = subType != note.subType.code || type != note.subType.typeCode
+  val noteChanged = text != note.text
+  return typeChanged || noteChanged || amendments.any { it updates note }
+}
+
+private infix fun SyncCaseNoteAmendmentRequest.updates(note: Note): Boolean =
+  note.findAmendment(this)?.let { text != it.text } ?: false
+
+private fun Note.findAmendment(request: SyncCaseNoteAmendmentRequest): Amendment? =
+  amendments().singleOrNull { it.authorUsername == request.author.username && it.createdAt.isSameSecond(request.createdDateTime) }
+
+private fun LocalDateTime.isSameSecond(other: LocalDateTime): Boolean =
+  truncatedTo(ChronoUnit.SECONDS) == other.truncatedTo(ChronoUnit.SECONDS)
+
+private infix fun Note.amendWith(request: SyncCaseNoteRequest) = apply {
+  request.amendments.filter { findAmendment(it) == null }.forEach(::addAmendment)
+}

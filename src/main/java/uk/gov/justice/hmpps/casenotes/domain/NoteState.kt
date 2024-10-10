@@ -14,6 +14,7 @@ interface NoteState {
   val authorName: String
   val text: String
   val systemGenerated: Boolean
+  val system: System
   val legacyId: Long?
   val createdAt: LocalDateTime
   val createdBy: String
@@ -26,7 +27,13 @@ interface AmendmentState {
   val authorName: String
   val authorUserId: String
   val text: String
+  val system: System
   val createdAt: LocalDateTime
   val createdBy: String
   fun getId(): UUID
+}
+
+enum class System {
+  DPS,
+  NOMIS,
 }

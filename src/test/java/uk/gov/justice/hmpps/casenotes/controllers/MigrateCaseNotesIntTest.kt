@@ -5,8 +5,8 @@ import org.junit.jupiter.api.Test
 import org.springframework.http.HttpStatus
 import uk.gov.justice.hmpps.casenotes.config.SecurityUserContext.Companion.ROLE_CASE_NOTES_SYNC
 import uk.gov.justice.hmpps.casenotes.config.SecurityUserContext.Companion.ROLE_CASE_NOTES_WRITE
-import uk.gov.justice.hmpps.casenotes.config.Source
 import uk.gov.justice.hmpps.casenotes.domain.Note
+import uk.gov.justice.hmpps.casenotes.domain.System
 import uk.gov.justice.hmpps.casenotes.domain.matchesPersonIdentifier
 import uk.gov.justice.hmpps.casenotes.sync.Author
 import uk.gov.justice.hmpps.casenotes.sync.MigrateAmendmentRequest
@@ -152,7 +152,7 @@ private fun migrateCaseNoteRequest(
   author: Author = defaultAuthor(),
   createdDateTime: LocalDateTime = LocalDateTime.now().minusDays(1),
   createdBy: String = "CreatedByUsername",
-  source: Source = Source.NOMIS,
+  system: System = System.NOMIS,
   amendments: Set<MigrateAmendmentRequest> = setOf(),
 ) = MigrateCaseNoteRequest(
   legacyId,
@@ -162,18 +162,19 @@ private fun migrateCaseNoteRequest(
   occurrenceDateTime,
   text,
   systemGenerated,
+  system,
   author,
   createdDateTime,
   createdBy,
-  source,
   amendments,
 )
 
 private fun migrateAmendmentRequest(
   text: String = "The text of the case note",
+  system: System = System.NOMIS,
   author: Author = defaultAuthor(),
   createdDateTime: LocalDateTime = LocalDateTime.now(),
-) = MigrateAmendmentRequest(text, author, createdDateTime)
+) = MigrateAmendmentRequest(text, system, author, createdDateTime)
 
 private fun defaultAuthor() = Author("AuthorUsername", "12376471", "Author", "Name")
 

@@ -1,4 +1,4 @@
-package uk.gov.justice.hmpps.casenotes.notes
+package uk.gov.justice.hmpps.casenotes.domain.audit
 
 import com.fasterxml.jackson.databind.PropertyNamingStrategies.SnakeCaseStrategy
 import com.fasterxml.jackson.databind.annotation.JsonNaming
@@ -13,11 +13,11 @@ import org.hibernate.annotations.JdbcTypeCode
 import org.hibernate.type.SqlTypes
 import org.springframework.data.domain.Persistable
 import org.springframework.data.jpa.repository.JpaRepository
-import uk.gov.justice.hmpps.casenotes.config.Source
 import uk.gov.justice.hmpps.casenotes.domain.AmendmentState
 import uk.gov.justice.hmpps.casenotes.domain.DeletionCause
 import uk.gov.justice.hmpps.casenotes.domain.IdGenerator.newUuid
 import uk.gov.justice.hmpps.casenotes.domain.NoteState
+import uk.gov.justice.hmpps.casenotes.domain.System
 import java.time.LocalDateTime
 import java.util.SortedSet
 import java.util.UUID
@@ -37,7 +37,7 @@ class DeletedCaseNote(
   val deletedBy: String,
 
   @Enumerated(EnumType.STRING)
-  val source: Source,
+  val system: System,
 
   @Enumerated(EnumType.STRING)
   val cause: DeletionCause,
@@ -68,6 +68,7 @@ data class DeletedDetail(
   override val authorName: String,
   override val text: String,
   override val systemGenerated: Boolean,
+  override val system: System,
   override val legacyId: Long?,
   private val id: UUID,
   override val createdAt: LocalDateTime,
@@ -87,6 +88,7 @@ data class DeletedDetail(
     noteState.authorName,
     noteState.text,
     noteState.systemGenerated,
+    noteState.system,
     noteState.legacyId,
     noteState.getId(),
     noteState.createdAt,
@@ -97,6 +99,7 @@ data class DeletedDetail(
         it.authorName,
         it.authorUserId,
         it.text,
+        it.system,
         it.getId(),
         it.createdAt,
         it.createdBy,
@@ -111,6 +114,7 @@ data class NestedDetail(
   override val authorName: String,
   override val authorUserId: String,
   override val text: String,
+  override val system: System,
   private val id: UUID,
   override val createdAt: LocalDateTime,
   override val createdBy: String,

@@ -8,11 +8,10 @@ import org.springframework.stereotype.Component
 import org.springframework.web.context.request.RequestContextHolder
 import org.springframework.web.context.request.ServletRequestAttributes
 import uk.gov.justice.hmpps.casenotes.config.CaseNoteRequestContext
+import uk.gov.justice.hmpps.casenotes.config.Source
 import uk.gov.justice.hmpps.casenotes.domain.DeletionCause
 import uk.gov.justice.hmpps.casenotes.domain.NoteState
-import uk.gov.justice.hmpps.casenotes.notes.DeletedCaseNote
-import uk.gov.justice.hmpps.casenotes.notes.DeletedCaseNoteRepository
-import uk.gov.justice.hmpps.casenotes.notes.DeletedDetail
+import uk.gov.justice.hmpps.casenotes.domain.System
 
 @Component
 class DeletedEntityListener {
@@ -35,7 +34,10 @@ class DeletedEntityListener {
         DeletedDetail(noteState),
         context.requestAt,
         context.username,
-        context.source,
+        when (context.source) {
+          Source.DPS -> System.DPS
+          Source.NOMIS -> System.NOMIS
+        },
         causeOfDelete(),
       ),
     )

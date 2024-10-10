@@ -1,19 +1,17 @@
 package uk.gov.justice.hmpps.casenotes.utils
 
 import org.assertj.core.api.Assertions.assertThat
-import org.springframework.data.jpa.domain.AbstractAuditable_.createdBy
 import uk.gov.justice.hmpps.casenotes.config.Source
 import uk.gov.justice.hmpps.casenotes.domain.Amendment
 import uk.gov.justice.hmpps.casenotes.domain.Note
+import uk.gov.justice.hmpps.casenotes.domain.audit.DeletedDetail
 import uk.gov.justice.hmpps.casenotes.events.CaseNoteInformation
 import uk.gov.justice.hmpps.casenotes.events.DomainEvent
 import uk.gov.justice.hmpps.casenotes.events.PersonCaseNoteEvent
 import uk.gov.justice.hmpps.casenotes.notes.CaseNote
 import uk.gov.justice.hmpps.casenotes.notes.CaseNoteAmendment
-import uk.gov.justice.hmpps.casenotes.notes.DeletedDetail
 import uk.gov.justice.hmpps.casenotes.sync.SyncAmendmentRequest
 import uk.gov.justice.hmpps.casenotes.sync.SyncNoteRequest
-import java.awt.SystemColor.text
 import java.time.temporal.ChronoUnit.SECONDS
 
 fun CaseNote.verifyAgainst(note: Note) {

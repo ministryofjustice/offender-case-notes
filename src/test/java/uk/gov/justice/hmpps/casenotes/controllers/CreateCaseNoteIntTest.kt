@@ -9,6 +9,7 @@ import uk.gov.justice.hmpps.casenotes.config.SecurityUserContext.Companion.ROLE_
 import uk.gov.justice.hmpps.casenotes.config.SecurityUserContext.Companion.ROLE_CASE_NOTES_WRITE
 import uk.gov.justice.hmpps.casenotes.config.Source
 import uk.gov.justice.hmpps.casenotes.domain.Note
+import uk.gov.justice.hmpps.casenotes.domain.System
 import uk.gov.justice.hmpps.casenotes.events.PersonCaseNoteEvent
 import uk.gov.justice.hmpps.casenotes.health.wiremock.OAuthExtension.Companion.oAuthApi
 import uk.gov.justice.hmpps.casenotes.notes.CaseNote
@@ -81,6 +82,7 @@ class CreateCaseNoteIntTest : IntegrationTest() {
     saved.verifyAgainst(request)
     assertThat(saved.authorUsername).isEqualTo(USERNAME)
     response.verifyAgainst(saved)
+    assertThat(saved.system).isEqualTo(System.DPS)
 
     hmppsEventsQueue.receivePersonCaseNoteEvent().verifyAgainst(PersonCaseNoteEvent.Type.CREATED, Source.DPS, saved)
   }
@@ -129,6 +131,7 @@ class CreateCaseNoteIntTest : IntegrationTest() {
     saved.verifyAgainst(objectMapper.readValue<CreateCaseNoteRequest>(request))
     assertThat(saved.authorUsername).isEqualTo(USERNAME)
     response.verifyAgainst(saved)
+    assertThat(saved.system).isEqualTo(System.DPS)
 
     hmppsEventsQueue.receivePersonCaseNoteEvent().verifyAgainst(PersonCaseNoteEvent.Type.CREATED, Source.DPS, saved)
   }

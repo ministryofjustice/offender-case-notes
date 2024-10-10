@@ -4,6 +4,8 @@ import com.fasterxml.uuid.Generators;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EntityListeners;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
@@ -23,6 +25,7 @@ import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.domain.Persistable;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import uk.gov.justice.hmpps.casenotes.domain.NoteState;
+import uk.gov.justice.hmpps.casenotes.domain.System;
 import uk.gov.justice.hmpps.casenotes.domain.audit.DeletedEntityListener;
 
 import java.time.LocalDateTime;
@@ -94,6 +97,10 @@ public class OffenderCaseNote implements NoteState, Persistable<UUID> {
     private Long legacyId;
 
     private boolean systemGenerated;
+
+    @Builder.Default
+    @Enumerated(EnumType.STRING)
+    private System system = System.DPS;
 
     @Override
     public boolean getSystemGenerated() {

@@ -4,11 +4,11 @@ import io.swagger.v3.oas.annotations.media.Schema
 import io.swagger.v3.oas.annotations.media.Schema.RequiredMode.REQUIRED
 import jakarta.validation.constraints.NotBlank
 import org.hibernate.validator.constraints.Length
-import uk.gov.justice.hmpps.casenotes.config.Source
 import uk.gov.justice.hmpps.casenotes.domain.Amendment
 import uk.gov.justice.hmpps.casenotes.domain.IdGenerator.newUuid
 import uk.gov.justice.hmpps.casenotes.domain.Note
 import uk.gov.justice.hmpps.casenotes.domain.SubType
+import uk.gov.justice.hmpps.casenotes.domain.System
 import uk.gov.justice.hmpps.casenotes.domain.TypeKey
 import java.time.LocalDateTime
 import java.util.UUID
@@ -39,7 +39,6 @@ data class SyncCaseNoteRequest(
   override val author: Author,
   override val createdDateTime: LocalDateTime,
   override val createdByUsername: String,
-  override val source: Source,
   override val amendments: Set<SyncCaseNoteAmendmentRequest>,
 ) : SyncNoteRequest
 
@@ -53,11 +52,20 @@ internal data class NoteAndAmendments(val note: Note, val amendments: List<Amend
 
 internal fun SyncNoteRequest.typeKey() = TypeKey(type, subType)
 
+internal data class SyncOverrides(
+  val id: UUID?,
+  val system: System?,
+) {
+  companion object {
+    fun of(id: UUID?, system: System?) = if (id == null && system == null) null else SyncOverrides(id, system)
+  }
+}
+
 internal fun SyncNoteRequest.asNoteAndAmendments(
   personIdentifier: String,
-  id: UUID?,
+  syncOverrides: SyncOverrides?,
   typeSupplier: (String, String) -> SubType,
-) = asNote(personIdentifier, id, typeSupplier).let { note ->
+) = asNote(personIdentifier, syncOverrides, typeSupplier).let { note ->
   note.legacyId = this.legacyId
   note.createdAt = createdDateTime
   note.createdBy = createdByUsername
@@ -70,16 +78,21 @@ private fun SyncAmendmentRequest.asAmendment(note: Note) = Amendment(
   author.fullName(),
   author.userId,
   text,
+  if (this is SystemAwareRequest) system else System.NOMIS,
   newUuid(),
 ).apply { this.createdAt = this@asAmendment.createdDateTime }
 
 internal fun SyncNoteRequest.asNoteWithAmendments(
   personIdentifier: String,
-  id: UUID?,
+  syncOverrides: SyncOverrides?,
   typeSupplier: (String, String) -> SubType,
-) = asNote(personIdentifier, id, typeSupplier).also { note -> amendments.forEach { note.addAmendment(it) } }
+) = asNote(personIdentifier, syncOverrides, typeSupplier).also { note -> amendments.forEach { note.addAmendment(it) } }
 
-internal fun SyncNoteRequest.asNote(personIdentifier: String, id: UUID?, typeSupplier: (String, String) -> SubType) =
+internal fun SyncNoteRequest.asNote(
+  personIdentifier: String,
+  overrides: SyncOverrides?,
+  typeSupplier: (String, String) -> SubType,
+) =
   Note(
     personIdentifier,
     typeSupplier(type, subType),
@@ -90,7 +103,8 @@ internal fun SyncNoteRequest.asNote(personIdentifier: String, id: UUID?, typeSup
     author.fullName(),
     text,
     systemGenerated,
-    id = id ?: newUuid(),
+    if (this is SystemAwareRequest) system else overrides?.system ?: System.NOMIS,
+    id = overrides?.id ?: newUuid(),
   ).apply {
     this.legacyId = this@asNote.legacyId
     this.createdAt = this@asNote.createdDateTime

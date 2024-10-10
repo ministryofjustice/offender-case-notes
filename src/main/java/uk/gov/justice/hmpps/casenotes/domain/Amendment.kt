@@ -2,6 +2,8 @@ package uk.gov.justice.hmpps.casenotes.domain
 
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
+import jakarta.persistence.EnumType
+import jakarta.persistence.Enumerated
 import jakarta.persistence.Id
 import jakarta.persistence.JoinColumn
 import jakarta.persistence.ManyToOne
@@ -32,6 +34,9 @@ class Amendment(
 
   @Column(name = "note_text", nullable = false)
   override val text: String,
+
+  @Enumerated(EnumType.STRING)
+  override val system: System,
 
   @Id
   @Column(name = "id", updatable = false, nullable = false)

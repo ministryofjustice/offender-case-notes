@@ -22,6 +22,7 @@ import uk.gov.justice.hmpps.casenotes.domain.Note
 import uk.gov.justice.hmpps.casenotes.domain.NoteRepository
 import uk.gov.justice.hmpps.casenotes.domain.ParentTypeRepository
 import uk.gov.justice.hmpps.casenotes.domain.SubType
+import uk.gov.justice.hmpps.casenotes.domain.System
 import uk.gov.justice.hmpps.casenotes.events.CaseNoteInformation
 import uk.gov.justice.hmpps.casenotes.events.DomainEvent
 import uk.gov.justice.hmpps.casenotes.events.Notification
@@ -168,6 +169,7 @@ abstract class IntegrationTest : BasicIntegrationTest() {
     authorName: String = "Author Name",
     text: String = "Text about the case note saved in the case note database",
     systemGenerated: Boolean = false,
+    system: System = System.DPS,
     legacyId: Long = NomisIdGenerator.newId(),
     createdAt: LocalDateTime? = null,
   ) = Note(
@@ -180,6 +182,7 @@ abstract class IntegrationTest : BasicIntegrationTest() {
     authorName,
     text,
     systemGenerated,
+    system,
   ).apply {
     this.legacyId = legacyId
     createdAt?.also { this.createdAt = it }
@@ -190,11 +193,12 @@ abstract class IntegrationTest : BasicIntegrationTest() {
     authorUserId: String = "AuthorId",
     authorName: String = "Author Name",
     text: String = "An amendment to a case note saved in the case note database",
+    system: System = System.DPS,
     createdAt: LocalDateTime = LocalDateTime.now(),
     id: UUID = Generators.timeBasedEpochGenerator().generate(),
   ): Note = apply {
     val amendment =
-      Amendment(this, authorUsername, authorName, authorUserId, text, id).apply { this.createdAt = createdAt }
+      Amendment(this, authorUsername, authorName, authorUserId, text, system, id).apply { this.createdAt = createdAt }
     setByName("amendments", (amendments() + amendment).toSortedSet())
   }
 
