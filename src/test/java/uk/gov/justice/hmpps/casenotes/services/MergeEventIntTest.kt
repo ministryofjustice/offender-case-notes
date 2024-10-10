@@ -9,12 +9,12 @@ import org.springframework.beans.factory.annotation.Autowired
 import uk.gov.justice.hmpps.casenotes.controllers.IntegrationTest
 import uk.gov.justice.hmpps.casenotes.domain.DeletionCause
 import uk.gov.justice.hmpps.casenotes.domain.Note
+import uk.gov.justice.hmpps.casenotes.domain.audit.DeletedCaseNoteRepository
 import uk.gov.justice.hmpps.casenotes.domain.matchesPersonIdentifier
 import uk.gov.justice.hmpps.casenotes.events.DomainEvent
 import uk.gov.justice.hmpps.casenotes.events.DomainEventListener.Companion.PRISONER_MERGED
 import uk.gov.justice.hmpps.casenotes.events.MergeInformation
 import uk.gov.justice.hmpps.casenotes.events.PersonReference
-import uk.gov.justice.hmpps.casenotes.notes.DeletedCaseNoteRepository
 import uk.gov.justice.hmpps.casenotes.utils.NomisIdGenerator.personIdentifier
 import uk.gov.justice.hmpps.casenotes.utils.verifyAgainst
 import java.time.ZonedDateTime

@@ -12,9 +12,10 @@ import uk.gov.justice.hmpps.casenotes.domain.Amendment
 import uk.gov.justice.hmpps.casenotes.domain.DeletionCause.DELETE
 import uk.gov.justice.hmpps.casenotes.domain.DeletionCause.UPDATE
 import uk.gov.justice.hmpps.casenotes.domain.Note
+import uk.gov.justice.hmpps.casenotes.domain.System
+import uk.gov.justice.hmpps.casenotes.domain.audit.DeletedCaseNoteRepository
 import uk.gov.justice.hmpps.casenotes.events.PersonCaseNoteEvent
 import uk.gov.justice.hmpps.casenotes.notes.CaseNote
-import uk.gov.justice.hmpps.casenotes.notes.DeletedCaseNoteRepository
 import uk.gov.justice.hmpps.casenotes.sync.Author
 import uk.gov.justice.hmpps.casenotes.sync.SyncCaseNoteAmendmentRequest
 import uk.gov.justice.hmpps.casenotes.sync.SyncCaseNoteRequest
@@ -98,6 +99,7 @@ class SyncCaseNoteIntTest : IntegrationTest() {
 
     val saved = requireNotNull(noteRepository.findByIdAndPersonIdentifier(response.id, request.personIdentifier))
     saved.verifyAgainst(request)
+    assertThat(saved.system).isEqualTo(System.NOMIS)
 
     hmppsEventsQueue.receivePersonCaseNoteEvent().verifyAgainst(PersonCaseNoteEvent.Type.CREATED, Source.NOMIS, saved)
   }
@@ -110,8 +112,10 @@ class SyncCaseNoteIntTest : IntegrationTest() {
 
     val saved = requireNotNull(noteRepository.findByIdAndPersonIdentifier(response.id, request.personIdentifier))
     saved.verifyAgainst(request)
+    assertThat(saved.system).isEqualTo(System.NOMIS)
     val amended = saved.amendments().first()
     amended.verifyAgainst(request.amendments.first())
+    assertThat(amended.system).isEqualTo(System.NOMIS)
 
     hmppsEventsQueue.receivePersonCaseNoteEvent().verifyAgainst(PersonCaseNoteEvent.Type.CREATED, Source.NOMIS, saved)
   }
@@ -126,6 +130,7 @@ class SyncCaseNoteIntTest : IntegrationTest() {
 
     val saved = requireNotNull(noteRepository.findByIdAndPersonIdentifier(response.id, request.personIdentifier))
     saved.verifyAgainst(request)
+    assertThat(saved.system).isEqualTo(System.DPS)
 
     val deleted = deletedCaseNoteRepository.findByCaseNoteId(existing.id)
     assertThat(deleted!!.caseNote).isNotNull()
@@ -148,6 +153,7 @@ class SyncCaseNoteIntTest : IntegrationTest() {
 
     val saved = requireNotNull(noteRepository.findByIdAndPersonIdentifier(response.id, request.personIdentifier))
     saved.verifyAgainst(request)
+    assertThat(saved.system).isEqualTo(System.DPS)
 
     val deleted = deletedCaseNoteRepository.findByCaseNoteId(existing.id)
     assertThat(deleted!!.caseNote).isNotNull()
@@ -168,6 +174,9 @@ class SyncCaseNoteIntTest : IntegrationTest() {
 
     val saved = requireNotNull(noteRepository.findByIdAndPersonIdentifier(response.id, request.personIdentifier))
     saved.verifyAgainst(request)
+    assertThat(saved.system).isEqualTo(System.DPS)
+    assertThat(saved.amendments()).hasSize(2)
+    assertThat(saved.amendments().map { it.system }).containsExactlyInAnyOrder(System.DPS, System.NOMIS)
 
     val deleted = deletedCaseNoteRepository.findByCaseNoteId(existing.id)
     assertThat(deleted).isNull()
@@ -178,13 +187,14 @@ class SyncCaseNoteIntTest : IntegrationTest() {
   @Test
   fun `200 ok - sync updates an existing case note using legacy id`() {
     val prisonNumber = personIdentifier()
-    val existing = givenCaseNote(generateCaseNote(prisonNumber))
+    val existing = givenCaseNote(generateCaseNote(prisonNumber, system = System.NOMIS))
     val request = existing.syncRequest().copy(id = null, text = "The text was amended in nomis")
     val response = syncCaseNote(request).success<SyncResult>(HttpStatus.OK)
     assertThat(response.action).isEqualTo(UPDATED)
 
     val saved = requireNotNull(noteRepository.findByIdAndPersonIdentifier(response.id, request.personIdentifier))
     saved.verifyAgainst(request)
+    assertThat(saved.system).isEqualTo(System.NOMIS)
 
     val deleted = deletedCaseNoteRepository.findByCaseNoteId(existing.id)
     assertThat(deleted!!.caseNote).isNotNull()
@@ -217,9 +227,11 @@ class SyncCaseNoteIntTest : IntegrationTest() {
 
     val saved = requireNotNull(noteRepository.findByIdAndPersonIdentifier(existing.id, request.personIdentifier))
     saved.verifyAgainst(request)
+    assertThat(saved.system).isEqualTo(System.DPS)
     assertThat(saved.amendments().size).isEqualTo(2)
     val amend = saved.amendments().first()
     amend.verifyAgainst(request.amendments.first())
+    assertThat(amend.system).isEqualTo(System.NOMIS)
 
     val deleted = deletedCaseNoteRepository.findByCaseNoteId(existing.id)
     assertThat(deleted!!.caseNote).isNotNull()
@@ -308,7 +320,6 @@ private fun syncCaseNoteRequest(
   author: Author = defaultAuthor(),
   createdDateTime: LocalDateTime = now().minusDays(1),
   createdBy: String = "CreatedByUsername",
-  source: Source = Source.NOMIS,
   amendments: Set<SyncCaseNoteAmendmentRequest> = setOf(),
 ) = SyncCaseNoteRequest(
   legacyId,
@@ -323,7 +334,6 @@ private fun syncCaseNoteRequest(
   author,
   createdDateTime,
   createdBy,
-  source,
   amendments,
 )
 

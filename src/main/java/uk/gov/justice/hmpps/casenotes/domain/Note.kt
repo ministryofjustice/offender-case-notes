@@ -4,6 +4,8 @@ import jakarta.persistence.CascadeType
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
 import jakarta.persistence.EntityListeners
+import jakarta.persistence.EnumType
+import jakarta.persistence.Enumerated
 import jakarta.persistence.Id
 import jakarta.persistence.JoinColumn
 import jakarta.persistence.ManyToOne
@@ -29,6 +31,7 @@ import uk.gov.justice.hmpps.casenotes.domain.audit.DeletedEntityListener
 import uk.gov.justice.hmpps.casenotes.domain.audit.SimpleAudited
 import uk.gov.justice.hmpps.casenotes.notes.TextRequest
 import uk.gov.justice.hmpps.casenotes.sync.SyncAmendmentRequest
+import uk.gov.justice.hmpps.casenotes.sync.SystemAwareRequest
 import java.time.LocalDateTime
 import java.util.Optional
 import java.util.SortedSet
@@ -66,6 +69,9 @@ class Note(
 
   override val systemGenerated: Boolean,
 
+  @Enumerated(EnumType.STRING)
+  override val system: System,
+
   @Id
   @Column(name = "id", updatable = false, nullable = false)
   private val id: UUID = newUuid(),
@@ -99,6 +105,7 @@ class Note(
           request.author.fullName(),
           request.author.userId,
           request.text,
+          if (request is SystemAwareRequest) system else System.NOMIS,
           newUuid(),
         ).apply { createdAt = request.createdDateTime },
       )
@@ -111,6 +118,7 @@ class Note(
           context.userDisplayName,
           context.userId,
           request.text,
+          System.DPS,
           newUuid(),
         ).apply { createdAt = context.requestAt },
       )
@@ -127,6 +135,7 @@ class Note(
     authorName,
     text,
     systemGenerated,
+    system,
     id,
   ).apply {
     legacyId = this@Note.legacyId
@@ -139,6 +148,7 @@ class Note(
         it.authorName,
         it.authorUserId,
         it.text,
+        it.system,
         it.id,
       ).apply {
         createdAt = it.createdAt

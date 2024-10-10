@@ -9,6 +9,7 @@ import uk.gov.justice.hmpps.casenotes.domain.Note
 import uk.gov.justice.hmpps.casenotes.domain.NoteRepository
 import uk.gov.justice.hmpps.casenotes.domain.SubType
 import uk.gov.justice.hmpps.casenotes.domain.SubTypeRepository
+import uk.gov.justice.hmpps.casenotes.domain.System
 import uk.gov.justice.hmpps.casenotes.domain.getByTypeCodeAndCode
 import uk.gov.justice.hmpps.casenotes.domain.saveAndRefresh
 import uk.gov.justice.hmpps.casenotes.events.PersonCaseNoteEvent.Companion.createEvent
@@ -48,5 +49,6 @@ class CreateSysGenNote(
     authorName,
     text,
     true,
+    System.DPS,
   ).apply { legacyId = noteRepository.getNextLegacyId() }
 }

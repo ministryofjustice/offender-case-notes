@@ -5,7 +5,7 @@ import io.swagger.v3.oas.annotations.media.Schema.RequiredMode.REQUIRED
 import jakarta.validation.Valid
 import jakarta.validation.constraints.NotBlank
 import org.hibernate.validator.constraints.Length
-import uk.gov.justice.hmpps.casenotes.config.Source
+import uk.gov.justice.hmpps.casenotes.domain.System
 import uk.gov.justice.hmpps.casenotes.notes.NoteRequest
 import uk.gov.justice.hmpps.casenotes.notes.TextRequest
 import java.time.LocalDateTime
@@ -41,14 +41,6 @@ interface SyncNoteRequest : NoteRequest {
   @get:NotBlank(message = "created by username cannot be blank")
   val createdByUsername: String
 
-  @get:Schema(
-    requiredMode = REQUIRED,
-    example = "DPS",
-    allowableValues = ["DPS", "NOMIS"],
-    description = "Indicates whether the case note was created via prison API or nomis",
-  )
-  val source: Source
-
   @get:Schema(requiredMode = REQUIRED, description = "Boolean flag to indicate if case note is system generated")
   override val systemGenerated: Boolean
 
@@ -61,6 +53,10 @@ interface SyncAmendmentRequest : TextRequest {
   @get:Valid
   val author: Author
   val createdDateTime: LocalDateTime
+}
+
+interface SystemAwareRequest {
+  val system: System
 }
 
 data class Author(

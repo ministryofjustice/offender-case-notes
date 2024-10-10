@@ -26,7 +26,7 @@ import uk.gov.justice.hmpps.casenotes.notes.AmendCaseNoteRequest;
 import uk.gov.justice.hmpps.casenotes.notes.CaseNote;
 import uk.gov.justice.hmpps.casenotes.notes.CaseNoteAmendment;
 import uk.gov.justice.hmpps.casenotes.notes.CreateCaseNoteRequest;
-import uk.gov.justice.hmpps.casenotes.notes.DeletedCaseNoteRepository;
+import uk.gov.justice.hmpps.casenotes.domain.audit.DeletedCaseNoteRepository;
 import uk.gov.justice.hmpps.casenotes.legacy.repository.CaseNoteSubTypeRepository;
 import uk.gov.justice.hmpps.casenotes.legacy.repository.OffenderCaseNoteRepository;
 

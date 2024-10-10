@@ -10,6 +10,7 @@ import org.junit.jupiter.api.Test
 import org.springframework.http.HttpStatus
 import uk.gov.justice.hmpps.casenotes.config.SecurityUserContext
 import uk.gov.justice.hmpps.casenotes.config.Source
+import uk.gov.justice.hmpps.casenotes.domain.System
 import uk.gov.justice.hmpps.casenotes.events.PersonCaseNoteEvent
 import uk.gov.justice.hmpps.casenotes.health.wiremock.OAuthExtension.Companion.oAuthApi
 import uk.gov.justice.hmpps.casenotes.notes.AmendCaseNoteRequest
@@ -96,9 +97,11 @@ class CreateAmendmentIntTest : IntegrationTest() {
     assertThat(response.amendments.first().additionalNoteText).isEqualTo(request.text)
 
     val saved = requireNotNull(noteRepository.findByIdAndPersonIdentifier(caseNote.id, response.personIdentifier))
+    assertThat(saved.system).isEqualTo(System.DPS)
     with(saved.amendments().first()) {
       assertThat(text).isEqualTo(request.text)
       assertThat(authorUsername).isEqualTo(USERNAME)
+      assertThat(system).isEqualTo(System.DPS)
     }
 
     hmppsEventsQueue.receivePersonCaseNoteEvent().verifyAgainst(PersonCaseNoteEvent.Type.UPDATED, Source.DPS, saved)
@@ -114,9 +117,11 @@ class CreateAmendmentIntTest : IntegrationTest() {
     assertThat(response.amendments.first().additionalNoteText).isEqualTo(request.text)
 
     val saved = requireNotNull(noteRepository.findByIdAndPersonIdentifier(caseNote.id, response.personIdentifier))
+    assertThat(saved.system).isEqualTo(System.DPS)
     with(saved.amendments().first()) {
       assertThat(text).isEqualTo(request.text)
       assertThat(authorUsername).isEqualTo(USERNAME)
+      assertThat(system).isEqualTo(System.DPS)
     }
 
     hmppsEventsQueue.receivePersonCaseNoteEvent().verifyAgainst(PersonCaseNoteEvent.Type.UPDATED, Source.DPS, saved)
@@ -134,9 +139,11 @@ class CreateAmendmentIntTest : IntegrationTest() {
     assertThat(response.amendments.first().additionalNoteText).isEqualTo(request.text)
 
     val saved = requireNotNull(noteRepository.findByIdAndPersonIdentifier(caseNote.id, response.personIdentifier))
+    assertThat(saved.system).isEqualTo(System.DPS)
     with(saved.amendments().first()) {
       assertThat(text).isEqualTo(request.text)
       assertThat(authorUsername).isEqualTo(USERNAME)
+      assertThat(system).isEqualTo(System.DPS)
     }
 
     await withPollDelay ofSeconds(1) untilCallTo { hmppsEventsQueue.countAllMessagesOnQueue() } matches { it == 0 }

@@ -1,6 +1,6 @@
 package uk.gov.justice.hmpps.casenotes.sync
 
-import uk.gov.justice.hmpps.casenotes.config.Source
+import uk.gov.justice.hmpps.casenotes.domain.System
 import java.time.LocalDateTime
 
 data class MigrateCaseNoteRequest(
@@ -11,15 +11,16 @@ data class MigrateCaseNoteRequest(
   override val occurrenceDateTime: LocalDateTime,
   override val text: String,
   override val systemGenerated: Boolean,
+  override val system: System,
   override val author: Author,
   override val createdDateTime: LocalDateTime,
   override val createdByUsername: String,
-  override val source: Source,
   override val amendments: Set<MigrateAmendmentRequest>,
-) : SyncNoteRequest
+) : SyncNoteRequest, SystemAwareRequest
 
 data class MigrateAmendmentRequest(
   override val text: String,
+  override val system: System,
   override val author: Author,
   override val createdDateTime: LocalDateTime,
-) : SyncAmendmentRequest
+) : SyncAmendmentRequest, SystemAwareRequest

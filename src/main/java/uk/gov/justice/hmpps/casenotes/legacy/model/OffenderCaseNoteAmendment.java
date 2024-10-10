@@ -3,6 +3,8 @@ package uk.gov.justice.hmpps.casenotes.legacy.model;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EntityListeners;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
@@ -18,6 +20,7 @@ import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.domain.Persistable;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import uk.gov.justice.hmpps.casenotes.domain.AmendmentState;
+import uk.gov.justice.hmpps.casenotes.domain.System;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -52,6 +55,10 @@ public class OffenderCaseNoteAmendment implements AmendmentState, Persistable<UU
 
     @Column(name = "note_text", nullable = false)
     private String text;
+
+    @Builder.Default
+    @Enumerated(EnumType.STRING)
+    private System system = System.DPS;
 
     @CreatedDate
     @Column(nullable = false)

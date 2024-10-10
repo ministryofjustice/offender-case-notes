@@ -53,60 +53,60 @@ values ('NOT_DPS', 'NOT_SEL', 'Not Dps User Selectable', true, false, false, fal
 --Insert statement case_note
 
 insert into case_note (id, person_identifier, location_id, author_username, author_name, sub_type_id, occurred_at,
-                       note_text, created_at, created_by, legacy_id, author_user_id)
+                       note_text, created_at, created_by, legacy_id, author_user_id, system)
 values ('b5aa1318-e874-4614-a80d-a514e84d1a52', 'L6962XX', 'WNI', 'ADAM_GEN', 'John Smith',
         (select id from case_note_sub_type where type_code = 'POM' and code = 'GEN'),
         '2019-08-29 17:08:46.188956', 'text', '2019-08-29 17:08:46.655233', 'ADAM_GEN',
-        nextval('case_note_legacy_id_seq'), 'ADAM_GEN');
+        nextval('case_note_legacy_id_seq'), 'ADAM_GEN', 'DPS');
 
 insert into case_note (id, person_identifier, location_id, author_username, author_name, sub_type_id, occurred_at,
-                       note_text, created_at, created_by, legacy_id, author_user_id)
+                       note_text, created_at, created_by, legacy_id, author_user_id, system)
 values ('b5aa1318-e874-4614-a80d-a514e84d1a53', 'L6962XX', 'WNI', 'ADAM_GEN', 'John Smith',
         (select id from case_note_sub_type where type_code = 'POM' and code = 'GEN'),
         '2022-07-29 11:08:46.655233', 'text1', '2022-07-29 11:08:46.655233', 'ADAM_GEN',
-        nextval('case_note_legacy_id_seq'), 'ADAM_GEN');
+        nextval('case_note_legacy_id_seq'), 'ADAM_GEN', 'DPS');
 
 
 insert into case_note (id, person_identifier, location_id, author_username, author_name, sub_type_id, occurred_at,
-                       note_text, created_at, created_by, legacy_id, author_user_id)
+                       note_text, created_at, created_by, legacy_id, author_user_id, system)
 values ('b5aa1318-e874-4614-a80d-a514e84d1a54', 'L6962XX', 'WNI', 'ADAM_GEN', 'John Smith',
         (select id from case_note_sub_type where type_code = 'POM' and code = 'GEN'),
         '2023-07-29 17:08:46.655233', 'text33', '2023-07-29 17:08:46.655233', 'ADAM_GEN',
-        nextval('case_note_legacy_id_seq'), 'ADAM_GEN');
+        nextval('case_note_legacy_id_seq'), 'ADAM_GEN', 'DPS');
 
 insert into case_note (id, person_identifier, location_id, author_username, author_name, sub_type_id, occurred_at,
-                       note_text, created_at, created_by, legacy_id, author_user_id)
+                       note_text, created_at, created_by, legacy_id, author_user_id, system)
 values ('b5aa1318-e874-4614-a80d-a514e84d1a55', 'L6962XX', 'WNI', 'ADAM_GEN', 'John Smith',
         (select id from case_note_sub_type where type_code = 'POM' and code = 'GEN'),
         '2023-11-29 17:08:46.655233', 'text4', '2023-11-29 17:08:46.655233', 'ADAM_GEN',
-        nextval('case_note_legacy_id_seq'), 'ADAM_GEN');
+        nextval('case_note_legacy_id_seq'), 'ADAM_GEN', 'DPS');
 
 insert into case_note (id, person_identifier, location_id, author_username, author_name, sub_type_id, occurred_at,
-                       note_text, created_at, created_by, legacy_id, author_user_id)
+                       note_text, created_at, created_by, legacy_id, author_user_id, system)
 values ('b5aa1318-e874-4614-a80d-a514e84d1a56', 'L6962XX', 'WNI', 'ADAM_GEN', 'John Smith',
         (select id from case_note_sub_type where type_code = 'POM' and code = 'GEN'),
         '2023-12-30 17:08:46.655233', 'text6', '2023-12-30 17:08:46.655233', 'ADAM_GEN',
-        nextval('case_note_legacy_id_seq'), 'ADAM_GEN');
+        nextval('case_note_legacy_id_seq'), 'ADAM_GEN', 'DPS');
 
 --Insert statement case_note_amendment
 
 insert into case_note_amendment (id, case_note_id, author_username, author_name, note_text, created_at, created_by,
-                                 author_user_id)
+                                 author_user_id, system)
 values (gen_random_uuid(), 'b5aa1318-e874-4614-a80d-a514e84d1a54', 'ADAM_GEN', 'John Smith', 'Note amendment1',
         '2023-12-29 17:08:46.655233', 'ADAM_GEN',
-        'ADAM_GEN');
+        'ADAM_GEN', 'DPS');
 
 
 insert into case_note_amendment (id, case_note_id, author_username, author_name, note_text, created_at, created_by,
-                                 author_user_id)
+                                 author_user_id, system)
 values (gen_random_uuid(), 'b5aa1318-e874-4614-a80d-a514e84d1a54', 'ADAM_GEN', 'John Smith', 'Note amendment2',
         '2024-01-29 17:08:46.655233', 'ADAM_GEN',
-        'ADAM_GEN');
+        'ADAM_GEN', 'DPS');
 
 insert into case_note_amendment (id, case_note_id, author_username, author_name, note_text, created_at, created_by,
-                                 author_user_id)
+                                 author_user_id, system)
 values (gen_random_uuid(), 'b5aa1318-e874-4614-a80d-a514e84d1a56', 'ADAM_GEN', 'John Smith', 'New amendment1',
         '2023-12-31 17:08:46.655233', 'ADAM_GEN',
-        'ADAM_GEN');
+        'ADAM_GEN', 'DPS');
 
 
