@@ -20,6 +20,8 @@ import uk.gov.justice.hmpps.casenotes.events.PersonCaseNoteEvent.Companion.creat
 import uk.gov.justice.hmpps.casenotes.events.PersonCaseNoteEvent.Type.CREATED
 import uk.gov.justice.hmpps.casenotes.events.PersonCaseNoteEvent.Type.DELETED
 import uk.gov.justice.hmpps.casenotes.events.PersonCaseNoteEvent.Type.UPDATED
+import uk.gov.justice.hmpps.casenotes.notes.CaseNote
+import uk.gov.justice.hmpps.casenotes.notes.toModel
 import java.util.UUID
 
 @Transactional
@@ -85,6 +87,9 @@ class SyncCaseNotes(
       eventPublisher.publishEvent(it.createEvent(DELETED))
     }
   }
+
+  fun getCaseNotes(personIdentifier: String): List<CaseNote> =
+    noteRepository.findAllByPersonIdentifier(personIdentifier).map(Note::toModel)
 
   private fun getTypesForSync(keys: Set<TypeKey>): Map<TypeKey, SubType> {
     val types = typeRepository.findByKeyIn(keys).associateBy { it.key }

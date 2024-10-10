@@ -13,6 +13,7 @@ import org.springframework.http.HttpStatus.CREATED
 import org.springframework.http.ResponseEntity
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.web.bind.annotation.DeleteMapping
+import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.PutMapping
@@ -137,4 +138,8 @@ class SyncController(private val sync: SyncCaseNotes) {
   @DeleteMapping("sync/case-notes/{id}")
   @PreAuthorize("hasRole('$ROLE_CASE_NOTES_SYNC')")
   fun deleteCaseNote(@PathVariable id: UUID) = sync.deleteCaseNote(id)
+
+  @GetMapping("sync/case-notes/{personIdentifier}")
+  @PreAuthorize("hasRole('$ROLE_CASE_NOTES_SYNC')")
+  fun getCaseNotes(@PathVariable personIdentifier: String) = sync.getCaseNotes(personIdentifier)
 }
