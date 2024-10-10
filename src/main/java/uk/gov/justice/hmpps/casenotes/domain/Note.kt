@@ -179,6 +179,9 @@ interface NoteRepository : JpaSpecificationExecutor<Note>, JpaRepository<Note, U
   @Modifying
   @Query("delete from Note n where n.personIdentifier = :personIdentifier and n.legacyId > 0 ")
   fun deleteLegacyCaseNotes(personIdentifier: String)
+
+  @EntityGraph(attributePaths = ["subType.type", "amendments"])
+  fun findAllByPersonIdentifier(personIdentifier: String): List<Note>
 }
 
 fun NoteRepository.saveAndRefresh(note: Note): Note {

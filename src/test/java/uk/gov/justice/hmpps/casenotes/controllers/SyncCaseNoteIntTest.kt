@@ -13,6 +13,7 @@ import uk.gov.justice.hmpps.casenotes.domain.DeletionCause.DELETE
 import uk.gov.justice.hmpps.casenotes.domain.DeletionCause.UPDATE
 import uk.gov.justice.hmpps.casenotes.domain.Note
 import uk.gov.justice.hmpps.casenotes.events.PersonCaseNoteEvent
+import uk.gov.justice.hmpps.casenotes.notes.CaseNote
 import uk.gov.justice.hmpps.casenotes.notes.DeletedCaseNoteRepository
 import uk.gov.justice.hmpps.casenotes.sync.Author
 import uk.gov.justice.hmpps.casenotes.sync.SyncCaseNoteAmendmentRequest
@@ -210,6 +211,20 @@ class SyncCaseNoteIntTest : IntegrationTest() {
     deleteCaseNote(UUID.randomUUID())
   }
 
+  @Test
+  fun `200 ok - can retrieve all case notes`() {
+    val personIdentifier = personIdentifier()
+    (1..100).mapIndexed { _, i ->
+      val cn = generateCaseNote(personIdentifier)
+      if (i % 2 == 0) cn.withAmendment()
+      givenCaseNote(cn)
+    }
+
+    val caseNotes = getCaseNotes(personIdentifier)
+    assertThat(caseNotes).hasSize(100)
+    assertThat(caseNotes.flatMap(CaseNote::amendments)).hasSize(50)
+  }
+
   private fun syncCaseNote(
     request: SyncCaseNoteRequest,
     roles: List<String> = listOf(ROLE_CASE_NOTES_SYNC),
@@ -224,6 +239,14 @@ class SyncCaseNoteIntTest : IntegrationTest() {
   ) = webTestClient.delete().uri("$BASE_URL/$id")
     .headers(addBearerAuthorisation(tokenUsername, roles))
     .exchange().expectStatus().isNoContent
+
+  private fun getCaseNotes(
+    personIdentifier: String,
+    roles: List<String> = listOf(ROLE_CASE_NOTES_SYNC),
+    tokenUsername: String = USERNAME,
+  ) = webTestClient.get().uri("$BASE_URL/$personIdentifier")
+    .headers(addBearerAuthorisation(tokenUsername, roles))
+    .exchange().successList<CaseNote>()
 
   companion object {
     private const val BASE_URL = "/sync/case-notes"
