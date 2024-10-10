@@ -9,6 +9,7 @@ import uk.gov.justice.hmpps.casenotes.config.SecurityUserContext.Companion.ROLE_
 import uk.gov.justice.hmpps.casenotes.config.SecurityUserContext.Companion.ROLE_CASE_NOTES_WRITE
 import uk.gov.justice.hmpps.casenotes.config.Source
 import uk.gov.justice.hmpps.casenotes.domain.DeletionCause.DELETE
+import uk.gov.justice.hmpps.casenotes.domain.System
 import uk.gov.justice.hmpps.casenotes.domain.audit.DeletedCaseNoteRepository
 import uk.gov.justice.hmpps.casenotes.events.PersonCaseNoteEvent
 import uk.gov.justice.hmpps.casenotes.health.wiremock.OAuthExtension.Companion.oAuthApi
@@ -57,6 +58,7 @@ class DeleteCaseNoteIntTest : IntegrationTest() {
     val deleted = deletedCaseNoteRepository.findByCaseNoteId(caseNote.id)
     assertThat(deleted!!.caseNote).isNotNull()
     assertThat(deleted.cause).isEqualTo(DELETE)
+    assertThat(deleted.system).isEqualTo(System.DPS)
     deleted.caseNote.verifyAgainst(caseNote)
 
     hmppsEventsQueue.receivePersonCaseNoteEvent().verifyAgainst(PersonCaseNoteEvent.Type.DELETED, Source.DPS, caseNote)
