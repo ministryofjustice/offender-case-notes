@@ -42,6 +42,8 @@ class DeletedCaseNote(
   @Enumerated(EnumType.STRING)
   val cause: DeletionCause,
 
+  val reason: String?,
+
   @Id
   @Column(name = "id", updatable = false, nullable = false)
   private val id: UUID = newUuid(),

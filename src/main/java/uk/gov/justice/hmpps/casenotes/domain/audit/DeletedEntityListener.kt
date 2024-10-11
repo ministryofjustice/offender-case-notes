@@ -39,6 +39,7 @@ class DeletedEntityListener {
           Source.NOMIS -> System.NOMIS
         },
         causeOfDelete(),
+        null,
       ),
     )
   }
