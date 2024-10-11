@@ -27,12 +27,12 @@ import uk.gov.justice.hmpps.casenotes.config.SecurityUserContext
 import uk.gov.justice.hmpps.casenotes.config.SecurityUserContext.Companion.ROLE_CASE_NOTES_SYNC
 import uk.gov.justice.hmpps.casenotes.config.ServiceConfig
 import uk.gov.justice.hmpps.casenotes.integrations.PrisonerSearchService
-import uk.gov.justice.hmpps.casenotes.legacy.dto.CaseNoteFilter
 import uk.gov.justice.hmpps.casenotes.legacy.dto.ErrorResponse
 import uk.gov.justice.hmpps.casenotes.legacy.service.CaseNoteEventPusher
 import uk.gov.justice.hmpps.casenotes.legacy.service.CaseNoteService
 import uk.gov.justice.hmpps.casenotes.notes.AmendCaseNoteRequest
 import uk.gov.justice.hmpps.casenotes.notes.CaseNote
+import uk.gov.justice.hmpps.casenotes.notes.CaseNoteFilter
 import uk.gov.justice.hmpps.casenotes.notes.CreateCaseNoteRequest
 import uk.gov.justice.hmpps.casenotes.notes.ReadCaseNote
 import uk.gov.justice.hmpps.casenotes.notes.WriteCaseNote

@@ -31,8 +31,6 @@ import uk.gov.justice.hmpps.casenotes.config.CaseNoteRequestContext
 import uk.gov.justice.hmpps.casenotes.config.SecurityUserContext
 import uk.gov.justice.hmpps.casenotes.config.SecurityUserContext.UserIdUser
 import uk.gov.justice.hmpps.casenotes.config.Source
-import uk.gov.justice.hmpps.casenotes.domain.audit.DeletedCaseNoteRepository
-import uk.gov.justice.hmpps.casenotes.legacy.dto.CaseNoteFilter
 import uk.gov.justice.hmpps.casenotes.legacy.dto.NomisCaseNote
 import uk.gov.justice.hmpps.casenotes.legacy.dto.NomisCaseNoteAmendment
 import uk.gov.justice.hmpps.casenotes.legacy.filters.OffenderCaseNoteFilter
@@ -48,6 +46,7 @@ import uk.gov.justice.hmpps.casenotes.legacy.service.ExternalApiService
 import uk.gov.justice.hmpps.casenotes.notes.AmendCaseNoteRequest
 import uk.gov.justice.hmpps.casenotes.notes.CaseNote
 import uk.gov.justice.hmpps.casenotes.notes.CaseNoteAmendment
+import uk.gov.justice.hmpps.casenotes.notes.CaseNoteFilter
 import uk.gov.justice.hmpps.casenotes.notes.CreateCaseNoteRequest
 import uk.gov.justice.hmpps.casenotes.utils.NomisIdGenerator
 import java.time.LocalDateTime
@@ -61,7 +60,6 @@ class CaseNoteServiceTest {
   private val securityUserContext: SecurityUserContext = mock()
   private val externalApiService: ExternalApiService = mock()
   private var caseNoteService: CaseNoteService = mock()
-  private var deletedCaseNoteRepository: DeletedCaseNoteRepository = mock()
   private val requestAttributes: RequestAttributes = mock()
 
   @Captor
@@ -74,7 +72,6 @@ class CaseNoteServiceTest {
       caseNoteSubTypeRepository,
       securityUserContext,
       externalApiService,
-      deletedCaseNoteRepository,
     )
     RequestContextHolder.setRequestAttributes(requestAttributes)
     whenever(requestAttributes.getAttribute(CaseNoteRequestContext::class.simpleName!!, 0)).thenReturn(
