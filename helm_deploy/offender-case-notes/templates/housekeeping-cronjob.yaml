@@ -4,7 +4,7 @@ metadata:
   name: index-housekeeping-cronjob
 spec:
   schedule: {{ .Values.housekeeping.schedule }}
-  concurrencyPolicy: Forbid
+  concurrencyPolicy: Replace
   failedJobsHistoryLimit: 1
   startingDeadlineSeconds: 600
   successfulJobsHistoryLimit: 1
