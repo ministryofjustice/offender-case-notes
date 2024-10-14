@@ -1,7 +1,7 @@
 plugins {
   id("uk.gov.justice.hmpps.gradle-spring-boot") version "6.0.6"
-  kotlin("plugin.spring") version "2.0.20"
-  kotlin("plugin.jpa") version "2.0.20"
+  kotlin("plugin.spring") version "2.0.21"
+  kotlin("plugin.jpa") version "2.0.21"
 }
 
 configurations {
@@ -24,7 +24,7 @@ dependencies {
   implementation("org.springframework.boot:spring-boot-starter-oauth2-client")
   implementation("org.springframework.boot:spring-boot-starter-webflux")
   implementation("uk.gov.justice.service.hmpps:hmpps-sqs-spring-boot-starter:5.0.1")
-  implementation("io.sentry:sentry-spring-boot-starter-jakarta:7.14.0")
+  implementation("io.sentry:sentry-spring-boot-starter-jakarta:7.15.0")
 
   implementation("javax.activation:activation:1.1.1")
   implementation("javax.transaction:javax.transaction-api:1.3")
@@ -38,7 +38,7 @@ dependencies {
   implementation("com.google.guava:guava:33.3.1-jre")
 
   implementation(platform("com.amazonaws:aws-java-sdk-bom:1.12.773"))
-  implementation("software.amazon.awssdk:sns:2.28.17")
+  implementation("software.amazon.awssdk:sns:2.28.21")
 
   testAnnotationProcessor("org.projectlombok:lombok:1.18.34")
   testCompileOnly("org.projectlombok:lombok:1.18.34")
