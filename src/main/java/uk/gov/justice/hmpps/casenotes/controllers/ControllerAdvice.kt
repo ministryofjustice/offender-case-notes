@@ -17,6 +17,7 @@ import org.springframework.web.reactive.function.client.WebClientException
 import org.springframework.web.reactive.function.client.WebClientResponseException
 import uk.gov.justice.hmpps.casenotes.legacy.dto.ErrorResponse
 import uk.gov.justice.hmpps.casenotes.legacy.service.EntityNotFoundException
+import java.sql.BatchUpdateException
 
 @RestControllerAdvice
 @Slf4j
@@ -64,9 +65,15 @@ class ControllerAdvice {
 
   @ExceptionHandler(WebClientException::class, Exception::class)
   fun handleException(e: Exception): ResponseEntity<ErrorResponse> {
+    val exceptionToReport = e.getNestedBatchException() ?: e
     return ResponseEntity
       .status(HttpStatus.INTERNAL_SERVER_ERROR)
-      .body(ErrorResponse(status = (HttpStatus.INTERNAL_SERVER_ERROR.value()), developerMessage = e.message))
+      .body(
+        ErrorResponse(
+          status = (HttpStatus.INTERNAL_SERVER_ERROR.value()),
+          developerMessage = exceptionToReport.message,
+        ),
+      )
   }
 
   @ExceptionHandler(MethodArgumentNotValidException::class)
@@ -99,4 +106,7 @@ class ControllerAdvice {
           ),
         )
     }
+
+  fun Throwable.getNestedBatchException(): Throwable? =
+    if (this is BatchUpdateException) cause else cause?.getNestedBatchException()
 }
