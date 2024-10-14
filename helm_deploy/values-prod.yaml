@@ -41,7 +41,7 @@ generic-prometheus-alerts:
   sqsOldestAlertQueueNames:
     - "hmpps-move-and-improve-prod-case_notes_domain_events_queue"
   sqsNumberAlertQueueNames:
-    - "hmpps-move-and-improve-production-hmpps_csip_domain_events_dlq"
+    - "hmpps-move-and-improve-prod-case_notes_domain_events_dlq"
   sqsAlertsOldestThreshold: 10
   sqsAlertsTotalMessagesThreshold: 1
   rdsAlertsDatabases:
