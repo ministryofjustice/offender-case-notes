@@ -5,7 +5,6 @@ import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.http.HttpStatus
-import org.testcontainers.shaded.org.bouncycastle.oer.its.etsi102941.CtlCommand.delete
 import uk.gov.justice.hmpps.casenotes.config.SecurityUserContext.Companion.ROLE_CASE_NOTES_SYNC
 import uk.gov.justice.hmpps.casenotes.config.SecurityUserContext.Companion.ROLE_CASE_NOTES_WRITE
 import uk.gov.justice.hmpps.casenotes.config.Source
@@ -271,7 +270,7 @@ class SyncCaseNoteIntTest : IntegrationTest() {
   @Test
   fun `200 ok - can retrieve all case notes`() {
     val personIdentifier = personIdentifier()
-    (1..100).mapIndexed { _, i ->
+    (1..100).map { i ->
       val cn = generateCaseNote(personIdentifier)
       if (i % 2 == 0) cn.withAmendment()
       givenCaseNote(cn)

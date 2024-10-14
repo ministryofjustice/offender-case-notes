@@ -3,11 +3,11 @@ kind: CronJob
 metadata:
   name: index-housekeeping-cronjob
 spec:
-  schedule: "*/10 * * * *"
-  concurrencyPolicy: Forbid
-  failedJobsHistoryLimit: 5
+  schedule: {{ .Values.housekeeping.schedule }}
+  concurrencyPolicy: Replace
+  failedJobsHistoryLimit: 1
   startingDeadlineSeconds: 600
-  successfulJobsHistoryLimit: 5
+  successfulJobsHistoryLimit: 1
   jobTemplate:
     spec:
       # Tidy up all jobs after 4 days
