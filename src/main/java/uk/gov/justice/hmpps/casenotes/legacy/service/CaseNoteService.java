@@ -18,7 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 import uk.gov.justice.hmpps.casenotes.config.CaseNoteRequestContext;
 import uk.gov.justice.hmpps.casenotes.config.SecurityUserContext;
-import uk.gov.justice.hmpps.casenotes.legacy.dto.CaseNoteFilter;
+import uk.gov.justice.hmpps.casenotes.notes.CaseNoteFilter;
 import uk.gov.justice.hmpps.casenotes.legacy.dto.NomisCaseNote;
 import uk.gov.justice.hmpps.casenotes.legacy.filters.OffenderCaseNoteFilter;
 import uk.gov.justice.hmpps.casenotes.legacy.model.OffenderCaseNote;
@@ -26,7 +26,6 @@ import uk.gov.justice.hmpps.casenotes.notes.AmendCaseNoteRequest;
 import uk.gov.justice.hmpps.casenotes.notes.CaseNote;
 import uk.gov.justice.hmpps.casenotes.notes.CaseNoteAmendment;
 import uk.gov.justice.hmpps.casenotes.notes.CreateCaseNoteRequest;
-import uk.gov.justice.hmpps.casenotes.domain.audit.DeletedCaseNoteRepository;
 import uk.gov.justice.hmpps.casenotes.legacy.repository.CaseNoteSubTypeRepository;
 import uk.gov.justice.hmpps.casenotes.legacy.repository.OffenderCaseNoteRepository;
 
@@ -53,7 +52,6 @@ public class CaseNoteService {
     private final CaseNoteSubTypeRepository caseNoteSubTypeRepository;
     private final SecurityUserContext securityUserContext;
     private final ExternalApiService externalApiService;
-    private final DeletedCaseNoteRepository deletedCaseNoteRepository;
 
     public Page<CaseNote> getCaseNotes(
         final String offenderIdentifier,

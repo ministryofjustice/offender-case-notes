@@ -19,7 +19,6 @@ import uk.gov.justice.hmpps.casenotes.domain.matchesOnType
 import uk.gov.justice.hmpps.casenotes.domain.matchesPersonIdentifier
 import uk.gov.justice.hmpps.casenotes.domain.occurredAfter
 import uk.gov.justice.hmpps.casenotes.domain.occurredBefore
-import uk.gov.justice.hmpps.casenotes.legacy.dto.CaseNoteFilter
 import uk.gov.justice.hmpps.casenotes.legacy.service.EntityNotFoundException
 import java.util.UUID.fromString
 

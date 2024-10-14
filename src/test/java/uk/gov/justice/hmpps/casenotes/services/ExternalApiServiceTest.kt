@@ -28,11 +28,11 @@ import org.springframework.web.reactive.function.client.WebClient.RequestHeaders
 import org.springframework.web.reactive.function.client.WebClient.ResponseSpec
 import org.springframework.web.util.UriComponentsBuilder
 import reactor.core.publisher.Mono
-import uk.gov.justice.hmpps.casenotes.legacy.dto.CaseNoteFilter
 import uk.gov.justice.hmpps.casenotes.legacy.dto.NomisCaseNote
 import uk.gov.justice.hmpps.casenotes.legacy.service.ExternalApiService
 import uk.gov.justice.hmpps.casenotes.legacy.service.RestResponsePage
 import uk.gov.justice.hmpps.casenotes.notes.AmendCaseNoteRequest
+import uk.gov.justice.hmpps.casenotes.notes.CaseNoteFilter
 import uk.gov.justice.hmpps.casenotes.notes.CreateCaseNoteRequest
 import java.time.LocalDateTime
 

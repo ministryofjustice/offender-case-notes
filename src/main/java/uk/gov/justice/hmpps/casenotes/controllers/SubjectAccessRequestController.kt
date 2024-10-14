@@ -16,15 +16,15 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
 import uk.gov.justice.hmpps.casenotes.legacy.dto.ErrorResponse
-import uk.gov.justice.hmpps.casenotes.legacy.dto.SubjectAccessRequestData
-import uk.gov.justice.hmpps.casenotes.legacy.service.SubjectAccessRequestService
+import uk.gov.justice.hmpps.casenotes.sar.SubjectAccessRequest
+import uk.gov.justice.hmpps.casenotes.sar.SubjectAccessResponse
 import java.time.LocalDate
 
 @RestController
 @Tag(name = "Subject Access Request")
 @PreAuthorize("hasRole('SAR_DATA_ACCESS')")
 @RequestMapping("/subject-access-request", produces = [MediaType.APPLICATION_JSON_VALUE])
-class SubjectAccessRequestController(private val service: SubjectAccessRequestService) {
+class SubjectAccessRequestController(private val sar: SubjectAccessRequest) {
 
   @GetMapping
   @Operation(
@@ -39,7 +39,7 @@ class SubjectAccessRequestController(private val service: SubjectAccessRequestSe
         content = [
           Content(
             mediaType = "application/json",
-            schema = Schema(implementation = SubjectAccessRequestContent::class),
+            schema = Schema(implementation = SubjectAccessResponse::class),
           ),
         ],
       ),
@@ -72,48 +72,16 @@ class SubjectAccessRequestController(private val service: SubjectAccessRequestSe
     @RequestParam(name = "prn")
     @Parameter(description = "NOMIS Prison Reference Number")
     prn: String?,
-    @RequestParam(name = "crn")
-    @Parameter(description = "nDelius Case Reference Number")
-    crn: String?,
     @Parameter(description = "Optional parameter denoting minimum date of event occurrence which should be returned in the response")
     @RequestParam(value = "fromDate")
     fromDate: LocalDate?,
     @Parameter(description = "Optional parameter denoting maximum date of event occurrence which should be returned in the response")
     @RequestParam(value = "toDate")
     toDate: LocalDate?,
-  ): ResponseEntity<Any> {
-    if (prn.isNullOrBlank() && crn.isNullOrBlank()) {
-      return ResponseEntity.badRequest().body(
-        ErrorResponse(
-          status = 400,
-          userMessage = "One of prn or crn must be supplied.",
-          developerMessage = "One of prn or crn must be supplied.",
-        ),
-      )
-    }
-
-    if (crn != null) {
-      return ResponseEntity.status(209).body(
-        ErrorResponse(
-          status = 209,
-          userMessage = "Search by case reference number is not supported.",
-          developerMessage = "Search by case reference number is not supported.",
-        ),
-      )
-    }
-
-    val result = service.getCaseNotes(prn, fromDate, toDate)
-    if (result.isEmpty()) {
-      return ResponseEntity.status(HttpStatus.NO_CONTENT).body(
-        ErrorResponse(
-          status = 204,
-          userMessage = "Request successfully processed - no content found",
-          developerMessage = "Request successfully processed - no content found",
-        ),
-      )
-    }
-    return ResponseEntity.ok(SubjectAccessRequestContent(result))
+  ): ResponseEntity<SubjectAccessResponse> {
+    return prn?.let {
+      sar.getSarContent(prn, fromDate, toDate)?.let { ResponseEntity.ok(it) }
+        ?: ResponseEntity.status(HttpStatus.NO_CONTENT).build()
+    } ?: ResponseEntity.status(209).build()
   }
 }
-
-data class SubjectAccessRequestContent(val content: List<SubjectAccessRequestData>)

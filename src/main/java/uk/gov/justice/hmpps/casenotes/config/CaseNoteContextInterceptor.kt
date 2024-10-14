@@ -58,7 +58,7 @@ class CaseNoteContextInterceptor(
   }
 
   private fun HttpServletResponse.handleNoUserDetails(objectMapper: ObjectMapper): Boolean {
-    status = org.springframework.http.HttpStatus.BAD_REQUEST.value()
+    status = HttpStatus.BAD_REQUEST.value()
     contentType = org.springframework.http.MediaType.APPLICATION_JSON_VALUE
     writer.write(
       objectMapper.writeValueAsString(
