@@ -54,10 +54,7 @@ class WebClientConfiguration(
 
   @Bean
   fun tokenVerificationApiWebClient(builder: Builder): WebClient = builder.baseUrl(tokenVerificationApiBaseUrl)
-    .clientConnector(
-      ReactorClientHttpConnector(create().warmupWithHealthPing(tokenVerificationApiBaseUrl)),
-    )
-    .build()
+    .clientConnector(ReactorClientHttpConnector(create().warmupWithHealthPing(tokenVerificationApiBaseUrl))).build()
 
   @Bean
   fun tokenVerificationApiHealthWebClient(builder: Builder): WebClient =
@@ -65,16 +62,7 @@ class WebClientConfiguration(
 
   private fun createForwardAuthWebClient(builder: Builder, url: @URL String): WebClient = builder.baseUrl(url)
     .filter(addAuthHeaderFilterFunction())
-    .clientConnector(
-      ReactorClientHttpConnector(
-        create().responseTimeout(ofSeconds(responseTimeout.toSeconds()))
-          .option(CONNECT_TIMEOUT_MILLIS, 1000)
-          .option(SO_KEEPALIVE, true)
-          // this will show a warning on apple (arm) architecture but will work on linux x86 container
-          .option(EpollChannelOption.TCP_KEEPINTVL, 60)
-          .warmupWithHealthPing(tokenVerificationApiBaseUrl),
-      ),
-    ).build()
+    .clientConnector(clientConnector { it.warmupWithHealthPing(tokenVerificationApiBaseUrl) }).build()
 
   private fun createHealthClient(builder: Builder, url: @URL String): WebClient {
     val httpClient = create()
@@ -129,8 +117,19 @@ class WebClientConfiguration(
     val oauth2Client = ServletOAuth2AuthorizedClientExchangeFilterFunction(authorizedClientManager)
     oauth2Client.setDefaultClientRegistrationId("default")
     return builder.baseUrl(rootUri)
+      .clientConnector(clientConnector())
       .apply(oauth2Client.oauth2Configuration())
       .build()
+  }
+
+  private fun clientConnector(consumer: ((HttpClient) -> Unit)? = null): ReactorClientHttpConnector {
+    val client = create().responseTimeout(ofSeconds(responseTimeout.toSeconds()))
+      .option(CONNECT_TIMEOUT_MILLIS, 1000)
+      .option(SO_KEEPALIVE, true)
+      // this will show a warning on apple (arm) architecture but will work on linux x86 container
+      .option(EpollChannelOption.TCP_KEEPINTVL, 60)
+    consumer?.also { it.invoke(client) }
+    return ReactorClientHttpConnector(client)
   }
 
   companion object {
