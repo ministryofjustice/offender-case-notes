@@ -24,6 +24,10 @@
         <appender-ref ref="consoleAppender"/>
     </logger>
 
+    <logger name="org.hibernate" additivity="false" level="OFF">
+        <appender-ref ref="consoleAppender"/>
+    </logger>
+
     <logger name="com.microsoft.applicationinsights" additivity="false" level="INFO">
         <appender-ref ref="consoleAppender"/>
     </logger>
