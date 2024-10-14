@@ -62,3 +62,6 @@ generic-service:
 
 generic-prometheus-alerts:
   targetApplication: offender-case-notes
+
+housekeeping:
+  schedule: "30 7-21 * * 1-5"
