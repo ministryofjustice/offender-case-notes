@@ -191,7 +191,7 @@ interface NoteRepository : JpaSpecificationExecutor<Note>, JpaRepository<Note, U
   fun deleteLegacyCaseNotes(personIdentifier: String)
 
   @EntityGraph(attributePaths = ["subType.type", "amendments"])
-  fun findAllByPersonIdentifier(personIdentifier: String): List<Note>
+  fun findAllByPersonIdentifierAndSubTypeSyncToNomis(personIdentifier: String, syncToNomis: Boolean): List<Note>
 
   @Query(
     """

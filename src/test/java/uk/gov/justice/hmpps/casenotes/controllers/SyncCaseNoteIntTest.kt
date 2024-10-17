@@ -268,17 +268,18 @@ class SyncCaseNoteIntTest : IntegrationTest() {
   }
 
   @Test
-  fun `200 ok - can retrieve all case notes`() {
+  fun `200 ok - can retrieve all sync to nomis case notes`() {
     val personIdentifier = personIdentifier()
-    (1..100).map { i ->
+    val cns = (1..100).map { i ->
       val cn = generateCaseNote(personIdentifier)
       if (i % 2 == 0) cn.withAmendment()
       givenCaseNote(cn)
     }
 
+    val expected = cns.filter { it.subType.syncToNomis }
     val caseNotes = getCaseNotes(personIdentifier)
-    assertThat(caseNotes).hasSize(100)
-    assertThat(caseNotes.flatMap(CaseNote::amendments)).hasSize(50)
+    assertThat(caseNotes).hasSize(expected.size)
+    assertThat(caseNotes.flatMap(CaseNote::amendments)).hasSize(expected.flatMap { it.amendments() }.size)
   }
 
   private fun syncCaseNote(

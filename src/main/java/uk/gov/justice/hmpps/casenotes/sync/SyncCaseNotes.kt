@@ -98,7 +98,7 @@ class SyncCaseNotes(
   }
 
   fun getCaseNotes(personIdentifier: String): List<CaseNote> =
-    noteRepository.findAllByPersonIdentifier(personIdentifier).map(Note::toModel)
+    noteRepository.findAllByPersonIdentifierAndSubTypeSyncToNomis(personIdentifier, true).map(Note::toModel)
 
   private fun getTypesForSync(keys: Set<TypeKey>): Map<TypeKey, SubType> {
     val types = typeRepository.findByKeyIn(keys).associateBy { it.key }
