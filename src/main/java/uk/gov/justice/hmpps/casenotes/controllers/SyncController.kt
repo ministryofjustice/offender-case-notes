@@ -24,6 +24,7 @@ import uk.gov.justice.hmpps.casenotes.config.SecurityUserContext.Companion.ROLE_
 import uk.gov.justice.hmpps.casenotes.legacy.dto.ErrorResponse
 import uk.gov.justice.hmpps.casenotes.sync.MigrateCaseNoteRequest
 import uk.gov.justice.hmpps.casenotes.sync.MigrationResult
+import uk.gov.justice.hmpps.casenotes.sync.MoveCaseNotesRequest
 import uk.gov.justice.hmpps.casenotes.sync.SyncCaseNoteRequest
 import uk.gov.justice.hmpps.casenotes.sync.SyncCaseNotes
 import uk.gov.justice.hmpps.casenotes.sync.SyncResult
@@ -141,5 +142,38 @@ class SyncController(private val sync: SyncCaseNotes) {
 
   @GetMapping("sync/case-notes/{personIdentifier}")
   @PreAuthorize("hasRole('$ROLE_CASE_NOTES_SYNC')")
-  fun getCaseNotes(@PathVariable personIdentifier: String) = sync.getCaseNotes(personIdentifier)
+  fun getNomisCaseNotes(@PathVariable personIdentifier: String) = sync.getCaseNotes(personIdentifier)
+
+  @Operation(
+    summary = "Endpoint to move case notes - only for sync operations",
+    description = "Case notes that are moved across bookings in nomis can be moved using this endpoint",
+  )
+  @ApiResponses(
+    value = [
+      ApiResponse(
+        responseCode = "200",
+        description = "Case notes successfully moved",
+      ),
+      ApiResponse(
+        responseCode = "400",
+        description = "Bad request",
+        content = [Content(schema = Schema(implementation = ErrorResponse::class))],
+      ),
+      ApiResponse(
+        responseCode = "401",
+        description = "Unauthorised, requires a valid Oauth2 token",
+        content = [Content(schema = Schema(implementation = ErrorResponse::class))],
+      ),
+      ApiResponse(
+        responseCode = "403",
+        description = "Forbidden, requires an appropriate role",
+        content = [Content(schema = Schema(implementation = ErrorResponse::class))],
+      ),
+    ],
+  )
+  @PutMapping("/move/case-notes")
+  @PreAuthorize("hasRole('$ROLE_CASE_NOTES_SYNC')")
+  fun moveCaseNotes(@RequestBody request: MoveCaseNotesRequest) {
+    sync.moveCaseNotes(request)
+  }
 }
