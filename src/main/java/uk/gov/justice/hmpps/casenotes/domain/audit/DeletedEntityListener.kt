@@ -47,9 +47,19 @@ class DeletedEntityListener {
   private fun causeOfDelete() = when (getRequestMethod()) {
     null -> DeletionCause.MERGE
     HttpMethod.DELETE -> DeletionCause.DELETE
-    else -> DeletionCause.UPDATE
+    else -> {
+      if (isMoveRequest()) {
+        DeletionCause.MOVE
+      } else {
+        DeletionCause.UPDATE
+      }
+    }
   }
 
   private fun getRequestMethod(): HttpMethod? =
     (RequestContextHolder.getRequestAttributes() as ServletRequestAttributes?)?.request?.let { HttpMethod.valueOf(it.method) }
+
+  private fun isMoveRequest(): Boolean =
+    (RequestContextHolder.getRequestAttributes() as ServletRequestAttributes?)?.request?.requestURL
+      ?.contains("/move/case-notes") ?: false
 }

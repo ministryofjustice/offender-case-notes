@@ -97,6 +97,16 @@ class SyncCaseNotes(
     }
   }
 
+  fun moveCaseNotes(request: MoveCaseNotesRequest) {
+    val from = noteRepository.findAllByIdIn(request.caseNoteIds)
+      .filter { it.personIdentifier == request.fromPersonIdentifier }
+    noteRepository.deleteAll(from)
+    val to = from.map { it.merge(request.toPersonIdentifier) }
+    noteRepository.saveAll(to)
+    amendmentRepository.saveAll(to.flatMap(Note::mergedAmendments))
+  }
+
+  @Transactional(readOnly = true)
   fun getCaseNotes(personIdentifier: String): List<CaseNote> =
     noteRepository.findAllByPersonIdentifierAndSubTypeSyncToNomis(personIdentifier, true).map(Note::toModel)
 
