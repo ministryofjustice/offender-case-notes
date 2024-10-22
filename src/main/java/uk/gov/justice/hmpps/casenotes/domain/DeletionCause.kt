@@ -4,4 +4,5 @@ enum class DeletionCause {
   DELETE,
   UPDATE,
   MERGE,
+  MOVE,
 }

@@ -50,9 +50,9 @@ class WriteCaseNote(
       it.subType.validateTypeUsage()
     }
 
-    val saved = noteRepository.saveAndFlush(caseNote.addAmendment(request))
-    eventPublisher.publishEvent(saved.createEvent(UPDATED))
-    return saved.toModel()
+    caseNote.addAmendment(request)
+    eventPublisher.publishEvent(caseNote.createEvent(UPDATED))
+    return caseNote.toModel()
   }
 
   fun deleteNote(personIdentifier: String, caseNoteId: String) {

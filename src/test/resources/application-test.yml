@@ -53,7 +53,7 @@ hmpps.sqs:
       queueName: ${random.uuid}
       dlqName: ${random.uuid}
       subscribeTopicId: domainevents
-      subscribeFilter: '{"eventType":["person.case-note.created","person.case-note.updated","person.case-note.deleted"]}'
+      subscribeFilter: '{"eventType":["person.case-note.created","person.case-note.updated","person.case-note.deleted", "person.case-note.moved"]}'
     domaineventsqueue:
       queueName: ${random.uuid}
       dlqName: ${random.uuid}

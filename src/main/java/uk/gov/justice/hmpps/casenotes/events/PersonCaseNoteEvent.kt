@@ -16,11 +16,13 @@ data class PersonCaseNoteEvent(
   val source: Source,
   val syncToNomis: Boolean,
   val systemGenerated: Boolean,
+  val previousPersonIdentifier: String?,
 ) {
   enum class Type {
     CREATED,
     UPDATED,
     DELETED,
+    MOVED,
   }
 
   val eventName = EVENT_PREFIX + eventType.name.lowercase()
@@ -29,17 +31,19 @@ data class PersonCaseNoteEvent(
   companion object {
     private const val EVENT_PREFIX = "person.case-note."
 
-    fun Note.createEvent(eventType: Type): PersonCaseNoteEvent = PersonCaseNoteEvent(
-      eventType,
-      personIdentifier,
-      id,
-      legacyId,
-      subType.type.code,
-      subType.code,
-      CaseNoteRequestContext.get().source,
-      subType.syncToNomis,
-      systemGenerated,
-    )
+    fun Note.createEvent(eventType: Type, previousPersonIdentifier: String? = null): PersonCaseNoteEvent =
+      PersonCaseNoteEvent(
+        eventType,
+        personIdentifier,
+        id,
+        legacyId,
+        subType.type.code,
+        subType.code,
+        CaseNoteRequestContext.get().source,
+        subType.syncToNomis,
+        systemGenerated,
+        previousPersonIdentifier,
+      )
   }
 }
 
@@ -48,6 +52,6 @@ fun PersonCaseNoteEvent.asDomainEvent(baseUrl: String): DomainEvent<CaseNoteInfo
   eventName,
   baseUrl + detailUrl,
   description = "A case note has been ${eventType.name.lowercase()}",
-  CaseNoteInformation(id, legacyId, type, subType, source, syncToNomis, systemGenerated),
+  CaseNoteInformation(id, legacyId, type, subType, source, syncToNomis, systemGenerated, previousPersonIdentifier),
   PersonReference.withIdentifier(personIdentifier),
 )

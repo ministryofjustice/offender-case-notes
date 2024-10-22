@@ -24,6 +24,8 @@ components:
       $ref: https://raw.githubusercontent.com/ministryofjustice/hmpps-domain-events/main/spec/schemas/case-notes/person-case-note-created.yaml
     person.case-note.updated:
       $ref: https://raw.githubusercontent.com/ministryofjustice/hmpps-domain-events/main/spec/schemas/case-notes/person-case-note-updated.yaml
+    person.case-note.moved:
+      $ref: https://raw.githubusercontent.com/ministryofjustice/hmpps-domain-events/main/spec/schemas/case-notes/person-case-note-moved.yaml
     person.case-note.deleted:
       $ref: https://raw.githubusercontent.com/ministryofjustice/hmpps-domain-events/main/spec/schemas/case-notes/person-case-note-deleted.yaml
 
@@ -39,6 +41,8 @@ channels:
         $ref: '#/components/messages/person.case-note.created'
       person.case-note.updated:
         $ref: '#/components/messages/person.case-note.updated'
+      person.case-note.moved:
+        $ref: '#/components/messages/person.case-note.moved'
       person.case-note.deleted:
         $ref: '#/components/messages/person.case-note.deleted'
 
@@ -49,5 +53,6 @@ operations:
       $ref: '#/channels/hmpps-domain-events'
     messages:
       - $ref: '#/channels/hmpps-domain-events/messages/person.case-note.created'
-      - $ref: '#/channels/hmpps-domain-events/messages/person.case-note.deleted'
       - $ref: '#/channels/hmpps-domain-events/messages/person.case-note.updated'
+      - $ref: '#/channels/hmpps-domain-events/messages/person.case-note.moved'
+      - $ref: '#/channels/hmpps-domain-events/messages/person.case-note.deleted'

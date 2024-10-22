@@ -186,6 +186,9 @@ interface NoteRepository : JpaSpecificationExecutor<Note>, JpaRepository<Note, U
   @EntityGraph(attributePaths = ["subType.type", "amendments"])
   fun findAllByIdIn(ids: Collection<UUID>): List<Note>
 
+  @EntityGraph(attributePaths = ["subType.type", "amendments"])
+  fun findAllByPersonIdentifierAndIdIn(personIdentifier: String, ids: Collection<UUID>): List<Note>
+
   @Modifying
   @Query("delete from Note n where n.personIdentifier = :personIdentifier and n.legacyId > 0 ")
   fun deleteLegacyCaseNotes(personIdentifier: String)
