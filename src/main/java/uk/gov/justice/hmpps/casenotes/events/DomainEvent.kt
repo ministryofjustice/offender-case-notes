@@ -36,6 +36,7 @@ data class CaseNoteInformation(
   val source: Source,
   val syncToNomis: Boolean,
   val systemGenerated: Boolean,
+  val previousNomsNumber: String?,
 ) : AdditionalInformation
 
 data class MergeInformation(

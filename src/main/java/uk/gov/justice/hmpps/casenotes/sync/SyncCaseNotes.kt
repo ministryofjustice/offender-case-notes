@@ -20,6 +20,7 @@ import uk.gov.justice.hmpps.casenotes.domain.saveAndRefresh
 import uk.gov.justice.hmpps.casenotes.events.PersonCaseNoteEvent.Companion.createEvent
 import uk.gov.justice.hmpps.casenotes.events.PersonCaseNoteEvent.Type.CREATED
 import uk.gov.justice.hmpps.casenotes.events.PersonCaseNoteEvent.Type.DELETED
+import uk.gov.justice.hmpps.casenotes.events.PersonCaseNoteEvent.Type.MOVED
 import uk.gov.justice.hmpps.casenotes.events.PersonCaseNoteEvent.Type.UPDATED
 import uk.gov.justice.hmpps.casenotes.notes.CaseNote
 import uk.gov.justice.hmpps.casenotes.notes.toModel
@@ -98,12 +99,16 @@ class SyncCaseNotes(
   }
 
   fun moveCaseNotes(request: MoveCaseNotesRequest) {
-    val from = noteRepository.findAllByIdIn(request.caseNoteIds)
-      .filter { it.personIdentifier == request.fromPersonIdentifier }
+    val from = noteRepository.findAllByPersonIdentifierAndIdIn(request.fromPersonIdentifier, request.caseNoteIds)
     noteRepository.deleteAll(from)
-    val to = from.map { it.merge(request.toPersonIdentifier) }
+    val (to, events) = from.map {
+      val new = it.merge(request.toPersonIdentifier)
+      val event = new.createEvent(MOVED, it.personIdentifier)
+      new to event
+    }.unzip()
     noteRepository.saveAll(to)
     amendmentRepository.saveAll(to.flatMap(Note::mergedAmendments))
+    events.forEach(eventPublisher::publishEvent)
   }
 
   @Transactional(readOnly = true)
@@ -131,7 +136,6 @@ class SyncCaseNotes(
   private fun create(new: List<NoteAndAmendments>): List<Note> {
     val notes = noteRepository.saveAll(new.map { it.note })
     amendmentRepository.saveAll(new.flatMap { it.amendments })
-    noteRepository.flush()
     return notes
   }
 }

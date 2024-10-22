@@ -43,6 +43,8 @@ class MoveCaseNotesIntTest : IntegrationTest() {
 
     verifyMoveAudit(cn1)
     verifyMoveAudit(cn2)
+
+    verifyEvents(oldNoms, newNoms, cn1.id, cn2.id)
   }
 
   @Test
@@ -63,6 +65,8 @@ class MoveCaseNotesIntTest : IntegrationTest() {
 
     verifyMoveAudit(cn1)
     verifyMoveAudit(cn2)
+
+    verifyEvents(oldNoms, newNoms, cn1.id, cn2.id)
   }
 
   @Test
@@ -89,6 +93,16 @@ class MoveCaseNotesIntTest : IntegrationTest() {
     assertThat(deleted.cause).isEqualTo(DeletionCause.MOVE)
     assertThat(deleted.deletedBy).isEqualTo("SYS")
     deleted.caseNote.verifyAgainst(note)
+  }
+
+  private fun verifyEvents(oldNoms: String, newNoms: String, vararg ids: UUID) {
+    val events = hmppsEventsQueue.receivePersonCaseNoteEventsOnQueue()
+    assertThat(events).hasSize(ids.size)
+    val personIdentifiers = events.map { it.personReference.findNomsNumber() }.toSet()
+    assertThat(personIdentifiers).hasSize(1)
+    assertThat(personIdentifiers.first()).isEqualTo(newNoms)
+    assertThat(events.map { it.additionalInformation.previousNomsNumber to it.additionalInformation.id })
+      .containsExactlyInAnyOrderElementsOf(ids.map { oldNoms to it })
   }
 
   companion object {
