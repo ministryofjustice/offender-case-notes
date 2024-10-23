@@ -54,12 +54,9 @@ class CaseNotesSimulation : Simulation() {
       ),
   )
 
-  val users = scenario("users").exec(getToken).repeat(100).on(feed(personIdentifiers), listCaseNotes)
+  val users = scenario("users").exec(getToken).repeat(1000).on(feed(personIdentifiers), listCaseNotes)
 
   init {
-    setUp(
-      // users.injectOpen(constantUsersPerSec(1.0).during(Duration.ofMinutes(10))),
-      users.injectOpen(rampUsers(100).during(Duration.ofSeconds(10))),
-    ).protocols(httpProtocol)
+    setUp(users.injectOpen(rampUsers(200).during(Duration.ofSeconds(10)))).protocols(httpProtocol)
   }
 }
