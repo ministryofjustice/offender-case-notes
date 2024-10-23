@@ -3,6 +3,7 @@ version: 2.1
 orbs:
   hmpps: ministryofjustice/hmpps@8
 
+
 jobs:
   validate:
     executor:
@@ -34,6 +35,22 @@ jobs:
           paths:
             - build/libs
             - build.gradle.kts
+  performance-tests:
+    circleci_ip_ranges: true
+    environment:
+      JAVA_TOOL_OPTIONS: '-Xmx4g'
+    docker:
+      - image: cimg/openjdk:21.0
+    resource_class: medium+
+    steps:
+      - checkout
+      - restore_cache:
+          keys:
+            - gradle-{{ checksum "build.gradle.kts" }}
+            - gradle-
+      - run: ./gradlew gatlingRun
+      - store_artifacts:
+          path: build/reports/gatling
 
 workflows:
   version: 2
@@ -70,6 +87,14 @@ workflows:
           type: approval
           requires:
             - deploy_dev
+      - request-dev-performance-test-approval:
+          type: approval
+      #          requires:
+      #            - deploy_dev
+      - performance-tests:
+          name: performance_tests_dev
+          requires:
+            - request-dev-performance-test-approval
       - hmpps/deploy_env:
           name: deploy_preprod
           env: "preprod"
