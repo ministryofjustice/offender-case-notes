@@ -89,8 +89,8 @@ workflows:
             - deploy_dev
       - request-dev-performance-test-approval:
           type: approval
-      #          requires:
-      #            - deploy_dev
+          requires:
+            - deploy_dev
       - performance-tests:
           name: performance_tests_dev
           requires:
@@ -111,6 +111,16 @@ workflows:
           type: approval
           requires:
             - deploy_preprod
+      - request-preprod-performance-test-approval:
+          type: approval
+          requires:
+            - deploy_preprod
+      - performance-tests:
+          name: performance_tests_preprod
+          context:
+            - offender-case-notes-preprod
+          requires:
+            - request-preprod-performance-test-approval
       - hmpps/deploy_env:
           name: deploy_prod
           env: "prod"
