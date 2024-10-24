@@ -1,5 +1,5 @@
 plugins {
-  id("uk.gov.justice.hmpps.gradle-spring-boot") version "6.0.6"
+  id("uk.gov.justice.hmpps.gradle-spring-boot") version "6.0.8"
   kotlin("plugin.spring") version "2.0.21"
   kotlin("plugin.jpa") version "2.0.21"
 }
@@ -23,8 +23,8 @@ dependencies {
   implementation("org.springframework.boot:spring-boot-starter-oauth2-resource-server")
   implementation("org.springframework.boot:spring-boot-starter-oauth2-client")
   implementation("org.springframework.boot:spring-boot-starter-webflux")
-  implementation("uk.gov.justice.service.hmpps:hmpps-sqs-spring-boot-starter:5.0.1")
-  implementation("io.sentry:sentry-spring-boot-starter-jakarta:7.15.0")
+  implementation("uk.gov.justice.service.hmpps:hmpps-sqs-spring-boot-starter:5.0.2")
+  implementation("io.sentry:sentry-spring-boot-starter-jakarta:7.16.0")
 
   implementation("javax.activation:activation:1.1.1")
   implementation("javax.transaction:javax.transaction-api:1.3")
@@ -38,7 +38,7 @@ dependencies {
   implementation("com.google.guava:guava:33.3.1-jre")
 
   implementation(platform("com.amazonaws:aws-java-sdk-bom:1.12.777"))
-  implementation("software.amazon.awssdk:sns:2.28.27")
+  implementation("software.amazon.awssdk:sns:2.29.0")
 
   testAnnotationProcessor("org.projectlombok:lombok:1.18.34")
   testCompileOnly("org.projectlombok:lombok:1.18.34")
@@ -46,9 +46,9 @@ dependencies {
   testImplementation("com.tngtech.java:junit-dataprovider:1.13.1")
   testImplementation("net.javacrumbs.json-unit:json-unit-assertj:3.4.1")
   testImplementation("io.github.http-builder-ng:http-builder-ng-apache:1.0.4")
-  testImplementation("org.wiremock:wiremock-standalone:3.9.1")
-  testImplementation("org.testcontainers:postgresql:1.20.2")
-  testImplementation("org.testcontainers:localstack:1.20.2")
+  testImplementation("org.wiremock:wiremock-standalone:3.9.2")
+  testImplementation("org.testcontainers:postgresql:1.20.3")
+  testImplementation("org.testcontainers:localstack:1.20.3")
   testImplementation("io.jsonwebtoken:jjwt-impl:0.12.6")
   testImplementation("io.jsonwebtoken:jjwt-jackson:0.12.6")
   testImplementation("org.awaitility:awaitility:4.2.2")
@@ -57,7 +57,7 @@ dependencies {
   testImplementation("org.springframework.security.oauth:spring-security-oauth2:2.5.2.RELEASE")
   testImplementation("org.springframework.security:spring-security-jwt:1.1.1.RELEASE")
   testImplementation("org.mockito.kotlin:mockito-kotlin:5.4.0")
-  testImplementation("io.swagger.parser.v3:swagger-parser-v3:2.1.22")
+  testImplementation("io.swagger.parser.v3:swagger-parser-v3:2.1.23")
 }
 
 java {
