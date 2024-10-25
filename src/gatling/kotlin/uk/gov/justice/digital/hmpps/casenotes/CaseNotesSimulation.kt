@@ -65,7 +65,7 @@ class CaseNotesSimulation : Simulation() {
 
   init {
     setUp(
-      paginated.injectClosed(constantConcurrentUsers(30).during(ofMinutes(10))),
+      paginated.injectClosed(constantConcurrentUsers(20).during(ofMinutes(10))),
       unpaginated.injectClosed(constantConcurrentUsers(10).during(ofMinutes(10))),
     ).protocols(httpProtocol)
   }

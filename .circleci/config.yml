@@ -3,7 +3,6 @@ version: 2.1
 orbs:
   hmpps: ministryofjustice/hmpps@8
 
-
 jobs:
   validate:
     executor:
