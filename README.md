@@ -15,3 +15,9 @@ For detailed insights into the architectural decisions made during the project t
 * [ADR003: Adopting a Two-Way Sync for Prisoner Case Notes](architectural_decision_records/003-two-way-sync.md)
 * [ADR004: Add new roles in line with agreed naming convention and remove reliance on DPS roles and user tokens](architectural_decision_records/004-roles.md)
 
+## Performance Tests
+
+A basic performance test has been ran and is in the project to enable rerunning as a way of monitoring performance.
+The performance tests are intended to be ran from a local machine. 
+
+[How to run performance tests from a local machine](performance-testing.md)

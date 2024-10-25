@@ -1,5 +1,6 @@
 package uk.gov.justice.digital.hmpps.casenotes
 
+import io.gatling.javaapi.core.CoreDsl.constantConcurrentUsers
 import io.gatling.javaapi.core.CoreDsl.csv
 import io.gatling.javaapi.core.CoreDsl.exec
 import io.gatling.javaapi.core.CoreDsl.feed
@@ -10,7 +11,8 @@ import io.gatling.javaapi.core.Simulation
 import io.gatling.javaapi.http.HttpDsl.http
 import io.gatling.javaapi.http.HttpDsl.status
 import java.lang.System.getenv
-import java.time.Duration
+import java.time.Duration.ofMinutes
+import java.time.Duration.ofSeconds
 
 class CaseNotesSimulation : Simulation() {
 
@@ -23,17 +25,21 @@ class CaseNotesSimulation : Simulation() {
   val authorisationHeader = mapOf("authorization" to "Bearer #{authToken}")
 
   val getToken = exec(
-    http("Get Auth Token")
-      .post(getenv("AUTH_URL"))
-      .queryParam("grant_type", "client_credentials")
-      .basicAuth(getenv("CLIENT_ID"), getenv("CLIENT_SECRET"))
-      .check(status().shouldBe(200), jsonPath("$.access_token").exists().saveAs("authToken")),
+    exec { session -> getenv("AUTH_TOKEN")?.let { session.set("authToken", it) } ?: session }
+      .doIf { it.getString("authToken").isNullOrBlank() }
+      .then(
+        http("Get Auth Token")
+          .post(getenv("AUTH_URL"))
+          .queryParam("grant_type", "client_credentials")
+          .basicAuth(getenv("CLIENT_ID"), getenv("CLIENT_SECRET"))
+          .check(status().shouldBe(200), jsonPath("$.access_token").exists().saveAs("authToken")),
+      ),
   )
 
-  val listCaseNotes = exec(
+  fun listCaseNotes(pageSize: Int) = exec(
     http("Find Case Notes page 1")
       .get("/case-notes/#{personIdentifier}")
-      .queryParam("size", 20)
+      .queryParam("size", pageSize)
       .headers(authorisationHeader)
       .header("CaseloadId", "LEI")
       .check(status().shouldBe(200))
@@ -46,7 +52,7 @@ class CaseNotesSimulation : Simulation() {
       .exec(
         http("Find case notes page #{currentPage} / #{totalPages}")
           .get("/case-notes/#{personIdentifier}")
-          .queryParam("size", 20)
+          .queryParam("size", pageSize)
           .queryParam("page", "#{currentPage}")
           .headers(authorisationHeader)
           .header("CaseloadId", "LEI")
@@ -54,9 +60,15 @@ class CaseNotesSimulation : Simulation() {
       ),
   )
 
-  val users = scenario("users").exec(getToken).repeat(1000).on(feed(personIdentifiers), listCaseNotes)
+  val paginated = scenario("paginated").exec(getToken)
+    .repeat(10).on(feed(personIdentifiers), listCaseNotes(20))
+  val unpaginated = scenario("unpaginated").exec(getToken)
+    .repeat(10).on(feed(personIdentifiers), listCaseNotes(9999))
 
   init {
-    setUp(users.injectOpen(rampUsers(200).during(Duration.ofSeconds(10)))).protocols(httpProtocol)
+    setUp(
+      paginated.injectClosed(constantConcurrentUsers(30).during(ofMinutes(10))),
+      unpaginated.injectClosed(constantConcurrentUsers(10).during(ofMinutes(10))),
+    ).protocols(httpProtocol)
   }
 }

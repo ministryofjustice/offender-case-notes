@@ -24,6 +24,17 @@
           "attributes": [
             {
               "key": "http.url",
+              "value": "https?://[^/]+/migrate/case-notes/?.*",
+              "matchType": "regexp"
+            }
+          ],
+          "percentage": 5
+        },
+        {
+          "telemetryType": "request",
+          "attributes": [
+            {
+              "key": "http.url",
               "value": "https?://[^/]+/health/?.*",
               "matchType": "regexp"
             }
@@ -45,9 +56,7 @@
           "telemetryType": "dependency",
           "attributes": [
             {
-              "key": "db.operation",
-              "value": "SELECT",
-              "matchType": "strict"
+              "key": "db.operation"
             }
           ],
           "percentage": 0
