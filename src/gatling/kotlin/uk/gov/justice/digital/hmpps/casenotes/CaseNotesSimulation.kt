@@ -5,14 +5,12 @@ import io.gatling.javaapi.core.CoreDsl.csv
 import io.gatling.javaapi.core.CoreDsl.exec
 import io.gatling.javaapi.core.CoreDsl.feed
 import io.gatling.javaapi.core.CoreDsl.jsonPath
-import io.gatling.javaapi.core.CoreDsl.rampUsers
 import io.gatling.javaapi.core.CoreDsl.scenario
 import io.gatling.javaapi.core.Simulation
 import io.gatling.javaapi.http.HttpDsl.http
 import io.gatling.javaapi.http.HttpDsl.status
 import java.lang.System.getenv
 import java.time.Duration.ofMinutes
-import java.time.Duration.ofSeconds
 
 class CaseNotesSimulation : Simulation() {
 
