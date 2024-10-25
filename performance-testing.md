@@ -17,6 +17,8 @@ To run against preprod, please provide a token by adding
 
 `AUTH_TOKEN='<jwt_token>'` as an environment variable before the `./gradlew gatlingRun` command and update the BASE_URL to point to the preprod service.
 
+Additionally, you will need to create a `person-identifiers-preprod.csv` file with a selection of identifiers to run (see the dev version for an example of layout).
+
 After running the tests, the results can be viewed by opening `build/reports/gatling/`. 
 This folder contains all the runs you may have unless, usually the most recent is the bottom one in the list. If you have only ran once or ran a clean there will be only one.
 After opening the correct simulation folder, opening the `index.html` file in a browser will allow you to view the test report.
