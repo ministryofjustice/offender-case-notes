@@ -43,7 +43,15 @@ class Amendment(
   private val id: UUID,
 ) : SimpleAudited(), Comparable<Amendment>, AmendmentState, Persistable<UUID> {
 
-  override fun compareTo(other: Amendment): Int = createdAt.compareTo(other.createdAt)
+  override fun compareTo(other: Amendment): Int {
+    val dif = createdAt.compareTo(other.createdAt)
+    return if (dif == 0) {
+      id.compareTo(other.id)
+    } else {
+      dif
+    }
+  }
+
   override fun getId(): UUID = id
 
   @Transient
