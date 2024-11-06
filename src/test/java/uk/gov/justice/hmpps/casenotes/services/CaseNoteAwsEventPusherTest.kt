@@ -21,14 +21,12 @@ import uk.gov.justice.hmpps.casenotes.notes.CaseNote
 import uk.gov.justice.hmpps.sqs.HmppsQueueService
 import uk.gov.justice.hmpps.sqs.HmppsTopic
 import java.time.LocalDateTime
-import java.util.concurrent.CompletableFuture
 import java.util.concurrent.CompletableFuture.completedFuture
 
 class CaseNoteAwsEventPusherTest {
   private val hmppsQueueService: HmppsQueueService = mock()
   private val snsClient: SnsAsyncClient = mock()
   private val objectMapper: ObjectMapper = mock()
-  private val publishRequest: PublishRequest = PublishRequest.builder().build()
   private val service = CaseNoteAwsEventPusher(hmppsQueueService, objectMapper, "http://localhost:8080")
 
   @Test
@@ -37,10 +35,8 @@ class CaseNoteAwsEventPusherTest {
     whenever(hmppsQueueService.findByTopicId("domainevents")).thenReturn(HmppsTopic("id", "topicUrn", snsClient))
 
     val publishResponse = PublishResponse.builder().messageId("Hello").build()
-    val completableFuture = CompletableFuture<PublishResponse>()
-    completableFuture.complete(publishResponse)
+    whenever(snsClient.publish(any<PublishRequest>())).thenReturn(completedFuture(publishResponse))
 
-    whenever(snsClient.publish(publishRequest)).thenReturn(completableFuture)
     service.sendEvent(caseCaseNote())
     verify(objectMapper).writeValueAsString(
       check<HmppsDomainEvent> {
