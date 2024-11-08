@@ -31,7 +31,6 @@ import uk.gov.justice.hmpps.casenotes.domain.audit.DeletedEntityListener
 import uk.gov.justice.hmpps.casenotes.domain.audit.SimpleAudited
 import uk.gov.justice.hmpps.casenotes.notes.TextRequest
 import uk.gov.justice.hmpps.casenotes.sync.SyncAmendmentRequest
-import uk.gov.justice.hmpps.casenotes.sync.SystemAwareRequest
 import java.time.LocalDateTime
 import java.util.Optional
 import java.util.SortedSet
@@ -105,7 +104,7 @@ class Note(
           request.author.fullName(),
           request.author.userId,
           request.text,
-          if (request is SystemAwareRequest) system else System.NOMIS,
+          request.system ?: System.NOMIS,
           newUuid(),
         ).apply { createdAt = request.createdDateTime },
       )

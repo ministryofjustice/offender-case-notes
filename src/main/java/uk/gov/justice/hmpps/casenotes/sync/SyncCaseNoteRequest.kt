@@ -40,12 +40,14 @@ data class SyncCaseNoteRequest(
   override val createdDateTime: LocalDateTime,
   override val createdByUsername: String,
   override val amendments: Set<SyncCaseNoteAmendmentRequest>,
+  override val system: System?,
 ) : SyncNoteRequest
 
 data class SyncCaseNoteAmendmentRequest(
   override val text: String,
   override val author: Author,
   override val createdDateTime: LocalDateTime,
+  override val system: System?,
 ) : SyncAmendmentRequest
 
 internal data class NoteAndAmendments(val note: Note, val amendments: List<Amendment>)
@@ -54,10 +56,9 @@ internal fun SyncNoteRequest.typeKey() = TypeKey(type, subType)
 
 internal data class SyncOverrides(
   val id: UUID?,
-  val system: System?,
 ) {
   companion object {
-    fun of(id: UUID?, system: System?) = if (id == null && system == null) null else SyncOverrides(id, system)
+    fun of(id: UUID?) = if (id == null) null else SyncOverrides(id)
   }
 }
 
@@ -78,7 +79,7 @@ private fun SyncAmendmentRequest.asAmendment(note: Note) = Amendment(
   author.fullName(),
   author.userId,
   text,
-  if (this is SystemAwareRequest) system else System.NOMIS,
+  system ?: System.NOMIS,
   newUuid(),
 ).apply { this.createdAt = this@asAmendment.createdDateTime }
 
@@ -92,21 +93,20 @@ internal fun SyncNoteRequest.asNote(
   personIdentifier: String,
   overrides: SyncOverrides?,
   typeSupplier: (String, String) -> SubType,
-) =
-  Note(
-    personIdentifier,
-    typeSupplier(type, subType),
-    occurrenceDateTime,
-    locationId,
-    author.username,
-    author.userId,
-    author.fullName(),
-    text,
-    systemGenerated,
-    if (this is SystemAwareRequest) system else overrides?.system ?: System.NOMIS,
-    id = overrides?.id ?: newUuid(),
-  ).apply {
-    this.legacyId = this@asNote.legacyId
-    this.createdAt = this@asNote.createdDateTime
-    this.createdBy = this@asNote.createdByUsername
-  }
+) = Note(
+  personIdentifier,
+  typeSupplier(type, subType),
+  occurrenceDateTime,
+  locationId,
+  author.username,
+  author.userId,
+  author.fullName(),
+  text,
+  systemGenerated,
+  system ?: System.NOMIS,
+  id = overrides?.id ?: newUuid(),
+).apply {
+  this.legacyId = this@asNote.legacyId
+  this.createdAt = this@asNote.createdDateTime
+  this.createdBy = this@asNote.createdByUsername
+}
