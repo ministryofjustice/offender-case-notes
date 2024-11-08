@@ -16,11 +16,11 @@ data class MigrateCaseNoteRequest(
   override val createdDateTime: LocalDateTime,
   override val createdByUsername: String,
   override val amendments: Set<MigrateAmendmentRequest>,
-) : SyncNoteRequest, SystemAwareRequest
+) : SyncNoteRequest
 
 data class MigrateAmendmentRequest(
   override val text: String,
   override val system: System,
   override val author: Author,
   override val createdDateTime: LocalDateTime,
-) : SyncAmendmentRequest, SystemAwareRequest
+) : SyncAmendmentRequest

@@ -124,7 +124,7 @@ class SyncCaseNoteIntTest : IntegrationTest() {
   fun `200 ok - sync updates an existing case note using id`() {
     val prisonNumber = personIdentifier()
     val existing = givenCaseNote(generateCaseNote(prisonNumber))
-    val request = existing.syncRequest().copy(text = "The text was updated in nomis by CENTRAL ADMIN")
+    val request = existing.syncRequest().copy(text = "The text was updated in nomis by CENTRAL ADMIN", system = System.DPS)
     val response = syncCaseNote(request).success<SyncResult>(HttpStatus.OK)
     assertThat(response.action).isEqualTo(UPDATED)
 
@@ -148,7 +148,7 @@ class SyncCaseNoteIntTest : IntegrationTest() {
     val type2 = types.filter { it.typeCode != type1.typeCode && it.code != type1.code }.random()
     val prisonNumber = personIdentifier()
     val existing = givenCaseNote(generateCaseNote(prisonNumber, type1))
-    val request = existing.syncRequest().copy(type = type2.typeCode, subType = type2.code)
+    val request = existing.syncRequest().copy(type = type2.typeCode, subType = type2.code, system = System.DPS)
     val response = syncCaseNote(request).success<SyncResult>(HttpStatus.OK)
     assertThat(response.action).isEqualTo(UPDATED)
 
@@ -215,6 +215,7 @@ class SyncCaseNoteIntTest : IntegrationTest() {
     )
     val request = existing.syncRequest().let { r ->
       r.copy(
+        system = System.NOMIS,
         amendments = (
           r.amendments.map { it.copy(text = "The text was updated in nomis by CENTRAL ADMIN") } +
             syncAmendmentRequest("A new amendment", createdDateTime = now().minusSeconds(10))
@@ -227,7 +228,7 @@ class SyncCaseNoteIntTest : IntegrationTest() {
 
     val saved = requireNotNull(noteRepository.findByIdAndPersonIdentifier(existing.id, request.personIdentifier))
     saved.verifyAgainst(request)
-    assertThat(saved.system).isEqualTo(System.DPS)
+    assertThat(saved.system).isEqualTo(System.NOMIS)
     assertThat(saved.amendments().size).isEqualTo(2)
     val amend = saved.amendments().first()
     amend.verifyAgainst(request.amendments.first())
@@ -324,6 +325,7 @@ private fun syncCaseNoteRequest(
   createdDateTime: LocalDateTime = now().minusDays(1),
   createdBy: String = "CreatedByUsername",
   amendments: Set<SyncCaseNoteAmendmentRequest> = setOf(),
+  system: System? = null,
 ) = SyncCaseNoteRequest(
   legacyId,
   id,
@@ -338,13 +340,15 @@ private fun syncCaseNoteRequest(
   createdDateTime,
   createdBy,
   amendments,
+  system,
 )
 
 private fun syncAmendmentRequest(
   text: String = "The text of the case note",
   author: Author = defaultAuthor(),
   createdDateTime: LocalDateTime = now(),
-) = SyncCaseNoteAmendmentRequest(text, author, createdDateTime)
+  system: System? = null,
+) = SyncCaseNoteAmendmentRequest(text, author, createdDateTime, system)
 
 private fun defaultAuthor() = Author("AuthorUsername", "12376471", "Author", "Name")
 

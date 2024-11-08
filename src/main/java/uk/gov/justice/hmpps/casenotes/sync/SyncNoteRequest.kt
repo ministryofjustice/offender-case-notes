@@ -10,7 +10,7 @@ import uk.gov.justice.hmpps.casenotes.notes.NoteRequest
 import uk.gov.justice.hmpps.casenotes.notes.TextRequest
 import java.time.LocalDateTime
 
-interface SyncNoteRequest : NoteRequest {
+interface SyncNoteRequest : NoteRequest, SystemAwareRequest {
   @get:Schema(
     requiredMode = REQUIRED,
     example = "1645251",
@@ -49,14 +49,14 @@ interface SyncNoteRequest : NoteRequest {
   val amendments: Set<SyncAmendmentRequest>
 }
 
-interface SyncAmendmentRequest : TextRequest {
+interface SyncAmendmentRequest : TextRequest, SystemAwareRequest {
   @get:Valid
   val author: Author
   val createdDateTime: LocalDateTime
 }
 
 interface SystemAwareRequest {
-  val system: System
+  val system: System?
 }
 
 data class Author(
