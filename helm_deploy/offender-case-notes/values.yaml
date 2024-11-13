@@ -3,6 +3,11 @@ generic-service:
   nameOverride: offender-case-notes
   productId: DPS095
 
+  resources:
+    requests:
+      cpu: 128m
+      memory: 768Mi
+
   image:
     repository: quay.io/hmpps/offender-case-notes
     tag: app_version # override at deployment time
