@@ -65,4 +65,3 @@ hmpps.sqs:
 
 service:
   active-prisons: MDI
-  publish-person-events: true

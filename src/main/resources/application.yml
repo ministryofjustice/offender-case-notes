@@ -89,5 +89,4 @@ management:
 
 service:
   active-prisons:
-  publish-person-events: true
   base-url:

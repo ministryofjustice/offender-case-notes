@@ -12,7 +12,6 @@ class ServiceConfigInfo(
   override fun contribute(builder: Info.Builder) {
     builder
       .withDetail("activeAgencies", serviceConfig.activePrisons)
-      .withDetail("publishPersonEvents", serviceConfig.publishPersonEvents)
   }
 }
 
@@ -20,5 +19,4 @@ class ServiceConfigInfo(
 data class ServiceConfig(
   val activePrisons: Set<String>,
   val baseUrl: String,
-  val publishPersonEvents: Boolean,
 )
