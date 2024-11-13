@@ -1,7 +1,6 @@
 package uk.gov.justice.hmpps.casenotes.events
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import com.microsoft.applicationinsights.TelemetryClient
 import org.springframework.stereotype.Component
 import org.springframework.transaction.event.TransactionalEventListener
 import uk.gov.justice.hmpps.casenotes.config.ServiceConfig
@@ -14,30 +13,14 @@ class PersonCaseNoteEventListener(
   private val hmppsQueueService: HmppsQueueService,
   private val objectMapper: ObjectMapper,
   private val serviceConfig: ServiceConfig,
-  private val telemetryClient: TelemetryClient,
 ) {
   private val eventTopic by lazy { hmppsQueueService.findByTopicId("domainevents") as HmppsTopic }
 
   @TransactionalEventListener
   fun handlePersonCaseNoteEvent(event: PersonCaseNoteEvent) {
-    if (serviceConfig.publishPersonEvents) {
-      eventTopic.publish(
-        event.eventName,
-        objectMapper.writeValueAsString(event.asDomainEvent(serviceConfig.baseUrl)),
-      )
-    } else {
-      telemetryClient.trackEvent(event.eventName, event.properties(), mapOf())
-    }
+    eventTopic.publish(
+      event.eventName,
+      objectMapper.writeValueAsString(event.asDomainEvent(serviceConfig.baseUrl)),
+    )
   }
-
-  private fun PersonCaseNoteEvent.properties(): Map<String, String> = mapOf(
-    "personIdentifier" to personIdentifier,
-    "id" to id.toString(),
-    "legacyId" to legacyId.toString(),
-    "type" to type,
-    "subType" to subType,
-    "source" to source.toString(),
-    "syncToNomis" to syncToNomis.toString(),
-    "systemGenerated" to systemGenerated.toString(),
-  )
 }
