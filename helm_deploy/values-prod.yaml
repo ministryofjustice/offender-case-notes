@@ -17,7 +17,8 @@ generic-service:
     APPLICATIONINSIGHTS_CONFIGURATION_FILE: applicationinsights.json
 
   postgresDatabaseRestore:
-    enabled: false
+    enabled: true
+    timeout: 7200
     namespace_secrets:
       dps-rds-instance-output:
         DB_NAME: "database_name"
