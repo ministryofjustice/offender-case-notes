@@ -45,7 +45,7 @@ dependencies {
   testCompileOnly("org.projectlombok:lombok:1.18.36")
   testImplementation("org.springframework.security:spring-security-test")
   testImplementation("com.tngtech.java:junit-dataprovider:1.13.1")
-  testImplementation("net.javacrumbs.json-unit:json-unit-assertj:3.5.0")
+  testImplementation("net.javacrumbs.json-unit:json-unit-assertj:4.0.0")
   testImplementation("io.github.http-builder-ng:http-builder-ng-apache:1.0.4")
   testImplementation("org.wiremock:wiremock-standalone:3.9.2")
   testImplementation("org.testcontainers:postgresql:1.20.4")
