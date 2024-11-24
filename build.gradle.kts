@@ -1,5 +1,5 @@
 plugins {
-  id("uk.gov.justice.hmpps.gradle-spring-boot") version "6.0.9"
+  id("uk.gov.justice.hmpps.gradle-spring-boot") version "6.1.0"
   kotlin("plugin.spring") version "2.0.21"
   kotlin("plugin.jpa") version "2.0.21"
   id("io.gatling.gradle") version "3.13.1"
@@ -31,7 +31,7 @@ dependencies {
   implementation("javax.transaction:javax.transaction-api:1.3")
 
   implementation("javax.xml.bind:jaxb-api:2.3.1")
-  implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.6.0")
+  implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.7.0")
   implementation("net.sf.ehcache:ehcache:2.10.9.2")
   implementation("org.apache.commons:commons-text:1.12.0")
   implementation("com.fasterxml.uuid:java-uuid-generator:5.1.0")
@@ -39,7 +39,7 @@ dependencies {
   implementation("com.google.guava:guava:33.3.1-jre")
 
   implementation(platform("com.amazonaws:aws-java-sdk-bom:1.12.778"))
-  implementation("software.amazon.awssdk:sns:2.29.18")
+  implementation("software.amazon.awssdk:sns:2.29.20")
 
   testAnnotationProcessor("org.projectlombok:lombok:1.18.36")
   testCompileOnly("org.projectlombok:lombok:1.18.36")
