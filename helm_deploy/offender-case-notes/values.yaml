@@ -30,7 +30,7 @@ generic-service:
 
   env:
     SERVER_PORT: 8080
-    JAVA_OPTS: "-Xmx512m"
+    JDK_JAVA_OPTIONS: "-XX:MaxRAMPercentage=75.0"
     APPLICATIONINSIGHTS_CONNECTION_STRING: "InstrumentationKey=$(APPINSIGHTS_INSTRUMENTATIONKEY);IngestionEndpoint=https://northeurope-0.in.applicationinsights.azure.com/;LiveEndpoint=https://northeurope.livediagnostics.monitor.azure.com/"
     SNS_PROVIDER: "aws"
     HMPPS_SQS_USE_WEB_TOKEN: true
