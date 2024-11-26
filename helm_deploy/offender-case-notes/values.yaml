@@ -6,7 +6,10 @@ generic-service:
   resources:
     requests:
       cpu: 128m
-      memory: 768Mi
+      memory: 1024Mi
+    limits:
+      cpu: 1024m
+      memory: 1280
 
   image:
     repository: quay.io/hmpps/offender-case-notes
@@ -30,7 +33,7 @@ generic-service:
 
   env:
     SERVER_PORT: 8080
-    JDK_JAVA_OPTIONS: "-XX:MaxRAMPercentage=65.0"
+    JDK_JAVA_OPTIONS: "-Xmx512m"
     APPLICATIONINSIGHTS_CONNECTION_STRING: "InstrumentationKey=$(APPINSIGHTS_INSTRUMENTATIONKEY);IngestionEndpoint=https://northeurope-0.in.applicationinsights.azure.com/;LiveEndpoint=https://northeurope.livediagnostics.monitor.azure.com/"
     SNS_PROVIDER: "aws"
     HMPPS_SQS_USE_WEB_TOKEN: true
