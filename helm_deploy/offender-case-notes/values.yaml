@@ -9,7 +9,7 @@ generic-service:
       memory: 1024Mi
     limits:
       cpu: 1024m
-      memory: 1280
+      memory: 1280Mi
 
   image:
     repository: quay.io/hmpps/offender-case-notes
