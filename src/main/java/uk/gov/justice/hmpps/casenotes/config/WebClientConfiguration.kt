@@ -58,7 +58,7 @@ class WebClientConfiguration(
     createHealthClient(builder, prisonerSearchApiBaseUrl)
 
   @Bean
-  fun manageUserApiHealthWebClient(builder: Builder): WebClient = createHealthClient(builder, manageUsersApiBaseUrl)
+  fun manageUsersApiHealthWebClient(builder: Builder): WebClient = createHealthClient(builder, manageUsersApiBaseUrl)
 
   @Bean
   fun tokenVerificationApiWebClient(builder: Builder): WebClient = builder.baseUrl(tokenVerificationApiBaseUrl)

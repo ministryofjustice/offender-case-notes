@@ -35,7 +35,7 @@ class OAuthApiHealth(@Qualifier("oauthApiHealthWebClient") webClient: WebClient)
 class PrisonerSearchApiHealth(@Qualifier("prisonerSearchApiHealthWebClient") webClient: WebClient) : HealthCheck(webClient)
 
 @Component
-class ManageUserApiHealth(@Qualifier("manageUserApiHealthWebClient") webClient: WebClient) : HealthCheck(webClient)
+class ManageUsersApiHealth(@Qualifier("manageUsersApiHealthWebClient") webClient: WebClient) : HealthCheck(webClient)
 
 @Component
 class TokenVerificationApiHealth(
