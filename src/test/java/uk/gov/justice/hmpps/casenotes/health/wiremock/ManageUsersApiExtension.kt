@@ -57,11 +57,6 @@ class ManageUsersApiServer : WireMockServer(WIREMOCK_PORT) {
         ),
     )
 
-  fun stubUserDetailsNotFound(username: String): StubMapping =
-    stubFor(
-      get("/users/$username").willReturn(aResponse().withStatus(404)),
-    )
-
   companion object {
     private const val WIREMOCK_PORT = 8100
   }

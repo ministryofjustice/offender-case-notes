@@ -54,6 +54,13 @@ class WebClientConfiguration(
   fun oauthApiHealthWebClient(builder: Builder): WebClient = createHealthClient(builder, oauthApiBaseUrl)
 
   @Bean
+  fun prisonerSearchApiHealthWebClient(builder: Builder): WebClient =
+    createHealthClient(builder, prisonerSearchApiBaseUrl)
+
+  @Bean
+  fun manageUserApiHealthWebClient(builder: Builder): WebClient = createHealthClient(builder, manageUsersApiBaseUrl)
+
+  @Bean
   fun tokenVerificationApiWebClient(builder: Builder): WebClient = builder.baseUrl(tokenVerificationApiBaseUrl)
     .clientConnector(ReactorClientHttpConnector(create().warmupWithHealthPing(tokenVerificationApiBaseUrl))).build()
 

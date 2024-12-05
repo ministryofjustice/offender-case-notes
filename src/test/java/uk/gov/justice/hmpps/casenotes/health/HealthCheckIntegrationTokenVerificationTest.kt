@@ -24,6 +24,8 @@ class HealthCheckIntegrationTokenVerificationTest : BasicIntegrationTest() {
       .expectBody()
       .jsonPath("components.OAuthApiHealth.details.HttpStatus").isEqualTo("OK")
       .jsonPath("components.elite2ApiHealth.details.HttpStatus").isEqualTo("OK")
+      .jsonPath("components.prisonerSearchApiHealth.details.HttpStatus").isEqualTo("OK")
+      .jsonPath("components.manageUserApiHealth.details.HttpStatus").isEqualTo("OK")
       .jsonPath("components.tokenVerificationApiHealth.details.HttpStatus").isEqualTo("OK")
       .jsonPath("status").isEqualTo("UP")
   }
