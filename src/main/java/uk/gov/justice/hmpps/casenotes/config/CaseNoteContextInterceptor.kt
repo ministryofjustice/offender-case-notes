@@ -16,9 +16,9 @@ import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.web.servlet.HandlerInterceptor
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer
+import uk.gov.justice.hmpps.casenotes.integrations.ManageUsersService
 import uk.gov.justice.hmpps.casenotes.legacy.dto.ErrorResponse
 import uk.gov.justice.hmpps.casenotes.legacy.dto.UserDetails.Companion.NOMIS
-import uk.gov.justice.hmpps.casenotes.legacy.service.ExternalApiService
 
 @Configuration
 class CaseNoteContextConfiguration(private val caseNoteContextInterceptor: CaseNoteContextInterceptor) :
@@ -33,7 +33,7 @@ class CaseNoteContextConfiguration(private val caseNoteContextInterceptor: CaseN
 
 @Configuration
 class CaseNoteContextInterceptor(
-  private val externalApiService: ExternalApiService,
+  private val manageUserService: ManageUsersService,
   private val objectMapper: ObjectMapper,
 ) : HandlerInterceptor {
   override fun preHandle(request: HttpServletRequest, response: HttpServletResponse, handler: Any): Boolean {
@@ -41,11 +41,11 @@ class CaseNoteContextInterceptor(
       // add request header to request in app insights to avoid having custom events
       request.getHeader("CaseloadId")?.also { Span.current().setAttribute("caseloadId", it) }
       val username = username()
-      return externalApiService.getUserDetails(username)?.let {
+      return manageUserService.getUserDetails(username)?.let {
         val context = CaseNoteRequestContext(
           username,
-          it.name ?: username,
-          it.userId ?: username,
+          it.name,
+          it.userId,
           it.activeCaseLoadId,
           Source.DPS,
           nomisUser = it.authSource == NOMIS,

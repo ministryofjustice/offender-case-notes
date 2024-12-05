@@ -13,6 +13,7 @@ generic-service:
     ELITE2_API_BASE_URL: "https://prison-api-preprod.prison.service.justice.gov.uk"
     OAUTH_API_BASE_URL: "https://sign-in-preprod.hmpps.service.justice.gov.uk/auth"
     PRISONER_SEARCH_API_BASE_URL: "https://prisoner-search-preprod.prison.service.justice.gov.uk"
+    MANAGE_USERS_API_BASE_URL: "https://manage-users-api-dev.hmpps.service.justice.gov.uk"
     TOKENVERIFICATION_API_BASE_URL: "https://token-verification-api-preprod.prison.service.justice.gov.uk"
     TOKENVERIFICATION_ENABLED: "false"
     SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_JWK_SET_URI: "https://sign-in-preprod.hmpps.service.justice.gov.uk/auth/.well-known/jwks.json"

@@ -17,10 +17,12 @@ class OAuthExtension : BeforeAllCallback, AfterAllCallback, BeforeEachCallback {
 
   override fun beforeAll(context: ExtensionContext) {
     oAuthApi.start()
+    oAuthApi.stubGrantToken()
   }
 
   override fun beforeEach(context: ExtensionContext) {
     oAuthApi.resetRequests()
+    oAuthApi.stubGrantToken()
   }
 
   override fun afterAll(context: ExtensionContext) {
@@ -31,7 +33,7 @@ class OAuthExtension : BeforeAllCallback, AfterAllCallback, BeforeEachCallback {
 class OAuthMockServer : WireMockServer(WIREMOCK_PORT) {
   fun stubGrantToken() {
     stubFor(
-      WireMock.post(WireMock.urlEqualTo("/auth/oauth/token"))
+      WireMock.post(WireMock.urlPathMatching(".*"))
         .willReturn(
           WireMock.aResponse()
             .withHeaders(HttpHeaders(HttpHeader("Content-Type", "application/json")))
@@ -46,30 +48,7 @@ class OAuthMockServer : WireMockServer(WIREMOCK_PORT) {
     )
   }
 
-  fun subGetUserDetails(username: String, nomisUser: Boolean = true) {
-    stubFor(
-      WireMock.get(WireMock.urlPathMatching(String.format("%s/user/%s", API_PREFIX, username)))
-        .willReturn(
-          WireMock.aResponse()
-            .withHeader("Content-Type", "application/json")
-            .withBody(
-              """
-                {
-                  "username": "$username",
-                  "userId": 1111,
-                  "active": true,
-                  "name": "Mikey Mouse",
-                  "authSource": "${if (nomisUser) "nomis" else "delius"}",
-                  "activeCaseLoadId": "LEI"
-                }
-              """.trimIndent(),
-            ).withStatus(200),
-        ),
-    )
-  }
-
   companion object {
     private const val WIREMOCK_PORT = 8998
-    private const val API_PREFIX = "/auth/api"
   }
 }

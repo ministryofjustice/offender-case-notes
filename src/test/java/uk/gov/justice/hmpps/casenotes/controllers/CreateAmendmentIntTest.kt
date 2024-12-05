@@ -12,19 +12,19 @@ import uk.gov.justice.hmpps.casenotes.config.SecurityUserContext
 import uk.gov.justice.hmpps.casenotes.config.Source
 import uk.gov.justice.hmpps.casenotes.domain.System
 import uk.gov.justice.hmpps.casenotes.events.PersonCaseNoteEvent
-import uk.gov.justice.hmpps.casenotes.health.wiremock.OAuthExtension.Companion.oAuthApi
+import uk.gov.justice.hmpps.casenotes.health.wiremock.ManageUsersApiExtension.Companion.manageUsersApi
 import uk.gov.justice.hmpps.casenotes.notes.AmendCaseNoteRequest
 import uk.gov.justice.hmpps.casenotes.notes.CaseNote
 import uk.gov.justice.hmpps.casenotes.utils.NomisIdGenerator.newId
 import uk.gov.justice.hmpps.casenotes.utils.NomisIdGenerator.personIdentifier
 import uk.gov.justice.hmpps.casenotes.utils.verifyAgainst
 import java.time.Duration.ofSeconds
-import java.util.UUID
+import java.util.UUID.randomUUID
 
 class CreateAmendmentIntTest : IntegrationTest() {
   @Test
   fun `401 unauthorised`() {
-    webTestClient.put().uri(urlToTest(), personIdentifier(), UUID.randomUUID().toString())
+    webTestClient.put().uri(urlToTest(), personIdentifier(), randomUUID().toString())
       .exchange().expectStatus().isUnauthorized
   }
 
@@ -32,7 +32,7 @@ class CreateAmendmentIntTest : IntegrationTest() {
   fun `403 forbidden - does not have the right role`() {
     amendCaseNote(
       personIdentifier(),
-      UUID.randomUUID().toString(),
+      randomUUID().toString(),
       amendCaseNoteRequest(),
       roles = listOf(SecurityUserContext.ROLE_CASE_NOTES_READ),
     ).expectStatus().isForbidden
@@ -40,10 +40,10 @@ class CreateAmendmentIntTest : IntegrationTest() {
 
   @Test
   fun `cannot create case note without user details`() {
+    val notFoundUser = "NoneExistentUser"
     val request = amendCaseNoteRequest()
-    val response =
-      amendCaseNote(personIdentifier(), UUID.randomUUID().toString(), request, tokenUsername = "NoneExistentUser")
-        .errorResponse(HttpStatus.BAD_REQUEST)
+    val response = amendCaseNote(personIdentifier(), randomUUID().toString(), request, tokenUsername = notFoundUser)
+      .errorResponse(HttpStatus.BAD_REQUEST)
 
     with(response) {
       assertThat(status).isEqualTo(HttpStatus.BAD_REQUEST.value())
@@ -54,7 +54,7 @@ class CreateAmendmentIntTest : IntegrationTest() {
   @Test
   fun `cannot amend a sync to nomis case note with non nomis user`() {
     val username = "DeliusUser"
-    oAuthApi.subGetUserDetails(username, nomisUser = false)
+    manageUsersApi.stubGetUserDetails(username, nomisUser = false)
     val type = getAllTypes().first { it.syncToNomis }
     val caseNote = givenCaseNote(generateCaseNote(personIdentifier(), type))
     val response =
@@ -178,7 +178,7 @@ class CreateAmendmentIntTest : IntegrationTest() {
     @JvmStatic
     @BeforeAll
     fun setup() {
-      oAuthApi.subGetUserDetails(USERNAME)
+      manageUsersApi.stubGetUserDetails(USERNAME)
     }
   }
 }
