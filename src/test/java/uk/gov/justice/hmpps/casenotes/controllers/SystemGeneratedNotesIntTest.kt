@@ -8,7 +8,6 @@ import uk.gov.justice.hmpps.casenotes.config.SecurityUserContext.Companion.ROLE_
 import uk.gov.justice.hmpps.casenotes.config.Source
 import uk.gov.justice.hmpps.casenotes.domain.Note
 import uk.gov.justice.hmpps.casenotes.events.PersonCaseNoteEvent
-import uk.gov.justice.hmpps.casenotes.health.wiremock.OAuthExtension.Companion.oAuthApi
 import uk.gov.justice.hmpps.casenotes.health.wiremock.PrisonerSearchApiExtension.Companion.prisonerSearchApi
 import uk.gov.justice.hmpps.casenotes.notes.CaseNote
 import uk.gov.justice.hmpps.casenotes.systemgenerated.SystemGeneratedRequest
@@ -124,7 +123,6 @@ class SystemGeneratedNotesIntTest : IntegrationTest() {
   fun `201 ok - use prison id from prisoner search when location id not provided`() {
     val personIdentifier = personIdentifier()
     val prisonId = "LEI"
-    oAuthApi.stubGrantToken()
     prisonerSearchApi.stubPrisonerDetails(personIdentifier, prisonId)
     val type = getAllTypes().filter { it.typeCode == "ACP" && !it.syncToNomis }.random()
 

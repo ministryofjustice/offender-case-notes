@@ -4,7 +4,6 @@ import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.client.WireMock.aResponse
 import com.github.tomakehurst.wiremock.client.WireMock.get
-import com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo
 import com.github.tomakehurst.wiremock.client.WireMock.urlPathMatching
 import org.junit.jupiter.api.extension.AfterAllCallback
 import org.junit.jupiter.api.extension.BeforeAllCallback
@@ -34,61 +33,6 @@ class Elite2Extension : BeforeAllCallback, AfterAllCallback, BeforeEachCallback 
 }
 
 class Elite2MockServer : WireMockServer(WIREMOCK_PORT) {
-
-  fun stubGetBookingIdentifiers(bookingIdentifier: Long) {
-    val getBookingIdentifiers = "$API_PREFIX/bookings/$bookingIdentifier/identifiers"
-    stubFor(
-      get(urlPathMatching(getBookingIdentifiers))
-        .willReturn(
-          aResponse()
-            .withHeader("Content-Type", "application/json")
-            .withBody(
-              """[
-                    {
-                      "type": "MERGED",
-                      "value": "A2345CD",
-                      "offenderNo": "A5156DY",
-                      "bookingId": $bookingIdentifier,
-                      "caseloadType": "INST"
-                    },
-                    {
-                      "type": "MERGED",
-                      "value": "A1234BC",
-                      "offenderNo": "A1234BC",
-                      "bookingId": $bookingIdentifier,
-                      "caseloadType": "INST"
-                    }
-                  ]""",
-            )
-            .withStatus(200),
-        ),
-    )
-  }
-
-  fun stubGetBookingBasicInfo(bookingIdentifier: Long) {
-    val getBookingBasicInfo = "$API_PREFIX/bookings/$bookingIdentifier?basicInfo=true"
-    stubFor(
-      get(urlEqualTo(getBookingBasicInfo))
-        .willReturn(
-          aResponse()
-            .withHeader("Content-Type", "application/json")
-            .withBody(
-              """{
-                    "bookingId": $bookingIdentifier,
-                    "bookingNo": "38408A",
-                    "offenderNo": "A5156DY",
-                    "firstName": "ROGER",
-                    "lastName": "QUILTER",
-                    "agencyId": "OUT",
-                    "activeFlag": false,
-                    "dateOfBirth": "1932-05-04"
-                  }
-              """.trimIndent(),
-            )
-            .withStatus(200),
-        ),
-    )
-  }
 
   fun subGetCaseNotesForOffender(offenderIdentifier: String) {
     val getCaseNotes = "$API_PREFIX/offenders/$offenderIdentifier/case-notes/v2"

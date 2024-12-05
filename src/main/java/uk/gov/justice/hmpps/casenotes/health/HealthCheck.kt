@@ -32,6 +32,12 @@ class Elite2ApiHealth(@Qualifier("elite2ApiHealthWebClient") webClient: WebClien
 class OAuthApiHealth(@Qualifier("oauthApiHealthWebClient") webClient: WebClient) : HealthCheck(webClient)
 
 @Component
+class PrisonerSearchApiHealth(@Qualifier("prisonerSearchApiHealthWebClient") webClient: WebClient) : HealthCheck(webClient)
+
+@Component
+class ManageUsersApiHealth(@Qualifier("manageUsersApiHealthWebClient") webClient: WebClient) : HealthCheck(webClient)
+
+@Component
 class TokenVerificationApiHealth(
   @Qualifier("tokenVerificationApiHealthWebClient") webClient: WebClient,
   @Value("\${tokenverification.enabled:false}") private val tokenVerificationEnabled: Boolean,

@@ -46,10 +46,7 @@ class ExternalApiServiceTest {
   private val requestBodyUriSpec: RequestBodyUriSpec = mock()
   private val requestBodySpec: RequestBodySpec = mock()
 
-  private val externalApiService: ExternalApiService = ExternalApiService(
-    prisonApiWebClient,
-    authWebClient,
-  )
+  private val externalApiService: ExternalApiService = ExternalApiService(prisonApiWebClient)
 
   @BeforeEach
   fun setup() {

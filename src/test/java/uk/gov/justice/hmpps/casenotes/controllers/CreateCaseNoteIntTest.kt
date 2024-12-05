@@ -11,7 +11,7 @@ import uk.gov.justice.hmpps.casenotes.config.Source
 import uk.gov.justice.hmpps.casenotes.domain.Note
 import uk.gov.justice.hmpps.casenotes.domain.System
 import uk.gov.justice.hmpps.casenotes.events.PersonCaseNoteEvent
-import uk.gov.justice.hmpps.casenotes.health.wiremock.OAuthExtension.Companion.oAuthApi
+import uk.gov.justice.hmpps.casenotes.health.wiremock.ManageUsersApiExtension.Companion.manageUsersApi
 import uk.gov.justice.hmpps.casenotes.notes.CaseNote
 import uk.gov.justice.hmpps.casenotes.notes.CreateCaseNoteRequest
 import uk.gov.justice.hmpps.casenotes.utils.NomisIdGenerator.personIdentifier
@@ -60,7 +60,7 @@ class CreateCaseNoteIntTest : IntegrationTest() {
   @Test
   fun `cannot create a sync to nomis case note with non nomis user`() {
     val username = "DeliusUser"
-    oAuthApi.subGetUserDetails(username, nomisUser = false)
+    manageUsersApi.stubGetUserDetails(username, nomisUser = false)
     val type = getAllTypes().first { it.syncToNomis }
     val request = createCaseNoteRequest(type = type.type.code, subType = type.code)
     val response = createCaseNote(personIdentifier(), request, params = mapOf(), tokenUsername = username)
@@ -191,7 +191,7 @@ class CreateCaseNoteIntTest : IntegrationTest() {
     @JvmStatic
     @BeforeAll
     fun setup() {
-      oAuthApi.subGetUserDetails(USERNAME)
+      manageUsersApi.stubGetUserDetails(USERNAME)
     }
   }
 }

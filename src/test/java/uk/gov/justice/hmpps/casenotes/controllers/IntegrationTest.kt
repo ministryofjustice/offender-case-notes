@@ -29,6 +29,7 @@ import uk.gov.justice.hmpps.casenotes.events.Notification
 import uk.gov.justice.hmpps.casenotes.events.PersonCaseNoteEvent
 import uk.gov.justice.hmpps.casenotes.health.BasicIntegrationTest
 import uk.gov.justice.hmpps.casenotes.health.wiremock.Elite2Extension
+import uk.gov.justice.hmpps.casenotes.health.wiremock.ManageUsersApiExtension
 import uk.gov.justice.hmpps.casenotes.health.wiremock.OAuthExtension
 import uk.gov.justice.hmpps.casenotes.health.wiremock.PrisonerSearchApiExtension
 import uk.gov.justice.hmpps.casenotes.health.wiremock.TokenVerificationExtension
@@ -56,6 +57,7 @@ internal const val USERNAME = "TestUser"
   OAuthExtension::class,
   TokenVerificationExtension::class,
   PrisonerSearchApiExtension::class,
+  ManageUsersApiExtension::class,
 )
 abstract class IntegrationTest : BasicIntegrationTest() {
 

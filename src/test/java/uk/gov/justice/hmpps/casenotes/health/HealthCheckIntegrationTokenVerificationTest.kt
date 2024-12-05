@@ -6,7 +6,9 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.springframework.boot.test.context.SpringBootTest
 import uk.gov.justice.hmpps.casenotes.health.wiremock.Elite2Extension.Companion.elite2Api
+import uk.gov.justice.hmpps.casenotes.health.wiremock.ManageUsersApiExtension.Companion.manageUsersApi
 import uk.gov.justice.hmpps.casenotes.health.wiremock.OAuthExtension.Companion.oAuthApi
+import uk.gov.justice.hmpps.casenotes.health.wiremock.PrisonerSearchApiExtension.Companion.prisonerSearchApi
 import uk.gov.justice.hmpps.casenotes.health.wiremock.TokenVerificationExtension.Companion.tokenVerificationApi
 
 @SpringBootTest(
@@ -24,6 +26,8 @@ class HealthCheckIntegrationTokenVerificationTest : BasicIntegrationTest() {
       .expectBody()
       .jsonPath("components.OAuthApiHealth.details.HttpStatus").isEqualTo("OK")
       .jsonPath("components.elite2ApiHealth.details.HttpStatus").isEqualTo("OK")
+      .jsonPath("components.prisonerSearchApiHealth.details.HttpStatus").isEqualTo("OK")
+      .jsonPath("components.manageUsersApiHealth.details.HttpStatus").isEqualTo("OK")
       .jsonPath("components.tokenVerificationApiHealth.details.HttpStatus").isEqualTo("OK")
       .jsonPath("status").isEqualTo("UP")
   }
@@ -51,6 +55,12 @@ class HealthCheckIntegrationTokenVerificationTest : BasicIntegrationTest() {
       .jsonPath("components.elite2ApiHealth.details.error").value<String> {
         assertThat(it).contains("WebClientResponseException\$NotFound: 404 Not Found")
       }
+      .jsonPath("components.manageUsersApiHealth.details.error").value<String> {
+        assertThat(it).contains("WebClientResponseException\$NotFound: 404 Not Found")
+      }
+      .jsonPath("components.prisonerSearchApiHealth.details.error").value<String> {
+        assertThat(it).contains("WebClientResponseException\$NotFound: 404 Not Found")
+      }
       .jsonPath("components.tokenVerificationApiHealth.details.error").value<String> {
         assertThat(it).contains("WebClientResponseException\$NotFound: 404 Not Found")
       }
@@ -70,6 +80,12 @@ class HealthCheckIntegrationTokenVerificationTest : BasicIntegrationTest() {
       .jsonPath("components.elite2ApiHealth.details.error").value<String> {
         assertThat(it).contains("WebClientResponseException: 418 I'm a teapot")
       }
+      .jsonPath("components.prisonerSearchApiHealth.details.error").value<String> {
+        assertThat(it).contains("WebClientResponseException: 418 I'm a teapot")
+      }
+      .jsonPath("components.manageUsersApiHealth.details.error").value<String> {
+        assertThat(it).contains("WebClientResponseException: 418 I'm a teapot")
+      }
       .jsonPath("components.tokenVerificationApiHealth.details.error").value<String> {
         assertThat(it).contains("WebClientResponseException: 418 I'm a teapot")
       }
@@ -87,6 +103,24 @@ class HealthCheckIntegrationTokenVerificationTest : BasicIntegrationTest() {
     )
 
     elite2Api.stubFor(
+      get("/health/ping").willReturn(
+        aResponse()
+          .withHeader("Content-Type", "application/json")
+          .withBody(if (status == 200) "{\"status\":\"UP\"}" else "some error")
+          .withStatus(status),
+      ),
+    )
+
+    prisonerSearchApi.stubFor(
+      get("/health/ping").willReturn(
+        aResponse()
+          .withHeader("Content-Type", "application/json")
+          .withBody(if (status == 200) "{\"status\":\"UP\"}" else "some error")
+          .withStatus(status),
+      ),
+    )
+
+    manageUsersApi.stubFor(
       get("/health/ping").willReturn(
         aResponse()
           .withHeader("Content-Type", "application/json")

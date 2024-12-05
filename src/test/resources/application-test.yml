@@ -39,6 +39,8 @@ tokenverification:
 
 prisoner-search.api.base.url: http://localhost:8200
 
+manage-users.api.base.url: http://localhost:8100
+
 api:
   health-timeout: 400ms
 

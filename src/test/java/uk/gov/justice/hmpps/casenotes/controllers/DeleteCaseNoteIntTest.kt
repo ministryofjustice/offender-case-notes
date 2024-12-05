@@ -12,7 +12,7 @@ import uk.gov.justice.hmpps.casenotes.domain.DeletionCause.DELETE
 import uk.gov.justice.hmpps.casenotes.domain.System
 import uk.gov.justice.hmpps.casenotes.domain.audit.DeletedCaseNoteRepository
 import uk.gov.justice.hmpps.casenotes.events.PersonCaseNoteEvent
-import uk.gov.justice.hmpps.casenotes.health.wiremock.OAuthExtension.Companion.oAuthApi
+import uk.gov.justice.hmpps.casenotes.health.wiremock.ManageUsersApiExtension.Companion.manageUsersApi
 import uk.gov.justice.hmpps.casenotes.utils.NomisIdGenerator.personIdentifier
 import uk.gov.justice.hmpps.casenotes.utils.verifyAgainst
 import java.util.UUID
@@ -81,7 +81,7 @@ class DeleteCaseNoteIntTest : IntegrationTest() {
     @JvmStatic
     @BeforeAll
     fun setup() {
-      oAuthApi.subGetUserDetails(USERNAME)
+      manageUsersApi.stubGetUserDetails(USERNAME)
     }
   }
 }

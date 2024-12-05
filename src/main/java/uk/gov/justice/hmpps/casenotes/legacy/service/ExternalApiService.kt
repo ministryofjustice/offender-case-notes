@@ -1,41 +1,23 @@
 package uk.gov.justice.hmpps.casenotes.legacy.service
 
+import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.core.ParameterizedTypeReference
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageImpl
 import org.springframework.data.domain.Pageable
-import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Service
 import org.springframework.web.reactive.function.client.WebClient
 import org.springframework.web.reactive.function.client.bodyToMono
-import reactor.core.publisher.Mono
 import uk.gov.justice.hmpps.casenotes.integrations.retryOnTransientException
 import uk.gov.justice.hmpps.casenotes.legacy.dto.NomisCaseNote
-import uk.gov.justice.hmpps.casenotes.legacy.dto.UserDetails
 import uk.gov.justice.hmpps.casenotes.notes.AmendCaseNoteRequest
 import uk.gov.justice.hmpps.casenotes.notes.CaseNoteFilter
 import uk.gov.justice.hmpps.casenotes.notes.CreateCaseNoteRequest
 import java.time.format.DateTimeFormatter
 
 @Service
-class ExternalApiService(
-  private val elite2ApiWebClient: WebClient,
-  private val oauthApiWebClient: WebClient,
-) {
-
-  fun getUserDetails(currentUsername: String): UserDetails? =
-    oauthApiWebClient.get().uri("/api/user/{username}", currentUsername)
-      .exchangeToMono {
-        if (it.statusCode() == HttpStatus.NOT_FOUND) {
-          Mono.empty()
-        } else {
-          it.bodyToMono<UserDetails>()
-        }
-      }
-      .retryOnTransientException()
-      .block()
-
+class ExternalApiService(@Qualifier("elite2ApiWebClient") private val elite2ApiWebClient: WebClient) {
   fun getOffenderCaseNotes(
     offenderIdentifier: String,
     filter: CaseNoteFilter,

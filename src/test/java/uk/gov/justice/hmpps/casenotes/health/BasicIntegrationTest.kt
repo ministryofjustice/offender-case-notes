@@ -14,12 +14,20 @@ import uk.gov.justice.hmpps.casenotes.config.container.LocalStackContainer
 import uk.gov.justice.hmpps.casenotes.config.container.LocalStackContainer.setLocalStackProperties
 import uk.gov.justice.hmpps.casenotes.config.container.PostgresContainer
 import uk.gov.justice.hmpps.casenotes.health.wiremock.Elite2Extension
+import uk.gov.justice.hmpps.casenotes.health.wiremock.ManageUsersApiExtension
 import uk.gov.justice.hmpps.casenotes.health.wiremock.OAuthExtension
+import uk.gov.justice.hmpps.casenotes.health.wiremock.PrisonerSearchApiExtension
 import uk.gov.justice.hmpps.casenotes.health.wiremock.TokenVerificationExtension
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("test")
-@ExtendWith(Elite2Extension::class, OAuthExtension::class, TokenVerificationExtension::class)
+@ExtendWith(
+  Elite2Extension::class,
+  OAuthExtension::class,
+  TokenVerificationExtension::class,
+  PrisonerSearchApiExtension::class,
+  ManageUsersApiExtension::class,
+)
 abstract class BasicIntegrationTest {
   @Autowired
   lateinit var webTestClient: WebTestClient

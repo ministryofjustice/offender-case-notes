@@ -35,6 +35,7 @@ class WebClientConfiguration(
   @Value("\${elite2.api.base.url}") private val elite2ApiBaseUrl: @URL String,
   @Value("\${oauth.api.base.url}") private val oauthApiBaseUrl: @URL String,
   @Value("\${prisoner-search.api.base.url}") private val prisonerSearchApiBaseUrl: @URL String,
+  @Value("\${manage-users.api.base.url}") private val manageUsersApiBaseUrl: @URL String,
   @Value("\${tokenverification.api.base.url}") private val tokenVerificationApiBaseUrl: @URL String,
   @Value("\${api.health-timeout:1s}") private val healthTimeout: Duration,
   @Value("\${api.response-timeout:2s}") private val responseTimeout: Duration,
@@ -51,6 +52,13 @@ class WebClientConfiguration(
 
   @Bean
   fun oauthApiHealthWebClient(builder: Builder): WebClient = createHealthClient(builder, oauthApiBaseUrl)
+
+  @Bean
+  fun prisonerSearchApiHealthWebClient(builder: Builder): WebClient =
+    createHealthClient(builder, prisonerSearchApiBaseUrl)
+
+  @Bean
+  fun manageUsersApiHealthWebClient(builder: Builder): WebClient = createHealthClient(builder, manageUsersApiBaseUrl)
 
   @Bean
   fun tokenVerificationApiWebClient(builder: Builder): WebClient = builder.baseUrl(tokenVerificationApiBaseUrl)
@@ -108,6 +116,12 @@ class WebClientConfiguration(
     @Qualifier(value = "authorizedClientManagerAppScope") authorizedClientManager: OAuth2AuthorizedClientManager,
     builder: Builder,
   ): WebClient = getOAuthWebClient(authorizedClientManager, builder, prisonerSearchApiBaseUrl)
+
+  @Bean
+  fun manageUsersWebClient(
+    @Qualifier(value = "authorizedClientManagerAppScope") authorizedClientManager: OAuth2AuthorizedClientManager,
+    builder: Builder,
+  ): WebClient = getOAuthWebClient(authorizedClientManager, builder, manageUsersApiBaseUrl)
 
   private fun getOAuthWebClient(
     authorizedClientManager: OAuth2AuthorizedClientManager,
