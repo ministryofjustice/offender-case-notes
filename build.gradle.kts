@@ -1,7 +1,7 @@
 plugins {
   id("uk.gov.justice.hmpps.gradle-spring-boot") version "6.1.0"
-  kotlin("plugin.spring") version "2.0.21"
-  kotlin("plugin.jpa") version "2.0.21"
+  kotlin("plugin.spring") version "2.1.0"
+  kotlin("plugin.jpa") version "2.1.0"
   id("io.gatling.gradle") version "3.13.1"
 }
 
@@ -25,7 +25,7 @@ dependencies {
   implementation("org.springframework.boot:spring-boot-starter-oauth2-client")
   implementation("org.springframework.boot:spring-boot-starter-webflux")
   implementation("uk.gov.justice.service.hmpps:hmpps-sqs-spring-boot-starter:5.2.0")
-  implementation("io.sentry:sentry-spring-boot-starter-jakarta:7.18.0")
+  implementation("io.sentry:sentry-spring-boot-starter-jakarta:7.18.1")
 
   implementation("javax.activation:activation:1.1.1")
   implementation("javax.transaction:javax.transaction-api:1.3")
@@ -39,15 +39,15 @@ dependencies {
   implementation("com.google.guava:guava:33.3.1-jre")
 
   implementation(platform("com.amazonaws:aws-java-sdk-bom:1.12.779"))
-  implementation("software.amazon.awssdk:sns:2.29.21")
+  implementation("software.amazon.awssdk:sns:2.29.31")
 
   testAnnotationProcessor("org.projectlombok:lombok:1.18.36")
   testCompileOnly("org.projectlombok:lombok:1.18.36")
   testImplementation("org.springframework.security:spring-security-test")
   testImplementation("com.tngtech.java:junit-dataprovider:1.13.1")
-  testImplementation("net.javacrumbs.json-unit:json-unit-assertj:4.0.0")
+  testImplementation("net.javacrumbs.json-unit:json-unit-assertj:4.1.0")
   testImplementation("io.github.http-builder-ng:http-builder-ng-apache:1.0.4")
-  testImplementation("org.wiremock:wiremock-standalone:3.9.2")
+  testImplementation("org.wiremock:wiremock-standalone:3.10.0")
   testImplementation("org.testcontainers:postgresql:1.20.4")
   testImplementation("org.testcontainers:localstack:1.20.4")
   testImplementation("io.jsonwebtoken:jjwt-impl:0.12.6")
