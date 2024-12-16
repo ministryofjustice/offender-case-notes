@@ -9,8 +9,8 @@ data class SarNote(
   val type: String,
   val subType: String,
   val text: String,
-  val authorName: String,
+  val authorUsername: String,
   val amendments: List<SarAmendment>,
 )
 
-data class SarAmendment(val creationDateTime: LocalDateTime, val additionalNoteText: String, val authorName: String)
+data class SarAmendment(val creationDateTime: LocalDateTime, val additionalNoteText: String, val authorUsername: String)
