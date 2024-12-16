@@ -23,10 +23,8 @@ private fun Note.toSarNote() = SarNote(
   subType.type.description,
   subType.description,
   text,
-  authorName.masked(),
+  authorUsername,
   amendments().map { it.toSarAmendment() },
 )
 
-private fun Amendment.toSarAmendment() = SarAmendment(createdAt, text, authorName.masked())
-
-private fun String.masked() = replace("\\S".toRegex(), "#")
+private fun Amendment.toSarAmendment() = SarAmendment(createdAt, text, authorUsername)

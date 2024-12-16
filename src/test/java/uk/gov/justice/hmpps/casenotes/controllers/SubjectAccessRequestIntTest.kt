@@ -12,7 +12,6 @@ import uk.gov.justice.hmpps.casenotes.utils.NomisIdGenerator.personIdentifier
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.time.temporal.ChronoUnit
-import java.util.regex.Pattern.compile
 
 class SubjectAccessRequestIntTest : IntegrationTest() {
   @Test
@@ -50,7 +49,6 @@ class SubjectAccessRequestIntTest : IntegrationTest() {
     val res = getSarContent(mapOf("prn" to personIdentifier)).success<SubjectAccessResponse>()
     assertThat(res.content).hasSize(100)
     assertThat(res.content.flatMap { it.amendments }).hasSize(20)
-    res.content.forEach(SarNote::verifyNoAuthorName)
     assertThat(
       res.content.map { it.type to it.subType }.toSet(),
     ).containsExactlyInAnyOrderElementsOf(cn.map { it.subType.type.description to it.subType.description }.toSet())
@@ -157,23 +155,16 @@ class SubjectAccessRequestIntTest : IntegrationTest() {
   }
 }
 
-private val MASK_PATTERN = compile("^[#\\s]+$")
-
-private fun SarNote.verifyNoAuthorName() {
-  assertThat(authorName).matches(MASK_PATTERN)
-  amendments.forEach { assertThat(it.authorName).matches(MASK_PATTERN) }
-}
-
 private fun SarNote.verifyAgainst(note: Note) {
   assertThat(type).isEqualTo(note.subType.type.description)
   assertThat(subType).isEqualTo(note.subType.description)
-  assertThat(authorName).matches(MASK_PATTERN)
+  assertThat(authorUsername).matches(note.authorUsername)
   assertThat(creationDateTime.truncatedTo(ChronoUnit.SECONDS)).isEqualTo(note.createdAt.truncatedTo(ChronoUnit.SECONDS))
   assertThat(text).isEqualTo(note.text)
 }
 
 private fun SarAmendment.verifyAgainst(amendment: Amendment) {
-  assertThat(authorName).matches(MASK_PATTERN)
+  assertThat(authorUsername).matches(amendment.authorUsername)
   assertThat(creationDateTime.truncatedTo(ChronoUnit.SECONDS))
     .isEqualTo(amendment.createdAt.truncatedTo(ChronoUnit.SECONDS))
   assertThat(additionalNoteText).isEqualTo(amendment.text)
