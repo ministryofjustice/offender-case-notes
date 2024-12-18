@@ -35,8 +35,14 @@ class SyncCaseNotes(
     val allNotes = noteRepository.findNomisCaseNotesByPersonIdentifier(personIdentifier)
     val nomisIds = toKeep.map { it.legacyId }
     val toDelete = allNotes.filter { it.legacyId !in nomisIds }
-    amendmentRepository.deleteByIdIn(toDelete.flatMap { it.amendments().map(Amendment::getId) })
-    noteRepository.deleteByIdIn(toDelete.map { it.id })
+    val amendmentIds = toDelete.flatMap { it.amendments().map(Amendment::getId) }
+    if (amendmentIds.isNotEmpty()) {
+      amendmentRepository.deleteByIdIn(amendmentIds)
+    }
+    val noteIds = toDelete.map { it.id }
+    if (noteIds.isNotEmpty()) {
+      noteRepository.deleteByIdIn(noteIds)
+    }
     return allNotes.filter { it.legacyId in nomisIds }.map { MigrationResult(it.id, it.legacyId) }
   }
 
