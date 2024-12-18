@@ -188,10 +188,6 @@ interface NoteRepository : JpaSpecificationExecutor<Note>, JpaRepository<Note, U
   @EntityGraph(attributePaths = ["subType.type", "amendments"])
   fun findAllByPersonIdentifierAndIdIn(personIdentifier: String, ids: Collection<UUID>): List<Note>
 
-  @Modifying
-  @Query("delete from Note n where n.personIdentifier = :personIdentifier and n.legacyId > 0 ")
-  fun deleteLegacyCaseNotes(personIdentifier: String)
-
   @EntityGraph(attributePaths = ["subType.type", "amendments"])
   fun findAllByPersonIdentifierAndSubTypeSyncToNomis(personIdentifier: String, syncToNomis: Boolean): List<Note>
 
@@ -212,6 +208,22 @@ interface NoteRepository : JpaSpecificationExecutor<Note>, JpaRepository<Note, U
     """,
   )
   fun findSarContent(personIdentifier: String, from: LocalDateTime?, to: LocalDateTime?): List<Note>
+
+  @Query(
+    """
+    select cn from Note cn
+    join fetch cn.subType st
+    join fetch st.type t
+    left join cn.amendments a
+    where cn.personIdentifier = :personIdentifier
+    and st.syncToNomis = true
+    """,
+  )
+  fun findNomisCaseNotesByPersonIdentifier(personIdentifier: String): List<Note>
+
+  @Modifying
+  @Query("delete from Note n where n.id in :ids")
+  fun deleteByIdIn(ids: List<UUID>)
 }
 
 fun NoteRepository.saveAndRefresh(note: Note): Note {

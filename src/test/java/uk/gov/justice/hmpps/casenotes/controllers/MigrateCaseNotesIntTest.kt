@@ -2,7 +2,6 @@ package uk.gov.justice.hmpps.casenotes.controllers
 
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
-import org.springframework.http.HttpStatus
 import uk.gov.justice.hmpps.casenotes.config.SecurityUserContext.Companion.ROLE_CASE_NOTES_SYNC
 import uk.gov.justice.hmpps.casenotes.config.SecurityUserContext.Companion.ROLE_CASE_NOTES_WRITE
 import uk.gov.justice.hmpps.casenotes.domain.Note
@@ -14,11 +13,7 @@ import uk.gov.justice.hmpps.casenotes.sync.MigrateCaseNoteRequest
 import uk.gov.justice.hmpps.casenotes.sync.MigrationResult
 import uk.gov.justice.hmpps.casenotes.utils.NomisIdGenerator
 import uk.gov.justice.hmpps.casenotes.utils.NomisIdGenerator.personIdentifier
-import uk.gov.justice.hmpps.casenotes.utils.verifyAgainst
-import java.time.Duration
 import java.time.LocalDateTime
-import kotlin.time.measureTimedValue
-import kotlin.time.toJavaDuration
 
 class MigrateCaseNotesIntTest : IntegrationTest() {
   @Test
@@ -33,97 +28,30 @@ class MigrateCaseNotesIntTest : IntegrationTest() {
   }
 
   @Test
-  fun `400 bad request - case note types must exist`() {
+  fun `200 ok - case note already exists, delete duplicates`() {
     val personIdentifier = personIdentifier()
-    val request = listOf(
-      migrateCaseNoteRequest(type = "NON_EXISTENT", subType = "GARBAGE"),
-      migrateCaseNoteRequest(type = "NON_EXISTENT", subType = "NOT_THERE"),
-      migrateCaseNoteRequest(type = "ANOTHER_TYPE", subType = "GARBAGE"),
-    )
-    val response = migrateCaseNotes(personIdentifier, request).errorResponse(HttpStatus.BAD_REQUEST)
-    with(response) {
-      assertThat(status).isEqualTo(HttpStatus.BAD_REQUEST.value())
-      assertThat(developerMessage).isEqualTo("Case note types missing: { ANOTHER_TYPE:[GARBAGE], NON_EXISTENT:[GARBAGE, NOT_THERE] }")
+    val (nomisTypes, dpsTypes) = getAllTypes().partition { it.syncToNomis }
+    val migrated = (0..20).map {
+      val caseNote = generateCaseNote(personIdentifier, nomisTypes.random())
+      if (it % 2 == 0) {
+        caseNote.withAmendment().withAmendment()
+      }
+      givenCaseNote(caseNote)
     }
-  }
 
-  @Test
-  fun `400 bad request - case note types be sync to nomis types`() {
-    val request = listOf(
-      migrateCaseNoteRequest(type = "POM", subType = "SPECIAL"),
-      migrateCaseNoteRequest(type = "POM", subType = "GEN"),
-      migrateCaseNoteRequest(type = "OMIC", subType = "GEN"),
-      migrateCaseNoteRequest(type = "OMIC", subType = "OMIC_OPEN"),
-    )
-    val response = migrateCaseNotes(personIdentifier(), request).errorResponse(HttpStatus.BAD_REQUEST)
-    with(response) {
-      assertThat(status).isEqualTo(HttpStatus.BAD_REQUEST.value())
-      assertThat(developerMessage).isEqualTo("Case note types are not sync to nomis types: { OMIC:[GEN, OMIC_OPEN], POM:[GEN, SPECIAL] }")
+    val duplicate = givenCaseNote(migrated.random().duplicate())
+    val dpsNotes = (0..5).map {
+      givenCaseNote(generateCaseNote(personIdentifier, dpsTypes.random(), legacyId = noteRepository.getNextLegacyId()))
     }
-  }
 
-  @Test
-  fun `200 ok - new case notes created`() {
-    val personIdentifier = personIdentifier()
-    val types = getAllTypes().filter { it.syncToNomis }
-    val request = (0..500).map {
-      val type = types.random()
-      migrateCaseNoteRequest(
-        type = type.type.code,
-        subType = type.code,
-        amendments = if (it % 5 == 0) setOf(migrateAmendmentRequest(), migrateAmendmentRequest()) else setOf(),
-      )
-    }
-    val (response, elapsed) = measureTimedValue {
-      migrateCaseNotes(personIdentifier, request).successList<MigrationResult>()
-    }
-    assertThat(response.size).isEqualTo(request.size)
-    assertThat(elapsed.toJavaDuration()).isLessThanOrEqualTo(Duration.ofSeconds(2))
-  }
-
-  @Test
-  fun `200 ok - new case note with amendments is correctly stored`() {
-    val personIdentifier = personIdentifier()
-    val type = getAllTypes().first { it.syncToNomis }
-    val amendment = migrateAmendmentRequest(
-      text = "An amendment to the case note, to verify it is saved correctly",
-      author = Author("SM1ELSE", "585153477", "Simon", "Else"),
-      createdDateTime = LocalDateTime.now().minusDays(3),
-    )
-    val request = migrateCaseNoteRequest(
-      locationId = "LEI",
-      type = type.type.code,
-      subType = type.code,
-      text = "This a larger, non default text block to determine that notes are correctly saved to the db",
-      author = Author("anotherUser", "564716341", "An", "Other"),
-      occurrenceDateTime = LocalDateTime.now().minusDays(10),
-      createdDateTime = LocalDateTime.now().minusDays(7),
-      amendments = setOf(amendment),
-    )
-
-    val response = migrateCaseNotes(personIdentifier, listOf(request)).successList<MigrationResult>()
-    val saved = noteRepository.findByIdAndPersonIdentifier(response.first().id, personIdentifier)
-    requireNotNull(saved).verifyAgainst(request)
-    saved.amendments().first().verifyAgainst(request.amendments.first())
-  }
-
-  @Test
-  fun `200 ok - some case note already exists`() {
-    val personIdentifier = personIdentifier()
-    val types = getAllTypes().filter { it.syncToNomis }
-    val migrated = givenCaseNote(generateCaseNote(personIdentifier, types.random()).withAmendment().withAmendment())
-    val secondType = types.random()
-    val request = listOf(
-      migrateCaseNoteRequest(type = secondType.typeCode, subType = secondType.code),
-      migrated.migrateRequest(),
-    )
-
+    val request = migrated.map(Note::migrateRequest)
     val response = migrateCaseNotes(personIdentifier, request).successList<MigrationResult>()
     assertThat(response.size).isEqualTo(request.size)
     assertThat(response.map { it.legacyId }).containsExactlyInAnyOrderElementsOf(request.map { it.legacyId })
 
     val saved = noteRepository.findAll(matchesPersonIdentifier(personIdentifier))
-    assertThat(saved.size).isEqualTo(request.size)
+    assertThat(saved.size).isEqualTo(request.size + dpsNotes.size)
+    assertThat(saved.none { it.id == duplicate.id })
   }
 
   private fun migrateCaseNotes(
@@ -169,13 +97,6 @@ private fun migrateCaseNoteRequest(
   amendments,
 )
 
-private fun migrateAmendmentRequest(
-  text: String = "The text of the case note",
-  system: System = System.NOMIS,
-  author: Author = defaultAuthor(),
-  createdDateTime: LocalDateTime = LocalDateTime.now(),
-) = MigrateAmendmentRequest(text, system, author, createdDateTime)
-
 private fun defaultAuthor() = Author("AuthorUsername", "12376471", "Author", "Name")
 
 private fun Note.migrateRequest(): MigrateCaseNoteRequest {
@@ -192,3 +113,16 @@ private fun Note.migrateRequest(): MigrateCaseNoteRequest {
     subType = subType.code,
   )
 }
+
+private fun Note.duplicate() = Note(
+  personIdentifier,
+  subType,
+  occurredAt,
+  locationId,
+  authorUsername,
+  authorUserId,
+  authorName,
+  text,
+  systemGenerated,
+  system,
+).apply { legacyId = NomisIdGenerator.newId() }

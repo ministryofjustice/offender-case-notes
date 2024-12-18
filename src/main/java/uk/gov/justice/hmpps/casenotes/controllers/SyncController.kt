@@ -33,14 +33,7 @@ import java.util.UUID
 @Tag(name = "Sync Case Notes", description = "Endpoint for sync operations")
 @RestController
 class SyncController(private val sync: SyncCaseNotes) {
-  @Operation(
-    summary = "Endpoint to migrate all the case notes for a person from NOMIS to DPS.",
-    description =
-    """
-    Existing case notes associated with the person will be deleted and recreated. 
-    This will change the mapping information for the recreated notes therefore the caller should replace all existing mapping information with the response.
-    """,
-  )
+  @Operation(summary = "Endpoint repurposed to remove duplicate case notes")
   @ApiResponses(
     value = [
       ApiResponse(
@@ -70,7 +63,7 @@ class SyncController(private val sync: SyncCaseNotes) {
     @Parameter(description = "Person Identifier", required = true, example = "A1234AA")
     @PathVariable personIdentifier: String,
     @Valid @RequestBody caseNotes: List<MigrateCaseNoteRequest>,
-  ): List<MigrationResult> = sync.migrateNotes(personIdentifier, caseNotes)
+  ): List<MigrationResult> = sync.removeUnknownNotes(personIdentifier, caseNotes)
 
   @Operation(
     summary = "Endpoint to sync a case note from nomis to dps.",
