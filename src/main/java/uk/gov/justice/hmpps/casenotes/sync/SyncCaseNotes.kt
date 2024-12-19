@@ -38,9 +38,7 @@ class SyncCaseNotes(
   fun migrationRequest(personIdentifier: String, toMigrate: List<MigrateCaseNoteRequest>): List<MigrationResult> {
     val previousAmendmentCount = amendmentRepository.deleteLegacyAmendments(personIdentifier)
     val previousCount = noteRepository.deleteLegacyNotes(personIdentifier)
-
-    val toCreate = toMigrate.mapToEntities(personIdentifier)
-    val created = toCreate.create()
+    val created = toMigrate.mapToEntities(personIdentifier).create()
 
     telemetryClient.trackEvent(
       "Migration Request",
