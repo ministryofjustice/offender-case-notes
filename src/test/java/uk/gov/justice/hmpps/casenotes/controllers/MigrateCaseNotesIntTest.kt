@@ -28,7 +28,7 @@ class MigrateCaseNotesIntTest : IntegrationTest() {
   }
 
   @Test
-  fun `200 ok - case note already exists, delete duplicates`() {
+  fun `200 ok - replace existing nomis notes and insert new ones`() {
     val personIdentifier = personIdentifier()
     val (nomisTypes, dpsTypes) = getAllTypes().partition { it.syncToNomis }
     val migrated = (0..20).map {
