@@ -28,7 +28,7 @@ class MigrateCaseNotesIntTest : IntegrationTest() {
   }
 
   @Test
-  fun `200 ok - replace existing nomis notes and insert new ones`() {
+  fun `200 ok - update existing nomis notes, delete duplicates and insert new ones`() {
     val personIdentifier = personIdentifier()
     val (nomisTypes, dpsTypes) = getAllTypes().partition { it.syncToNomis }
     val migrated = (0..20).map {
@@ -55,6 +55,9 @@ class MigrateCaseNotesIntTest : IntegrationTest() {
     assertThat(saved.size).isEqualTo(request.size + dpsNotes.size)
     assertThat(saved.none { it.id == duplicate.id })
     assertThat(saved.firstOrNull { it.legacyId == extra.legacyId }).isNotNull
+    saved.filter { it.subType.syncToNomis && it.legacyId > 0 }.forEach {
+      assertThat(it.createdAt).isEqualTo(request.find { m -> it.legacyId == m.legacyId }!!.createdDateTime)
+    }
   }
 
   private fun migrateCaseNotes(
@@ -108,7 +111,7 @@ private fun Note.migrateRequest(): MigrateCaseNoteRequest {
     legacyId = legacyId,
     locationId = locationId,
     text = text,
-    createdDateTime = createdAt,
+    createdDateTime = createdAt.minusMonths(3),
     occurrenceDateTime = occurredAt,
     author = Author(authorUsername, authorUserId, authorNames[0], authorNames[1]),
     createdBy = createdBy,

@@ -36,22 +36,44 @@ class SyncCaseNotes(
   private val telemetryClient: TelemetryClient,
 ) {
   fun migrationRequest(personIdentifier: String, toMigrate: List<MigrateCaseNoteRequest>): List<MigrationResult> {
-    val previousAmendmentCount = amendmentRepository.deleteLegacyAmendments(personIdentifier)
-    val previousCount = noteRepository.deleteLegacyNotes(personIdentifier)
-    val created = toMigrate.mapToEntities(personIdentifier).create()
+    val existing = noteRepository.findNomisCaseNotesByPersonIdentifier(personIdentifier)
+    val existingLegacyIds = existing.map(Note::legacyId).toSet()
+    val toMigrateLegacyMap = toMigrate.associateBy(MigrateCaseNoteRequest::legacyId)
+
+    val deleted = existing.filter { it.legacyId !in toMigrateLegacyMap.keys }.delete()
+    val created = toMigrate.filter { it.legacyId !in existingLegacyIds }.mapToEntities(personIdentifier).create()
+    val updated = existing.filter { it.legacyId in toMigrateLegacyMap.keys }
+      .map {
+        it.createdAt = requireNotNull(toMigrateLegacyMap[it.legacyId]).createdDateTime
+        it
+      }
 
     telemetryClient.trackEvent(
       "Migration Request",
       mapOf(
-        "person" to personIdentifier,
+        "personIdentifier" to personIdentifier,
         "createdCaseNotes" to created.size.toString(),
         "createdAmendments" to created.flatMap { it.amendments() }.size.toString(),
-        "deletedAmendments" to previousAmendmentCount.toString(),
-        "deletedCaseNotes" to previousCount.toString(),
+        "deletedCaseNotes" to deleted.size.toString(),
+        "deletedAmendments" to deleted.flatMap { it.amendments() }.size.toString(),
+        "updatedCaseNotes" to updated.size.toString(),
       ),
       mapOf(),
     )
-    return created.map { MigrationResult(it.id, it.legacyId) }
+    return (created + updated).map { MigrationResult(it.id, it.legacyId) }
+  }
+
+  private fun List<Note>.delete(): List<Note> {
+    val amendments = flatMap(Note::amendments)
+    if (amendments.isNotEmpty()) {
+      amendmentRepository.deleteByIdIn(amendments.map(Amendment::getId))
+    }
+
+    if (isNotEmpty()) {
+      noteRepository.deleteByIdIn(map(Note::getId))
+      forEach(noteRepository::detach)
+    }
+    return this
   }
 
   private fun getTypesForSync(keys: Set<TypeKey>): Map<TypeKey, SubType> {

@@ -14,6 +14,7 @@ import jakarta.persistence.Table
 import jakarta.persistence.Transient
 import jakarta.persistence.criteria.Join
 import jakarta.persistence.criteria.JoinType
+import org.hibernate.annotations.DynamicUpdate
 import org.springframework.data.domain.Persistable
 import org.springframework.data.jpa.domain.Specification
 import org.springframework.data.jpa.repository.EntityGraph
@@ -39,6 +40,7 @@ import java.util.UUID
 
 @Entity
 @Table(name = "case_note")
+@DynamicUpdate
 @EntityListeners(DeletedEntityListener::class)
 class Note(
   @Column(nullable = false)
@@ -209,18 +211,21 @@ interface NoteRepository : JpaSpecificationExecutor<Note>, JpaRepository<Note, U
   )
   fun findSarContent(personIdentifier: String, from: LocalDateTime?, to: LocalDateTime?): List<Note>
 
-  @Modifying
   @Query(
     """
-      delete from case_note c
-      using case_note_sub_type st
-      where c.person_identifier = :personIdentifier 
-	    and st.id = c.sub_type_id
-	    and st.sync_to_nomis = true and c.legacy_id > 0
-      """,
-    nativeQuery = true,
+    select cn from Note cn
+    join fetch cn.subType st
+    join fetch st.type t
+    left join fetch cn.amendments a
+    where cn.personIdentifier = :personIdentifier
+    and st.syncToNomis = true and cn.legacyId > 0
+    """,
   )
-  fun deleteLegacyNotes(personIdentifier: String): Int
+  fun findNomisCaseNotesByPersonIdentifier(personIdentifier: String): List<Note>
+
+  @Modifying
+  @Query("delete from Note n where n.id in :ids")
+  fun deleteByIdIn(ids: List<UUID>)
 }
 
 fun NoteRepository.saveAndRefresh(note: Note): Note {
