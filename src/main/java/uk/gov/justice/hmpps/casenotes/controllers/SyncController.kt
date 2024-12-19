@@ -63,7 +63,7 @@ class SyncController(private val sync: SyncCaseNotes) {
     @Parameter(description = "Person Identifier", required = true, example = "A1234AA")
     @PathVariable personIdentifier: String,
     @Valid @RequestBody caseNotes: List<MigrateCaseNoteRequest>,
-  ): List<MigrationResult> = sync.removeUnknownNotes(personIdentifier, caseNotes)
+  ): List<MigrationResult> = sync.migrationRequest(personIdentifier, caseNotes)
 
   @Operation(
     summary = "Endpoint to sync a case note from nomis to dps.",
