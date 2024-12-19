@@ -35,40 +35,23 @@ class SyncCaseNotes(
   private val eventPublisher: ApplicationEventPublisher,
   private val telemetryClient: TelemetryClient,
 ) {
-  fun migrationRequest(personIdentifier: String, toKeep: List<MigrateCaseNoteRequest>): List<MigrationResult> {
-    val existingNotes = noteRepository.findNomisCaseNotesByPersonIdentifier(personIdentifier)
-    val existingIds = existingNotes.map(Note::legacyId)
-    val nomisIds = toKeep.map { it.legacyId }
-    val toCreate = toKeep.filter { it.legacyId !in existingIds }.mapToEntities(personIdentifier)
-    val toDelete = existingNotes.filter { it.legacyId !in nomisIds && it.legacyId > 0 }
-    val created = toCreate.create()
-    toDelete.delete()
-    val remaining = existingNotes.filter { it.legacyId in nomisIds }
-    val result = created + remaining
+  fun migrationRequest(personIdentifier: String, toMigrate: List<MigrateCaseNoteRequest>): List<MigrationResult> {
+    val previousAmendmentCount = amendmentRepository.deleteLegacyAmendments(personIdentifier)
+    val previousCount = noteRepository.deleteLegacyNotes(personIdentifier)
+    val created = toMigrate.mapToEntities(personIdentifier).create()
+
     telemetryClient.trackEvent(
       "Migration Request",
       mapOf(
         "person" to personIdentifier,
-        "created" to created.size.toString(),
-        "deleted" to toDelete.size.toString(),
-        "unchanged" to remaining.size.toString(),
-        "totalBefore" to existingNotes.size.toString(),
-        "totalAfter" to result.size.toString(),
+        "createdCaseNotes" to created.size.toString(),
+        "createdAmendments" to created.flatMap { it.amendments() }.size.toString(),
+        "deletedAmendments" to previousAmendmentCount.toString(),
+        "deletedCaseNotes" to previousCount.toString(),
       ),
       mapOf(),
     )
-    return (result).map { MigrationResult(it.id, it.legacyId) }
-  }
-
-  private fun List<Note>.delete() {
-    val amendmentIds = flatMap { it.amendments().map(Amendment::getId) }
-    if (amendmentIds.isNotEmpty()) {
-      amendmentRepository.deleteByIdIn(amendmentIds)
-    }
-    val noteIds = map { it.id }
-    if (noteIds.isNotEmpty()) {
-      noteRepository.deleteByIdIn(noteIds)
-    }
+    return created.map { MigrationResult(it.id, it.legacyId) }
   }
 
   private fun getTypesForSync(keys: Set<TypeKey>): Map<TypeKey, SubType> {

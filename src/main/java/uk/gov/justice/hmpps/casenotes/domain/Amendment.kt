@@ -61,6 +61,15 @@ class Amendment(
 
 interface AmendmentRepository : JpaRepository<Amendment, UUID> {
   @Modifying
-  @Query("delete from Amendment a where a.id in :ids")
-  fun deleteByIdIn(ids: List<UUID>)
+  @Query(
+    """
+      delete from case_note_amendment a 
+      using case_note c
+      join case_note_sub_type st on st.id = c.sub_type_id
+      where a.case_note_id = c.id and st.sync_to_nomis = true
+      and c.person_identifier = :personIdentifier and c.legacy_id > 0 
+      """,
+    nativeQuery = true,
+  )
+  fun deleteLegacyAmendments(personIdentifier: String): Int
 }

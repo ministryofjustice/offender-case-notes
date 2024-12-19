@@ -209,21 +209,9 @@ interface NoteRepository : JpaSpecificationExecutor<Note>, JpaRepository<Note, U
   )
   fun findSarContent(personIdentifier: String, from: LocalDateTime?, to: LocalDateTime?): List<Note>
 
-  @Query(
-    """
-    select cn from Note cn
-    join fetch cn.subType st
-    join fetch st.type t
-    left join cn.amendments a
-    where cn.personIdentifier = :personIdentifier
-    and st.syncToNomis = true
-    """,
-  )
-  fun findNomisCaseNotesByPersonIdentifier(personIdentifier: String): List<Note>
-
   @Modifying
-  @Query("delete from Note n where n.id in :ids")
-  fun deleteByIdIn(ids: List<UUID>)
+  @Query("delete from Note n where n.personIdentifier = :personIdentifier and n.subType.syncToNomis = true and n.legacyId > 0 ")
+  fun deleteLegacyNotes(personIdentifier: String): Int
 }
 
 fun NoteRepository.saveAndRefresh(note: Note): Note {
