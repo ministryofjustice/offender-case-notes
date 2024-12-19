@@ -44,7 +44,9 @@ class MigrateCaseNotesIntTest : IntegrationTest() {
       givenCaseNote(generateCaseNote(personIdentifier, dpsTypes.random(), legacyId = noteRepository.getNextLegacyId()))
     }
 
-    val request = migrated.map(Note::migrateRequest)
+    val extraType = nomisTypes.random()
+    val extra = migrateCaseNoteRequest(type = extraType.typeCode, subType = extraType.code)
+    val request = migrated.map(Note::migrateRequest) + extra
     val response = migrateCaseNotes(personIdentifier, request).successList<MigrationResult>()
     assertThat(response.size).isEqualTo(request.size)
     assertThat(response.map { it.legacyId }).containsExactlyInAnyOrderElementsOf(request.map { it.legacyId })
@@ -52,6 +54,7 @@ class MigrateCaseNotesIntTest : IntegrationTest() {
     val saved = noteRepository.findAll(matchesPersonIdentifier(personIdentifier))
     assertThat(saved.size).isEqualTo(request.size + dpsNotes.size)
     assertThat(saved.none { it.id == duplicate.id })
+    assertThat(saved.firstOrNull { it.legacyId == extra.legacyId }).isNotNull
   }
 
   private fun migrateCaseNotes(

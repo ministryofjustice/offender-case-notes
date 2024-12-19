@@ -1,5 +1,6 @@
 package uk.gov.justice.hmpps.casenotes.sync
 
+import com.microsoft.applicationinsights.TelemetryClient
 import org.springframework.context.ApplicationEventPublisher
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
@@ -8,7 +9,9 @@ import uk.gov.justice.hmpps.casenotes.domain.Amendment
 import uk.gov.justice.hmpps.casenotes.domain.AmendmentRepository
 import uk.gov.justice.hmpps.casenotes.domain.Note
 import uk.gov.justice.hmpps.casenotes.domain.NoteRepository
+import uk.gov.justice.hmpps.casenotes.domain.SubType
 import uk.gov.justice.hmpps.casenotes.domain.SubTypeRepository
+import uk.gov.justice.hmpps.casenotes.domain.TypeKey
 import uk.gov.justice.hmpps.casenotes.domain.TypeLookup
 import uk.gov.justice.hmpps.casenotes.domain.getByTypeCodeAndCode
 import uk.gov.justice.hmpps.casenotes.domain.saveAndRefresh
@@ -30,20 +33,66 @@ class SyncCaseNotes(
   private val noteRepository: NoteRepository,
   private val amendmentRepository: AmendmentRepository,
   private val eventPublisher: ApplicationEventPublisher,
+  private val telemetryClient: TelemetryClient,
 ) {
-  fun removeUnknownNotes(personIdentifier: String, toKeep: List<MigrateCaseNoteRequest>): List<MigrationResult> {
-    val allNotes = noteRepository.findNomisCaseNotesByPersonIdentifier(personIdentifier)
+  fun migrationRequest(personIdentifier: String, toKeep: List<MigrateCaseNoteRequest>): List<MigrationResult> {
+    val existingNotes = noteRepository.findNomisCaseNotesByPersonIdentifier(personIdentifier)
+    val existingIds = existingNotes.map(Note::legacyId)
     val nomisIds = toKeep.map { it.legacyId }
-    val toDelete = allNotes.filter { it.legacyId !in nomisIds }
-    val amendmentIds = toDelete.flatMap { it.amendments().map(Amendment::getId) }
+    val toCreate = toKeep.filter { it.legacyId !in existingIds }.mapToEntities(personIdentifier)
+    val toDelete = existingNotes.filter { it.legacyId !in nomisIds && it.legacyId > 0 }
+    val created = toCreate.create()
+    toDelete.delete()
+    val remaining = existingNotes.filter { it.legacyId in nomisIds }
+    val result = created + remaining
+    telemetryClient.trackEvent(
+      "Migration Request",
+      mapOf(
+        "person" to personIdentifier,
+        "created" to created.size.toString(),
+        "deleted" to toDelete.size.toString(),
+        "unchanged" to remaining.size.toString(),
+        "totalBefore" to existingNotes.size.toString(),
+        "totalAfter" to result.size.toString(),
+      ),
+      mapOf(),
+    )
+    return (result).map { MigrationResult(it.id, it.legacyId) }
+  }
+
+  private fun List<Note>.delete() {
+    val amendmentIds = flatMap { it.amendments().map(Amendment::getId) }
     if (amendmentIds.isNotEmpty()) {
       amendmentRepository.deleteByIdIn(amendmentIds)
     }
-    val noteIds = toDelete.map { it.id }
+    val noteIds = map { it.id }
     if (noteIds.isNotEmpty()) {
       noteRepository.deleteByIdIn(noteIds)
     }
-    return allNotes.filter { it.legacyId in nomisIds }.map { MigrationResult(it.id, it.legacyId) }
+  }
+
+  private fun getTypesForSync(keys: Set<TypeKey>): Map<TypeKey, SubType> {
+    val types = typeRepository.findByKeyIn(keys).associateBy { it.key }
+    val missing = keys.subtract(types.keys)
+    check(missing.isEmpty()) {
+      "Case note types missing: ${missing.exceptionMessage()}"
+    }
+    val nonSyncToNomisTypes = types.values.filter { !it.syncToNomis }
+    check(nonSyncToNomisTypes.isEmpty()) {
+      "Case note types are not sync to nomis types: ${nonSyncToNomisTypes.exceptionMessage()}"
+    }
+    return types
+  }
+
+  private fun List<MigrateCaseNoteRequest>.mapToEntities(personIdentifier: String): List<NoteAndAmendments> {
+    val types = getTypesForSync(map { it.typeKey() }.toSet())
+    return map { it.asNoteAndAmendments(personIdentifier, null) { t, st -> requireNotNull(types[TypeKey(t, st)]) } }
+  }
+
+  private fun List<NoteAndAmendments>.create(): List<Note> {
+    val notes = noteRepository.saveAll(map { it.note })
+    amendmentRepository.saveAll(flatMap { it.amendments })
+    return notes
   }
 
   fun syncNote(request: SyncCaseNoteRequest): SyncResult {
