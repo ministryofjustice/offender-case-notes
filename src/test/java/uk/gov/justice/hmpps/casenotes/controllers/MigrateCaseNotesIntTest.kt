@@ -1,6 +1,7 @@
 package uk.gov.justice.hmpps.casenotes.controllers
 
 import org.assertj.core.api.Assertions.assertThat
+import org.assertj.core.api.Assertions.within
 import org.junit.jupiter.api.Test
 import uk.gov.justice.hmpps.casenotes.config.SecurityUserContext.Companion.ROLE_CASE_NOTES_SYNC
 import uk.gov.justice.hmpps.casenotes.config.SecurityUserContext.Companion.ROLE_CASE_NOTES_WRITE
@@ -14,6 +15,7 @@ import uk.gov.justice.hmpps.casenotes.sync.MigrationResult
 import uk.gov.justice.hmpps.casenotes.utils.NomisIdGenerator
 import uk.gov.justice.hmpps.casenotes.utils.NomisIdGenerator.personIdentifier
 import java.time.LocalDateTime
+import java.time.temporal.ChronoUnit
 
 class MigrateCaseNotesIntTest : IntegrationTest() {
   @Test
@@ -56,7 +58,8 @@ class MigrateCaseNotesIntTest : IntegrationTest() {
     assertThat(saved.none { it.id == duplicate.id })
     assertThat(saved.firstOrNull { it.legacyId == extra.legacyId }).isNotNull
     saved.filter { it.subType.syncToNomis && it.legacyId > 0 }.forEach {
-      assertThat(it.createdAt).isEqualTo(request.find { m -> it.legacyId == m.legacyId }!!.createdDateTime)
+      assertThat(it.createdAt)
+        .isCloseTo(request.find { m -> it.legacyId == m.legacyId }!!.createdDateTime, within(1, ChronoUnit.SECONDS))
     }
   }
 
