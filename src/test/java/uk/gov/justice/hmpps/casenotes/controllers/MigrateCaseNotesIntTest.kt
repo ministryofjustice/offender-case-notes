@@ -1,6 +1,7 @@
 package uk.gov.justice.hmpps.casenotes.controllers
 
 import org.assertj.core.api.Assertions.assertThat
+import org.assertj.core.api.Assertions.within
 import org.junit.jupiter.api.Test
 import uk.gov.justice.hmpps.casenotes.config.SecurityUserContext.Companion.ROLE_CASE_NOTES_SYNC
 import uk.gov.justice.hmpps.casenotes.config.SecurityUserContext.Companion.ROLE_CASE_NOTES_WRITE
@@ -14,6 +15,7 @@ import uk.gov.justice.hmpps.casenotes.sync.MigrationResult
 import uk.gov.justice.hmpps.casenotes.utils.NomisIdGenerator
 import uk.gov.justice.hmpps.casenotes.utils.NomisIdGenerator.personIdentifier
 import java.time.LocalDateTime
+import java.time.temporal.ChronoUnit
 
 class MigrateCaseNotesIntTest : IntegrationTest() {
   @Test
@@ -28,7 +30,7 @@ class MigrateCaseNotesIntTest : IntegrationTest() {
   }
 
   @Test
-  fun `200 ok - replace existing nomis notes and insert new ones`() {
+  fun `200 ok - update existing nomis notes, delete duplicates and insert new ones`() {
     val personIdentifier = personIdentifier()
     val (nomisTypes, dpsTypes) = getAllTypes().partition { it.syncToNomis }
     val migrated = (0..20).map {
@@ -55,6 +57,10 @@ class MigrateCaseNotesIntTest : IntegrationTest() {
     assertThat(saved.size).isEqualTo(request.size + dpsNotes.size)
     assertThat(saved.none { it.id == duplicate.id })
     assertThat(saved.firstOrNull { it.legacyId == extra.legacyId }).isNotNull
+    saved.filter { it.subType.syncToNomis && it.legacyId > 0 }.forEach {
+      assertThat(it.createdAt)
+        .isCloseTo(request.find { m -> it.legacyId == m.legacyId }!!.createdDateTime, within(1, ChronoUnit.SECONDS))
+    }
   }
 
   private fun migrateCaseNotes(
@@ -108,7 +114,7 @@ private fun Note.migrateRequest(): MigrateCaseNoteRequest {
     legacyId = legacyId,
     locationId = locationId,
     text = text,
-    createdDateTime = createdAt,
+    createdDateTime = createdAt.minusMonths(3),
     occurrenceDateTime = occurredAt,
     author = Author(authorUsername, authorUserId, authorNames[0], authorNames[1]),
     createdBy = createdBy,
