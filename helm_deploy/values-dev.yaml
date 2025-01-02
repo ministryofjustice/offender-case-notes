@@ -29,6 +29,6 @@ generic-service:
 
 # CloudPlatform AlertManager receiver to route promethues alerts to slack
 generic-prometheus-alerts:
-  alertSeverity: move-and-improve-alerts-non-prod
+  alertSeverity: hmpps-alerts-api-non-prod
   rdsAlertsDatabases:
     cloud-platform-58ca03d8cef2cd18: 'offender case notes'
