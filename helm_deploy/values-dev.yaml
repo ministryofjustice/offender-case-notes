@@ -32,6 +32,3 @@ generic-prometheus-alerts:
   alertSeverity: hmpps-alerts-api-non-prod
   rdsAlertsDatabases:
     cloud-platform-58ca03d8cef2cd18: 'offender case notes'
-
-housekeeping:
-  schedule: "0 * * * *"
