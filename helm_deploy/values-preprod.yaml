@@ -30,3 +30,6 @@ generic-prometheus-alerts:
   rdsAlertsDatabases:
     cloud-platform-5c6377808488916a: 'offender case notes'
     rdsAlertsConnectionThreshold: 360
+
+housekeeping:
+  schedule: "0 * * * *"
