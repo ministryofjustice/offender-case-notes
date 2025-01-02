@@ -31,6 +31,7 @@ spring:
       connectionTimeout: 10000
       validationTimeout: 500
       maximum-pool-size: 20
+      auto-commit: false
 
   jackson:
     date-format: "yyyy-MM-dd HH:mm:ss"
