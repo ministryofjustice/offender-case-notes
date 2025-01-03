@@ -27,6 +27,7 @@ import uk.gov.justice.hmpps.casenotes.utils.NomisIdGenerator.personIdentifier
 import uk.gov.justice.hmpps.casenotes.utils.verifyAgainst
 import java.time.LocalDateTime
 import java.time.LocalDateTime.now
+import java.time.temporal.ChronoUnit
 import java.util.UUID
 
 class SyncCaseNoteIntTest : IntegrationTest() {
@@ -125,6 +126,27 @@ class SyncCaseNoteIntTest : IntegrationTest() {
     val prisonNumber = personIdentifier()
     val existing = givenCaseNote(generateCaseNote(prisonNumber))
     val request = existing.syncRequest().copy(text = "The text was updated in nomis by CENTRAL ADMIN", system = System.DPS)
+    val response = syncCaseNote(request).success<SyncResult>(HttpStatus.OK)
+    assertThat(response.action).isEqualTo(UPDATED)
+
+    val saved = requireNotNull(noteRepository.findByIdAndPersonIdentifier(response.id, request.personIdentifier))
+    saved.verifyAgainst(request)
+    assertThat(saved.system).isEqualTo(System.DPS)
+
+    val deleted = deletedCaseNoteRepository.findByCaseNoteId(existing.id)
+    assertThat(deleted!!.caseNote).isNotNull()
+    assertThat(deleted.cause).isEqualTo(UPDATE)
+    assertThat(deleted.system).isEqualTo(System.NOMIS)
+    deleted.caseNote.verifyAgainst(existing)
+
+    hmppsEventsQueue.receivePersonCaseNoteEvent().verifyAgainst(PersonCaseNoteEvent.Type.UPDATED, Source.NOMIS, saved)
+  }
+
+  @Test
+  fun `200 ok - sync updates case note occurred at`() {
+    val prisonNumber = personIdentifier()
+    val existing = givenCaseNote(generateCaseNote(prisonNumber))
+    val request = existing.syncRequest().copy(occurrenceDateTime = existing.occurredAt.minusHours(4), system = System.DPS)
     val response = syncCaseNote(request).success<SyncResult>(HttpStatus.OK)
     assertThat(response.action).isEqualTo(UPDATED)
 
@@ -333,7 +355,7 @@ private fun syncCaseNoteRequest(
   locationId,
   type,
   subType,
-  occurrenceDateTime,
+  occurrenceDateTime.truncatedTo(ChronoUnit.SECONDS),
   text,
   systemGenerated,
   author,

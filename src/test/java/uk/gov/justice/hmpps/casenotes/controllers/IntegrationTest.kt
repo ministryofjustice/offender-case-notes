@@ -44,6 +44,7 @@ import uk.gov.justice.hmpps.sqs.MissingTopicException
 import uk.gov.justice.hmpps.sqs.countAllMessagesOnQueue
 import uk.gov.justice.hmpps.sqs.publish
 import java.time.LocalDateTime
+import java.time.temporal.ChronoUnit
 import java.util.UUID
 import java.util.function.Consumer
 
@@ -177,7 +178,7 @@ abstract class IntegrationTest : BasicIntegrationTest() {
   ) = Note(
     prisonNumber,
     type,
-    occurredAt,
+    occurredAt.truncatedTo(ChronoUnit.SECONDS),
     locationId,
     authorUsername,
     authorUserId,

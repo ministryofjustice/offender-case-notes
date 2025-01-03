@@ -44,8 +44,8 @@ class SyncCaseNotes(
     val created = toMigrate.filter { it.legacyId !in existingLegacyIds }.mapToEntities(personIdentifier).create()
     val updated = existing.filter { it.legacyId in toMigrateLegacyMap.keys }
       .map {
-        it.createdAt = requireNotNull(toMigrateLegacyMap[it.legacyId]).createdDateTime
-        it
+        val dates = requireNotNull(toMigrateLegacyMap[it.legacyId])
+        it.migrateDates(dates.occurrenceDateTime, dates.createdDateTime)
       }
 
     telemetryClient.trackEvent(
@@ -175,7 +175,8 @@ private fun <T : TypeLookup> Collection<T>.exceptionMessage() =
 private infix fun SyncCaseNoteRequest.updates(note: Note): Boolean {
   val typeChanged = subType != note.subType.code || type != note.subType.typeCode
   val noteChanged = text != note.text
-  return typeChanged || noteChanged || amendments.any { it updates note }
+  val dateChanged = occurrenceDateTime != note.occurredAt
+  return typeChanged || noteChanged || dateChanged || amendments.any { it updates note }
 }
 
 private infix fun SyncCaseNoteAmendmentRequest.updates(note: Note): Boolean =
