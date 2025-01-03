@@ -3,9 +3,6 @@ generic-service:
   ingress:
     host: dev.offender-case-notes.service.justice.gov.uk
 
-  scheduledDowntime:
-    enabled: true
-
   env:
     SENTRY_ENVIRONMENT: dev
     SERVICE_BASE_URL: "https://dev.offender-case-notes.service.justice.gov.uk"
