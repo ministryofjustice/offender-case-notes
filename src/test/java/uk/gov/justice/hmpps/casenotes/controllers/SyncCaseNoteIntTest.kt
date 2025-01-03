@@ -142,6 +142,27 @@ class SyncCaseNoteIntTest : IntegrationTest() {
   }
 
   @Test
+  fun `200 ok - sync updates case note occurred at`() {
+    val prisonNumber = personIdentifier()
+    val existing = givenCaseNote(generateCaseNote(prisonNumber))
+    val request = existing.syncRequest().copy(occurrenceDateTime = existing.occurredAt.minusHours(4), system = System.DPS)
+    val response = syncCaseNote(request).success<SyncResult>(HttpStatus.OK)
+    assertThat(response.action).isEqualTo(UPDATED)
+
+    val saved = requireNotNull(noteRepository.findByIdAndPersonIdentifier(response.id, request.personIdentifier))
+    saved.verifyAgainst(request)
+    assertThat(saved.system).isEqualTo(System.DPS)
+
+    val deleted = deletedCaseNoteRepository.findByCaseNoteId(existing.id)
+    assertThat(deleted!!.caseNote).isNotNull()
+    assertThat(deleted.cause).isEqualTo(UPDATE)
+    assertThat(deleted.system).isEqualTo(System.NOMIS)
+    deleted.caseNote.verifyAgainst(existing)
+
+    hmppsEventsQueue.receivePersonCaseNoteEvent().verifyAgainst(PersonCaseNoteEvent.Type.UPDATED, Source.NOMIS, saved)
+  }
+
+  @Test
   fun `200 ok - sync updates an existing case note type`() {
     val types = getAllTypes()
     val type1 = types.random()

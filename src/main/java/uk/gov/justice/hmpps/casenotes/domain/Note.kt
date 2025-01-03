@@ -50,8 +50,7 @@ class Note(
   @JoinColumn(name = "sub_type_id", nullable = false)
   val subType: SubType,
 
-  @Column(nullable = false)
-  override val occurredAt: LocalDateTime,
+  occurredAt: LocalDateTime,
 
   @Column(nullable = false)
   override val locationId: String,
@@ -86,6 +85,11 @@ class Note(
 
   @Column(name = "sub_type_id", insertable = false, updatable = false, nullable = false)
   override val subTypeId: Long = subType.id!!
+
+  @Column(nullable = false)
+  override var occurredAt: LocalDateTime = occurredAt
+    private set
+
   override var legacyId: Long = 0
 
   @OneToMany(cascade = [CascadeType.ALL], mappedBy = "note")
@@ -156,6 +160,11 @@ class Note(
         createdBy = it.createdBy
       }
     }.toSortedSet()
+  }
+
+  fun migrateDates(occurredAt: LocalDateTime, createdAt: LocalDateTime) = apply {
+    this.occurredAt = occurredAt
+    this.createdAt = createdAt
   }
 
   companion object {
