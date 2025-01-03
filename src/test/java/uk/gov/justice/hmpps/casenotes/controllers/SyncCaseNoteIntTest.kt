@@ -27,6 +27,7 @@ import uk.gov.justice.hmpps.casenotes.utils.NomisIdGenerator.personIdentifier
 import uk.gov.justice.hmpps.casenotes.utils.verifyAgainst
 import java.time.LocalDateTime
 import java.time.LocalDateTime.now
+import java.time.temporal.ChronoUnit
 import java.util.UUID
 
 class SyncCaseNoteIntTest : IntegrationTest() {
@@ -354,7 +355,7 @@ private fun syncCaseNoteRequest(
   locationId,
   type,
   subType,
-  occurrenceDateTime,
+  occurrenceDateTime.truncatedTo(ChronoUnit.SECONDS),
   text,
   systemGenerated,
   author,
