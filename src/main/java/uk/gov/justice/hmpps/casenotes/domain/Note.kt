@@ -236,7 +236,7 @@ interface NoteRepository : JpaSpecificationExecutor<Note>, JpaRepository<Note, U
   @Query("delete from Note n where n.id in :ids")
   fun deleteByIdIn(ids: List<UUID>)
 
-  fun existsByPersonIdentifier(personIdentifier: String): Boolean
+  fun existsByPersonIdentifierAndSubTypeSensitiveIn(personIdentifier: String, sensitive: Set<Boolean>): Boolean
 }
 
 fun NoteRepository.saveAndRefresh(note: Note): Note {

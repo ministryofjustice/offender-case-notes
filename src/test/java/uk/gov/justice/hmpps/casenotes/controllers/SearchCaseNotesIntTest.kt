@@ -201,6 +201,18 @@ class SearchCaseNotesIntTest : IntegrationTest() {
     assertThat(response.hasCaseNotes).isFalse()
   }
 
+  @Test
+  fun `when no case non-sensitive notes exist`() {
+    val prisonNumber = personIdentifier()
+    val type = givenRandomType(sensitive = true)
+    givenCaseNote(generateCaseNote(prisonNumber, type))
+    assertThat(findCaseNotes(prisonNumber, searchRequest(includeSensitive = true)).hasCaseNotes).isTrue()
+
+    val response = findCaseNotes(prisonNumber, searchRequest(includeSensitive = false))
+    assertThat(response.metadata.totalElements).isEqualTo(0)
+    assertThat(response.hasCaseNotes).isFalse()
+  }
+
   private fun urlToTest(prisonNumber: String) = "/search/case-notes/$prisonNumber"
 
   private fun findCaseNotesSpec(

@@ -46,7 +46,13 @@ class ReadCaseNote(
     val page = noteRepository.findAll(request.asSpecification(personIdentifier), request.pageable())
     val records = noteRepository.findAllByIdIn(page.content.map { it.id }).associateBy { it.id }
     val results = page.content.map { records[it.id]!!.toModel() }
-    val hasCaseNotes = { noteRepository.existsByPersonIdentifier(personIdentifier) }
+    val hasCaseNotes = {
+      val sensitiveValues = when (request.includeSensitive) {
+        true -> setOf(true, false)
+        false -> setOf(false)
+      }
+      noteRepository.existsByPersonIdentifierAndSubTypeSensitiveIn(personIdentifier, sensitiveValues)
+    }
     return SearchNotesResponse(
       results,
       PageMeta(page.totalElements.toInt(), request.page, request.size),
