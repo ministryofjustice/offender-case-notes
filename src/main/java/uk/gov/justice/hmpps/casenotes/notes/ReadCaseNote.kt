@@ -1,7 +1,7 @@
 package uk.gov.justice.hmpps.casenotes.notes
 
 import org.springframework.data.domain.Page
-import org.springframework.data.domain.PageRequest
+import org.springframework.data.domain.PageRequest.of
 import org.springframework.data.domain.Pageable
 import org.springframework.data.domain.Sort
 import org.springframework.data.domain.Sort.by
@@ -41,6 +41,24 @@ class ReadCaseNote(
     } ?: throw EntityNotFoundException.withId(caseNoteId)
     return caseNote.toModel()
   }
+
+  fun findNotes(personIdentifier: String, request: SearchNotesRequest): SearchNotesResponse {
+    val page = noteRepository.findAll(request.asSpecification(personIdentifier), request.pageable())
+    val records = noteRepository.findAllByIdIn(page.content.map { it.id }).associateBy { it.id }
+    val results = page.content.map { records[it.id]!!.toModel() }
+    val hasCaseNotes = {
+      val sensitiveValues = when (request.includeSensitive) {
+        true -> setOf(true, false)
+        false -> setOf(false)
+      }
+      noteRepository.existsByPersonIdentifierAndSubTypeSensitiveIn(personIdentifier, sensitiveValues)
+    }
+    return SearchNotesResponse(
+      results,
+      PageMeta(page.totalElements.toInt(), request.page, request.size),
+      records.isNotEmpty() || hasCaseNotes(),
+    )
+  }
 }
 
 private fun CaseNoteFilter.asSpecification(prisonNumber: String) =
@@ -56,5 +74,15 @@ private fun CaseNoteFilter.asSpecification(prisonNumber: String) =
 private fun Pageable.forSpecification(): Pageable {
   val occurredAtSort = sort.getOrderFor("occurrenceDateTime")?.direction?.let { by(it, Note.OCCURRED_AT) }
   val sort = occurredAtSort ?: sort.getOrderFor("creationDateTime")?.direction?.let { by(it, Note.CREATED_AT) }
-  return PageRequest.of(pageNumber, pageSize, sort ?: by(Sort.Direction.DESC, Note.OCCURRED_AT))
+  return of(pageNumber, pageSize, sort ?: by(Sort.Direction.DESC, Note.OCCURRED_AT))
 }
+
+private fun SearchNotesRequest.asSpecification(prisonNumber: String) =
+  listOfNotNull(
+    matchesPersonIdentifier(prisonNumber),
+    matchesOnType(includeSensitive, getTypesAndSubTypes()),
+    occurredFrom?.let { occurredAfter(it) },
+    occurredTo?.let { occurredBefore(it) },
+  ).reduce { spec, current -> spec.and(current) }
+
+private fun SearchNotesRequest.getTypesAndSubTypes() = typeSubTypes.associate { it.type to it.subTypes }
