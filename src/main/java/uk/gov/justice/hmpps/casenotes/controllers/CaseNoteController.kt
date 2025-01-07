@@ -76,17 +76,10 @@ class CaseNoteController(
   }
 
   @Operation(
-    summary = "Retrieves a list of case notes",
-    description = "Sorting can be applied on occurrenceDateTime (default) or creationDateTime. Any other sort parameter will have the default result (occurrenceDateTime,desc)",
+    deprecated = true,
+    summary = "Please do not use - this has been superseded by search/case-notes/{personIdentifier}",
   )
-  @ApiResponses(
-    ApiResponse(responseCode = "200", description = "OK"),
-    ApiResponse(
-      responseCode = "404",
-      description = "Offender not found",
-      content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))],
-    ),
-  )
+  @ApiResponses(ApiResponse(responseCode = "200", description = "OK"))
   @GetMapping("/{personIdentifier}")
   fun getCaseNotes(
     @Parameter(description = "Person Identifier", required = true, example = "A1234AA")
