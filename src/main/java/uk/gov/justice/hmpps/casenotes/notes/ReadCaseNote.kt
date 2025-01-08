@@ -15,6 +15,7 @@ import uk.gov.justice.hmpps.casenotes.config.SecurityUserContext.Companion.ROLE_
 import uk.gov.justice.hmpps.casenotes.domain.Note
 import uk.gov.justice.hmpps.casenotes.domain.NoteRepository
 import uk.gov.justice.hmpps.casenotes.domain.authorUserIdIn
+import uk.gov.justice.hmpps.casenotes.domain.locationIdIn
 import uk.gov.justice.hmpps.casenotes.domain.matchesAuthorUsername
 import uk.gov.justice.hmpps.casenotes.domain.matchesLocationId
 import uk.gov.justice.hmpps.casenotes.domain.matchesOnType
@@ -90,6 +91,20 @@ class ReadCaseNote(
       )
     }.groupBy { it.authorId }
   }
+
+  fun findByPrisonCode(request: UsageByPrisonCodeRequest): Map<String, List<UsageByPrisonCodeResponse>> {
+    val map = noteRepository.findAll(request.asSpecification())
+      .groupBy { listOf(it.locationId, it.subType.typeCode, it.subType.code) }.toMap()
+    return map.entries.map {
+      UsageByPrisonCodeResponse(
+        it.key[0],
+        it.key[1],
+        it.key[2],
+        it.value.count(),
+        it.value.latest(),
+      )
+    }.groupBy { it.prisonCode }
+  }
 }
 
 private fun CaseNoteFilter.asSpecification(prisonNumber: String) =
@@ -132,5 +147,8 @@ private fun UsageByPersonIdentifierRequest.asSpecification(): Specification<Note
 
 private fun UsageByAuthorIdRequest.asSpecification(): Specification<Note> =
   (specifications() + authorUserIdIn(authorIds)).reduce { spec, current -> spec.and(current) }
+
+private fun UsageByPrisonCodeRequest.asSpecification(): Specification<Note> =
+  (specifications() + locationIdIn(prisonCodes)).reduce { spec, current -> spec.and(current) }
 
 private fun List<Note>.latest() = maxBy { it.occurredAt }.let { LatestNote(it.id, it.occurredAt) }

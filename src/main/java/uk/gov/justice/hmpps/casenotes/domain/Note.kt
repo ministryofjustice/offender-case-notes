@@ -258,6 +258,9 @@ fun matchesPersonIdentifier(prisonNumber: String) =
 fun matchesLocationId(locationId: String) =
   Specification<Note> { cn, _, cb -> cb.equal(cb.lower(cn[LOCATION_ID]), locationId.lowercase()) }
 
+fun locationIdIn(prisonCodes: Set<String>) =
+  Specification<Note> { cn, _, cb -> cb.lower(cn[LOCATION_ID]).`in`(prisonCodes.map(String::lowercase)) }
+
 fun matchesAuthorUsername(authorUsername: String) =
   Specification<Note> { cn, _, cb -> cb.equal(cb.lower(cn[AUTHOR_USERNAME]), authorUsername.lowercase()) }
 
