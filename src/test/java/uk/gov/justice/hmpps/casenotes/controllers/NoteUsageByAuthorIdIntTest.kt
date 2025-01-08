@@ -118,26 +118,26 @@ class NoteUsageByAuthorIdIntTest : IntegrationTest() {
     val authorId = newId().toString()
     val subType = givenRandomType()
     givenCaseNote(
-        generateCaseNote(
-            type = subType,
-            occurredAt = LocalDateTime.now().minusDays(7),
-            authorUserId = authorId,
-        ),
+      generateCaseNote(
+        type = subType,
+        occurredAt = LocalDateTime.now().minusDays(7),
+        authorUserId = authorId,
+      ),
     )
     val caseNote =
       givenCaseNote(
-          generateCaseNote(
-              type = subType,
-              occurredAt = LocalDateTime.now().minusDays(5),
-              authorUserId = authorId,
-          ),
+        generateCaseNote(
+          type = subType,
+          occurredAt = LocalDateTime.now().minusDays(5),
+          authorUserId = authorId,
+        ),
       )
     givenCaseNote(
-        generateCaseNote(
-            type = subType,
-            occurredAt = LocalDateTime.now().minusDays(3),
-            authorUserId = authorId,
-        ),
+      generateCaseNote(
+        type = subType,
+        occurredAt = LocalDateTime.now().minusDays(3),
+        authorUserId = authorId,
+      ),
     )
 
     val all = getUsageByAuthorId(
