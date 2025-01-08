@@ -76,6 +76,20 @@ class ReadCaseNote(
       )
     }.groupBy { it.personIdentifier }
   }
+
+  fun findByAuthorId(request: UsageByAuthorIdRequest): Map<String, List<UsageByAuthorIdResponse>> {
+    val map = noteRepository.findAll(request.asSpecification())
+      .groupBy { listOf(it.authorUserId, it.subType.typeCode, it.subType.code) }.toMap()
+    return map.entries.map {
+      UsageByAuthorIdResponse(
+        it.key[0],
+        it.key[1],
+        it.key[2],
+        it.value.count(),
+        it.value.latest(),
+      )
+    }.groupBy { it.authorId }
+  }
 }
 
 private fun CaseNoteFilter.asSpecification(prisonNumber: String) =
@@ -115,5 +129,8 @@ private fun UsageByPersonIdentifierRequest.asSpecification(): Specification<Note
   add(personIdentifierIn(personIdentifiers))
   if (authorIds.isNotEmpty()) add(authorUserIdIn(authorIds))
 }.reduce { spec, current -> spec.and(current) }
+
+private fun UsageByAuthorIdRequest.asSpecification(): Specification<Note> =
+  (specifications() + authorUserIdIn(authorIds)).reduce { spec, current -> spec.and(current) }
 
 private fun List<Note>.latest() = maxBy { it.occurredAt }.let { LatestNote(it.id, it.occurredAt) }
