@@ -25,8 +25,8 @@ class CaseNoteContextConfiguration(private val caseNoteContextInterceptor: CaseN
   WebMvcConfigurer {
   override fun addInterceptors(registry: InterceptorRegistry) {
     registry.addInterceptor(caseNoteContextInterceptor)
-      .addPathPatterns("/case-notes/**", "/case-notes/**/**", "/case-notes/amendment/**/**")
-      .excludePathPatterns("/case-notes/usage", "/case-notes/staff-usage")
+      .addPathPatterns("/case-notes/**", "/case-notes/**/**")
+      .excludePathPatterns("/case-notes/usage", "/case-notes/staff-usage", "/case-notes/prison-usage")
   }
 }
 
