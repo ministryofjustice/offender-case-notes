@@ -1,0 +1,1 @@
+create index if not exists idx_case_note_author_user_id on case_note(author_user_id);
