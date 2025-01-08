@@ -25,6 +25,7 @@ import org.springframework.data.jpa.repository.Query
 import uk.gov.justice.hmpps.casenotes.config.CaseNoteRequestContext
 import uk.gov.justice.hmpps.casenotes.domain.IdGenerator.newUuid
 import uk.gov.justice.hmpps.casenotes.domain.Note.Companion.AUTHOR_USERNAME
+import uk.gov.justice.hmpps.casenotes.domain.Note.Companion.AUTHOR_USER_ID
 import uk.gov.justice.hmpps.casenotes.domain.Note.Companion.LOCATION_ID
 import uk.gov.justice.hmpps.casenotes.domain.Note.Companion.OCCURRED_AT
 import uk.gov.justice.hmpps.casenotes.domain.Note.Companion.PERSON_IDENTIFIER
@@ -171,6 +172,7 @@ class Note(
     val SUB_TYPE = Note::subType.name
     val PERSON_IDENTIFIER = Note::personIdentifier.name
     val AUTHOR_USERNAME = Note::authorUsername.name
+    val AUTHOR_USER_ID = Note::authorUserId.name
     val LOCATION_ID = Note::locationId.name
     val OCCURRED_AT = Note::occurredAt.name
     val CREATED_AT = Note::createdAt.name
@@ -245,6 +247,9 @@ fun NoteRepository.saveAndRefresh(note: Note): Note {
   return saved
 }
 
+fun personIdentifierIn(prisonNumbers: Set<String>) =
+  Specification<Note> { cn, _, cb -> cb.lower(cn[PERSON_IDENTIFIER]).`in`(prisonNumbers.map(String::lowercase)) }
+
 fun matchesPersonIdentifier(prisonNumber: String) =
   Specification<Note> { cn, _, cb ->
     cb.equal(cb.lower(cn[PERSON_IDENTIFIER]), prisonNumber.lowercase())
@@ -255,6 +260,9 @@ fun matchesLocationId(locationId: String) =
 
 fun matchesAuthorUsername(authorUsername: String) =
   Specification<Note> { cn, _, cb -> cb.equal(cb.lower(cn[AUTHOR_USERNAME]), authorUsername.lowercase()) }
+
+fun authorUserIdIn(authorUserIds: Set<String>) =
+  Specification<Note> { cn, _, cb -> cn.get<String>(AUTHOR_USER_ID).`in`(authorUserIds) }
 
 fun occurredBefore(to: LocalDateTime) =
   Specification<Note> { csip, _, cb -> cb.lessThanOrEqualTo(csip[OCCURRED_AT], to) }
