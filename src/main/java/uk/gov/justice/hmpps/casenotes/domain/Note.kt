@@ -262,7 +262,7 @@ fun matchesAuthorUsername(authorUsername: String) =
   Specification<Note> { cn, _, cb -> cb.equal(cb.lower(cn[AUTHOR_USERNAME]), authorUsername.lowercase()) }
 
 fun authorUserIdIn(authorUserIds: Set<String>) =
-  Specification<Note> { cn, _, cb -> cb.lower(cn[AUTHOR_USER_ID]).`in`(authorUserIds.map(String::lowercase)) }
+  Specification<Note> { cn, _, cb -> cn.get<String>(AUTHOR_USER_ID).`in`(authorUserIds) }
 
 fun occurredBefore(to: LocalDateTime) =
   Specification<Note> { csip, _, cb -> cb.lessThanOrEqualTo(csip[OCCURRED_AT], to) }
