@@ -36,7 +36,7 @@ class NoteUsageByAuthorIdIntTest : IntegrationTest() {
   }
 
   @ParameterizedTest
-  @MethodSource("invalidPiUsageRequest")
+  @MethodSource("invalidAuthorUsageRequest")
   fun `400 bad request - invalid request for usage request by author id`(
     request: UsageByAuthorIdRequest,
     error: ErrorResponse,
@@ -188,7 +188,7 @@ class NoteUsageByAuthorIdIntTest : IntegrationTest() {
     private const val USAGE_URL = "/case-notes/staff-usage"
 
     @JvmStatic
-    fun invalidPiUsageRequest() = listOf(
+    fun invalidAuthorUsageRequest() = listOf(
       of(
         UsageByAuthorIdRequest(authorIds = setOf("12345")),
         ErrorResponse(400, developerMessage = "400 BAD_REQUEST Validation failure: At least one type is required"),

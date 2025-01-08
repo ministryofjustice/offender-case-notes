@@ -35,7 +35,7 @@ class NoteUsageByPrisonCodeIntTest : IntegrationTest() {
   }
 
   @ParameterizedTest
-  @MethodSource("invalidPiUsageRequest")
+  @MethodSource("invalidPrisonCodeUsageRequest")
   fun `400 bad request - invalid request for usage request by prison code`(
     request: UsageByPrisonCodeRequest,
     error: ErrorResponse,
@@ -188,7 +188,7 @@ class NoteUsageByPrisonCodeIntTest : IntegrationTest() {
     private const val USAGE_URL = "/case-notes/prison-usage"
 
     @JvmStatic
-    fun invalidPiUsageRequest() = listOf(
+    fun invalidPrisonCodeUsageRequest() = listOf(
       of(
         UsageByPrisonCodeRequest(prisonCodes = setOf("ABC")),
         ErrorResponse(400, developerMessage = "400 BAD_REQUEST Validation failure: At least one type is required"),
