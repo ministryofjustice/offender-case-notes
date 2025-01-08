@@ -5,6 +5,7 @@ import org.springframework.data.domain.PageRequest.of
 import org.springframework.data.domain.Pageable
 import org.springframework.data.domain.Sort
 import org.springframework.data.domain.Sort.by
+import org.springframework.data.jpa.domain.Specification
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -13,12 +14,14 @@ import uk.gov.justice.hmpps.casenotes.config.SecurityUserContext.Companion.ROLE_
 import uk.gov.justice.hmpps.casenotes.config.SecurityUserContext.Companion.ROLE_CASE_NOTES_WRITE
 import uk.gov.justice.hmpps.casenotes.domain.Note
 import uk.gov.justice.hmpps.casenotes.domain.NoteRepository
+import uk.gov.justice.hmpps.casenotes.domain.authorUserIdIn
 import uk.gov.justice.hmpps.casenotes.domain.matchesAuthorUsername
 import uk.gov.justice.hmpps.casenotes.domain.matchesLocationId
 import uk.gov.justice.hmpps.casenotes.domain.matchesOnType
 import uk.gov.justice.hmpps.casenotes.domain.matchesPersonIdentifier
 import uk.gov.justice.hmpps.casenotes.domain.occurredAfter
 import uk.gov.justice.hmpps.casenotes.domain.occurredBefore
+import uk.gov.justice.hmpps.casenotes.domain.personIdentifierIn
 import uk.gov.justice.hmpps.casenotes.legacy.service.EntityNotFoundException
 import java.util.UUID.fromString
 
@@ -59,6 +62,20 @@ class ReadCaseNote(
       records.isNotEmpty() || hasCaseNotes(),
     )
   }
+
+  fun findByPersonIdentifier(request: UsageByPersonIdentifierRequest): Map<String, List<UsageByPersonIdentifierResponse>> {
+    val map = noteRepository.findAll(request.asSpecification())
+      .groupBy { listOf(it.personIdentifier, it.subType.typeCode, it.subType.code) }.toMap()
+    return map.entries.map {
+      UsageByPersonIdentifierResponse(
+        it.key[0],
+        it.key[1],
+        it.key[2],
+        it.value.count(),
+        it.value.latest(),
+      )
+    }.groupBy { it.personIdentifier }
+  }
 }
 
 private fun CaseNoteFilter.asSpecification(prisonNumber: String) =
@@ -77,12 +94,26 @@ private fun Pageable.forSpecification(): Pageable {
   return of(pageNumber, pageSize, sort ?: by(Sort.Direction.DESC, Note.OCCURRED_AT))
 }
 
-private fun SearchNotesRequest.asSpecification(prisonNumber: String) =
+private fun Set<TypeSubTypeRequest>.asMap() = associate { it.type to it.subTypes }
+
+private fun SearchNotesRequest.asSpecification(personIdentifier: String) =
   listOfNotNull(
-    matchesPersonIdentifier(prisonNumber),
-    matchesOnType(includeSensitive, getTypesAndSubTypes()),
+    matchesPersonIdentifier(personIdentifier),
+    matchesOnType(includeSensitive, typeSubTypes.asMap()),
     occurredFrom?.let { occurredAfter(it) },
     occurredTo?.let { occurredBefore(it) },
   ).reduce { spec, current -> spec.and(current) }
 
-private fun SearchNotesRequest.getTypesAndSubTypes() = typeSubTypes.associate { it.type to it.subTypes }
+private fun NoteUsageRequest.specifications() = listOfNotNull(
+  matchesOnType(true, typeSubTypes.asMap()),
+  occurredFrom?.let { occurredAfter(it) },
+  occurredTo?.let { occurredBefore(it) },
+)
+
+private fun UsageByPersonIdentifierRequest.asSpecification(): Specification<Note> = buildList {
+  addAll(specifications())
+  add(personIdentifierIn(personIdentifiers))
+  if (authorIds.isNotEmpty()) add(authorUserIdIn(authorIds))
+}.reduce { spec, current -> spec.and(current) }
+
+private fun List<Note>.latest() = maxBy { it.occurredAt }.let { LatestNote(it.id, it.occurredAt) }

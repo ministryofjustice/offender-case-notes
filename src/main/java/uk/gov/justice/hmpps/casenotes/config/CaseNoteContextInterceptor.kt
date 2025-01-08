@@ -28,6 +28,7 @@ class CaseNoteContextConfiguration(private val caseNoteContextInterceptor: CaseN
       .addPathPatterns("/case-notes/**")
       .addPathPatterns("/case-notes/**/**")
       .addPathPatterns("/case-notes/amendment/**/**")
+      .excludePathPatterns("/case-notes/usage")
   }
 }
 
