@@ -1,0 +1,2 @@
+create index if not exists idx_person_identifier_sub_type on case_note (lower(person_identifier), sub_type_id);
+create index if not exists idx_author_id_sub_type on case_note (author_user_id, sub_type_id);
