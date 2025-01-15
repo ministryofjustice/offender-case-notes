@@ -12,7 +12,7 @@ data class SearchNotesRequest(
   override val page: Int,
   override val size: Int,
   @Parameter(description = "The sort to apply to the results", example = "occurredAt,desc")
-  override val sort: String = "${Note.OCCURRED_AT.lowercase()},desc",
+  override val sort: String = "${Note.OCCURRED_AT},desc",
 ) : PagedRequest
 
 data class TypeSubTypeRequest(val type: String, val subTypes: Set<String> = setOf())

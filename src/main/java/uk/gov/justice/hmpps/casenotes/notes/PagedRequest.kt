@@ -2,7 +2,6 @@ package uk.gov.justice.hmpps.casenotes.notes
 
 import io.swagger.v3.oas.annotations.Parameter
 import jakarta.validation.ValidationException
-import jakarta.validation.constraints.Max
 import jakarta.validation.constraints.Min
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Pageable
@@ -16,7 +15,6 @@ interface PagedRequest {
 
   @get:Parameter(description = "The page size to request", example = "10")
   @get:Min(value = 1, message = "Page size must be at least 1")
-  @get:Max(value = 100, message = "Page size must not be more than 100")
   val size: Int
   val sort: String
 
