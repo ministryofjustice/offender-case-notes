@@ -2,7 +2,6 @@ package uk.gov.justice.hmpps.casenotes.notes
 
 import jakarta.validation.constraints.NotEmpty
 import java.time.LocalDateTime
-import java.util.UUID
 
 interface NoteUsageRequest {
   @get:NotEmpty(message = "At least one type is required")
@@ -20,7 +19,7 @@ interface UsageResponse {
   val latestNote: LatestNote?
 }
 
-data class LatestNote(val id: UUID, val occurredAt: LocalDateTime)
+data class LatestNote(val occurredAt: LocalDateTime)
 
 data class UsageByPersonIdentifierRequest(
   override val typeSubTypes: Set<TypeSubTypeRequest> = emptySet(),

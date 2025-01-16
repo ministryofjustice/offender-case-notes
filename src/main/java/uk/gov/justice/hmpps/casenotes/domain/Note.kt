@@ -25,7 +25,6 @@ import org.springframework.data.jpa.repository.Query
 import uk.gov.justice.hmpps.casenotes.config.CaseNoteRequestContext
 import uk.gov.justice.hmpps.casenotes.domain.IdGenerator.newUuid
 import uk.gov.justice.hmpps.casenotes.domain.Note.Companion.AUTHOR_USERNAME
-import uk.gov.justice.hmpps.casenotes.domain.Note.Companion.AUTHOR_USER_ID
 import uk.gov.justice.hmpps.casenotes.domain.Note.Companion.LOCATION_ID
 import uk.gov.justice.hmpps.casenotes.domain.Note.Companion.OCCURRED_AT
 import uk.gov.justice.hmpps.casenotes.domain.Note.Companion.PERSON_IDENTIFIER
@@ -239,6 +238,85 @@ interface NoteRepository : JpaSpecificationExecutor<Note>, JpaRepository<Note, U
   fun deleteByIdIn(ids: List<UUID>)
 
   fun existsByPersonIdentifierAndSubTypeSensitiveIn(personIdentifier: String, sensitive: Set<Boolean>): Boolean
+
+  @Query(
+    """
+        select 
+            n.personIdentifier  as key, 
+            st.key.typeCode     as type, 
+            st.key.code         as subType, 
+            count(n)            as count, 
+            max(n.occurredAt)   as latestAt
+        from Note n
+        join n.subType st
+        where lower(n.personIdentifier) in :personIdentifiers and st.key in :typeKeys
+        and (cast(:occurredBefore as timestamp) is null or n.occurredAt <= :occurredBefore) 
+        and (cast(:occurredAfter as timestamp) is null or n.occurredAt >= :occurredAfter)
+        and (:authorIds is null or n.authorUserId in :authorIds)
+        group by n.personIdentifier, st.key.typeCode, st.key.code  
+    """,
+  )
+  fun findUsageByPersonIdentifier(
+    personIdentifiers: Set<String>,
+    typeKeys: Set<TypeKey>,
+    occurredAfter: LocalDateTime?,
+    occurredBefore: LocalDateTime?,
+    authorIds: Set<String>?,
+  ): List<UsageCount>
+
+  @Query(
+    """
+        select 
+            n.authorUserId      as key, 
+            st.key.typeCode     as type, 
+            st.key.code         as subType, 
+            count(n)            as count, 
+            max(n.occurredAt)   as latestAt
+        from Note n
+        join n.subType st
+        where n.authorUserId in :authorIds and st.key in :typeKeys
+        and (cast(:occurredBefore as timestamp) is null or n.occurredAt <= :occurredBefore) 
+        and (cast(:occurredAfter as timestamp) is null or n.occurredAt >= :occurredAfter)
+        group by n.authorUserId, st.key.typeCode, st.key.code  
+    """,
+  )
+  fun findUsageByAuthorId(
+    authorIds: Set<String>,
+    typeKeys: Set<TypeKey>,
+    occurredAfter: LocalDateTime?,
+    occurredBefore: LocalDateTime?,
+  ): List<UsageCount>
+
+  @Query(
+    """
+        select 
+            n.locationId        as key, 
+            st.key.typeCode     as type, 
+            st.key.code         as subType, 
+            count(n)            as count, 
+            max(n.occurredAt)   as latestAt
+        from Note n
+        join n.subType st
+        where lower(n.locationId) in :prisonCodes and st.key in :typeKeys
+        and (cast(:occurredBefore as timestamp) is null or n.occurredAt <= :occurredBefore) 
+        and (cast(:occurredAfter as timestamp) is null or n.occurredAt >= :occurredAfter)
+        group by n.locationId, st.key.typeCode, st.key.code  
+    """,
+  )
+  fun findUsageByPrisonCode(
+    prisonCodes: Set<String>,
+    typeKeys: Set<TypeKey>,
+    occurredAfter: LocalDateTime?,
+    occurredBefore: LocalDateTime?,
+  ): List<UsageCount>
+}
+
+interface UsageCount {
+  val key: String
+  val type: String
+  val subType: String
+  val count: Int
+  val latestAt: LocalDateTime
 }
 
 fun NoteRepository.saveAndRefresh(note: Note): Note {
@@ -246,9 +324,6 @@ fun NoteRepository.saveAndRefresh(note: Note): Note {
   refresh(saved)
   return saved
 }
-
-fun personIdentifierIn(prisonNumbers: Set<String>) =
-  Specification<Note> { cn, _, cb -> cb.lower(cn[PERSON_IDENTIFIER]).`in`(prisonNumbers.map(String::lowercase)) }
 
 fun matchesPersonIdentifier(prisonNumber: String) =
   Specification<Note> { cn, _, cb ->
@@ -258,14 +333,8 @@ fun matchesPersonIdentifier(prisonNumber: String) =
 fun matchesLocationId(locationId: String) =
   Specification<Note> { cn, _, cb -> cb.equal(cb.lower(cn[LOCATION_ID]), locationId.lowercase()) }
 
-fun locationIdIn(prisonCodes: Set<String>) =
-  Specification<Note> { cn, _, cb -> cb.lower(cn[LOCATION_ID]).`in`(prisonCodes.map(String::lowercase)) }
-
 fun matchesAuthorUsername(authorUsername: String) =
   Specification<Note> { cn, _, cb -> cb.equal(cb.lower(cn[AUTHOR_USERNAME]), authorUsername.lowercase()) }
-
-fun authorUserIdIn(authorUserIds: Set<String>) =
-  Specification<Note> { cn, _, cb -> cn.get<String>(AUTHOR_USER_ID).`in`(authorUserIds) }
 
 fun occurredBefore(to: LocalDateTime) =
   Specification<Note> { csip, _, cb -> cb.lessThanOrEqualTo(csip[OCCURRED_AT], to) }

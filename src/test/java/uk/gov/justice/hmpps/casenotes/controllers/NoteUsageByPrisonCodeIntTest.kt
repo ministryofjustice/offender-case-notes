@@ -106,9 +106,7 @@ class NoteUsageByPrisonCodeIntTest : IntegrationTest() {
       forEach { usage ->
         val matching = caseNotes.filter { it.subType.typeCode == usage.type && it.subType.code == usage.subType }
         assertThat(usage.count).isEqualTo(matching.size)
-        assertThat(usage.latestNote).isEqualTo(
-          matching.maxBy { it.occurredAt }.let { LatestNote(it.id, it.occurredAt) },
-        )
+        assertThat(usage.latestNote).isEqualTo(LatestNote(matching.maxBy { it.occurredAt }.occurredAt))
       }
     }
   }
@@ -158,12 +156,7 @@ class NoteUsageByPrisonCodeIntTest : IntegrationTest() {
     )
 
     assertThat(response.content[prisonCode]!!.first().count).isEqualTo(1)
-    assertThat(response.content[prisonCode]!!.first().latestNote).isEqualTo(
-      LatestNote(
-        caseNote.id,
-        caseNote.occurredAt,
-      ),
-    )
+    assertThat(response.content[prisonCode]!!.first().latestNote).isEqualTo(LatestNote(caseNote.occurredAt))
   }
 
   private fun getUsageByPrisonCodeSpec(
