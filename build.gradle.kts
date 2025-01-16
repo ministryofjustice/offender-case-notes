@@ -5,6 +5,7 @@ plugins {
   kotlin("plugin.spring") version "2.0.21"
   kotlin("plugin.jpa") version "2.0.21"
   id("io.gatling.gradle") version "3.13.1.2"
+  jacoco
 }
 
 configurations {
@@ -72,5 +73,17 @@ tasks {
     compilerOptions {
       jvmTarget = JvmTarget.JVM_21
     }
+  }
+}
+
+// Jacoco code coverage
+tasks.named("test") {
+  finalizedBy("jacocoTestReport")
+}
+
+tasks.named<JacocoReport>("jacocoTestReport") {
+  reports {
+    html.required.set(true)
+    xml.required.set(true)
   }
 }
