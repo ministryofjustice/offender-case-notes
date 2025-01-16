@@ -5,7 +5,6 @@ import org.springframework.data.domain.PageRequest.of
 import org.springframework.data.domain.Pageable
 import org.springframework.data.domain.Sort
 import org.springframework.data.domain.Sort.by
-import org.springframework.data.jpa.domain.Specification
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -14,15 +13,13 @@ import uk.gov.justice.hmpps.casenotes.config.SecurityUserContext.Companion.ROLE_
 import uk.gov.justice.hmpps.casenotes.config.SecurityUserContext.Companion.ROLE_CASE_NOTES_WRITE
 import uk.gov.justice.hmpps.casenotes.domain.Note
 import uk.gov.justice.hmpps.casenotes.domain.NoteRepository
-import uk.gov.justice.hmpps.casenotes.domain.authorUserIdIn
-import uk.gov.justice.hmpps.casenotes.domain.locationIdIn
+import uk.gov.justice.hmpps.casenotes.domain.TypeKey
 import uk.gov.justice.hmpps.casenotes.domain.matchesAuthorUsername
 import uk.gov.justice.hmpps.casenotes.domain.matchesLocationId
 import uk.gov.justice.hmpps.casenotes.domain.matchesOnType
 import uk.gov.justice.hmpps.casenotes.domain.matchesPersonIdentifier
 import uk.gov.justice.hmpps.casenotes.domain.occurredAfter
 import uk.gov.justice.hmpps.casenotes.domain.occurredBefore
-import uk.gov.justice.hmpps.casenotes.domain.personIdentifierIn
 import uk.gov.justice.hmpps.casenotes.legacy.service.EntityNotFoundException
 import java.util.UUID.fromString
 
@@ -65,43 +62,56 @@ class ReadCaseNote(
   }
 
   fun findByPersonIdentifier(request: UsageByPersonIdentifierRequest): Map<String, List<UsageByPersonIdentifierResponse>> {
-    val map = noteRepository.findAll(request.asSpecification())
-      .groupBy { listOf(it.personIdentifier, it.subType.typeCode, it.subType.code) }.toMap()
-    return map.entries.map {
+    val typeKeys = request.typeSubTypes.flatMap { r -> r.subTypes.map { TypeKey(r.type, it) } }.toSet()
+    return noteRepository.findUsageByPersonIdentifier(
+      request.personIdentifiers.map { it.lowercase() }.toSet(),
+      typeKeys,
+      request.occurredFrom,
+      request.occurredTo,
+      request.authorIds.takeUnless { it.isEmpty() },
+    ).map {
       UsageByPersonIdentifierResponse(
-        it.key[0],
-        it.key[1],
-        it.key[2],
-        it.value.count(),
-        it.value.latest(),
+        it.key,
+        it.type,
+        it.subType,
+        it.count,
+        LatestNote(it.latestAt),
       )
     }.groupBy { it.personIdentifier }
   }
 
   fun findByAuthorId(request: UsageByAuthorIdRequest): Map<String, List<UsageByAuthorIdResponse>> {
-    val map = noteRepository.findAll(request.asSpecification())
-      .groupBy { listOf(it.authorUserId, it.subType.typeCode, it.subType.code) }.toMap()
-    return map.entries.map {
+    val typeKeys = request.typeSubTypes.flatMap { r -> r.subTypes.map { TypeKey(r.type, it) } }.toSet()
+    return noteRepository.findUsageByAuthorId(
+      request.authorIds.map { it.lowercase() }.toSet(),
+      typeKeys,
+      request.occurredFrom,
+      request.occurredTo,
+    ).map {
       UsageByAuthorIdResponse(
-        it.key[0],
-        it.key[1],
-        it.key[2],
-        it.value.count(),
-        it.value.latest(),
+        it.key,
+        it.type,
+        it.subType,
+        it.count,
+        LatestNote(it.latestAt),
       )
     }.groupBy { it.authorId }
   }
 
   fun findByPrisonCode(request: UsageByPrisonCodeRequest): Map<String, List<UsageByPrisonCodeResponse>> {
-    val map = noteRepository.findAll(request.asSpecification())
-      .groupBy { listOf(it.locationId, it.subType.typeCode, it.subType.code) }.toMap()
-    return map.entries.map {
+    val typeKeys = request.typeSubTypes.flatMap { r -> r.subTypes.map { TypeKey(r.type, it) } }.toSet()
+    return noteRepository.findUsageByPrisonCode(
+      request.prisonCodes.map { it.lowercase() }.toSet(),
+      typeKeys,
+      request.occurredFrom,
+      request.occurredTo,
+    ).map {
       UsageByPrisonCodeResponse(
-        it.key[0],
-        it.key[1],
-        it.key[2],
-        it.value.count(),
-        it.value.latest(),
+        it.key,
+        it.type,
+        it.subType,
+        it.count,
+        LatestNote(it.latestAt),
       )
     }.groupBy { it.prisonCode }
   }
@@ -132,23 +142,3 @@ private fun SearchNotesRequest.asSpecification(personIdentifier: String) =
     occurredFrom?.let { occurredAfter(it) },
     occurredTo?.let { occurredBefore(it) },
   ).reduce { spec, current -> spec.and(current) }
-
-private fun NoteUsageRequest.specifications() = listOfNotNull(
-  matchesOnType(true, typeSubTypes.asMap()),
-  occurredFrom?.let { occurredAfter(it) },
-  occurredTo?.let { occurredBefore(it) },
-)
-
-private fun UsageByPersonIdentifierRequest.asSpecification(): Specification<Note> = buildList {
-  addAll(specifications())
-  add(personIdentifierIn(personIdentifiers))
-  if (authorIds.isNotEmpty()) add(authorUserIdIn(authorIds))
-}.reduce { spec, current -> spec.and(current) }
-
-private fun UsageByAuthorIdRequest.asSpecification(): Specification<Note> =
-  (specifications() + authorUserIdIn(authorIds)).reduce { spec, current -> spec.and(current) }
-
-private fun UsageByPrisonCodeRequest.asSpecification(): Specification<Note> =
-  (specifications() + locationIdIn(prisonCodes)).reduce { spec, current -> spec.and(current) }
-
-private fun List<Note>.latest() = maxBy { it.occurredAt }.let { LatestNote(it.id, it.occurredAt) }

@@ -3,6 +3,7 @@ package uk.gov.justice.hmpps.casenotes.controllers
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import com.fasterxml.uuid.Generators
+import org.assertj.core.api.Assertions.assertThat
 import org.awaitility.kotlin.await
 import org.awaitility.kotlin.matches
 import org.awaitility.kotlin.untilCallTo
@@ -103,7 +104,12 @@ abstract class IntegrationTest : BasicIntegrationTest() {
     ).get().messages()
       .map { objectMapper.readValue<Notification>(it.body()) }
       .filter { e -> e.eventType in PersonCaseNoteEvent.Type.entries.map { "person.case-note.${it.name.lowercase()}" } }
-      .map { objectMapper.readValue<DomainEvent<CaseNoteInformation>>(it.message) }
+      .map {
+        val event = objectMapper.readValue<DomainEvent<CaseNoteInformation>>(it.message)
+        assertThat(it.attributes["type"]?.value).isEqualTo(event.additionalInformation.type)
+        assertThat(it.attributes["subType"]?.value).isEqualTo(event.additionalInformation.subType)
+        event
+      }
   }
 
   internal fun HmppsQueue.receivePersonCaseNoteEvent(): DomainEvent<CaseNoteInformation> {
