@@ -23,7 +23,7 @@ jobs:
             - gradle-
       - run: ./gradlew check
       - codecov/upload:
-          file: build/reports/jacoco/test/jacocoTestReport.xml
+          files: build/reports/jacoco/test/jacocoTestReport.xml
       - save_cache:
           paths:
             - ~/.gradle
