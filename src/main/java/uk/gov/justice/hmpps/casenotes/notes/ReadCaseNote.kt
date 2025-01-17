@@ -102,25 +102,6 @@ class ReadCaseNote(
     }.groupBy { it.authorId }
   }
 
-  fun findByPrisonCode(request: UsageByPrisonCodeRequest): Map<String, List<UsageByPrisonCodeResponse>> {
-    val (typeCodes, typeKeys) = request.allTypeKeys()
-    return noteRepository.findUsageByPrisonCode(
-      request.prisonCodes.map { it.lowercase() }.toSet(),
-      typeCodes,
-      typeKeys,
-      request.occurredFrom,
-      request.occurredTo,
-    ).map {
-      UsageByPrisonCodeResponse(
-        it.key,
-        it.type,
-        it.subType,
-        it.count,
-        LatestNote(it.latestAt),
-      )
-    }.groupBy { it.prisonCode }
-  }
-
   fun NoteUsageRequest.allTypeKeys(): Pair<Set<String>, Set<TypeKey>> {
     val providedSubTypes = typeSubTypes.flatMap { r -> r.subTypes.map { TypeKey(r.type, it) } }.toSet()
     val typeCodes = typeSubTypes.asSequence().filter { it.subTypes.isEmpty() }.map { it.type }.toSet()

@@ -289,31 +289,6 @@ interface NoteRepository : JpaSpecificationExecutor<Note>, JpaRepository<Note, U
     occurredAfter: LocalDateTime?,
     occurredBefore: LocalDateTime?,
   ): List<UsageCount>
-
-  @Query(
-    """
-        select 
-            n.locationId        as key, 
-            st.key.typeCode     as type, 
-            st.key.code         as subType, 
-            count(n)            as count, 
-            max(n.occurredAt)   as latestAt
-        from Note n
-        join n.subType st
-        where lower(n.locationId) in :prisonCodes 
-        and (st.type.code in :typeCodes or st.key in :typeKeys)
-        and (cast(:occurredBefore as timestamp) is null or n.occurredAt <= :occurredBefore) 
-        and (cast(:occurredAfter as timestamp) is null or n.occurredAt >= :occurredAfter)
-        group by n.locationId, st.key.typeCode, st.key.code  
-    """,
-  )
-  fun findUsageByPrisonCode(
-    prisonCodes: Set<String>,
-    typeCodes: Set<String>,
-    typeKeys: Set<TypeKey>,
-    occurredAfter: LocalDateTime?,
-    occurredBefore: LocalDateTime?,
-  ): List<UsageCount>
 }
 
 interface UsageCount {
