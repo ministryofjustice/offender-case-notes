@@ -47,7 +47,6 @@ import static java.time.LocalDateTime.now;
 @Builder(toBuilder = true)
 @EqualsAndHashCode(of = {"personIdentifier", "occurredAt", "locationId", "authorUsername", "subType", "text"})
 @ToString(of = {"id", "personIdentifier", "occurredAt", "locationId", "authorUsername", "subType"})
-@SQLRestriction("exists(select 1 from case_note_sub_type ct where ct.id = sub_type_id and ct.sync_to_nomis = false)")
 public class OffenderCaseNote implements NoteState, Persistable<UUID> {
 
     @Builder.Default
