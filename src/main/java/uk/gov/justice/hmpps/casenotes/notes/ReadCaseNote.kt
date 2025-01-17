@@ -64,9 +64,10 @@ class ReadCaseNote(
   }
 
   fun findByPersonIdentifier(request: UsageByPersonIdentifierRequest): Map<String, List<UsageByPersonIdentifierResponse>> {
-    val typeKeys = request.allTypeKeys()
+    val (typeCodes, typeKeys) = request.allTypeKeys()
     return noteRepository.findUsageByPersonIdentifier(
       request.personIdentifiers.map { it.lowercase() }.toSet(),
+      typeCodes,
       typeKeys,
       request.occurredFrom,
       request.occurredTo,
@@ -83,9 +84,10 @@ class ReadCaseNote(
   }
 
   fun findByAuthorId(request: UsageByAuthorIdRequest): Map<String, List<UsageByAuthorIdResponse>> {
-    val typeKeys = request.allTypeKeys()
+    val (typeCodes, typeKeys) = request.allTypeKeys()
     return noteRepository.findUsageByAuthorId(
       request.authorIds.toSet(),
+      typeCodes,
       typeKeys,
       request.occurredFrom,
       request.occurredTo,
@@ -101,9 +103,10 @@ class ReadCaseNote(
   }
 
   fun findByPrisonCode(request: UsageByPrisonCodeRequest): Map<String, List<UsageByPrisonCodeResponse>> {
-    val typeKeys = request.allTypeKeys()
+    val (typeCodes, typeKeys) = request.allTypeKeys()
     return noteRepository.findUsageByPrisonCode(
       request.prisonCodes.map { it.lowercase() }.toSet(),
+      typeCodes,
       typeKeys,
       request.occurredFrom,
       request.occurredTo,
@@ -118,11 +121,10 @@ class ReadCaseNote(
     }.groupBy { it.prisonCode }
   }
 
-  fun NoteUsageRequest.allTypeKeys(): Set<TypeKey> {
+  fun NoteUsageRequest.allTypeKeys(): Pair<Set<String>, Set<TypeKey>> {
     val providedSubTypes = typeSubTypes.flatMap { r -> r.subTypes.map { TypeKey(r.type, it) } }.toSet()
     val typeCodes = typeSubTypes.asSequence().filter { it.subTypes.isEmpty() }.map { it.type }.toSet()
-    val deducedSubTypes = subTypeRepository.findByTypeCodeIn(typeCodes).map { it.key }.toSet()
-    return providedSubTypes + deducedSubTypes
+    return Pair(typeCodes, providedSubTypes)
   }
 }
 

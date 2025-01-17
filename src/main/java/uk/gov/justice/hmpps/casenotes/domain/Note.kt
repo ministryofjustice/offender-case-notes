@@ -249,7 +249,8 @@ interface NoteRepository : JpaSpecificationExecutor<Note>, JpaRepository<Note, U
             max(n.occurredAt)   as latestAt
         from Note n
         join n.subType st
-        where lower(n.personIdentifier) in :personIdentifiers and st.key in :typeKeys
+        where lower(n.personIdentifier) in :personIdentifiers 
+        and (st.type.code in :typeCodes or st.key in :typeKeys)
         and (cast(:occurredBefore as timestamp) is null or n.occurredAt <= :occurredBefore) 
         and (cast(:occurredAfter as timestamp) is null or n.occurredAt >= :occurredAfter)
         and (:authorIds is null or n.authorUserId in :authorIds)
@@ -258,6 +259,7 @@ interface NoteRepository : JpaSpecificationExecutor<Note>, JpaRepository<Note, U
   )
   fun findUsageByPersonIdentifier(
     personIdentifiers: Set<String>,
+    typeCodes: Set<String>,
     typeKeys: Set<TypeKey>,
     occurredAfter: LocalDateTime?,
     occurredBefore: LocalDateTime?,
@@ -274,7 +276,8 @@ interface NoteRepository : JpaSpecificationExecutor<Note>, JpaRepository<Note, U
             max(n.occurredAt)   as latestAt
         from Note n
         join n.subType st
-        where n.authorUserId in :authorIds and st.key in :typeKeys
+        where n.authorUserId in :authorIds 
+        and (st.type.code in :typeCodes or st.key in :typeKeys)
         and (cast(:occurredBefore as timestamp) is null or n.occurredAt <= :occurredBefore) 
         and (cast(:occurredAfter as timestamp) is null or n.occurredAt >= :occurredAfter)
         group by n.authorUserId, st.key.typeCode, st.key.code  
@@ -282,6 +285,7 @@ interface NoteRepository : JpaSpecificationExecutor<Note>, JpaRepository<Note, U
   )
   fun findUsageByAuthorId(
     authorIds: Set<String>,
+    typeCodes: Set<String>,
     typeKeys: Set<TypeKey>,
     occurredAfter: LocalDateTime?,
     occurredBefore: LocalDateTime?,
@@ -297,7 +301,8 @@ interface NoteRepository : JpaSpecificationExecutor<Note>, JpaRepository<Note, U
             max(n.occurredAt)   as latestAt
         from Note n
         join n.subType st
-        where lower(n.locationId) in :prisonCodes and st.key in :typeKeys
+        where lower(n.locationId) in :prisonCodes 
+        and (st.type.code in :typeCodes or st.key in :typeKeys)
         and (cast(:occurredBefore as timestamp) is null or n.occurredAt <= :occurredBefore) 
         and (cast(:occurredAfter as timestamp) is null or n.occurredAt >= :occurredAfter)
         group by n.locationId, st.key.typeCode, st.key.code  
@@ -305,6 +310,7 @@ interface NoteRepository : JpaSpecificationExecutor<Note>, JpaRepository<Note, U
   )
   fun findUsageByPrisonCode(
     prisonCodes: Set<String>,
+    typeCodes: Set<String>,
     typeKeys: Set<TypeKey>,
     occurredAfter: LocalDateTime?,
     occurredBefore: LocalDateTime?,
