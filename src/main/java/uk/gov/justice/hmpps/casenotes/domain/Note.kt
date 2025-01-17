@@ -171,7 +171,6 @@ class Note(
     val SUB_TYPE = Note::subType.name
     val PERSON_IDENTIFIER = Note::personIdentifier.name
     val AUTHOR_USERNAME = Note::authorUsername.name
-    val AUTHOR_USER_ID = Note::authorUserId.name
     val LOCATION_ID = Note::locationId.name
     val OCCURRED_AT = Note::occurredAt.name
     val CREATED_AT = Note::createdAt.name
