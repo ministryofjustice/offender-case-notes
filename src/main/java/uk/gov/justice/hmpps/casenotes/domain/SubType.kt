@@ -11,6 +11,7 @@ import jakarta.persistence.Table
 import org.hibernate.annotations.Immutable
 import org.springframework.data.jpa.repository.EntityGraph
 import org.springframework.data.jpa.repository.JpaRepository
+import org.springframework.data.jpa.repository.Query
 
 @Immutable
 @Entity
@@ -51,6 +52,9 @@ interface SubTypeRepository : JpaRepository<SubType, Long> {
 
   @EntityGraph(attributePaths = ["type"])
   fun findByKeyIn(keys: Set<TypeKey>): List<SubType>
+
+  @Query("select st from SubType st join fetch st.type t where t.code in :typeCodes")
+  fun findByTypeCodeIn(typeCodes: Set<String>): List<SubType>
 }
 
 fun SubTypeRepository.findByTypeCodeAndCode(typeCode: String, code: String) = findByKey(TypeKey(typeCode, code))

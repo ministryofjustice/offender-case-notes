@@ -112,6 +112,38 @@ class NoteUsageByPrisonCodeIntTest : IntegrationTest() {
   }
 
   @Test
+  fun `200 ok - can find counts of multiple types deducing sub types`() {
+    val location = "MST"
+    val types = getAllTypes()
+      .groupBy { it.type.code }
+      .map { it.value.take(2) }.flatten().take(20)
+      .toList()
+    val caseNotes = (0..10).map { givenCaseNote(generateCaseNote(type = types.random(), locationId = location)) }
+
+    val toFind = caseNotes.map { it.subType.typeCode }.toSet().take(2)
+
+    val response = getUsageByPrisonCode(
+      UsageByPrisonCodeRequest(
+        prisonCodes = setOf(location),
+        typeSubTypes = toFind.map { TypeSubTypeRequest(it, setOf()) }.toSet(),
+      ),
+    )
+
+    assertThat(response.content).hasSize(1)
+    with(response.content[location]!!) {
+      assertThat(size).isEqualTo(
+        caseNotes.filter { it.subType.typeCode in toFind }
+          .distinctBy { Pair(it.subType.typeCode, it.subType.code) }.size,
+      )
+      forEach { usage ->
+        val matching = caseNotes.filter { it.subType.typeCode == usage.type && it.subType.code == usage.subType }
+        assertThat(usage.count).isEqualTo(matching.size)
+        assertThat(usage.latestNote).isEqualTo(LatestNote(matching.maxBy { it.occurredAt }.occurredAt))
+      }
+    }
+  }
+
+  @Test
   fun `can find by occurred at`() {
     val prisonCode = "OCC"
     val subType = givenRandomType()
