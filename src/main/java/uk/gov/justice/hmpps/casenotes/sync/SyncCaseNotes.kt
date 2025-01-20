@@ -5,6 +5,7 @@ import org.springframework.context.ApplicationEventPublisher
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import uk.gov.justice.hmpps.casenotes.config.Source
 import uk.gov.justice.hmpps.casenotes.domain.Amendment
 import uk.gov.justice.hmpps.casenotes.domain.AmendmentRepository
 import uk.gov.justice.hmpps.casenotes.domain.Note
@@ -160,6 +161,13 @@ class SyncCaseNotes(
   @Transactional(readOnly = true)
   fun getCaseNotes(personIdentifier: String): List<CaseNote> =
     noteRepository.findAllByPersonIdentifierAndSubTypeSyncToNomis(personIdentifier, true).map(Note::toModel)
+
+  @Transactional(readOnly = true)
+  fun resendEvents(request: ResendPersonCaseNoteEvents) {
+    noteRepository.findAllByIdIn(request.uuids)
+      .map { it.createEvent(UPDATED, sourceOverride = Source.DPS) }
+      .forEach(eventPublisher::publishEvent)
+  }
 }
 
 private fun <T : TypeLookup> Collection<T>.exceptionMessage() =

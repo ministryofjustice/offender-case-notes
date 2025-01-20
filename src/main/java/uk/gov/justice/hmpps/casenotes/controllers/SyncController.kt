@@ -1,5 +1,6 @@
 package uk.gov.justice.hmpps.casenotes.controllers
 
+import io.swagger.v3.oas.annotations.Hidden
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.Parameter
 import io.swagger.v3.oas.annotations.media.Content
@@ -25,6 +26,7 @@ import uk.gov.justice.hmpps.casenotes.legacy.dto.ErrorResponse
 import uk.gov.justice.hmpps.casenotes.sync.MigrateCaseNoteRequest
 import uk.gov.justice.hmpps.casenotes.sync.MigrationResult
 import uk.gov.justice.hmpps.casenotes.sync.MoveCaseNotesRequest
+import uk.gov.justice.hmpps.casenotes.sync.ResendPersonCaseNoteEvents
 import uk.gov.justice.hmpps.casenotes.sync.SyncCaseNoteRequest
 import uk.gov.justice.hmpps.casenotes.sync.SyncCaseNotes
 import uk.gov.justice.hmpps.casenotes.sync.SyncResult
@@ -168,5 +170,12 @@ class SyncController(private val sync: SyncCaseNotes) {
   @PreAuthorize("hasRole('$ROLE_CASE_NOTES_SYNC')")
   fun moveCaseNotes(@RequestBody request: MoveCaseNotesRequest) {
     sync.moveCaseNotes(request)
+  }
+
+  @Hidden
+  @ResponseStatus(HttpStatus.NO_CONTENT)
+  @PostMapping("/resend-person-case-note-events")
+  fun resendEvents(@RequestBody request: ResendPersonCaseNoteEvents) {
+    sync.resendEvents(request)
   }
 }
