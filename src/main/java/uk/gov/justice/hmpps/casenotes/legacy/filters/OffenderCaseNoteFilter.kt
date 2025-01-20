@@ -51,7 +51,7 @@ class OffenderCaseNoteFilter(
     root.fetch<Any, Any>("amendments", JoinType.LEFT)
     val type = root.fetch<Any, Any>("subType", JoinType.INNER)
     type.fetch<Any, Any>("type", JoinType.INNER)
-    return cb.and(*predicateBuilder.toTypedArray())
+    return cb.and(cb.equal((type as Join<*, *>).get<Any>("syncToNomis"), false), *predicateBuilder.toTypedArray())
   }
 
   private fun getTypesPredicate(root: Root<OffenderCaseNote>, cb: CriteriaBuilder): Predicate {
