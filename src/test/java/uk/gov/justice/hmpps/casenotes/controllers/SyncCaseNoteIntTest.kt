@@ -324,19 +324,86 @@ class SyncCaseNoteIntTest : IntegrationTest() {
   }
 
   @Test
-  fun `200 ok - resends case note updated event for date range`() {
+  fun `200 ok - resends case note respects include sync to nomis limiter`() {
     val prisonNumber = personIdentifier()
-    val toFind = givenCaseNote(generateCaseNote(prisonNumber, createdAt = now().minusDays(80)))
-    givenCaseNote(generateCaseNote(prisonNumber, createdAt = now().minusDays(70)))
-    givenCaseNote(generateCaseNote(prisonNumber, createdAt = now().minusDays(90)))
+    val types = getAllTypes()
+    val stn = givenCaseNote(
+      generateCaseNote(prisonNumber, types.filter { it.syncToNomis }.random(), createdAt = now().minusDays(50)),
+    )
+    val nstn = givenCaseNote(
+      generateCaseNote(prisonNumber, types.filter { !it.syncToNomis }.random(), createdAt = now().minusDays(50)),
+    )
+
+    val request1 = ResendPersonCaseNoteEvents(setOf(), CreatedBetween(now().minusDays(51), now().minusDays(49)))
+    webTestClient.post().uri("/resend-person-case-note-events")
+      .bodyValue(request1)
+      .exchange().expectStatus().isNoContent
+
+    hmppsEventsQueue.receivePersonCaseNoteEvent().verifyAgainst(PersonCaseNoteEvent.Type.CREATED, Source.DPS, nstn)
+
+    val request2 = ResendPersonCaseNoteEvents(
+      setOf(),
+      CreatedBetween(now().minusDays(51), now().minusDays(49), includeSyncToNomis = true),
+    )
+    webTestClient.post().uri("/resend-person-case-note-events")
+      .bodyValue(request2)
+      .exchange().expectStatus().isNoContent
+
+    val events = hmppsEventsQueue.receivePersonCaseNoteEventsOnQueue()
+    assertThat(events).hasSize(2)
+    events.forEach { e ->
+      val caseNote = listOf(stn, nstn).first { it.id == e.additionalInformation.id }
+      val eventType = if (caseNote.amendments().isEmpty()) {
+        PersonCaseNoteEvent.Type.CREATED
+      } else {
+        PersonCaseNoteEvent.Type.UPDATED
+      }
+      e.verifyAgainst(eventType, Source.DPS, caseNote)
+    }
+  }
+
+  @Test
+  fun `200 ok - resends case note created and updated event for date range`() {
+    val prisonNumber = personIdentifier()
+    val types = getAllTypes().filter { !it.syncToNomis }
+    val toFind = listOf(
+      givenCaseNote(generateCaseNote(prisonNumber, types.random(), createdAt = now().minusDays(80))),
+      givenCaseNote(
+        generateCaseNote(
+          prisonNumber,
+          types.random(),
+          createdAt = now().minusDays(120),
+        ).withAmendment(createdAt = now().minusDays(80)),
+      ),
+    )
+    givenCaseNote(generateCaseNote(prisonNumber, types.random(), createdAt = now().minusDays(70)))
+    givenCaseNote(generateCaseNote(prisonNumber, types.random(), createdAt = now().minusDays(90)))
+    givenCaseNote(
+      generateCaseNote(prisonNumber, types.random(), createdAt = now().minusDays(120))
+        .withAmendment(createdAt = now()),
+    )
+    givenCaseNote(
+      generateCaseNote(prisonNumber, types.random(), createdAt = now().minusDays(90))
+        .withAmendment(createdAt = now().minusDays(90)),
+    )
 
     val request = ResendPersonCaseNoteEvents(setOf(), CreatedBetween(now().minusDays(85), now().minusDays(75)))
     webTestClient.post().uri("/resend-person-case-note-events")
       .bodyValue(request)
       .exchange().expectStatus().isNoContent
 
-    val saved = requireNotNull(noteRepository.findByIdOrNull(toFind.id))
-    hmppsEventsQueue.receivePersonCaseNoteEvent().verifyAgainst(PersonCaseNoteEvent.Type.UPDATED, Source.DPS, saved)
+    val saved = noteRepository.findAllByIdIn(toFind.map { it.id })
+    val events = hmppsEventsQueue.receivePersonCaseNoteEventsOnQueue()
+    assertThat(events).hasSize(2)
+    events.forEach { e ->
+      val caseNote = saved.first { it.id == e.additionalInformation.id }
+      val eventType = if (caseNote.amendments().isEmpty()) {
+        PersonCaseNoteEvent.Type.CREATED
+      } else {
+        PersonCaseNoteEvent.Type.UPDATED
+      }
+      e.verifyAgainst(eventType, Source.DPS, caseNote)
+    }
   }
 
   private fun syncCaseNote(

@@ -168,14 +168,14 @@ class SyncCaseNotes(
   @Transactional(readOnly = true)
   fun resendEvents(request: ResendPersonCaseNoteEvents) {
     noteRepository.findAll(request.asSpecification())
-      .map { it.createEvent(UPDATED, sourceOverride = Source.DPS) }
+      .map { it.createEvent(if (it.amendments().isEmpty()) CREATED else UPDATED, sourceOverride = Source.DPS) }
       .forEach(eventPublisher::publishEvent)
   }
 }
 
 private fun ResendPersonCaseNoteEvents.asSpecification(): Specification<Note> = listOfNotNull(
   if (uuids.isNotEmpty()) idIn(uuids) else null,
-  createdBetween?.let { createdBetween(createdBetween.from, createdBetween.to) },
+  createdBetween?.let { createdBetween(createdBetween.from, createdBetween.to, createdBetween.includeSyncToNomis) },
 ).reduce { spec, current -> spec.and(current) }
 
 private fun <T : TypeLookup> Collection<T>.exceptionMessage() =

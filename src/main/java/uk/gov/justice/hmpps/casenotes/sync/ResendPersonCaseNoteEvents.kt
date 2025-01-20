@@ -8,4 +8,4 @@ data class ResendPersonCaseNoteEvents(
   val createdBetween: CreatedBetween? = null,
 )
 
-data class CreatedBetween(val from: LocalDateTime, val to: LocalDateTime)
+data class CreatedBetween(val from: LocalDateTime, val to: LocalDateTime, val includeSyncToNomis: Boolean = false)

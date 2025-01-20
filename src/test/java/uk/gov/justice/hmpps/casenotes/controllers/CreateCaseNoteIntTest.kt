@@ -19,6 +19,7 @@ import uk.gov.justice.hmpps.casenotes.health.wiremock.ManageUsersApiExtension.Co
 import uk.gov.justice.hmpps.casenotes.notes.CaseNote
 import uk.gov.justice.hmpps.casenotes.notes.CreateCaseNoteRequest
 import uk.gov.justice.hmpps.casenotes.utils.NomisIdGenerator.personIdentifier
+import uk.gov.justice.hmpps.casenotes.utils.set
 import uk.gov.justice.hmpps.casenotes.utils.verifyAgainst
 import java.time.Duration.ofSeconds
 import java.time.LocalDateTime
@@ -155,6 +156,8 @@ class CreateCaseNoteIntTest : IntegrationTest() {
     await withPollDelay ofSeconds(1) untilCallTo { hmppsEventsQueue.countAllMessagesOnQueue() } matches { it == 1 }
     val event = hmppsEventsQueue.receivePersonCaseNoteEvent()
     assertThat(event.eventType).isEqualTo("person.case-note.created")
+    assertThat(event.additionalInformation.source).isEqualTo(Source.DPS)
+    assertThat(event.additionalInformation.syncToNomis).isEqualTo(false)
   }
 
   private fun createCaseNoteRequest(
