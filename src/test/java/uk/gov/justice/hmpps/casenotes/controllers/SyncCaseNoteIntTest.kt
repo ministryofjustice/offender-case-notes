@@ -17,6 +17,7 @@ import uk.gov.justice.hmpps.casenotes.domain.audit.DeletedCaseNoteRepository
 import uk.gov.justice.hmpps.casenotes.events.PersonCaseNoteEvent
 import uk.gov.justice.hmpps.casenotes.notes.CaseNote
 import uk.gov.justice.hmpps.casenotes.sync.Author
+import uk.gov.justice.hmpps.casenotes.sync.ResendPersonCaseNoteEvents
 import uk.gov.justice.hmpps.casenotes.sync.SyncCaseNoteAmendmentRequest
 import uk.gov.justice.hmpps.casenotes.sync.SyncCaseNoteRequest
 import uk.gov.justice.hmpps.casenotes.sync.SyncResult
@@ -125,7 +126,8 @@ class SyncCaseNoteIntTest : IntegrationTest() {
   fun `200 ok - sync updates an existing case note using id`() {
     val prisonNumber = personIdentifier()
     val existing = givenCaseNote(generateCaseNote(prisonNumber))
-    val request = existing.syncRequest().copy(text = "The text was updated in nomis by CENTRAL ADMIN", system = System.DPS)
+    val request =
+      existing.syncRequest().copy(text = "The text was updated in nomis by CENTRAL ADMIN", system = System.DPS)
     val response = syncCaseNote(request).success<SyncResult>(HttpStatus.OK)
     assertThat(response.action).isEqualTo(UPDATED)
 
@@ -146,7 +148,8 @@ class SyncCaseNoteIntTest : IntegrationTest() {
   fun `200 ok - sync updates case note occurred at`() {
     val prisonNumber = personIdentifier()
     val existing = givenCaseNote(generateCaseNote(prisonNumber))
-    val request = existing.syncRequest().copy(occurrenceDateTime = existing.occurredAt.minusHours(4), system = System.DPS)
+    val request =
+      existing.syncRequest().copy(occurrenceDateTime = existing.occurredAt.minusHours(4), system = System.DPS)
     val response = syncCaseNote(request).success<SyncResult>(HttpStatus.OK)
     assertThat(response.action).isEqualTo(UPDATED)
 
@@ -303,6 +306,20 @@ class SyncCaseNoteIntTest : IntegrationTest() {
     val caseNotes = getCaseNotes(personIdentifier)
     assertThat(caseNotes).hasSize(expected.size)
     assertThat(caseNotes.flatMap(CaseNote::amendments)).hasSize(expected.flatMap { it.amendments() }.size)
+  }
+
+  @Test
+  fun `200 ok - resends case note updated event`() {
+    val prisonNumber = personIdentifier()
+    val existing = givenCaseNote(generateCaseNote(prisonNumber).withAmendment(createdAt = now().minusDays(5)))
+
+    val request = ResendPersonCaseNoteEvents(setOf(existing.id))
+    webTestClient.post().uri("/resend-person-case-note-events")
+      .bodyValue(request)
+      .exchange().expectStatus().isNoContent
+
+    val saved = requireNotNull(noteRepository.findByIdOrNull(existing.id))
+    hmppsEventsQueue.receivePersonCaseNoteEvent().verifyAgainst(PersonCaseNoteEvent.Type.UPDATED, Source.DPS, saved)
   }
 
   private fun syncCaseNote(

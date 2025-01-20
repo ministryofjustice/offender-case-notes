@@ -1,11 +1,14 @@
 package uk.gov.justice.hmpps.casenotes.events
 
+import com.fasterxml.jackson.annotation.JsonInclude
+import com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL
 import uk.gov.justice.hmpps.casenotes.config.CaseNoteRequestContext
 import uk.gov.justice.hmpps.casenotes.config.Source
 import uk.gov.justice.hmpps.casenotes.domain.Note
 import java.time.ZoneId
 import java.util.UUID
 
+@JsonInclude(NON_NULL)
 data class PersonCaseNoteEvent(
   val eventType: Type,
   val personIdentifier: String,
@@ -31,7 +34,11 @@ data class PersonCaseNoteEvent(
   companion object {
     private const val EVENT_PREFIX = "person.case-note."
 
-    fun Note.createEvent(eventType: Type, previousPersonIdentifier: String? = null): PersonCaseNoteEvent =
+    fun Note.createEvent(
+      eventType: Type,
+      previousPersonIdentifier: String? = null,
+      sourceOverride: Source? = null,
+    ): PersonCaseNoteEvent =
       PersonCaseNoteEvent(
         eventType,
         personIdentifier,
@@ -39,7 +46,7 @@ data class PersonCaseNoteEvent(
         legacyId,
         subType.type.code,
         subType.code,
-        CaseNoteRequestContext.get().source,
+        sourceOverride ?: CaseNoteRequestContext.get().source,
         subType.syncToNomis,
         systemGenerated,
         previousPersonIdentifier,

@@ -28,6 +28,10 @@ generic-service:
           deny all;
           return 401;
         }
+        location /resend-person-case-note-events {
+          deny all;
+          return 401;
+        }
     tlsSecretName: offender-case-notes-cert
 
   serviceAccountName: offender-case-notes
