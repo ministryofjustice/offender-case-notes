@@ -19,6 +19,7 @@ data class CaseNoteRequestContext(
     private const val SYS_DISPLAY_NAME = "Sys"
     private val NomisContext = { CaseNoteRequestContext(SYS_USER, SYS_DISPLAY_NAME, SYS_USER, source = Source.NOMIS) }
 
+    @JvmStatic
     fun get(): CaseNoteRequestContext = RequestContextHolder.getRequestAttributes()
       ?.getAttribute(CaseNoteRequestContext::class.simpleName!!, 0) as CaseNoteRequestContext?
       ?: NomisContext()

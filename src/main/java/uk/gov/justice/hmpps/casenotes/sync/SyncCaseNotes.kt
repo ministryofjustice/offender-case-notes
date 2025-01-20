@@ -2,6 +2,7 @@ package uk.gov.justice.hmpps.casenotes.sync
 
 import com.microsoft.applicationinsights.TelemetryClient
 import org.springframework.context.ApplicationEventPublisher
+import org.springframework.data.jpa.domain.Specification
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -14,7 +15,9 @@ import uk.gov.justice.hmpps.casenotes.domain.SubType
 import uk.gov.justice.hmpps.casenotes.domain.SubTypeRepository
 import uk.gov.justice.hmpps.casenotes.domain.TypeKey
 import uk.gov.justice.hmpps.casenotes.domain.TypeLookup
+import uk.gov.justice.hmpps.casenotes.domain.createdBetween
 import uk.gov.justice.hmpps.casenotes.domain.getByTypeCodeAndCode
+import uk.gov.justice.hmpps.casenotes.domain.idIn
 import uk.gov.justice.hmpps.casenotes.domain.saveAndRefresh
 import uk.gov.justice.hmpps.casenotes.events.PersonCaseNoteEvent.Companion.createEvent
 import uk.gov.justice.hmpps.casenotes.events.PersonCaseNoteEvent.Type.CREATED
@@ -164,11 +167,16 @@ class SyncCaseNotes(
 
   @Transactional(readOnly = true)
   fun resendEvents(request: ResendPersonCaseNoteEvents) {
-    noteRepository.findAllByIdIn(request.uuids)
-      .map { it.createEvent(UPDATED, sourceOverride = Source.DPS) }
+    noteRepository.findAll(request.asSpecification())
+      .map { it.createEvent(if (it.amendments().isEmpty()) CREATED else UPDATED, sourceOverride = Source.DPS) }
       .forEach(eventPublisher::publishEvent)
   }
 }
+
+private fun ResendPersonCaseNoteEvents.asSpecification(): Specification<Note> = listOfNotNull(
+  if (uuids.isNotEmpty()) idIn(uuids) else null,
+  createdBetween?.let { createdBetween(createdBetween.from, createdBetween.to, createdBetween.includeSyncToNomis) },
+).reduce { spec, current -> spec.and(current) }
 
 private fun <T : TypeLookup> Collection<T>.exceptionMessage() =
   sortedBy { it.typeCode }

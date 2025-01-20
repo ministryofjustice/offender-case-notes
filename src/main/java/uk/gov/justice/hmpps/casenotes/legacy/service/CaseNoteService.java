@@ -6,6 +6,7 @@ import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.math.NumberUtils;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -18,6 +19,8 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 import uk.gov.justice.hmpps.casenotes.config.CaseNoteRequestContext;
 import uk.gov.justice.hmpps.casenotes.config.SecurityUserContext;
+import uk.gov.justice.hmpps.casenotes.events.PersonCaseNoteEvent;
+import uk.gov.justice.hmpps.casenotes.events.PersonCaseNoteEvent.Type;
 import uk.gov.justice.hmpps.casenotes.notes.CaseNoteFilter;
 import uk.gov.justice.hmpps.casenotes.legacy.dto.NomisCaseNote;
 import uk.gov.justice.hmpps.casenotes.legacy.filters.OffenderCaseNoteFilter;
@@ -52,6 +55,7 @@ public class CaseNoteService {
     private final CaseNoteSubTypeRepository caseNoteSubTypeRepository;
     private final SecurityUserContext securityUserContext;
     private final ExternalApiService externalApiService;
+    private final ApplicationEventPublisher eventPublisher;
 
     public Page<CaseNote> getCaseNotes(
         final String offenderIdentifier,
@@ -252,6 +256,7 @@ public class CaseNoteService {
         var saved = repository.saveAndFlush(caseNote);
         // refresh so the entity is populated with the event id before attempting to map
         repository.refresh(saved);
+        eventPublisher.publishEvent(generateEvent(Type.CREATED, saved));
         return mapper(saved);
     }
 
@@ -285,6 +290,7 @@ public class CaseNoteService {
                 context.getUserDisplayName(),
                 context.getUserId()
             );
+            eventPublisher.publishEvent(generateEvent(Type.UPDATED, offenderCaseNote));
             return mapper(repository.save(offenderCaseNote));
         }
     }
@@ -320,5 +326,20 @@ public class CaseNoteService {
 
     private boolean isAllowedToViewOrCreateSensitiveCaseNote() {
         return securityUserContext.isOverrideRole("POM", "VIEW_SENSITIVE_CASE_NOTES", "ADD_SENSITIVE_CASE_NOTES");
+    }
+
+    private PersonCaseNoteEvent generateEvent(PersonCaseNoteEvent.Type type, OffenderCaseNote caseNote) {
+     return new PersonCaseNoteEvent(
+         type,
+         caseNote.getPersonIdentifier(),
+         caseNote.getId(),
+         caseNote.getLegacyId(),
+         caseNote.getSubType().getType().getCode(),
+         caseNote.getSubType().getCode(),
+         CaseNoteRequestContext.get().getSource(),
+         caseNote.getSubType().isSyncToNomis(),
+         false,
+         null
+     );
     }
 }
