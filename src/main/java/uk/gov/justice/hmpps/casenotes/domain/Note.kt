@@ -25,6 +25,8 @@ import org.springframework.data.jpa.repository.Query
 import uk.gov.justice.hmpps.casenotes.config.CaseNoteRequestContext
 import uk.gov.justice.hmpps.casenotes.domain.IdGenerator.newUuid
 import uk.gov.justice.hmpps.casenotes.domain.Note.Companion.AUTHOR_USERNAME
+import uk.gov.justice.hmpps.casenotes.domain.Note.Companion.CREATED_AT
+import uk.gov.justice.hmpps.casenotes.domain.Note.Companion.ID
 import uk.gov.justice.hmpps.casenotes.domain.Note.Companion.LOCATION_ID
 import uk.gov.justice.hmpps.casenotes.domain.Note.Companion.OCCURRED_AT
 import uk.gov.justice.hmpps.casenotes.domain.Note.Companion.PERSON_IDENTIFIER
@@ -168,6 +170,7 @@ class Note(
   }
 
   companion object {
+    val ID = Note::id.name
     val SUB_TYPE = Note::subType.name
     val PERSON_IDENTIFIER = Note::personIdentifier.name
     val AUTHOR_USERNAME = Note::authorUsername.name
@@ -379,3 +382,11 @@ fun matchesOnType(includeSensitive: Boolean, typeMap: Map<String, Set<String>>) 
 
     cb.and(typePredicate, sensitivePredicate)
   }
+
+fun createdBetween(from: LocalDateTime, to: LocalDateTime) = Specification<Note> { csip, _, cb ->
+  cb.between(csip[CREATED_AT], from, to)
+}
+
+fun idIn(ids: Set<UUID>) = Specification<Note> { cn, _, cb ->
+  cn.get<String>(ID).`in`(ids)
+}

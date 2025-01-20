@@ -146,7 +146,9 @@ class CreateAmendmentIntTest : IntegrationTest() {
       assertThat(system).isEqualTo(System.DPS)
     }
 
-    await withPollDelay ofSeconds(1) untilCallTo { hmppsEventsQueue.countAllMessagesOnQueue() } matches { it == 0 }
+    await withPollDelay ofSeconds(1) untilCallTo { hmppsEventsQueue.countAllMessagesOnQueue() } matches { it == 1 }
+    val event = hmppsEventsQueue.receivePersonCaseNoteEvent()
+    assertThat(event.eventType).isEqualTo("person.case-note.updated")
   }
 
   private fun amendCaseNoteRequest(

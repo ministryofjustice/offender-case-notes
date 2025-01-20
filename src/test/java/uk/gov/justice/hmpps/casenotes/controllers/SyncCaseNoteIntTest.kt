@@ -17,6 +17,7 @@ import uk.gov.justice.hmpps.casenotes.domain.audit.DeletedCaseNoteRepository
 import uk.gov.justice.hmpps.casenotes.events.PersonCaseNoteEvent
 import uk.gov.justice.hmpps.casenotes.notes.CaseNote
 import uk.gov.justice.hmpps.casenotes.sync.Author
+import uk.gov.justice.hmpps.casenotes.sync.CreatedBetween
 import uk.gov.justice.hmpps.casenotes.sync.ResendPersonCaseNoteEvents
 import uk.gov.justice.hmpps.casenotes.sync.SyncCaseNoteAmendmentRequest
 import uk.gov.justice.hmpps.casenotes.sync.SyncCaseNoteRequest
@@ -319,6 +320,22 @@ class SyncCaseNoteIntTest : IntegrationTest() {
       .exchange().expectStatus().isNoContent
 
     val saved = requireNotNull(noteRepository.findByIdOrNull(existing.id))
+    hmppsEventsQueue.receivePersonCaseNoteEvent().verifyAgainst(PersonCaseNoteEvent.Type.UPDATED, Source.DPS, saved)
+  }
+
+  @Test
+  fun `200 ok - resends case note updated event for date range`() {
+    val prisonNumber = personIdentifier()
+    val toFind = givenCaseNote(generateCaseNote(prisonNumber, createdAt = now().minusDays(80)))
+    givenCaseNote(generateCaseNote(prisonNumber, createdAt = now().minusDays(70)))
+    givenCaseNote(generateCaseNote(prisonNumber, createdAt = now().minusDays(90)))
+
+    val request = ResendPersonCaseNoteEvents(setOf(), CreatedBetween(now().minusDays(85), now().minusDays(75)))
+    webTestClient.post().uri("/resend-person-case-note-events")
+      .bodyValue(request)
+      .exchange().expectStatus().isNoContent
+
+    val saved = requireNotNull(noteRepository.findByIdOrNull(toFind.id))
     hmppsEventsQueue.receivePersonCaseNoteEvent().verifyAgainst(PersonCaseNoteEvent.Type.UPDATED, Source.DPS, saved)
   }
 

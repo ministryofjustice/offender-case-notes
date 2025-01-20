@@ -17,6 +17,7 @@ import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
+import org.springframework.context.ApplicationEventPublisher
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageImpl
 import org.springframework.data.domain.PageRequest
@@ -61,6 +62,7 @@ class CaseNoteServiceTest {
   private val externalApiService: ExternalApiService = mock()
   private var caseNoteService: CaseNoteService = mock()
   private val requestAttributes: RequestAttributes = mock()
+  private val eventPublisher: ApplicationEventPublisher = mock()
 
   @Captor
   lateinit var filterCaptor: ArgumentCaptor<OffenderCaseNoteFilter>
@@ -72,6 +74,7 @@ class CaseNoteServiceTest {
       caseNoteSubTypeRepository,
       securityUserContext,
       externalApiService,
+      eventPublisher,
     )
     RequestContextHolder.setRequestAttributes(requestAttributes)
     whenever(requestAttributes.getAttribute(CaseNoteRequestContext::class.simpleName!!, 0)).thenReturn(

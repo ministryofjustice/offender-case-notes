@@ -2,6 +2,10 @@ package uk.gov.justice.hmpps.casenotes.controllers
 
 import com.fasterxml.jackson.module.kotlin.readValue
 import org.assertj.core.api.Assertions.assertThat
+import org.awaitility.kotlin.await
+import org.awaitility.kotlin.matches
+import org.awaitility.kotlin.untilCallTo
+import org.awaitility.kotlin.withPollDelay
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.springframework.http.HttpStatus
@@ -16,6 +20,7 @@ import uk.gov.justice.hmpps.casenotes.notes.CaseNote
 import uk.gov.justice.hmpps.casenotes.notes.CreateCaseNoteRequest
 import uk.gov.justice.hmpps.casenotes.utils.NomisIdGenerator.personIdentifier
 import uk.gov.justice.hmpps.casenotes.utils.verifyAgainst
+import java.time.Duration.ofSeconds
 import java.time.LocalDateTime
 import java.util.UUID.fromString
 
@@ -123,7 +128,8 @@ class CreateCaseNoteIntTest : IntegrationTest() {
         "systemGenerated": null
       }
     """.trimMargin()
-    val response = createCaseNoteWithStringRequestBody(personIdentifier(), request).success<CaseNote>(HttpStatus.CREATED)
+    val response =
+      createCaseNoteWithStringRequestBody(personIdentifier(), request).success<CaseNote>(HttpStatus.CREATED)
 
     val saved = requireNotNull(
       noteRepository.findByIdAndPersonIdentifier(fromString(response.id), response.personIdentifier),
@@ -134,6 +140,21 @@ class CreateCaseNoteIntTest : IntegrationTest() {
     assertThat(saved.system).isEqualTo(System.DPS)
 
     hmppsEventsQueue.receivePersonCaseNoteEvent().verifyAgainst(PersonCaseNoteEvent.Type.CREATED, Source.DPS, saved)
+  }
+
+  @Test
+  fun `can create a case note without caseload id when not sync to nomis`() {
+    val type = getAllTypes().first { !it.syncToNomis }
+    val request = createCaseNoteRequest(type = type.typeCode, subType = type.code)
+    val response = createCaseNote(personIdentifier(), request).success<CaseNote>(HttpStatus.CREATED)
+
+    val saved =
+      requireNotNull(noteRepository.findByIdAndPersonIdentifier(fromString(response.id), response.personIdentifier))
+    assertThat(saved.system).isEqualTo(System.DPS)
+
+    await withPollDelay ofSeconds(1) untilCallTo { hmppsEventsQueue.countAllMessagesOnQueue() } matches { it == 1 }
+    val event = hmppsEventsQueue.receivePersonCaseNoteEvent()
+    assertThat(event.eventType).isEqualTo("person.case-note.created")
   }
 
   private fun createCaseNoteRequest(
