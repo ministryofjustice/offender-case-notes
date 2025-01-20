@@ -251,6 +251,72 @@ class CaseNoteResourceTest : IntegrationTest() {
         .expectBody()
         .json(readFile("A1234AF-single-casenote.json"))
     }
+
+    @Test
+    fun `case notes of type sync to nomis stored in the db are not returned`() {
+      manageUsersApi.stubGetUserDetails("SECURE_CASENOTE_USER")
+      val personIdentifier = "S1234TN"
+      elite2Api.subGetCaseNotesForOffender(personIdentifier)
+      val token = jwtHelper.createJwt("SECURE_CASENOTE_USER", roles = CASENOTES_ROLES)
+
+      webTestClient.get().uri("/case-notes/{personIdentifier}", personIdentifier)
+        .headers(addBearerToken(token))
+        .exchange()
+        .expectStatus().isOk
+        .expectBody().json(
+          """
+          {
+            "totalElements": 1,
+            "totalPages": 1,
+            "sort": {
+              "empty": false,
+              "unsorted": false,
+              "sorted": true
+            },
+            "first": true,
+            "last": true,
+            "number": 0,
+            "size": 10,
+            "content": [
+              {
+                "caseNoteId": "131232",
+                "offenderIdentifier": "S1234TN",
+                "type": "OBS",
+                "typeDescription": "Observation",
+                "subType": "GEN",
+                "subTypeDescription": "General",
+                "source": "INST",
+                "creationDateTime": "2021-06-07T14:58:14.917306",
+                "occurrenceDateTime": "2021-06-07T14:58:14.917397",
+                "authorName": "Mickey Mouse",
+                "authorUserId": "1231232",
+                "text": "Some Text",
+                "locationId": "LEI",
+                "eventId": 131232,
+                "sensitive": false,
+                "amendments": [],
+                "systemGenerated": false,
+                "legacyId": 131232
+              }
+            ],
+            "numberOfElements": 1,
+            "pageable": {
+              "pageNumber": 0,
+              "pageSize": 10,
+              "sort": {
+                "empty": false,
+                "unsorted": false,
+                "sorted": true
+              },
+              "offset": 0,
+              "unpaged": false,
+              "paged": true
+            },
+            "empty": false
+          }
+          """.trimIndent(),
+        )
+    }
   }
 
   @Test
