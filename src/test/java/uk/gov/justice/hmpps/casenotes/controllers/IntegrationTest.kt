@@ -18,6 +18,7 @@ import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.web.reactive.server.WebTestClient
 import org.springframework.test.web.reactive.server.WebTestClient.RequestBodySpec
 import software.amazon.awssdk.services.sqs.model.ReceiveMessageRequest
+import uk.gov.justice.hmpps.casenotes.backfill.AlertsApiExtension
 import uk.gov.justice.hmpps.casenotes.domain.Amendment
 import uk.gov.justice.hmpps.casenotes.domain.Note
 import uk.gov.justice.hmpps.casenotes.domain.NoteRepository
@@ -60,6 +61,7 @@ internal const val USERNAME = "TestUser"
   TokenVerificationExtension::class,
   PrisonerSearchApiExtension::class,
   ManageUsersApiExtension::class,
+  AlertsApiExtension::class,
 )
 abstract class IntegrationTest : BasicIntegrationTest() {
 

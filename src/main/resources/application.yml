@@ -93,3 +93,4 @@ management:
 service:
   active-prisons:
   base-url:
+  action-missing-case-notes: false

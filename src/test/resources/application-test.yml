@@ -41,6 +41,8 @@ prisoner-search.api.base.url: http://localhost:8200
 
 manage-users.api.base.url: http://localhost:8100
 
+alerts.api.base.url: http://localhost:9999
+
 api:
   health-timeout: 400ms
 
@@ -60,7 +62,7 @@ hmpps.sqs:
       queueName: ${random.uuid}
       dlqName: ${random.uuid}
       subscribeTopicId: domainevents
-      subscribeFilter: '{"eventType":["prison-offender-events.prisoner.merged"]}'
+      subscribeFilter: '{"eventType":["prison-offender-events.prisoner.merged", "case-notes.alerts.verification"]}'
   topics:
     domainevents:
       arn: arn:aws:sns:eu-west-2:000000000000:${random.uuid}
