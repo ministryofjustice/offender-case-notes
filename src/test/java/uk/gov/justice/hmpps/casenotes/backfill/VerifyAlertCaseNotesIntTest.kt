@@ -24,12 +24,14 @@ import uk.gov.justice.hmpps.casenotes.health.wiremock.ManageUsersApiExtension.Co
 import uk.gov.justice.hmpps.casenotes.integrations.UserDetails
 import uk.gov.justice.hmpps.casenotes.utils.NomisIdGenerator.personIdentifier
 import uk.gov.justice.hmpps.casenotes.utils.setByName
+import java.time.Instant.now
 import java.time.Instant.ofEpochSecond
 import java.time.LocalDate
 import java.time.LocalTime
-import java.time.ZoneId
+import java.time.ZoneId.systemDefault
 import java.time.ZoneOffset
 import java.time.ZonedDateTime
+import java.time.temporal.ChronoUnit
 import java.util.UUID
 
 class VerifyAlertCaseNotesIntTest : IntegrationTest() {
@@ -66,14 +68,16 @@ class VerifyAlertCaseNotesIntTest : IntegrationTest() {
     assertThat(saved).hasSize(7)
     alerts.forEach { a ->
       val acn = saved.single { a.activeText() == it.text }
-      assertThat(acn.createdAt.toLocalDate()).isEqualTo(a.createdAt.toLocalDate())
+      assertThat(acn.occurredAt.toLocalDate()).isEqualTo(a.activeFrom)
+      assertThat(acn.createdAt.truncatedTo(ChronoUnit.SECONDS)).isEqualTo(a.createdAt.truncatedTo(ChronoUnit.SECONDS))
       assertThat(acn.subType.code).isEqualTo(ActiveInactive.ACTIVE.toString())
       assertThat(acn.authorName).isEqualTo(USER_DETAILS.name)
       assertThat(acn.authorUserId).isEqualTo(USER_DETAILS.userId)
       assertThat(acn.authorUsername).isEqualTo(USER_DETAILS.username)
-      if (!a.isActive()) {
+      if (a.madeInactive()) {
         val icn = saved.single { a.inactiveText() == it.text }
-        assertThat(icn.createdAt.toLocalDate()).isEqualTo(a.activeTo)
+        assertThat(icn.occurredAt.toLocalDate()).isEqualTo(a.activeTo)
+        assertThat(icn.createdAt.truncatedTo(ChronoUnit.SECONDS)).isEqualTo(a.madeInactiveAt?.truncatedTo(ChronoUnit.SECONDS))
         assertThat(icn.subType.code).isEqualTo(ActiveInactive.INACTIVE.toString())
         assertThat(icn.authorName).isEqualTo(USER_DETAILS.name)
         assertThat(icn.authorUserId).isEqualTo(USER_DETAILS.userId)
@@ -84,9 +88,10 @@ class VerifyAlertCaseNotesIntTest : IntegrationTest() {
 
   fun generateCaseNoteAlerts(from: LocalDate, to: LocalDate, count: Int = 5): List<CaseNoteAlert> {
     val dateRange = (from.forRange()..to.forRange())
-    val createdAt = ofEpochSecond(dateRange.random()).atZone(ZoneId.systemDefault()).toLocalDateTime()
-    val activeFrom = ofEpochSecond(dateRange.random()).atZone(ZoneId.systemDefault()).toLocalDate()
-    val activeTo = ofEpochSecond(dateRange.random()).atZone(ZoneId.systemDefault()).toLocalDate()
+    val createdAt = ofEpochSecond(dateRange.random()).atZone(systemDefault()).toLocalDateTime()
+    val activeFrom = ofEpochSecond(dateRange.random()).atZone(systemDefault()).toLocalDate()
+    val activeTo = ofEpochSecond((activeFrom.forRange()..to.forRange()).random())
+      .atZone(systemDefault()).toLocalDateTime()
     return (0..count).map {
       CaseNoteAlert(
         CodedDescription("T$it", "Type $it"),
@@ -95,10 +100,11 @@ class VerifyAlertCaseNotesIntTest : IntegrationTest() {
         activeFrom,
         when {
           it % 3 == 0 -> to.plusDays(3)
-          it % 4 == 0 -> activeTo
+          it % 4 == 0 -> activeTo.toLocalDate()
           else -> null
         },
         createdAt,
+        if (it % 3 != 0 && it % 4 == 0) activeTo else null,
       )
     }
   }

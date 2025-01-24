@@ -13,8 +13,10 @@ data class CaseNoteAlert(
   val activeFrom: LocalDate,
   val activeTo: LocalDate?,
   val createdAt: LocalDateTime,
+  val madeInactiveAt: LocalDateTime?,
 ) {
   fun isActive(): Boolean = activeTo?.isAfter(now()) ?: true
+  fun madeInactive(): Boolean = activeTo != null && madeInactiveAt != null
 
   private fun baseText() = "Alert ${type.description} and ${subType.description} made"
   fun activeText() = "${baseText()} active."

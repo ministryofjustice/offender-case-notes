@@ -1,6 +1,7 @@
 package uk.gov.justice.hmpps.casenotes.alertbackfill
 
 import com.microsoft.applicationinsights.TelemetryClient
+import com.sun.org.apache.xalan.internal.lib.ExsltDatetime.date
 import jakarta.annotation.PostConstruct
 import org.springframework.stereotype.Service
 import uk.gov.justice.hmpps.casenotes.alertbackfill.ActiveInactive.ACTIVE
@@ -40,7 +41,7 @@ class AlertCaseNoteVerification(
       val matches = existingNotes matching it
       buildList {
         if (matches[ACTIVE] == null) add(ACTIVE to it)
-        if (!it.isActive() && matches[INACTIVE] == null) add(INACTIVE to it)
+        if (it.madeInactive() && matches[INACTIVE] == null) add(INACTIVE to it)
       }
     }.groupBy({ it.first }, { it.second })
 
@@ -92,7 +93,10 @@ class AlertCaseNoteVerification(
   ) = Note(
     personIdentifier,
     requireNotNull(subTypes[activeInactive]),
-    date(activeInactive),
+    when (activeInactive) {
+      ACTIVE -> activeFrom.atStartOfDay()
+      INACTIVE -> requireNotNull(activeTo).atStartOfDay()
+    },
     prisonCode!!,
     DPS_USERNAME,
     dpsUser?.userId ?: "2",
@@ -106,12 +110,10 @@ class AlertCaseNoteVerification(
   ).apply {
     legacyId = noteRepository.getNextLegacyId()
     createdBy = DPS_USERNAME
-    this.createdAt = date(activeInactive)
-  }
-
-  private fun CaseNoteAlert.date(activeInactive: ActiveInactive) = when (activeInactive) {
-    ACTIVE -> createdAt.truncatedTo(ChronoUnit.DAYS)
-    INACTIVE -> checkNotNull(activeTo).atStartOfDay()
+    this.createdAt = when (activeInactive) {
+      ACTIVE -> this@toNote.createdAt.truncatedTo(ChronoUnit.SECONDS)
+      INACTIVE -> checkNotNull(madeInactiveAt)
+    }
   }
 
   @PostConstruct
