@@ -24,6 +24,7 @@ import uk.gov.justice.hmpps.casenotes.events.PersonCaseNoteEvent.Type.CREATED
 import uk.gov.justice.hmpps.casenotes.integrations.ManageUsersService
 import uk.gov.justice.hmpps.casenotes.integrations.UserDetails
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit
 
 @Transactional
@@ -73,13 +74,16 @@ class AlertCaseNoteReconciliation(
 
   private infix fun List<Note>.matching(alert: CaseNoteAlert): Map<ActiveInactive, Note> = mapNotNull { note ->
     when {
-      note.matches(alert.activeText(), alert.activeFrom) -> ACTIVE to note
-      alert.activeTo != null && note.matches(alert.inactiveText(), alert.activeTo) -> INACTIVE to note
+      note.matchesActive(alert.activeText(), alert.createdAt) -> ACTIVE to note
+      alert.activeTo != null && note.matchesInactive(alert.inactiveText(), alert.activeTo) -> INACTIVE to note
       else -> null
     }
   }.toMap()
 
-  private fun Note.matches(text: String, date: LocalDate) =
+  private fun Note.matchesActive(text: String, dateTime: LocalDateTime) =
+    this.text == text && createdAt.truncatedTo(ChronoUnit.SECONDS).isEqual(dateTime.truncatedTo(ChronoUnit.SECONDS))
+
+  private fun Note.matchesInactive(text: String, date: LocalDate) =
     this.text == text && occurredAt.toLocalDate().equals(date)
 
   private fun Map<ActiveInactive, List<CaseNoteAlert>>.properties(personIdentifier: String) = buildMap {
