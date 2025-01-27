@@ -1,7 +1,6 @@
 package uk.gov.justice.hmpps.casenotes.alertbackfill
 
 import java.time.LocalDate
-import java.time.LocalDate.now
 import java.time.LocalDateTime
 
 data class CaseNoteAlertResponse(val content: List<CaseNoteAlert>)
@@ -15,7 +14,6 @@ data class CaseNoteAlert(
   val createdAt: LocalDateTime,
   val madeInactiveAt: LocalDateTime?,
 ) {
-  fun isActive(): Boolean = activeTo?.isAfter(now()) ?: true
   fun madeInactive(): Boolean = activeTo != null && madeInactiveAt != null
 
   private fun baseText() = "Alert ${type.description} and ${subType.description} made"

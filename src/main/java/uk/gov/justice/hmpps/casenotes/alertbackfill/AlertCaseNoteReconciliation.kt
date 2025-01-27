@@ -1,9 +1,10 @@
 package uk.gov.justice.hmpps.casenotes.alertbackfill
 
 import com.microsoft.applicationinsights.TelemetryClient
-import com.sun.org.apache.xalan.internal.lib.ExsltDatetime.date
 import jakarta.annotation.PostConstruct
+import org.springframework.context.ApplicationEventPublisher
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 import uk.gov.justice.hmpps.casenotes.alertbackfill.ActiveInactive.ACTIVE
 import uk.gov.justice.hmpps.casenotes.alertbackfill.ActiveInactive.INACTIVE
 import uk.gov.justice.hmpps.casenotes.config.ServiceConfig
@@ -18,21 +19,25 @@ import uk.gov.justice.hmpps.casenotes.domain.matchesOnType
 import uk.gov.justice.hmpps.casenotes.domain.matchesPersonIdentifier
 import uk.gov.justice.hmpps.casenotes.events.AdditionalInformation
 import uk.gov.justice.hmpps.casenotes.events.DomainEvent
+import uk.gov.justice.hmpps.casenotes.events.PersonCaseNoteEvent.Companion.createEvent
+import uk.gov.justice.hmpps.casenotes.events.PersonCaseNoteEvent.Type.CREATED
 import uk.gov.justice.hmpps.casenotes.integrations.ManageUsersService
 import uk.gov.justice.hmpps.casenotes.integrations.UserDetails
 import java.time.LocalDate
 import java.time.temporal.ChronoUnit
 
+@Transactional
 @Service
-class AlertCaseNoteVerification(
+class AlertCaseNoteReconciliation(
   private val manageUsersService: ManageUsersService,
   private val alertService: AlertService,
   private val noteRepository: NoteRepository,
   private val subTypeRepository: SubTypeRepository,
   private val telemetryClient: TelemetryClient,
+  private val eventPublisher: ApplicationEventPublisher,
   private val serviceConfig: ServiceConfig,
 ) {
-  fun verify(domainEvent: DomainEvent<AlertVerificationInformation>) {
+  fun reconcile(domainEvent: DomainEvent<AlertVerificationInformation>) {
     setDpsUserIfNotSet()
     val info = domainEvent.additionalInformation
     val alerts = alertService.getAlertsOfInterest(info.personIdentifier, info.from, info.to).content
@@ -46,22 +51,22 @@ class AlertCaseNoteVerification(
     }.groupBy({ it.first }, { it.second })
 
     if (toCreate.isEmpty()) return
-    telemetryClient.trackEvent("MissingAlertCaseNotes", toCreate.properties(), mapOf())
+    telemetryClient.trackEvent("MissingAlertCaseNotes", toCreate.properties(info.personIdentifier), mapOf())
 
     if (serviceConfig.actionMissingCaseNotes) {
       val subTypes = subTypeRepository.findByKeyIn(
-        setOf(TypeKey("ALERT", "ACTIVE"), TypeKey("ALERT", "INACTIVE")),
+        setOf(TypeKey(TYPE, ACTIVE.name), TypeKey(TYPE, INACTIVE.name)),
       ).associateBy { ActiveInactive.valueOf(it.code) }
       val notes = toCreate.flatMap { e ->
         e.value.map { it.toNote(info.personIdentifier, e.key, subTypes) }
       }
-      noteRepository.saveAll(notes)
+      noteRepository.saveAll(notes).forEach { eventPublisher.publishEvent(it.createEvent(CREATED)) }
     }
   }
 
   private fun AlertVerificationInformation.asSpecification() =
     matchesPersonIdentifier(personIdentifier)
-      .and(matchesOnType(true, mapOf("ALERT" to setOf())))
+      .and(matchesOnType(true, mapOf(TYPE to setOf())))
       .and(createdBetween(from.atStartOfDay(), to.plusDays(1).atStartOfDay(), true))
 
   private infix fun List<Note>.matching(alert: CaseNoteAlert): Map<ActiveInactive, Note> = mapNotNull { note ->
@@ -75,14 +80,21 @@ class AlertCaseNoteVerification(
   private fun Note.matches(text: String, date: LocalDate) =
     this.text == text && occurredAt.toLocalDate().equals(date)
 
-  private fun Map<ActiveInactive, List<CaseNoteAlert>>.properties() = buildMap {
+  private fun Map<ActiveInactive, List<CaseNoteAlert>>.properties(personIdentifier: String) = buildMap {
+    put("PersonIdentifier", personIdentifier)
     this@properties[ACTIVE]?.also { v ->
       put("ActiveCount", v.size.toString())
-      put("ActiveTypes", v.joinToString { "${it.type} ${it.subType}" })
+      put(
+        "ActiveTypes",
+        v.joinToString { "${it.type.description} and ${it.subType.description} -> ${it.activeFrom} | ${it.createdAt}" },
+      )
     }
     this@properties[INACTIVE]?.also { v ->
       put("InactiveCount", v.size.toString())
-      put("InactiveTypes", v.joinToString { "${it.type} ${it.subType}" })
+      put(
+        "InactiveTypes",
+        v.joinToString { "${it.type.description} and ${it.subType.description} -> ${it.activeTo} | ${it.madeInactiveAt}" },
+      )
     }
   }
 
@@ -100,7 +112,7 @@ class AlertCaseNoteVerification(
     prisonCode!!,
     DPS_USERNAME,
     dpsUser?.userId ?: "2",
-    dpsUser?.name ?: "Dps Synchronisation",
+    dpsUser?.name ?: "System Generated",
     when (activeInactive) {
       ACTIVE -> activeText()
       INACTIVE -> inactiveText()
@@ -134,6 +146,7 @@ class AlertCaseNoteVerification(
   companion object {
     const val DPS_USERNAME: String = "PRISONER_MANAGER_API"
     private var dpsUser: UserDetails? = null
+    const val TYPE = "ALERT"
   }
 }
 

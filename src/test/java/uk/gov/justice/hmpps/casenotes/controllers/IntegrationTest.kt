@@ -171,7 +171,7 @@ abstract class IntegrationTest : BasicIntegrationTest() {
     }.random()
 
   fun generateCaseNote(
-    prisonNumber: String = NomisIdGenerator.personIdentifier(),
+    personIdentifier: String = NomisIdGenerator.personIdentifier(),
     type: SubType = givenRandomType(),
     occurredAt: LocalDateTime = LocalDateTime.now().minusDays(3),
     locationId: String = "MDI",
@@ -184,7 +184,7 @@ abstract class IntegrationTest : BasicIntegrationTest() {
     legacyId: Long = NomisIdGenerator.newId(),
     createdAt: LocalDateTime? = null,
   ) = Note(
-    prisonNumber,
+    personIdentifier,
     type,
     occurredAt.truncatedTo(ChronoUnit.SECONDS),
     locationId,
