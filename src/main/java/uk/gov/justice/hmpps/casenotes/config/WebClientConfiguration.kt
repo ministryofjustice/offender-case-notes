@@ -36,6 +36,7 @@ class WebClientConfiguration(
   @Value("\${oauth.api.base.url}") private val oauthApiBaseUrl: @URL String,
   @Value("\${prisoner-search.api.base.url}") private val prisonerSearchApiBaseUrl: @URL String,
   @Value("\${manage-users.api.base.url}") private val manageUsersApiBaseUrl: @URL String,
+  @Value("\${alerts.api.base.url}") private val alertsApiBaseUrl: @URL String,
   @Value("\${tokenverification.api.base.url}") private val tokenVerificationApiBaseUrl: @URL String,
   @Value("\${api.health-timeout:1s}") private val healthTimeout: Duration,
   @Value("\${api.response-timeout:2s}") private val responseTimeout: Duration,
@@ -122,6 +123,12 @@ class WebClientConfiguration(
     @Qualifier(value = "authorizedClientManagerAppScope") authorizedClientManager: OAuth2AuthorizedClientManager,
     builder: Builder,
   ): WebClient = getOAuthWebClient(authorizedClientManager, builder, manageUsersApiBaseUrl)
+
+  @Bean
+  fun alertsWebClient(
+    @Qualifier(value = "authorizedClientManagerAppScope") authorizedClientManager: OAuth2AuthorizedClientManager,
+    builder: Builder,
+  ): WebClient = getOAuthWebClient(authorizedClientManager, builder, alertsApiBaseUrl)
 
   private fun getOAuthWebClient(
     authorizedClientManager: OAuth2AuthorizedClientManager,

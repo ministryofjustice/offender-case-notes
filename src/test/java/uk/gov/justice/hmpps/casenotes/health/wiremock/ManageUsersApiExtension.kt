@@ -57,6 +57,17 @@ class ManageUsersApiServer : WireMockServer(WIREMOCK_PORT) {
         ),
     )
 
+  fun stubGetUserDetails(userDetails: UserDetails): StubMapping =
+    stubFor(
+      get("/users/${userDetails.username}")
+        .willReturn(
+          aResponse()
+            .withHeader("Content-Type", "application/json")
+            .withBody(mapper.writeValueAsString(userDetails))
+            .withStatus(200),
+        ),
+    )
+
   companion object {
     private const val WIREMOCK_PORT = 8100
   }

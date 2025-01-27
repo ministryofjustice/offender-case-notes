@@ -19,4 +19,5 @@ class ServiceConfigInfo(
 data class ServiceConfig(
   val activePrisons: Set<String>,
   val baseUrl: String,
+  val actionMissingCaseNotes: Boolean,
 )
