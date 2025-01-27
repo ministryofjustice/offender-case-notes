@@ -14,7 +14,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoSpyBean
 import uk.gov.justice.hmpps.casenotes.alertbackfill.ActiveInactive
 import uk.gov.justice.hmpps.casenotes.alertbackfill.AlertCaseNoteReconciliation
 import uk.gov.justice.hmpps.casenotes.alertbackfill.AlertCaseNoteReconciliation.Companion.TYPE
-import uk.gov.justice.hmpps.casenotes.alertbackfill.AlertVerificationInformation
+import uk.gov.justice.hmpps.casenotes.alertbackfill.AlertReconciliationInformation
 import uk.gov.justice.hmpps.casenotes.alertbackfill.CaseNoteAlert
 import uk.gov.justice.hmpps.casenotes.alertbackfill.CaseNoteAlertResponse
 import uk.gov.justice.hmpps.casenotes.alertbackfill.CodedDescription
@@ -193,12 +193,12 @@ class AlertCaseNoteReconciliationIntTest : IntegrationTest() {
     personIdentifier: String,
     fromDate: LocalDate,
     toDate: LocalDate,
-  ): DomainEvent<AlertVerificationInformation> = DomainEvent(
+  ): DomainEvent<AlertReconciliationInformation> = DomainEvent(
     occurredAt = ZonedDateTime.now(),
     eventType = DomainEventListener.RECONCILE_ALERTS,
     detailUrl = null,
     description = "A temporary internal use only event",
-    AlertVerificationInformation(personIdentifier, fromDate, toDate),
+    AlertReconciliationInformation(personIdentifier, fromDate, toDate),
     PersonReference.withIdentifier(personIdentifier),
   )
 

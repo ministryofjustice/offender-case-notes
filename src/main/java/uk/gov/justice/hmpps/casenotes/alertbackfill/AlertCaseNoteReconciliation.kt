@@ -37,11 +37,12 @@ class AlertCaseNoteReconciliation(
   private val eventPublisher: ApplicationEventPublisher,
   private val serviceConfig: ServiceConfig,
 ) {
-  fun reconcile(domainEvent: DomainEvent<AlertVerificationInformation>) {
+  fun reconcile(domainEvent: DomainEvent<AlertReconciliationInformation>) {
     setDpsUserIfNotSet()
     val info = domainEvent.additionalInformation
     val alerts = alertService.getAlertsOfInterest(info.personIdentifier, info.from, info.to).content
-    val existingNotes = noteRepository.findAll(info.asSpecification())
+    val (from, to) = alerts.getCaseNoteDates()
+    val existingNotes = noteRepository.findAll(info.asSpecification(from, to))
     val toCreate = alerts.flatMap {
       val matches = existingNotes matching it
       buildList {
@@ -64,7 +65,7 @@ class AlertCaseNoteReconciliation(
     }
   }
 
-  private fun AlertVerificationInformation.asSpecification() =
+  private fun AlertReconciliationInformation.asSpecification(from: LocalDate, to: LocalDate) =
     matchesPersonIdentifier(personIdentifier)
       .and(matchesOnType(true, mapOf(TYPE to setOf())))
       .and(createdBetween(from.atStartOfDay(), to.plusDays(1).atStartOfDay(), true))
@@ -155,5 +156,12 @@ enum class ActiveInactive {
   INACTIVE,
 }
 
-data class AlertVerificationInformation(val personIdentifier: String, val from: LocalDate, val to: LocalDate) :
+data class AlertReconciliationInformation(val personIdentifier: String, val from: LocalDate, val to: LocalDate) :
   AdditionalInformation
+
+private fun List<CaseNoteAlert>.getCaseNoteDates(): Pair<LocalDate, LocalDate> {
+  val dates = flatMap {
+    listOfNotNull(it.createdAt.toLocalDate(), it.madeInactiveAt?.toLocalDate(), it.activeTo, it.activeFrom)
+  }.sorted()
+  return Pair(dates.first(), dates.last())
+}

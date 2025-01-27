@@ -69,10 +69,6 @@ workflows:
             - validate
             - helm_lint
             - build_docker
-      - request-preprod-approval:
-          type: approval
-          requires:
-            - deploy_dev
       - hmpps/deploy_env:
           name: deploy_preprod
           env: "preprod"
@@ -84,7 +80,9 @@ workflows:
             - hmpps-common-vars
             - offender-case-notes-preprod
           requires:
-            - request-preprod-approval
+            - validate
+            - helm_lint
+            - build_docker
       - request-prod-approval:
           type: approval
           requires:
