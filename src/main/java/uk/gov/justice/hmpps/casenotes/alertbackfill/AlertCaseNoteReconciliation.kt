@@ -41,6 +41,7 @@ class AlertCaseNoteReconciliation(
     setDpsUserIfNotSet()
     val info = domainEvent.additionalInformation
     val alerts = alertService.getAlertsOfInterest(info.personIdentifier, info.from, info.to).content
+    if (alerts.isEmpty()) return
     val (from, to) = alerts.getCaseNoteDates()
     val existingNotes = noteRepository.findAll(info.asSpecification(from, to))
     val toCreate = alerts.flatMap {
