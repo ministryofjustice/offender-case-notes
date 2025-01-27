@@ -79,6 +79,10 @@ workflows:
           context:
             - hmpps-common-vars
             - offender-case-notes-preprod
+          filters:
+            branches:
+              only:
+                - main
           requires:
             - validate
             - helm_lint
