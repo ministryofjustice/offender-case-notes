@@ -23,6 +23,8 @@ import uk.gov.justice.hmpps.casenotes.events.PersonCaseNoteEvent.Companion.creat
 import uk.gov.justice.hmpps.casenotes.events.PersonCaseNoteEvent.Type.CREATED
 import uk.gov.justice.hmpps.casenotes.integrations.ManageUsersService
 import uk.gov.justice.hmpps.casenotes.integrations.UserDetails
+import java.time.Duration.between
+import java.time.Duration.ofMinutes
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit
@@ -81,7 +83,7 @@ class AlertCaseNoteReconciliation(
   }.toMap()
 
   private fun Note.matchesActive(text: String, dateTime: LocalDateTime) =
-    this.text == text && createdAt.truncatedTo(ChronoUnit.SECONDS).isEqual(dateTime.truncatedTo(ChronoUnit.SECONDS))
+    this.text == text && between(createdAt, dateTime) <= ofMinutes(1)
 
   private fun Note.matchesInactive(text: String, date: LocalDate) =
     this.text == text && occurredAt.toLocalDate().equals(date)
