@@ -49,11 +49,8 @@ class AlertCaseNoteReconciliation(
     val existingNotes = noteRepository.findAll(info.asSpecification(from, to))
     val toCreate = alerts.flatMap {
       val matches = existingNotes matching it
-      buildList {
-        if (matches[ACTIVE] == null) add(ACTIVE to it)
-        if (it.madeInactive() && matches[INACTIVE] == null) add(INACTIVE to it)
-      }
-    }.groupBy({ it.first }, { it.second })
+      matches.findMissing(it, info)
+    }.groupBy({ it.status to it.scope }, { it.alert })
 
     if (toCreate.isEmpty()) return
     telemetryClient.trackEvent("MissingAlertCaseNotes", toCreate.properties(info.personIdentifier), mapOf())
@@ -63,9 +60,33 @@ class AlertCaseNoteReconciliation(
         setOf(TypeKey(TYPE, ACTIVE.name), TypeKey(TYPE, INACTIVE.name)),
       ).associateBy { ActiveInactive.valueOf(it.code) }
       val notes = toCreate.flatMap { e ->
-        e.value.map { it.toNote(info.personIdentifier, e.key, subTypes) }
+        e.value.map { it.toNote(info.personIdentifier, e.key.first, subTypes) }
       }
       noteRepository.saveAll(notes).forEach { eventPublisher.publishEvent(it.createEvent(CREATED)) }
+    }
+  }
+
+  private fun Map<ActiveInactive, Note>.findMissing(
+    it: CaseNoteAlert,
+    info: AlertReconciliationInformation,
+  ): List<MissingNote> = buildList {
+    if (get(ACTIVE) == null) {
+      add(
+        MissingNote(
+          ACTIVE,
+          if (it.activeFrom in (info.from..info.to)) InOutScope.IN else InOutScope.OUT,
+          it,
+        ),
+      )
+    }
+    if (it.madeInactive() && get(INACTIVE) == null) {
+      add(
+        MissingNote(
+          INACTIVE,
+          if (it.activeTo!! in (info.from..info.to)) InOutScope.IN else InOutScope.OUT,
+          it,
+        ),
+      )
     }
   }
 
@@ -76,33 +97,58 @@ class AlertCaseNoteReconciliation(
 
   private infix fun List<Note>.matching(alert: CaseNoteAlert): Map<ActiveInactive, Note> = mapNotNull { note ->
     when {
-      note.matchesActive(alert.activeText(), alert.createdAt) -> ACTIVE to note
+      note.matchesActive(alert.activeText(), alert.activeFrom, alert.createdAt) -> ACTIVE to note
       alert.activeTo != null && note.matchesInactive(alert.inactiveText(), alert.activeTo) -> INACTIVE to note
       else -> null
     }
   }.toMap()
 
-  private fun Note.matchesActive(text: String, dateTime: LocalDateTime) =
-    this.text == text && between(dateTime.truncatedTo(SECONDS), createdAt.truncatedTo(SECONDS)) <= ofMinutes(1)
+  private fun Note.matchesActive(text: String, date: LocalDate, dateTime: LocalDateTime) =
+    this.text == text && (
+      occurredAt.toLocalDate() == date ||
+        between(dateTime.truncatedTo(SECONDS), createdAt.truncatedTo(SECONDS)) <= ofMinutes(1)
+      )
 
   private fun Note.matchesInactive(text: String, date: LocalDate) =
     this.text == text && occurredAt.toLocalDate().equals(date)
 
-  private fun Map<ActiveInactive, List<CaseNoteAlert>>.properties(personIdentifier: String) = buildMap {
-    put("PersonIdentifier", personIdentifier)
-    this@properties[ACTIVE]?.also { v ->
-      put("ActiveCount", v.size.toString())
-      put(
-        "ActiveTypes",
-        v.joinToString { "${it.type.description} and ${it.subType.description} -> ${it.activeFrom} | ${it.createdAt}" },
-      )
+  private fun Map<Pair<ActiveInactive, InOutScope>, List<CaseNoteAlert>>.properties(personIdentifier: String): Map<String, String> {
+    val activeDescription: (CaseNoteAlert) -> String = {
+      "${it.type.description} and ${it.subType.description} -> ${it.activeFrom} | ${it.createdAt}"
     }
-    this@properties[INACTIVE]?.also { v ->
-      put("InactiveCount", v.size.toString())
-      put(
-        "InactiveTypes",
-        v.joinToString { "${it.type.description} and ${it.subType.description} -> ${it.activeTo} | ${it.madeInactiveAt}" },
-      )
+    val inactiveDescription: (CaseNoteAlert) -> String = {
+      "${it.type.description} and ${it.subType.description} -> ${it.activeTo} | ${it.madeInactiveAt}"
+    }
+    return buildMap {
+      put("PersonIdentifier", personIdentifier)
+      this@properties[ACTIVE to InOutScope.IN]?.also { v ->
+        put("ActiveInScopeCount", v.size.toString())
+        put(
+          "ActiveInScopeTypes",
+          v.joinToString { activeDescription(it) },
+        )
+      }
+      this@properties[ACTIVE to InOutScope.OUT]?.also { v ->
+        put("ActiveOutOfScopeCount", v.size.toString())
+        put(
+          "ActiveOutOfScopeTypes",
+          v.joinToString { activeDescription(it) },
+        )
+      }
+      this@properties[INACTIVE to InOutScope.IN]?.also { v ->
+        put("InactiveInScopeCount", v.size.toString())
+        put(
+          "InactiveInScopeTypes",
+          v.joinToString { inactiveDescription(it) },
+        )
+      }
+      this@properties[INACTIVE to InOutScope.OUT]?.also { v ->
+        put("InactiveOutOfScopeCount", v.size.toString())
+        put(
+          "InactiveOutOfScopeTypes",
+          v.joinToString { inactiveDescription(it) },
+        )
+      }
     }
   }
 
@@ -162,6 +208,13 @@ enum class ActiveInactive {
   ACTIVE,
   INACTIVE,
 }
+
+enum class InOutScope {
+  IN,
+  OUT,
+}
+
+data class MissingNote(val status: ActiveInactive, val scope: InOutScope, val alert: CaseNoteAlert)
 
 data class AlertReconciliationInformation(val personIdentifier: String, val from: LocalDate, val to: LocalDate) :
   AdditionalInformation

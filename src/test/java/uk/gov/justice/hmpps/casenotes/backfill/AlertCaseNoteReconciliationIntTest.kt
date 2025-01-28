@@ -9,7 +9,6 @@ import org.junit.jupiter.api.Test
 import org.mockito.kotlin.any
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.verify
-import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.test.context.bean.override.mockito.MockitoSpyBean
 import uk.gov.justice.hmpps.casenotes.alertbackfill.ActiveInactive
 import uk.gov.justice.hmpps.casenotes.alertbackfill.AlertCaseNoteReconciliation
@@ -38,9 +37,6 @@ import java.time.temporal.ChronoUnit
 import java.util.UUID
 
 class AlertCaseNoteReconciliationIntTest : IntegrationTest() {
-
-  @Autowired
-  lateinit var reconcile: AlertCaseNoteReconciliation
 
   @MockitoSpyBean
   lateinit var telemetryClient: TelemetryClient
@@ -89,12 +85,12 @@ class AlertCaseNoteReconciliationIntTest : IntegrationTest() {
       eq(
         mapOf(
           "PersonIdentifier" to personIdentifier,
-          "ActiveCount" to "6",
-          "ActiveTypes" to alerts.joinToString {
+          "ActiveInScopeCount" to "6",
+          "ActiveInScopeTypes" to alerts.joinToString {
             "${it.type.description} and ${it.subType.description} -> ${it.activeFrom} | ${it.createdAt}"
           },
-          "InactiveCount" to "1",
-          "InactiveTypes" to alerts.filter { it.madeInactive() }.joinToString {
+          "InactiveInScopeCount" to "1",
+          "InactiveInScopeTypes" to alerts.filter { it.madeInactive() }.joinToString {
             "${it.type.description} and ${it.subType.description} -> ${it.activeTo} | ${it.madeInactiveAt}"
           },
         ),
@@ -156,8 +152,8 @@ class AlertCaseNoteReconciliationIntTest : IntegrationTest() {
       eq(
         mapOf(
           "PersonIdentifier" to personIdentifier,
-          "ActiveCount" to "5",
-          "ActiveTypes" to alerts.filter { it.subType.code != "ST4" }.joinToString {
+          "ActiveInScopeCount" to "5",
+          "ActiveInScopeTypes" to alerts.filter { it.subType.code != "ST4" }.joinToString {
             "${it.type.description} and ${it.subType.description} -> ${it.activeFrom} | ${it.createdAt}"
           },
         ),
