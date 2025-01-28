@@ -46,7 +46,7 @@ class AlertCaseNoteReconciliation(
     val alerts = alertService.getAlertsOfInterest(info.personIdentifier, info.from, info.to).content
     if (alerts.isEmpty()) return
     val (from, to) = alerts.getCaseNoteDates()
-    val existingNotes = noteRepository.findAll(info.asSpecification(from, to))
+    val existingNotes = noteRepository.findAll(info.asSpecification(from, maxOf(to, info.to)))
     val toCreate = alerts.flatMap {
       val matches = existingNotes matching it
       matches.findMissing(it, info)
@@ -66,25 +66,25 @@ class AlertCaseNoteReconciliation(
     }
   }
 
-  private fun Map<ActiveInactive, Note>.findMissing(
-    it: CaseNoteAlert,
+  private fun Set<ActiveInactive>.findMissing(
+    alert: CaseNoteAlert,
     info: AlertReconciliationInformation,
-  ): List<MissingNote> = buildList {
-    if (get(ACTIVE) == null) {
+  ): Set<MissingNote> = buildSet {
+    if (!contains<ActiveInactive>(ACTIVE)) {
       add(
         MissingNote(
           ACTIVE,
-          if (it.activeFrom in (info.from..info.to)) InOutScope.IN else InOutScope.OUT,
-          it,
+          if (alert.activeFrom in (info.from..info.to)) InOutScope.IN else InOutScope.OUT,
+          alert,
         ),
       )
     }
-    if (it.madeInactive() && get(INACTIVE) == null) {
+    if (alert.madeInactive() && !contains<ActiveInactive>(INACTIVE)) {
       add(
         MissingNote(
           INACTIVE,
-          if (it.activeTo!! in (info.from..info.to)) InOutScope.IN else InOutScope.OUT,
-          it,
+          if (alert.activeTo!! in (info.from..info.to)) InOutScope.IN else InOutScope.OUT,
+          alert,
         ),
       )
     }
@@ -95,22 +95,25 @@ class AlertCaseNoteReconciliation(
       .and(matchesOnType(true, mapOf(TYPE to setOf())))
       .and(createdBetween(from.atStartOfDay(), to.plusDays(1).atStartOfDay(), true))
 
-  private infix fun List<Note>.matching(alert: CaseNoteAlert): Map<ActiveInactive, Note> = mapNotNull { note ->
-    when {
-      note.matchesActive(alert.activeText(), alert.activeFrom, alert.createdAt) -> ACTIVE to note
-      alert.activeTo != null && note.matchesInactive(alert.inactiveText(), alert.activeTo) -> INACTIVE to note
-      else -> null
+  private infix fun List<Note>.matching(alert: CaseNoteAlert): Set<ActiveInactive> = flatMap { note ->
+    buildSet {
+      if (note.matchesActive(alert.activeText(), alert.activeFrom, alert.createdAt)) {
+        add(ACTIVE)
+      }
+      if (alert.activeTo != null && note.matchesInactive(alert.inactiveText(), alert.activeTo)) {
+        add(INACTIVE)
+      }
     }
-  }.toMap()
+  }.toSet()
 
   private fun Note.matchesActive(text: String, date: LocalDate, dateTime: LocalDateTime) =
     this.text == text && (
-      occurredAt.toLocalDate() == date ||
-        between(dateTime.truncatedTo(SECONDS), createdAt.truncatedTo(SECONDS)) <= ofMinutes(1)
+      this.occurredAt.toLocalDate() == date ||
+        between(dateTime.truncatedTo(SECONDS), this.createdAt.truncatedTo(SECONDS)) <= ofMinutes(1)
       )
 
   private fun Note.matchesInactive(text: String, date: LocalDate) =
-    this.text == text && occurredAt.toLocalDate().equals(date)
+    this.text == text && this.occurredAt.toLocalDate() == date
 
   private fun Map<Pair<ActiveInactive, InOutScope>, List<CaseNoteAlert>>.properties(personIdentifier: String): Map<String, String> {
     val activeDescription: (CaseNoteAlert) -> String = {
