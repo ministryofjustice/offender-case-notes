@@ -27,7 +27,7 @@ import java.time.Duration.between
 import java.time.Duration.ofMinutes
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.time.temporal.ChronoUnit
+import java.time.temporal.ChronoUnit.SECONDS
 
 @Transactional
 @Service
@@ -83,7 +83,7 @@ class AlertCaseNoteReconciliation(
   }.toMap()
 
   private fun Note.matchesActive(text: String, dateTime: LocalDateTime) =
-    this.text == text && between(dateTime, createdAt) <= ofMinutes(1)
+    this.text == text && between(dateTime.truncatedTo(SECONDS), createdAt.truncatedTo(SECONDS)) <= ofMinutes(1)
 
   private fun Note.matchesInactive(text: String, date: LocalDate) =
     this.text == text && occurredAt.toLocalDate().equals(date)
@@ -131,7 +131,7 @@ class AlertCaseNoteReconciliation(
     legacyId = noteRepository.getNextLegacyId()
     createdBy = DPS_USERNAME
     this.createdAt = when (activeInactive) {
-      ACTIVE -> this@toNote.createdAt.truncatedTo(ChronoUnit.SECONDS)
+      ACTIVE -> this@toNote.createdAt.truncatedTo(SECONDS)
       INACTIVE -> checkNotNull(madeInactiveAt)
     }
   }
