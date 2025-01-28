@@ -83,7 +83,7 @@ class AlertCaseNoteReconciliation(
   }.toMap()
 
   private fun Note.matchesActive(text: String, dateTime: LocalDateTime) =
-    this.text == text && between(createdAt, dateTime) <= ofMinutes(1)
+    this.text == text && between(dateTime, createdAt) <= ofMinutes(1)
 
   private fun Note.matchesInactive(text: String, date: LocalDate) =
     this.text == text && occurredAt.toLocalDate().equals(date)
