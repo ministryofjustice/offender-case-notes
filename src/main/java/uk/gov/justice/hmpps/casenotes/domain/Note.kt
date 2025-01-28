@@ -12,8 +12,11 @@ import jakarta.persistence.ManyToOne
 import jakarta.persistence.OneToMany
 import jakarta.persistence.Table
 import jakarta.persistence.Transient
+import jakarta.persistence.criteria.CriteriaBuilder
 import jakarta.persistence.criteria.Join
 import jakarta.persistence.criteria.JoinType
+import jakarta.persistence.criteria.Predicate
+import jakarta.persistence.criteria.Root
 import org.hibernate.annotations.DynamicUpdate
 import org.springframework.data.domain.Persistable
 import org.springframework.data.jpa.domain.Specification
@@ -25,6 +28,8 @@ import org.springframework.data.jpa.repository.Query
 import uk.gov.justice.hmpps.casenotes.config.CaseNoteRequestContext
 import uk.gov.justice.hmpps.casenotes.domain.IdGenerator.newUuid
 import uk.gov.justice.hmpps.casenotes.domain.Note.Companion.AUTHOR_USERNAME
+import uk.gov.justice.hmpps.casenotes.domain.Note.Companion.CREATED_AT
+import uk.gov.justice.hmpps.casenotes.domain.Note.Companion.ID
 import uk.gov.justice.hmpps.casenotes.domain.Note.Companion.LOCATION_ID
 import uk.gov.justice.hmpps.casenotes.domain.Note.Companion.OCCURRED_AT
 import uk.gov.justice.hmpps.casenotes.domain.Note.Companion.PERSON_IDENTIFIER
@@ -168,6 +173,7 @@ class Note(
   }
 
   companion object {
+    val ID = Note::id.name
     val SUB_TYPE = Note::subType.name
     val PERSON_IDENTIFIER = Note::personIdentifier.name
     val AUTHOR_USERNAME = Note::authorUsername.name
@@ -354,3 +360,23 @@ fun matchesOnType(includeSensitive: Boolean, typeMap: Map<String, Set<String>>) 
 
     cb.and(typePredicate, sensitivePredicate)
   }
+
+fun createdBetween(from: LocalDateTime, to: LocalDateTime, includeSyncToNomis: Boolean) = Specification { cn, _, cb ->
+  if (!includeSyncToNomis) {
+    val subType = cn.join<Note, SubType>(Note.SUB_TYPE, JoinType.INNER)
+    cb.and(cb.createdIncludingAmendments(from, to, cn), cb.equal(subType.get<Boolean>(SubType.SYNC_TO_NOMIS), false))
+  } else {
+    cb.createdIncludingAmendments(from, to, cn)
+  }
+}
+
+private fun CriteriaBuilder.createdIncludingAmendments(from: LocalDateTime, to: LocalDateTime, cn: Root<Note>): Predicate {
+  val cnBetween = between(cn[CREATED_AT], from, to)
+  val amendment = cn.join<Note, Amendment>("amendments", JoinType.LEFT)
+  val amBetween = between(amendment[CREATED_AT], from, to)
+  return or(cnBetween, amBetween)
+}
+
+fun idIn(ids: Set<UUID>) = Specification<Note> { cn, _, cb ->
+  cn.get<String>(ID).`in`(ids)
+}
