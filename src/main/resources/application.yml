@@ -30,7 +30,7 @@ spring:
       pool-name: OffenderCaseNotes-CP
       connectionTimeout: 10000
       validationTimeout: 500
-      maximum-pool-size: 20
+      maximum-pool-size: 25
       auto-commit: false
 
   jackson:
