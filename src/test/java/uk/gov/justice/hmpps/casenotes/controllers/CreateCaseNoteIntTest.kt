@@ -166,8 +166,11 @@ class CreateCaseNoteIntTest : IntegrationTest() {
     val request = createCaseNoteRequest(type = type.typeCode, subType = type.code, text = "This is some text" + Char.MIN_VALUE)
     val response = createCaseNote(personIdentifier(), request).success<CaseNote>(HttpStatus.CREATED)
 
-    val saved = requireNotNull(noteRepository.findByIdAndPersonIdentifier(
-      fromString(response.id), response.personIdentifier)
+    val saved = requireNotNull(
+      noteRepository.findByIdAndPersonIdentifier(
+        fromString(response.id),
+        response.personIdentifier,
+      ),
     )
     assertThat(saved.system).isEqualTo(System.DPS)
 

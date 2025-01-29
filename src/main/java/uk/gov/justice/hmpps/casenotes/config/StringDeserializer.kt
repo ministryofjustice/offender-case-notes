@@ -10,7 +10,5 @@ import java.io.IOException
 @JsonComponent
 class StringDeserializer : JsonDeserializer<String?>() {
   @Throws(IOException::class, JsonProcessingException::class)
-  override fun deserialize(p: JsonParser, ctxt: DeserializationContext): String? {
-    return p.text.filter { it != Char.MIN_VALUE }
-  }
+  override fun deserialize(p: JsonParser, ctxt: DeserializationContext): String? = p.text.filter { it != Char.MIN_VALUE }
 }
