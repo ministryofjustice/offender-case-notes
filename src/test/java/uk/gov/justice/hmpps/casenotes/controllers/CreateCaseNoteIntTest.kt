@@ -173,6 +173,7 @@ class CreateCaseNoteIntTest : IntegrationTest() {
       ),
     )
     assertThat(saved.system).isEqualTo(System.DPS)
+    assertThat(saved.text).isEqualTo("This is some text")
 
     await withPollDelay ofSeconds(1) untilCallTo { hmppsEventsQueue.countAllMessagesOnQueue() } matches { it == 1 }
     val event = hmppsEventsQueue.receivePersonCaseNoteEvent()
