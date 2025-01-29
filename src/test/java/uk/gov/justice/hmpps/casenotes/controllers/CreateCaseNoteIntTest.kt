@@ -160,6 +160,23 @@ class CreateCaseNoteIntTest : IntegrationTest() {
     assertThat(event.additionalInformation.syncToNomis).isEqualTo(false)
   }
 
+  @Test
+  fun `successfully strips null character from text before saving`() {
+    val type = getAllTypes().first { !it.syncToNomis }
+    val request = createCaseNoteRequest(type = type.typeCode, subType = type.code, text = "This is some text" + Char.MIN_VALUE)
+    val response = createCaseNote(personIdentifier(), request).success<CaseNote>(HttpStatus.CREATED)
+
+    val saved = requireNotNull(noteRepository.findByIdAndPersonIdentifier(
+      fromString(response.id), response.personIdentifier)
+    )
+    assertThat(saved.system).isEqualTo(System.DPS)
+
+    await withPollDelay ofSeconds(1) untilCallTo { hmppsEventsQueue.countAllMessagesOnQueue() } matches { it == 1 }
+    val event = hmppsEventsQueue.receivePersonCaseNoteEvent()
+    assertThat(event.eventType).isEqualTo("person.case-note.created")
+    assertThat(event.additionalInformation.source).isEqualTo(Source.DPS)
+  }
+
   private fun createCaseNoteRequest(
     locationId: String? = "MDI",
     type: String = "OMIC",
