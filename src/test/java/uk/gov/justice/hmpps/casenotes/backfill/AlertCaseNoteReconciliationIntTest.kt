@@ -9,7 +9,6 @@ import org.junit.jupiter.api.Test
 import org.mockito.kotlin.any
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.verify
-import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.test.context.bean.override.mockito.MockitoSpyBean
 import uk.gov.justice.hmpps.casenotes.alertbackfill.ActiveInactive
 import uk.gov.justice.hmpps.casenotes.alertbackfill.AlertCaseNoteReconciliation
@@ -38,9 +37,6 @@ import java.time.temporal.ChronoUnit
 import java.util.UUID
 
 class AlertCaseNoteReconciliationIntTest : IntegrationTest() {
-
-  @Autowired
-  lateinit var reconcile: AlertCaseNoteReconciliation
 
   @MockitoSpyBean
   lateinit var telemetryClient: TelemetryClient
@@ -89,12 +85,12 @@ class AlertCaseNoteReconciliationIntTest : IntegrationTest() {
       eq(
         mapOf(
           "PersonIdentifier" to personIdentifier,
-          "ActiveCount" to "6",
-          "ActiveTypes" to alerts.joinToString {
+          "ActiveInScopeCount" to "6",
+          "ActiveInScopeTypes" to alerts.joinToString {
             "${it.type.description} and ${it.subType.description} -> ${it.activeFrom} | ${it.createdAt}"
           },
-          "InactiveCount" to "1",
-          "InactiveTypes" to alerts.filter { it.madeInactive() }.joinToString {
+          "InactiveInScopeCount" to "1",
+          "InactiveInScopeTypes" to alerts.filter { it.madeInactive() }.joinToString {
             "${it.type.description} and ${it.subType.description} -> ${it.activeTo} | ${it.madeInactiveAt}"
           },
         ),
@@ -109,14 +105,21 @@ class AlertCaseNoteReconciliationIntTest : IntegrationTest() {
     val from = LocalDate.now().minusDays(30)
     val to = LocalDate.now()
 
-    val alerts = generateCaseNoteAlerts(from, to)
+    val main = generateCaseNoteAlerts(from, to)
+    val alertWithExisting = main.first { it.subType.code == "ST4" }
+    val new = alertWithExisting.copy(
+      activeFrom = alertWithExisting.activeTo!!.plusDays(1),
+      activeTo = null,
+      createdAt = alertWithExisting.createdAt.plusDays(1),
+      madeInactiveAt = null,
+    )
+    val alerts = main + new
     alertsApi.withAlerts(personIdentifier, from, to, CaseNoteAlertResponse(alerts))
 
     manageUsersApi.stubGetUserDetails(USER_DETAILS)
 
     val (active, inactive) = getAllTypes().filter { it.type.code == TYPE }.associateBy { it.code }
       .toMap().let { it[ActiveInactive.ACTIVE.name]!! to it[ActiveInactive.INACTIVE.name]!! }
-    val alertWithExisting = alerts.first { it.subType.code == "ST4" }
     val existing = listOf(
       givenCaseNote(
         generateCaseNote(
@@ -143,12 +146,13 @@ class AlertCaseNoteReconciliationIntTest : IntegrationTest() {
     await untilCallTo { domainEventsQueue.countAllMessagesOnQueue() } matches { it == 0 }
 
     val saved = noteRepository.findAll(matchesPersonIdentifier(personIdentifier))
-    assertThat(saved).hasSize(7)
-    assertThat(saved.filter { n -> n.id !in existing.map { it.id } }).hasSize(5)
-    alerts.filter { it.subType.code != "ST4" }.forEach { it.reconcileWith(saved) }
+    assertThat(saved).hasSize(8)
+    assertThat(saved.filter { n -> n.id !in existing.map { it.id } }).hasSize(6)
+    val expected = alerts.filter { it.subType.code != "ST4" || it.activeTo == null }
+    expected.forEach { it.reconcileWith(saved) }
 
     val sentEvents = hmppsEventsQueue.receivePersonCaseNoteEventsOnQueue()
-    assertThat(sentEvents).hasSize(5)
+    assertThat(sentEvents).hasSize(6)
     assertThat(sentEvents.map { it.eventType }.toSet().single()).isEqualTo("person.case-note.created")
 
     verify(telemetryClient).trackEvent(
@@ -156,8 +160,8 @@ class AlertCaseNoteReconciliationIntTest : IntegrationTest() {
       eq(
         mapOf(
           "PersonIdentifier" to personIdentifier,
-          "ActiveCount" to "5",
-          "ActiveTypes" to alerts.filter { it.subType.code != "ST4" }.joinToString {
+          "ActiveInScopeCount" to "6",
+          "ActiveInScopeTypes" to expected.joinToString {
             "${it.type.description} and ${it.subType.description} -> ${it.activeFrom} | ${it.createdAt}"
           },
         ),
@@ -167,23 +171,26 @@ class AlertCaseNoteReconciliationIntTest : IntegrationTest() {
   }
 
   private fun generateCaseNoteAlerts(from: LocalDate, to: LocalDate, count: Int = 5): List<CaseNoteAlert> {
-    val dateRange = (from.forRange()..to.forRange())
-    val createdAt = ofEpochSecond(dateRange.random()).atZone(systemDefault()).toLocalDateTime()
-    val activeFrom = ofEpochSecond(dateRange.random()).atZone(systemDefault()).toLocalDate()
-    val activeTo = ofEpochSecond((activeFrom.forRange()..to.forRange()).random())
-      .atZone(systemDefault()).toLocalDateTime()
+    val dateRange = (from.forRange()..to.minusDays(1).forRange())
+    val createdAt = { ofEpochSecond(dateRange.random()).atZone(systemDefault()).toLocalDateTime() }
+    val activeFrom = { ofEpochSecond(dateRange.random()).atZone(systemDefault()).toLocalDate() }
+    val activeTo = {
+      ofEpochSecond((activeFrom().forRange()..to.forRange()).random())
+        .atZone(systemDefault()).toLocalDateTime()
+    }
     return (0..count).map {
+      val activeTo = activeTo()
       CaseNoteAlert(
         CodedDescription("T$it", "Type $it"),
         CodedDescription("ST$it", "Sub type $it"),
         "CNA",
-        activeFrom,
+        activeFrom(),
         when {
           it % 3 == 0 -> to.plusDays(3)
           it % 4 == 0 -> activeTo.toLocalDate()
           else -> null
         },
-        createdAt,
+        createdAt(),
         if (it % 3 != 0 && it % 4 == 0) activeTo else null,
       )
     }
@@ -205,8 +212,7 @@ class AlertCaseNoteReconciliationIntTest : IntegrationTest() {
   private fun LocalDate.forRange() = toEpochSecond(LocalTime.now(), ZoneOffset.UTC)
 
   private fun CaseNoteAlert.reconcileWith(notes: List<Note>) {
-    val acn = notes.single { activeText() == it.text }
-    assertThat(acn.occurredAt.toLocalDate()).isEqualTo(activeFrom)
+    val acn = notes.single { activeText() == it.text && it.occurredAt.toLocalDate() == activeFrom }
     assertThat(acn.createdAt.truncatedTo(ChronoUnit.SECONDS)).isEqualTo(createdAt.truncatedTo(ChronoUnit.SECONDS))
     assertThat(acn.subType.code).isEqualTo(ActiveInactive.ACTIVE.toString())
     assertThat(acn.authorName).isEqualTo(USER_DETAILS.name)
