@@ -13,7 +13,10 @@ import uk.gov.justice.hmpps.casenotes.legacy.dto.NomisCaseNote
 import uk.gov.justice.hmpps.casenotes.utils.JsonHelper.objectMapper
 import java.time.LocalDateTime
 
-class Elite2Extension : BeforeAllCallback, AfterAllCallback, BeforeEachCallback {
+class Elite2Extension :
+  BeforeAllCallback,
+  AfterAllCallback,
+  BeforeEachCallback {
   companion object {
     @JvmField
     val elite2Api = Elite2MockServer()
@@ -130,24 +133,22 @@ class Elite2MockServer : WireMockServer(WIREMOCK_PORT) {
     )
   }
 
-  private fun createNomisCaseNote(): NomisCaseNote {
-    return NomisCaseNote.builder()
-      .id(131232)
-      .agencyId("LEI")
-      .authorUsername("MIC123")
-      .authorName("Mickey Mouse")
-      .createdAt(LocalDateTime.now().minusMonths(1))
-      .source("INST")
-      .originalNoteText("Some Text")
-      .staffId(1231232L)
-      .type("OBS")
-      .subType("GEN")
-      .typeDescription("Observation")
-      .subTypeDescription("General")
-      .text("Some Text")
-      .occurredAt(LocalDateTime.now().minusMonths(1))
-      .build()
-  }
+  private fun createNomisCaseNote(): NomisCaseNote = NomisCaseNote.builder()
+    .id(131232)
+    .agencyId("LEI")
+    .authorUsername("MIC123")
+    .authorName("Mickey Mouse")
+    .createdAt(LocalDateTime.now().minusMonths(1))
+    .source("INST")
+    .originalNoteText("Some Text")
+    .staffId(1231232L)
+    .type("OBS")
+    .subType("GEN")
+    .typeDescription("Observation")
+    .subTypeDescription("General")
+    .text("Some Text")
+    .occurredAt(LocalDateTime.now().minusMonths(1))
+    .build()
 
   fun subCreateCaseNote(offenderIdentifier: String?) {
     val body = objectMapper.writeValueAsString(createNomisCaseNote())

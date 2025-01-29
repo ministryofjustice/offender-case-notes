@@ -137,38 +137,33 @@ abstract class IntegrationTest : BasicIntegrationTest() {
 
   fun readFile(file: String): String = this.javaClass.getResource(file)!!.readText()
 
-  internal final fun WebTestClient.ResponseSpec.errorResponse(status: HttpStatus): ErrorResponse =
-    expectStatus().isEqualTo(status)
-      .expectBody(ErrorResponse::class.java)
-      .returnResult().responseBody!!
+  internal final fun WebTestClient.ResponseSpec.errorResponse(status: HttpStatus): ErrorResponse = expectStatus().isEqualTo(status)
+    .expectBody(ErrorResponse::class.java)
+    .returnResult().responseBody!!
 
-  internal final inline fun <reified T> WebTestClient.ResponseSpec.success(status: HttpStatus = HttpStatus.OK): T =
-    expectStatus().isEqualTo(status)
-      .expectBody(T::class.java)
-      .returnResult().responseBody!!
+  internal final inline fun <reified T> WebTestClient.ResponseSpec.success(status: HttpStatus = HttpStatus.OK): T = expectStatus().isEqualTo(status)
+    .expectBody(T::class.java)
+    .returnResult().responseBody!!
 
-  internal final inline fun <reified T> WebTestClient.ResponseSpec.successList(status: HttpStatus = HttpStatus.OK): List<T> =
-    expectStatus().isEqualTo(status)
-      .expectBodyList(T::class.java)
-      .returnResult().responseBody!!
+  internal final inline fun <reified T> WebTestClient.ResponseSpec.successList(status: HttpStatus = HttpStatus.OK): List<T> = expectStatus().isEqualTo(status)
+    .expectBodyList(T::class.java)
+    .returnResult().responseBody!!
 
   fun getAllTypes(
     includeInactive: Boolean = true,
     includeRestricted: Boolean = true,
     dpsSelectableOnly: Boolean = false,
-  ): List<SubType> =
-    parentTypeRepository.findAllWithParams(
-      includeInactive = true,
-      includeRestricted = true,
-      dpsUserSelectableOnly = false,
-    ).flatMap { it.getSubtypes() }
+  ): List<SubType> = parentTypeRepository.findAllWithParams(
+    includeInactive = true,
+    includeRestricted = true,
+    dpsUserSelectableOnly = false,
+  ).flatMap { it.getSubtypes() }
 
-  fun givenRandomType(active: Boolean? = null, sensitive: Boolean? = null, restricted: Boolean? = null): SubType =
-    getAllTypes().filter {
-      (active == null || it.active == active) &&
-        (sensitive == null || it.sensitive == sensitive) &&
-        (restricted == null || it.restrictedUse == restricted)
-    }.random()
+  fun givenRandomType(active: Boolean? = null, sensitive: Boolean? = null, restricted: Boolean? = null): SubType = getAllTypes().filter {
+    (active == null || it.active == active) &&
+      (sensitive == null || it.sensitive == sensitive) &&
+      (restricted == null || it.restrictedUse == restricted)
+  }.random()
 
   fun generateCaseNote(
     personIdentifier: String = NomisIdGenerator.personIdentifier(),

@@ -9,7 +9,10 @@ import org.junit.jupiter.api.extension.BeforeAllCallback
 import org.junit.jupiter.api.extension.BeforeEachCallback
 import org.junit.jupiter.api.extension.ExtensionContext
 
-class OAuthExtension : BeforeAllCallback, AfterAllCallback, BeforeEachCallback {
+class OAuthExtension :
+  BeforeAllCallback,
+  AfterAllCallback,
+  BeforeEachCallback {
   companion object {
     @JvmField
     val oAuthApi = OAuthMockServer()

@@ -100,13 +100,12 @@ class SyncController(private val sync: SyncCaseNotes) {
   )
   @PutMapping("sync/case-notes")
   @PreAuthorize("hasRole('$ROLE_CASE_NOTES_SYNC')")
-  fun syncCaseNotes(@Valid @RequestBody request: SyncCaseNoteRequest): ResponseEntity<SyncResult> =
-    sync.syncNote(request).let {
-      when (it.action) {
-        SyncResult.Action.CREATED -> ResponseEntity.status(CREATED).body(it)
-        SyncResult.Action.UPDATED -> ResponseEntity.ok(it)
-      }
+  fun syncCaseNotes(@Valid @RequestBody request: SyncCaseNoteRequest): ResponseEntity<SyncResult> = sync.syncNote(request).let {
+    when (it.action) {
+      SyncResult.Action.CREATED -> ResponseEntity.status(CREATED).body(it)
+      SyncResult.Action.UPDATED -> ResponseEntity.ok(it)
     }
+  }
 
   @Operation(
     summary = "Endpoint to delete a case note - only for sync operations",

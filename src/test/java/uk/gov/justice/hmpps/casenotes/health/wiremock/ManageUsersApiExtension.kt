@@ -12,7 +12,10 @@ import uk.gov.justice.hmpps.casenotes.integrations.UserDetails
 import uk.gov.justice.hmpps.casenotes.utils.JsonHelper
 import java.util.UUID
 
-class ManageUsersApiExtension : BeforeAllCallback, AfterAllCallback, BeforeEachCallback {
+class ManageUsersApiExtension :
+  BeforeAllCallback,
+  AfterAllCallback,
+  BeforeEachCallback {
   companion object {
     @JvmField
     val manageUsersApi = ManageUsersApiServer()
@@ -34,39 +37,37 @@ class ManageUsersApiExtension : BeforeAllCallback, AfterAllCallback, BeforeEachC
 class ManageUsersApiServer : WireMockServer(WIREMOCK_PORT) {
   private val mapper = JsonHelper.objectMapper
 
-  fun stubGetUserDetails(username: String, nomisUser: Boolean = true): StubMapping =
-    stubFor(
-      get("/users/$username")
-        .willReturn(
-          aResponse()
-            .withHeader("Content-Type", "application/json")
-            .withBody(
-              mapper.writeValueAsString(
-                UserDetails(
-                  username = username,
-                  active = true,
-                  name = "Mikey Mouse",
-                  authSource = if (nomisUser) "nomis" else "delius",
-                  activeCaseLoadId = "MDI",
-                  userId = "1111",
-                  uuid = UUID.randomUUID(),
-                ),
+  fun stubGetUserDetails(username: String, nomisUser: Boolean = true): StubMapping = stubFor(
+    get("/users/$username")
+      .willReturn(
+        aResponse()
+          .withHeader("Content-Type", "application/json")
+          .withBody(
+            mapper.writeValueAsString(
+              UserDetails(
+                username = username,
+                active = true,
+                name = "Mikey Mouse",
+                authSource = if (nomisUser) "nomis" else "delius",
+                activeCaseLoadId = "MDI",
+                userId = "1111",
+                uuid = UUID.randomUUID(),
               ),
-            )
-            .withStatus(200),
-        ),
-    )
+            ),
+          )
+          .withStatus(200),
+      ),
+  )
 
-  fun stubGetUserDetails(userDetails: UserDetails): StubMapping =
-    stubFor(
-      get("/users/${userDetails.username}")
-        .willReturn(
-          aResponse()
-            .withHeader("Content-Type", "application/json")
-            .withBody(mapper.writeValueAsString(userDetails))
-            .withStatus(200),
-        ),
-    )
+  fun stubGetUserDetails(userDetails: UserDetails): StubMapping = stubFor(
+    get("/users/${userDetails.username}")
+      .willReturn(
+        aResponse()
+          .withHeader("Content-Type", "application/json")
+          .withBody(mapper.writeValueAsString(userDetails))
+          .withStatus(200),
+      ),
+  )
 
   companion object {
     private const val WIREMOCK_PORT = 8100

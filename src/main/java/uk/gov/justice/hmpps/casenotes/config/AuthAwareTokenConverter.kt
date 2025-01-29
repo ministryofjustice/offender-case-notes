@@ -16,13 +16,11 @@ class AuthAwareTokenConverter : Converter<Jwt, AbstractAuthenticationToken> {
   }
 
   @Suppress("UNCHECKED_CAST")
-  private fun extractAuthorities(jwt: Jwt): Collection<GrantedAuthority> =
-    (jwt.claims.getOrDefault("authorities", listOf<String>()) as Collection<String>)
-      .map(::SimpleGrantedAuthority).toSet()
+  private fun extractAuthorities(jwt: Jwt): Collection<GrantedAuthority> = (jwt.claims.getOrDefault("authorities", listOf<String>()) as Collection<String>)
+    .map(::SimpleGrantedAuthority).toSet()
 }
 
-class AuthAwareAuthenticationToken(jwt: Jwt, userId: String, authorities: Collection<GrantedAuthority>) :
-  JwtAuthenticationToken(jwt, authorities) {
+class AuthAwareAuthenticationToken(jwt: Jwt, userId: String, authorities: Collection<GrantedAuthority>) : JwtAuthenticationToken(jwt, authorities) {
 
   val userIdUser: UserIdUser = UserIdUser(jwt.subject, userId)
 }

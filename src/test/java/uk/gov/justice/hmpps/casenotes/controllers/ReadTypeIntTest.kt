@@ -105,11 +105,9 @@ class ReadTypeIntTest : IntegrationTest() {
   private fun List<CaseNoteType>.inactive() = flatMap { it.subCodes }.filter { !it.active }
   private fun List<CaseNoteType>.withoutSubTypes() = filter { it.subCodes.isEmpty() }
 
-  private fun List<CaseNoteType>.restricted() =
-    flatMap { it.subCodes }.filter { it.restrictedUse }
+  private fun List<CaseNoteType>.restricted() = flatMap { it.subCodes }.filter { it.restrictedUse }
 
-  private fun List<CaseNoteType>.notDpsUserSelectable() =
-    flatMap { it.subCodes }.filter { DPS_USER !in it.selectableBy }
+  private fun List<CaseNoteType>.notDpsUserSelectable() = flatMap { it.subCodes }.filter { DPS_USER !in it.selectableBy }
 
   private fun getCaseNoteTypes(
     username: String = "API_TEST_USER",

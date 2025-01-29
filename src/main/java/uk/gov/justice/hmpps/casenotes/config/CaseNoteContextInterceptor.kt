@@ -21,8 +21,7 @@ import uk.gov.justice.hmpps.casenotes.legacy.dto.ErrorResponse
 import uk.gov.justice.hmpps.casenotes.legacy.dto.UserDetails.Companion.NOMIS
 
 @Configuration
-class CaseNoteContextConfiguration(private val caseNoteContextInterceptor: CaseNoteContextInterceptor) :
-  WebMvcConfigurer {
+class CaseNoteContextConfiguration(private val caseNoteContextInterceptor: CaseNoteContextInterceptor) : WebMvcConfigurer {
   override fun addInterceptors(registry: InterceptorRegistry) {
     registry.addInterceptor(caseNoteContextInterceptor)
       .addPathPatterns("/case-notes/**", "/case-notes/**/**")
@@ -70,11 +69,9 @@ class CaseNoteContextInterceptor(
     return false
   }
 
-  private fun authentication(): AuthAwareAuthenticationToken =
-    SecurityContextHolder.getContext().authentication as AuthAwareAuthenticationToken?
-      ?: throw AccessDeniedException("User is not authenticated")
+  private fun authentication(): AuthAwareAuthenticationToken = SecurityContextHolder.getContext().authentication as AuthAwareAuthenticationToken?
+    ?: throw AccessDeniedException("User is not authenticated")
 
-  private fun username(): String =
-    authentication().name.takeIf { it.length <= 64 }
-      ?: throw ValidationException("username for audit exceeds 64 characters")
+  private fun username(): String = authentication().name.takeIf { it.length <= 64 }
+    ?: throw ValidationException("username for audit exceeds 64 characters")
 }

@@ -38,41 +38,38 @@ class OpenApiConfiguration(buildProperties: BuildProperties, private val context
     )
 
   @Bean
-  fun preAuthorizeCustomizer(): OperationCustomizer {
-    return OperationCustomizer { operation, handlerMethod ->
-      handlerMethod.preAuthorizeForMethodOrClass()?.let {
-        val preAuthExp = SpelExpressionParser().parseExpression(it)
-        val evalContext = StandardEvaluationContext()
-        evalContext.beanResolver = BeanFactoryResolver(context)
-        evalContext.setRootObject(
-          object {
-            fun hasRole(role: String) = listOf(role)
-            fun hasAnyRole(vararg roles: String) = roles.toList()
-          },
-        )
+  fun preAuthorizeCustomizer(): OperationCustomizer = OperationCustomizer { operation, handlerMethod ->
+    handlerMethod.preAuthorizeForMethodOrClass()?.let {
+      val preAuthExp = SpelExpressionParser().parseExpression(it)
+      val evalContext = StandardEvaluationContext()
+      evalContext.beanResolver = BeanFactoryResolver(context)
+      evalContext.setRootObject(
+        object {
+          fun hasRole(role: String) = listOf(role)
+          fun hasAnyRole(vararg roles: String) = roles.toList()
+        },
+      )
 
-        val roles = try {
-          (preAuthExp.getValue(evalContext) as List<*>).filterIsInstance<String>()
-        } catch (e: SpelEvaluationException) {
-          emptyList()
-        }
-        if (roles.isNotEmpty()) {
-          operation.description =
-            listOf(
-              operation.description ?: "",
-              "Requires one of the following roles: ",
-            ).joinToString(separator = System.lineSeparator()) +
-            roles.joinToString(
-              prefix = "${System.lineSeparator()}* ",
-              separator = "${System.lineSeparator()}* ",
-            )
-        }
+      val roles = try {
+        (preAuthExp.getValue(evalContext) as List<*>).filterIsInstance<String>()
+      } catch (e: SpelEvaluationException) {
+        emptyList()
       }
-      operation
+      if (roles.isNotEmpty()) {
+        operation.description =
+          listOf(
+            operation.description ?: "",
+            "Requires one of the following roles: ",
+          ).joinToString(separator = System.lineSeparator()) +
+          roles.joinToString(
+            prefix = "${System.lineSeparator()}* ",
+            separator = "${System.lineSeparator()}* ",
+          )
+      }
     }
+    operation
   }
 
-  private fun HandlerMethod.preAuthorizeForMethodOrClass() =
-    getMethodAnnotation(PreAuthorize::class.java)?.value
-      ?: beanType.getAnnotation(PreAuthorize::class.java)?.value
+  private fun HandlerMethod.preAuthorizeForMethodOrClass() = getMethodAnnotation(PreAuthorize::class.java)?.value
+    ?: beanType.getAnnotation(PreAuthorize::class.java)?.value
 }

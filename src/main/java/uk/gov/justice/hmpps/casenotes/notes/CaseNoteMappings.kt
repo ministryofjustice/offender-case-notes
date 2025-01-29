@@ -33,5 +33,4 @@ internal fun Note.toModel() = CaseNote(
   amendments = amendments().map { it.toModel() },
 )
 
-internal fun Amendment.toModel() =
-  CaseNoteAmendment(createdAt, authorUsername, authorName, authorUserId, text)
+internal fun Amendment.toModel() = CaseNoteAmendment(createdAt, authorUsername, authorName, authorUserId, text)

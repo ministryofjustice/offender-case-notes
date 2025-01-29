@@ -56,10 +56,8 @@ class DeletedEntityListener {
     }
   }
 
-  private fun getRequestMethod(): HttpMethod? =
-    (RequestContextHolder.getRequestAttributes() as ServletRequestAttributes?)?.request?.let { HttpMethod.valueOf(it.method) }
+  private fun getRequestMethod(): HttpMethod? = (RequestContextHolder.getRequestAttributes() as ServletRequestAttributes?)?.request?.let { HttpMethod.valueOf(it.method) }
 
-  private fun isMoveRequest(): Boolean =
-    (RequestContextHolder.getRequestAttributes() as ServletRequestAttributes?)?.request?.requestURL
-      ?.contains("/move/case-notes") ?: false
+  private fun isMoveRequest(): Boolean = (RequestContextHolder.getRequestAttributes() as ServletRequestAttributes?)?.request?.requestURL
+    ?.contains("/move/case-notes") ?: false
 }

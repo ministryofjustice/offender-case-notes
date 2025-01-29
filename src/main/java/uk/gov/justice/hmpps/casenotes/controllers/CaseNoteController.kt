@@ -67,12 +67,10 @@ class CaseNoteController(
     @Parameter(description = "Case Note Id", required = true, example = "518b2200-6489-4c77-8514-10cf80ccd488")
     @PathVariable caseNoteIdentifier: String,
     @RequestHeader(CASELOAD_ID) caseloadId: String? = null,
-  ): CaseNote {
-    return if (caseloadId in serviceConfig.activePrisons || securityUserContext.hasAnyRole(ROLE_CASE_NOTES_SYNC)) {
-      find.caseNote(personIdentifier, caseNoteIdentifier)
-    } else {
-      caseNoteService.getCaseNote(personIdentifier, caseNoteIdentifier)
-    }
+  ): CaseNote = if (caseloadId in serviceConfig.activePrisons || securityUserContext.hasAnyRole(ROLE_CASE_NOTES_SYNC)) {
+    find.caseNote(personIdentifier, caseNoteIdentifier)
+  } else {
+    caseNoteService.getCaseNote(personIdentifier, caseNoteIdentifier)
   }
 
   @Operation(
@@ -87,12 +85,10 @@ class CaseNoteController(
     @Parameter(description = "Optionally specify a case note filter") filter: CaseNoteFilter,
     @PageableDefault(sort = ["occurrenceDateTime"], direction = Sort.Direction.DESC) pageable: Pageable,
     @RequestHeader(CASELOAD_ID) caseloadId: String? = null,
-  ): Page<CaseNote> {
-    return if (caseloadId in serviceConfig.activePrisons) {
-      find.caseNotes(personIdentifier, filter, pageable)
-    } else {
-      caseNoteService.getCaseNotes(personIdentifier, filter, pageable)
-    }
+  ): Page<CaseNote> = if (caseloadId in serviceConfig.activePrisons) {
+    find.caseNotes(personIdentifier, filter, pageable)
+  } else {
+    caseNoteService.getCaseNotes(personIdentifier, filter, pageable)
   }
 
   @Operation(
