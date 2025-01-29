@@ -18,8 +18,6 @@ import uk.gov.justice.hmpps.casenotes.notes.UsageByAuthorIdRequest
 import uk.gov.justice.hmpps.casenotes.notes.UsageByAuthorIdResponse
 import uk.gov.justice.hmpps.casenotes.notes.UsageByPersonIdentifierRequest
 import uk.gov.justice.hmpps.casenotes.notes.UsageByPersonIdentifierResponse
-import uk.gov.justice.hmpps.casenotes.notes.UsageByPrisonCodeRequest
-import uk.gov.justice.hmpps.casenotes.notes.UsageByPrisonCodeResponse
 
 @Tag(name = "case-note-usage", description = "Case Note Usage")
 @RestController
@@ -72,28 +70,4 @@ class NoteUsageController(private val usage: ReadCaseNote) {
   fun noteUsageForAuthorUserId(
     @Valid @RequestBody request: UsageByAuthorIdRequest,
   ): NoteUsageResponse<UsageByAuthorIdResponse> = NoteUsageResponse(usage.findByAuthorId(request))
-
-  @Operation(summary = "Finds counts of case notes for a prison")
-  @ApiResponses(
-    ApiResponse(responseCode = "200", description = "OK - counts returned based on request"),
-    ApiResponse(
-      responseCode = "400",
-      description = "Bad Request - Request validation failed",
-      content = [Content(schema = Schema(implementation = ErrorResponse::class))],
-    ),
-    ApiResponse(
-      responseCode = "401",
-      description = "Unauthorised, requires a valid token",
-      content = [Content(schema = Schema(implementation = ErrorResponse::class))],
-    ),
-    ApiResponse(
-      responseCode = "403",
-      description = "Forbidden, requires an appropriate role",
-      content = [Content(schema = Schema(implementation = ErrorResponse::class))],
-    ),
-  )
-  @PostMapping("/prison-usage")
-  fun noteUsageForPrisonCode(
-    @Valid @RequestBody request: UsageByPrisonCodeRequest,
-  ): NoteUsageResponse<UsageByPrisonCodeResponse> = NoteUsageResponse(usage.findByPrisonCode(request))
 }
