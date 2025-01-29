@@ -26,7 +26,6 @@ import uk.gov.justice.hmpps.casenotes.integrations.UserDetails
 import java.time.Duration.between
 import java.time.Duration.ofMinutes
 import java.time.LocalDate
-import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit.SECONDS
 
 @Transactional
@@ -97,23 +96,24 @@ class AlertCaseNoteReconciliation(
 
   private infix fun List<Note>.matching(alert: CaseNoteAlert): Set<ActiveInactive> = flatMap { note ->
     buildSet {
-      if (note.matchesActive(alert.activeText(), alert.activeFrom, alert.createdAt)) {
+      if (note.matchesActive(alert)) {
         add(ACTIVE)
       }
-      if (alert.activeTo != null && note.matchesInactive(alert.inactiveText(), alert.activeTo)) {
+      if (alert.activeTo != null && note.matchesInactive(alert)) {
         add(INACTIVE)
       }
     }
   }.toSet()
 
-  private fun Note.matchesActive(text: String, date: LocalDate, dateTime: LocalDateTime) =
-    this.text == text && (
-      this.occurredAt.toLocalDate() == date ||
-        between(dateTime.truncatedTo(SECONDS), this.createdAt.truncatedTo(SECONDS)).abs() <= ofMinutes(1)
+  private fun Note.matchesActive(alert: CaseNoteAlert) =
+    (text == alert.activeText() || text == alert.alternativeActiveText()) && (
+      occurredAt.toLocalDate() == alert.activeFrom ||
+        between(alert.createdAt.truncatedTo(SECONDS), createdAt.truncatedTo(SECONDS)).abs() <= ofMinutes(1)
       )
 
-  private fun Note.matchesInactive(text: String, date: LocalDate) =
-    this.text == text && this.occurredAt.toLocalDate() == date
+  private fun Note.matchesInactive(alert: CaseNoteAlert) =
+    (text == alert.inactiveText() || text == alert.alternativeInactiveText()) &&
+      occurredAt.toLocalDate() == alert.activeTo
 
   private fun Map<Pair<ActiveInactive, InOutScope>, List<CaseNoteAlert>>.properties(personIdentifier: String): Map<String, String> {
     val activeDescription: (CaseNoteAlert) -> String = {

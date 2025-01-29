@@ -25,6 +25,8 @@ class CaseNoteAlertTest {
     assertThat(before.activeText()).isEqualTo("Alert Other and No-contact request made active.")
     assertThat(after.inactiveText()).isEqualTo("Alert Other and Public Protection Contact Restriction made inactive.")
     assertThat(before.inactiveText()).isEqualTo("Alert Other and No-contact request made inactive.")
+    assertThat(before.alternativeActiveText()).isEqualTo(after.activeText())
+    assertThat(before.alternativeInactiveText()).isEqualTo(after.inactiveText())
   }
 
   @Test
@@ -36,6 +38,8 @@ class CaseNoteAlertTest {
     assertThat(before.activeText()).isEqualTo("Alert Child Communication Measures and PPRC made active.")
     assertThat(after.inactiveText()).isEqualTo("Alert Child Communication Measures and PPRC and Child Contact Arrangements made inactive.")
     assertThat(before.inactiveText()).isEqualTo("Alert Child Communication Measures and PPRC made inactive.")
+    assertThat(before.alternativeActiveText()).isEqualTo(after.activeText())
+    assertThat(before.alternativeInactiveText()).isEqualTo(after.inactiveText())
   }
 
   private fun caseNoteAlert(type: CodedDescription, subType: CodedDescription, dateTime: LocalDateTime) =

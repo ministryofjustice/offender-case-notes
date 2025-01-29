@@ -29,6 +29,8 @@ data class CaseNoteAlert(
 
   fun activeText(): String = "${baseText(createdAt)} active."
   fun inactiveText(): String = "${baseText(madeInactiveAt)} inactive."
+  fun alternativeActiveText() = "${baseText(LocalDateTime.now())} active."
+  fun alternativeInactiveText() = "${baseText(LocalDateTime.now())} inactive."
 
   private val cpcDateUpdated = LocalDateTime.parse("2024-11-25T09:54:57.787788")
   private val oncrDateUpdated = LocalDateTime.parse("2024-11-25T09:54:29.816785")
