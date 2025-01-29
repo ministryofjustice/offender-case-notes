@@ -55,8 +55,7 @@ class WebClientConfiguration(
   fun oauthApiHealthWebClient(builder: Builder): WebClient = createHealthClient(builder, oauthApiBaseUrl)
 
   @Bean
-  fun prisonerSearchApiHealthWebClient(builder: Builder): WebClient =
-    createHealthClient(builder, prisonerSearchApiBaseUrl)
+  fun prisonerSearchApiHealthWebClient(builder: Builder): WebClient = createHealthClient(builder, prisonerSearchApiBaseUrl)
 
   @Bean
   fun manageUsersApiHealthWebClient(builder: Builder): WebClient = createHealthClient(builder, manageUsersApiBaseUrl)
@@ -66,8 +65,7 @@ class WebClientConfiguration(
     .clientConnector(ReactorClientHttpConnector(create().warmupWithHealthPing(tokenVerificationApiBaseUrl))).build()
 
   @Bean
-  fun tokenVerificationApiHealthWebClient(builder: Builder): WebClient =
-    createHealthClient(builder, tokenVerificationApiBaseUrl)
+  fun tokenVerificationApiHealthWebClient(builder: Builder): WebClient = createHealthClient(builder, tokenVerificationApiBaseUrl)
 
   private fun createForwardAuthWebClient(builder: Builder, url: @URL String): WebClient = builder.baseUrl(url)
     .filter(addAuthHeaderFilterFunction())
@@ -84,13 +82,12 @@ class WebClientConfiguration(
     return builder.clientConnector(ReactorClientHttpConnector(httpClient)).baseUrl(url).build()
   }
 
-  private fun addAuthHeaderFilterFunction(): ExchangeFilterFunction =
-    ExchangeFilterFunction { request: ClientRequest, next: ExchangeFunction ->
-      val filtered = ClientRequest.from(request)
-        .header(HttpHeaders.AUTHORIZATION, UserContext.getAuthToken())
-        .build()
-      next.exchange(filtered)
-    }
+  private fun addAuthHeaderFilterFunction(): ExchangeFilterFunction = ExchangeFilterFunction { request: ClientRequest, next: ExchangeFunction ->
+    val filtered = ClientRequest.from(request)
+      .header(HttpHeaders.AUTHORIZATION, UserContext.getAuthToken())
+      .build()
+    next.exchange(filtered)
+  }
 
   @Bean
   fun authorizedClientManagerAppScope(

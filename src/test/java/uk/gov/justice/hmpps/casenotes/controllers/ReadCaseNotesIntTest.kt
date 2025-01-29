@@ -203,8 +203,7 @@ class ReadCaseNotesIntTest : IntegrationTest() {
 
   private fun urlToTest(prisonNumber: String) = "/case-notes/$prisonNumber"
 
-  private fun WebTestClient.ResponseSpec.page(): TestResponsePage =
-    expectBody(TestResponsePage::class.java).returnResult().responseBody!!
+  private fun WebTestClient.ResponseSpec.page(): TestResponsePage = expectBody(TestResponsePage::class.java).returnResult().responseBody!!
 }
 
 internal data class TestResponsePage(val content: MutableList<CaseNote>, val totalElements: Long)

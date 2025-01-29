@@ -12,9 +12,7 @@ class ObjectMapperCustomizer {
 
   // Configure hibernate to use the same Object Mapper as Spring
   @Bean
-  fun jsonFormatMapperCustomizer(objectMapper: ObjectMapper): HibernatePropertiesCustomizer {
-    return HibernatePropertiesCustomizer { properties: MutableMap<String, Any> ->
-      properties[AvailableSettings.JSON_FORMAT_MAPPER] = JacksonJsonFormatMapper(objectMapper)
-    }
+  fun jsonFormatMapperCustomizer(objectMapper: ObjectMapper): HibernatePropertiesCustomizer = HibernatePropertiesCustomizer { properties: MutableMap<String, Any> ->
+    properties[AvailableSettings.JSON_FORMAT_MAPPER] = JacksonJsonFormatMapper(objectMapper)
   }
 }

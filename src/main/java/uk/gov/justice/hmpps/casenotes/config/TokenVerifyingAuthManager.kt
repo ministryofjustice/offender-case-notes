@@ -18,8 +18,7 @@ class TokenVerifyingAuthManager(
   jwtDecoder: JwtDecoder,
   private val tokenVerificationApiWebClient: WebClient,
   @Value("\${tokenverification.enabled:false}") private val tokenVerificationEnabled: Boolean,
-) :
-  AuthenticationManager {
+) : AuthenticationManager {
 
   private val jwtAuthenticationProvider = JwtAuthenticationProvider(jwtDecoder)
 

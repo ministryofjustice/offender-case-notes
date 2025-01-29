@@ -4,7 +4,5 @@ import com.fasterxml.uuid.Generators
 import java.util.UUID
 
 object IdGenerator {
-  fun newUuid(): UUID {
-    return Generators.timeBasedEpochGenerator().generate()
-  }
+  fun newUuid(): UUID = Generators.timeBasedEpochGenerator().generate()
 }

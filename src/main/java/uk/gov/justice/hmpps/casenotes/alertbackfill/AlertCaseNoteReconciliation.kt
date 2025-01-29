@@ -90,10 +90,9 @@ class AlertCaseNoteReconciliation(
     }
   }
 
-  private fun AlertReconciliationInformation.asSpecification(from: LocalDate, to: LocalDate) =
-    matchesPersonIdentifier(personIdentifier)
-      .and(matchesOnType(true, mapOf(TYPE to setOf())))
-      .and(createdBetween(from.atStartOfDay(), to.plusDays(1).atStartOfDay(), true))
+  private fun AlertReconciliationInformation.asSpecification(from: LocalDate, to: LocalDate) = matchesPersonIdentifier(personIdentifier)
+    .and(matchesOnType(true, mapOf(TYPE to setOf())))
+    .and(createdBetween(from.atStartOfDay(), to.plusDays(1).atStartOfDay(), true))
 
   private infix fun List<Note>.matching(alert: CaseNoteAlert): Set<ActiveInactive> = flatMap { note ->
     buildSet {
@@ -106,14 +105,13 @@ class AlertCaseNoteReconciliation(
     }
   }.toSet()
 
-  private fun Note.matchesActive(text: String, date: LocalDate, dateTime: LocalDateTime) =
-    this.text == text && (
+  private fun Note.matchesActive(text: String, date: LocalDate, dateTime: LocalDateTime) = this.text == text &&
+    (
       this.occurredAt.toLocalDate() == date ||
         between(dateTime.truncatedTo(SECONDS), this.createdAt.truncatedTo(SECONDS)).abs() <= ofMinutes(1)
       )
 
-  private fun Note.matchesInactive(text: String, date: LocalDate) =
-    this.text == text && this.occurredAt.toLocalDate() == date
+  private fun Note.matchesInactive(text: String, date: LocalDate) = this.text == text && this.occurredAt.toLocalDate() == date
 
   private fun Map<Pair<ActiveInactive, InOutScope>, List<CaseNoteAlert>>.properties(personIdentifier: String): Map<String, String> {
     val activeDescription: (CaseNoteAlert) -> String = {
@@ -219,8 +217,7 @@ enum class InOutScope {
 
 data class MissingNote(val status: ActiveInactive, val scope: InOutScope, val alert: CaseNoteAlert)
 
-data class AlertReconciliationInformation(val personIdentifier: String, val from: LocalDate, val to: LocalDate) :
-  AdditionalInformation
+data class AlertReconciliationInformation(val personIdentifier: String, val from: LocalDate, val to: LocalDate) : AdditionalInformation
 
 private fun List<CaseNoteAlert>.getCaseNoteDates(): Pair<LocalDate, LocalDate> {
   val dates = flatMap {

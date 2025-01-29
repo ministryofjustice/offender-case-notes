@@ -162,8 +162,7 @@ class SyncCaseNotes(
   }
 
   @Transactional(readOnly = true)
-  fun getCaseNotes(personIdentifier: String): List<CaseNote> =
-    noteRepository.findAllByPersonIdentifierAndSubTypeSyncToNomis(personIdentifier, true).map(Note::toModel)
+  fun getCaseNotes(personIdentifier: String): List<CaseNote> = noteRepository.findAllByPersonIdentifierAndSubTypeSyncToNomis(personIdentifier, true).map(Note::toModel)
 
   @Transactional(readOnly = true)
   fun resendEvents(request: ResendPersonCaseNoteEvents) {
@@ -178,15 +177,14 @@ private fun ResendPersonCaseNoteEvents.asSpecification(): Specification<Note> = 
   createdBetween?.let { createdBetween(createdBetween.from, createdBetween.to, createdBetween.includeSyncToNomis) },
 ).reduce { spec, current -> spec.and(current) }
 
-private fun <T : TypeLookup> Collection<T>.exceptionMessage() =
-  sortedBy { it.typeCode }
-    .groupBy { it.typeCode }
-    .map { e ->
-      "${e.key}:${
-        e.value.sortedBy { it.code }.joinToString(prefix = "[", postfix = "]", separator = ", ") { it.code }
-      }"
-    }
-    .joinToString(separator = ", ", prefix = "{ ", postfix = " }")
+private fun <T : TypeLookup> Collection<T>.exceptionMessage() = sortedBy { it.typeCode }
+  .groupBy { it.typeCode }
+  .map { e ->
+    "${e.key}:${
+      e.value.sortedBy { it.code }.joinToString(prefix = "[", postfix = "]", separator = ", ") { it.code }
+    }"
+  }
+  .joinToString(separator = ", ", prefix = "{ ", postfix = " }")
 
 private infix fun SyncCaseNoteRequest.updates(note: Note): Boolean {
   val typeChanged = subType != note.subType.code || type != note.subType.typeCode
@@ -195,14 +193,11 @@ private infix fun SyncCaseNoteRequest.updates(note: Note): Boolean {
   return typeChanged || noteChanged || dateChanged || amendments.any { it updates note }
 }
 
-private infix fun SyncCaseNoteAmendmentRequest.updates(note: Note): Boolean =
-  note.findAmendment(this)?.let { text != it.text } ?: false
+private infix fun SyncCaseNoteAmendmentRequest.updates(note: Note): Boolean = note.findAmendment(this)?.let { text != it.text } ?: false
 
-private fun Note.findAmendment(request: SyncCaseNoteAmendmentRequest): Amendment? =
-  amendments().singleOrNull { it.authorUsername == request.author.username && it.createdAt.isSameSecond(request.createdDateTime) }
+private fun Note.findAmendment(request: SyncCaseNoteAmendmentRequest): Amendment? = amendments().singleOrNull { it.authorUsername == request.author.username && it.createdAt.isSameSecond(request.createdDateTime) }
 
-private fun LocalDateTime.isSameSecond(other: LocalDateTime): Boolean =
-  truncatedTo(ChronoUnit.SECONDS) == other.truncatedTo(ChronoUnit.SECONDS)
+private fun LocalDateTime.isSameSecond(other: LocalDateTime): Boolean = truncatedTo(ChronoUnit.SECONDS) == other.truncatedTo(ChronoUnit.SECONDS)
 
 private infix fun Note.amendWith(request: SyncCaseNoteRequest) = apply {
   request.amendments.filter { findAmendment(it) == null }.forEach(::addAmendment)

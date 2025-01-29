@@ -24,32 +24,24 @@ import java.sql.BatchUpdateException
 class ControllerAdvice {
 
   @ExceptionHandler(AccessDeniedException::class)
-  fun handleAccessDeniedException(e: AccessDeniedException): ResponseEntity<ErrorResponse> {
-    return ResponseEntity
-      .status(HttpStatus.FORBIDDEN)
-      .body(ErrorResponse(status = (HttpStatus.FORBIDDEN.value()), developerMessage = e.message))
-  }
+  fun handleAccessDeniedException(e: AccessDeniedException): ResponseEntity<ErrorResponse> = ResponseEntity
+    .status(HttpStatus.FORBIDDEN)
+    .body(ErrorResponse(status = (HttpStatus.FORBIDDEN.value()), developerMessage = e.message))
 
   @ExceptionHandler(WebClientResponseException::class)
-  fun handleWebClientResponseException(e: WebClientResponseException): ResponseEntity<ByteArray> {
-    return ResponseEntity
-      .status(e.statusCode)
-      .body(e.responseBodyAsByteArray)
-  }
+  fun handleWebClientResponseException(e: WebClientResponseException): ResponseEntity<ByteArray> = ResponseEntity
+    .status(e.statusCode)
+    .body(e.responseBodyAsByteArray)
 
   @ExceptionHandler(EntityExistsException::class)
-  fun handleEntityExistsException(e: Exception): ResponseEntity<ErrorResponse> {
-    return ResponseEntity
-      .status(HttpStatus.CONFLICT)
-      .body(ErrorResponse(status = (HttpStatus.CONFLICT.value()), developerMessage = e.message))
-  }
+  fun handleEntityExistsException(e: Exception): ResponseEntity<ErrorResponse> = ResponseEntity
+    .status(HttpStatus.CONFLICT)
+    .body(ErrorResponse(status = (HttpStatus.CONFLICT.value()), developerMessage = e.message))
 
   @ExceptionHandler(EntityNotFoundException::class)
-  fun handleEntityNotFoundException(e: Exception): ResponseEntity<ErrorResponse> {
-    return ResponseEntity
-      .status(HttpStatus.NOT_FOUND)
-      .body(ErrorResponse(status = (HttpStatus.NOT_FOUND.value()), developerMessage = e.message))
-  }
+  fun handleEntityNotFoundException(e: Exception): ResponseEntity<ErrorResponse> = ResponseEntity
+    .status(HttpStatus.NOT_FOUND)
+    .body(ErrorResponse(status = (HttpStatus.NOT_FOUND.value()), developerMessage = e.message))
 
   @ExceptionHandler(
     MissingServletRequestParameterException::class,
@@ -57,11 +49,9 @@ class ControllerAdvice {
     IllegalArgumentException::class,
     IllegalStateException::class,
   )
-  fun handleValidationException(e: Exception): ResponseEntity<ErrorResponse> {
-    return ResponseEntity
-      .status(BAD_REQUEST)
-      .body(ErrorResponse(status = (BAD_REQUEST.value()), developerMessage = e.message))
-  }
+  fun handleValidationException(e: Exception): ResponseEntity<ErrorResponse> = ResponseEntity
+    .status(BAD_REQUEST)
+    .body(ErrorResponse(status = (BAD_REQUEST.value()), developerMessage = e.message))
 
   @ExceptionHandler(WebClientException::class, Exception::class)
   fun handleException(e: Exception): ResponseEntity<ErrorResponse> {
@@ -77,36 +67,32 @@ class ControllerAdvice {
   }
 
   @ExceptionHandler(MethodArgumentNotValidException::class)
-  fun handleValidationException(e: MethodArgumentNotValidException): ResponseEntity<ErrorResponse> =
-    e.allErrors.mapErrors()
+  fun handleValidationException(e: MethodArgumentNotValidException): ResponseEntity<ErrorResponse> = e.allErrors.mapErrors()
 
   @ExceptionHandler(HandlerMethodValidationException::class)
-  fun handleHandlerMethodValidationException(e: HandlerMethodValidationException): ResponseEntity<ErrorResponse> =
-    e.allErrors.mapErrors()
+  fun handleHandlerMethodValidationException(e: HandlerMethodValidationException): ResponseEntity<ErrorResponse> = e.allErrors.mapErrors()
 
-  private fun List<MessageSourceResolvable>.mapErrors() =
-    map { it.defaultMessage }.distinct().sorted().let {
-      val validationFailure = "Validation failure"
-      val message = if (it.size > 1) {
-        """
+  private fun List<MessageSourceResolvable>.mapErrors() = map { it.defaultMessage }.distinct().sorted().let {
+    val validationFailure = "Validation failure"
+    val message = if (it.size > 1) {
+      """
               |${validationFailure}s: 
               |${it.joinToString(System.lineSeparator())}
               |
-        """.trimMargin()
-      } else {
-        "$validationFailure: ${it.joinToString(System.lineSeparator())}"
-      }
-      ResponseEntity
-        .status(BAD_REQUEST)
-        .body(
-          ErrorResponse(
-            status = BAD_REQUEST.value(),
-            userMessage = message,
-            developerMessage = "400 BAD_REQUEST $message",
-          ),
-        )
+      """.trimMargin()
+    } else {
+      "$validationFailure: ${it.joinToString(System.lineSeparator())}"
     }
+    ResponseEntity
+      .status(BAD_REQUEST)
+      .body(
+        ErrorResponse(
+          status = BAD_REQUEST.value(),
+          userMessage = message,
+          developerMessage = "400 BAD_REQUEST $message",
+        ),
+      )
+  }
 
-  fun Throwable.getNestedBatchException(): Throwable? =
-    if (this is BatchUpdateException) cause else cause?.getNestedBatchException()
+  fun Throwable.getNestedBatchException(): Throwable? = if (this is BatchUpdateException) cause else cause?.getNestedBatchException()
 }

@@ -2,7 +2,9 @@ package uk.gov.justice.hmpps.casenotes.legacy.service
 
 import java.util.function.Supplier
 
-class EntityNotFoundException(message: String?) : RuntimeException(message), Supplier<EntityNotFoundException> {
+class EntityNotFoundException(message: String?) :
+  RuntimeException(message),
+  Supplier<EntityNotFoundException> {
   override fun get(): EntityNotFoundException = EntityNotFoundException(message)
 
   @Synchronized

@@ -65,21 +65,19 @@ class ExternalApiService(@Qualifier("elite2ApiWebClient") private val elite2ApiW
     return "$params$sortParams"
   }
 
-  fun createCaseNote(offenderIdentifier: String, newCaseNote: CreateCaseNoteRequest): NomisCaseNote =
-    elite2ApiWebClient.post().uri("/api/offenders/{offenderNo}/case-notes", offenderIdentifier)
-      .bodyValue(newCaseNote)
-      .retrieve()
-      .bodyToMono<NomisCaseNote>()
-      .retryOnTransientException()
-      .block()!!
+  fun createCaseNote(offenderIdentifier: String, newCaseNote: CreateCaseNoteRequest): NomisCaseNote = elite2ApiWebClient.post().uri("/api/offenders/{offenderNo}/case-notes", offenderIdentifier)
+    .bodyValue(newCaseNote)
+    .retrieve()
+    .bodyToMono<NomisCaseNote>()
+    .retryOnTransientException()
+    .block()!!
 
-  fun getOffenderCaseNote(offenderIdentifier: String, caseNoteIdentifier: Long): NomisCaseNote =
-    elite2ApiWebClient.get()
-      .uri("/api/offenders/{offenderNo}/case-notes/{caseNoteIdentifier}", offenderIdentifier, caseNoteIdentifier)
-      .retrieve()
-      .bodyToMono<NomisCaseNote>()
-      .retryOnTransientException()
-      .block()!!
+  fun getOffenderCaseNote(offenderIdentifier: String, caseNoteIdentifier: Long): NomisCaseNote = elite2ApiWebClient.get()
+    .uri("/api/offenders/{offenderNo}/case-notes/{caseNoteIdentifier}", offenderIdentifier, caseNoteIdentifier)
+    .retrieve()
+    .bodyToMono<NomisCaseNote>()
+    .retryOnTransientException()
+    .block()!!
 
   fun amendOffenderCaseNote(
     offenderIdentifier: String,
@@ -93,6 +91,5 @@ class ExternalApiService(@Qualifier("elite2ApiWebClient") private val elite2ApiW
     .retryOnTransientException()
     .block()!!
 
-  private fun Map<String, Set<String>>.asPrisonApiParams(): List<String> =
-    entries.flatMap { e -> if (e.value.isEmpty()) setOf(e.key) else e.value.map { "${e.key}+$it" } }
+  private fun Map<String, Set<String>>.asPrisonApiParams(): List<String> = entries.flatMap { e -> if (e.value.isEmpty()) setOf(e.key) else e.value.map { "${e.key}+$it" } }
 }

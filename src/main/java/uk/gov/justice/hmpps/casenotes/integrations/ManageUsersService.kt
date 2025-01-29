@@ -10,19 +10,17 @@ import java.util.UUID
 
 @Service
 class ManageUsersService(@Qualifier("manageUsersWebClient") private val webClient: WebClient) {
-  fun getUserDetails(username: String): UserDetails? {
-    return webClient.get()
-      .uri("/users/{username}", username)
-      .exchangeToMono { res ->
-        when (res.statusCode()) {
-          HttpStatus.NOT_FOUND -> Mono.empty()
-          HttpStatus.OK -> res.bodyToMono<UserDetails>()
-          else -> res.createError()
-        }
+  fun getUserDetails(username: String): UserDetails? = webClient.get()
+    .uri("/users/{username}", username)
+    .exchangeToMono { res ->
+      when (res.statusCode()) {
+        HttpStatus.NOT_FOUND -> Mono.empty()
+        HttpStatus.OK -> res.bodyToMono<UserDetails>()
+        else -> res.createError()
       }
-      .retryOnTransientException()
-      .block()
-  }
+    }
+    .retryOnTransientException()
+    .block()
 }
 
 data class UserDetails(

@@ -181,36 +181,32 @@ data class CaseNote(
       this.legacyId = legacyId
     }
 
-    fun build(): CaseNote {
-      return CaseNote(
-        id!!,
-        personIdentifier!!,
-        type!!,
-        typeDescription!!,
-        subType!!,
-        subTypeDescription!!,
-        source!!,
-        createdAt!!,
-        occurredAt!!,
-        authorName!!,
-        authorUserId!!,
-        authorUsername!!,
-        text!!,
-        locationId,
-        eventId,
-        sensitive,
-        amendments,
-        systemGenerated,
-        legacyId,
-      )
-    }
+    fun build(): CaseNote = CaseNote(
+      id!!,
+      personIdentifier!!,
+      type!!,
+      typeDescription!!,
+      subType!!,
+      subTypeDescription!!,
+      source!!,
+      createdAt!!,
+      occurredAt!!,
+      authorName!!,
+      authorUserId!!,
+      authorUsername!!,
+      text!!,
+      locationId,
+      eventId,
+      sensitive,
+      amendments,
+      systemGenerated,
+      legacyId,
+    )
   }
 
   companion object {
     @JvmStatic
-    fun builder(): Builder {
-      return Builder()
-    }
+    fun builder(): Builder = Builder()
   }
 }
 

@@ -10,7 +10,9 @@ import uk.gov.justice.hmpps.casenotes.notes.NoteRequest
 import uk.gov.justice.hmpps.casenotes.notes.TextRequest
 import java.time.LocalDateTime
 
-interface SyncNoteRequest : NoteRequest, SystemAwareRequest {
+interface SyncNoteRequest :
+  NoteRequest,
+  SystemAwareRequest {
   @get:Schema(
     requiredMode = REQUIRED,
     example = "1645251",
@@ -49,7 +51,9 @@ interface SyncNoteRequest : NoteRequest, SystemAwareRequest {
   val amendments: Set<SyncAmendmentRequest>
 }
 
-interface SyncAmendmentRequest : TextRequest, SystemAwareRequest {
+interface SyncAmendmentRequest :
+  TextRequest,
+  SystemAwareRequest {
   @get:Valid
   val author: Author
   val createdDateTime: LocalDateTime
@@ -77,9 +81,7 @@ data class Author(
 ) {
   fun fullName(): String = "${firstName.capitalised()} ${lastName.capitalised()}"
 
-  private fun String.capitalised(): String {
-    return this.lowercase().replace("[^\\pL]+\\pL".toRegex()) {
-      it.value.uppercase()
-    }.replaceFirstChar { it.uppercase() }
-  }
+  private fun String.capitalised(): String = this.lowercase().replace("[^\\pL]+\\pL".toRegex()) {
+    it.value.uppercase()
+  }.replaceFirstChar { it.uppercase() }
 }

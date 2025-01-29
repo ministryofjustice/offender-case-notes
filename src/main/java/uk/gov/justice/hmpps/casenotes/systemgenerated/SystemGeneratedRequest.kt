@@ -15,7 +15,8 @@ data class SystemGeneratedRequest(
   override val authorName: String,
   @field:NotBlank(message = "text cannot be blank")
   override val text: String,
-) : NoteRequest, AuthoredRequest {
+) : NoteRequest,
+  AuthoredRequest {
   @JsonIgnore
   override val systemGenerated: Boolean = true
 }

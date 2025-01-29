@@ -7,4 +7,6 @@ import uk.gov.justice.hmpps.casenotes.legacy.model.OffenderCaseNoteAmendment
 import java.util.UUID
 
 @Repository
-interface OffenderCaseNoteAmendmentRepository : JpaSpecificationExecutor<OffenderCaseNoteAmendment>, JpaRepository<OffenderCaseNoteAmendment, UUID>
+interface OffenderCaseNoteAmendmentRepository :
+  JpaSpecificationExecutor<OffenderCaseNoteAmendment>,
+  JpaRepository<OffenderCaseNoteAmendment, UUID>

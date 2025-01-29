@@ -15,7 +15,10 @@ import uk.gov.justice.hmpps.casenotes.utils.JsonHelper
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter.ISO_DATE
 
-class AlertsApiExtension : BeforeAllCallback, AfterAllCallback, BeforeEachCallback {
+class AlertsApiExtension :
+  BeforeAllCallback,
+  AfterAllCallback,
+  BeforeEachCallback {
   companion object {
     @JvmField
     val alertsApi = AlertsApiServer()
@@ -37,18 +40,17 @@ class AlertsApiExtension : BeforeAllCallback, AfterAllCallback, BeforeEachCallba
 class AlertsApiServer : WireMockServer(WIREMOCK_PORT) {
   private val mapper = JsonHelper.objectMapper
 
-  fun withAlerts(prisonNumber: String, from: LocalDate, to: LocalDate, response: CaseNoteAlertResponse): StubMapping =
-    stubFor(
-      get(urlPathMatching("/alerts/case-notes/$prisonNumber"))
-        .withQueryParam("from", equalTo(ISO_DATE.format(from)))
-        .withQueryParam("to", equalTo(ISO_DATE.format(to)))
-        .willReturn(
-          aResponse()
-            .withHeader("Content-Type", "application/json")
-            .withBody(mapper.writeValueAsString(response))
-            .withStatus(200),
-        ),
-    )
+  fun withAlerts(prisonNumber: String, from: LocalDate, to: LocalDate, response: CaseNoteAlertResponse): StubMapping = stubFor(
+    get(urlPathMatching("/alerts/case-notes/$prisonNumber"))
+      .withQueryParam("from", equalTo(ISO_DATE.format(from)))
+      .withQueryParam("to", equalTo(ISO_DATE.format(to)))
+      .willReturn(
+        aResponse()
+          .withHeader("Content-Type", "application/json")
+          .withBody(mapper.writeValueAsString(response))
+          .withStatus(200),
+      ),
+  )
 
   companion object {
     private const val WIREMOCK_PORT = 9999

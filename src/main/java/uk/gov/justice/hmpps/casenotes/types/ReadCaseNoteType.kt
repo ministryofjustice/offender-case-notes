@@ -16,27 +16,24 @@ class ReadCaseNoteType(
     selectableBy: SelectableBy,
     includeInactive: Boolean,
     includeRestricted: Boolean,
-  ): List<CaseNoteType> =
-    parentTypeRepository.findAllWithParams(
-      includeInactive = includeInactive,
-      includeRestricted = includeRestricted,
-      dpsUserSelectableOnly = selectableBy == SelectableBy.DPS_USER,
-    ).map { it.toModel() }.sorted()
+  ): List<CaseNoteType> = parentTypeRepository.findAllWithParams(
+    includeInactive = includeInactive,
+    includeRestricted = includeRestricted,
+    dpsUserSelectableOnly = selectableBy == SelectableBy.DPS_USER,
+  ).map { it.toModel() }.sorted()
 }
 
-private fun Type.toModel(): CaseNoteType =
-  CaseNoteType(
-    code,
-    description,
-    subCodes = getSubtypes().map { it.toModel() }.sorted(),
-  )
+private fun Type.toModel(): CaseNoteType = CaseNoteType(
+  code,
+  description,
+  subCodes = getSubtypes().map { it.toModel() }.sorted(),
+)
 
-private fun SubType.toModel(): CaseNoteSubType =
-  CaseNoteSubType(
-    code,
-    description,
-    active,
-    sensitive,
-    restrictedUse,
-    if (dpsUserSelectable) listOf(SelectableBy.DPS_USER) else listOf(),
-  )
+private fun SubType.toModel(): CaseNoteSubType = CaseNoteSubType(
+  code,
+  description,
+  active,
+  sensitive,
+  restrictedUse,
+  if (dpsUserSelectable) listOf(SelectableBy.DPS_USER) else listOf(),
+)

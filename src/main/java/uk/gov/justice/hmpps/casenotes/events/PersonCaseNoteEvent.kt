@@ -38,19 +38,18 @@ data class PersonCaseNoteEvent(
       eventType: Type,
       previousPersonIdentifier: String? = null,
       sourceOverride: Source? = null,
-    ): PersonCaseNoteEvent =
-      PersonCaseNoteEvent(
-        eventType,
-        personIdentifier,
-        id,
-        legacyId,
-        subType.type.code,
-        subType.code,
-        sourceOverride ?: CaseNoteRequestContext.get().source,
-        subType.syncToNomis,
-        systemGenerated,
-        previousPersonIdentifier,
-      )
+    ): PersonCaseNoteEvent = PersonCaseNoteEvent(
+      eventType,
+      personIdentifier,
+      id,
+      legacyId,
+      subType.type.code,
+      subType.code,
+      sourceOverride ?: CaseNoteRequestContext.get().source,
+      subType.syncToNomis,
+      systemGenerated,
+      previousPersonIdentifier,
+    )
   }
 }
 

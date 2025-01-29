@@ -17,9 +17,7 @@ import java.time.LocalDateTime
 interface CaseNoteEventPusher {
   fun sendEvent(caseNote: CaseNote)
 
-  fun isSensitiveCaseNote(caseNoteIdentifier: String): Boolean {
-    return !NumberUtils.isDigits(caseNoteIdentifier)
-  }
+  fun isSensitiveCaseNote(caseNoteIdentifier: String): Boolean = !NumberUtils.isDigits(caseNoteIdentifier)
 }
 
 @Component

@@ -62,11 +62,10 @@ class WriteCaseNote(
     }
   }
 
-  private fun getCaseNote(personIdentifier: String, caseNoteId: String): Note =
-    when (val legacyId = caseNoteId.asLegacyId()) {
-      null -> noteRepository.findByIdAndPersonIdentifier(fromString(caseNoteId), personIdentifier)
-      else -> noteRepository.findByLegacyIdAndPersonIdentifier(legacyId, personIdentifier)
-    }?.takeIf { it.personIdentifier == personIdentifier } ?: throw EntityNotFoundException.withId(caseNoteId)
+  private fun getCaseNote(personIdentifier: String, caseNoteId: String): Note = when (val legacyId = caseNoteId.asLegacyId()) {
+    null -> noteRepository.findByIdAndPersonIdentifier(fromString(caseNoteId), personIdentifier)
+    else -> noteRepository.findByLegacyIdAndPersonIdentifier(legacyId, personIdentifier)
+  }?.takeIf { it.personIdentifier == personIdentifier } ?: throw EntityNotFoundException.withId(caseNoteId)
 
   private fun SubType.validateTypeUsage() = apply {
     if (!CaseNoteRequestContext.get().nomisUser && syncToNomis) {

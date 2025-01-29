@@ -80,7 +80,9 @@ class Note(
   @Id
   @Column(name = "id", updatable = false, nullable = false)
   private val id: UUID = newUuid(),
-) : SimpleAudited(), NoteState, Persistable<UUID> {
+) : SimpleAudited(),
+  NoteState,
+  Persistable<UUID> {
 
   override fun getId(): UUID = id
 
@@ -183,7 +185,10 @@ class Note(
   }
 }
 
-interface NoteRepository : JpaSpecificationExecutor<Note>, JpaRepository<Note, UUID>, RefreshRepository<Note, UUID> {
+interface NoteRepository :
+  JpaSpecificationExecutor<Note>,
+  JpaRepository<Note, UUID>,
+  RefreshRepository<Note, UUID> {
   @EntityGraph(attributePaths = ["subType.type", "amendments"])
   fun findByIdAndPersonIdentifier(id: UUID, prisonNumber: String): Note?
 
@@ -311,55 +316,49 @@ fun NoteRepository.saveAndRefresh(note: Note): Note {
   return saved
 }
 
-fun matchesPersonIdentifier(prisonNumber: String) =
-  Specification<Note> { cn, _, cb ->
-    cb.equal(cb.lower(cn[PERSON_IDENTIFIER]), prisonNumber.lowercase())
+fun matchesPersonIdentifier(prisonNumber: String) = Specification<Note> { cn, _, cb ->
+  cb.equal(cb.lower(cn[PERSON_IDENTIFIER]), prisonNumber.lowercase())
+}
+
+fun matchesLocationId(locationId: String) = Specification<Note> { cn, _, cb -> cb.equal(cb.lower(cn[LOCATION_ID]), locationId.lowercase()) }
+
+fun matchesAuthorUsername(authorUsername: String) = Specification<Note> { cn, _, cb -> cb.equal(cb.lower(cn[AUTHOR_USERNAME]), authorUsername.lowercase()) }
+
+fun occurredBefore(to: LocalDateTime) = Specification<Note> { csip, _, cb -> cb.lessThanOrEqualTo(csip[OCCURRED_AT], to) }
+
+fun occurredAfter(from: LocalDateTime) = Specification<Note> { csip, _, cb -> cb.greaterThanOrEqualTo(csip[OCCURRED_AT], from) }
+
+fun matchesOnType(includeSensitive: Boolean, typeMap: Map<String, Set<String>>) = Specification<Note> { cn, q, cb ->
+  val (type, subType) = if (q.resultType == cn.javaType) {
+    @Suppress("UNCHECKED_CAST")
+    val subType = cn.fetch<Note, SubType>(Note.SUB_TYPE, JoinType.INNER) as Join<Note, SubType>
+
+    @Suppress("UNCHECKED_CAST")
+    val type = subType.fetch<SubType, Type>(SubType.TYPE, JoinType.INNER) as Join<SubType, Type>
+    (type to subType)
+  } else {
+    val subType = cn.join<Note, SubType>(Note.SUB_TYPE, JoinType.INNER)
+    val type = subType.join<SubType, Type>(SubType.TYPE, JoinType.INNER)
+    (type to subType)
   }
 
-fun matchesLocationId(locationId: String) =
-  Specification<Note> { cn, _, cb -> cb.equal(cb.lower(cn[LOCATION_ID]), locationId.lowercase()) }
-
-fun matchesAuthorUsername(authorUsername: String) =
-  Specification<Note> { cn, _, cb -> cb.equal(cb.lower(cn[AUTHOR_USERNAME]), authorUsername.lowercase()) }
-
-fun occurredBefore(to: LocalDateTime) =
-  Specification<Note> { csip, _, cb -> cb.lessThanOrEqualTo(csip[OCCURRED_AT], to) }
-
-fun occurredAfter(from: LocalDateTime) =
-  Specification<Note> { csip, _, cb -> cb.greaterThanOrEqualTo(csip[OCCURRED_AT], from) }
-
-fun matchesOnType(includeSensitive: Boolean, typeMap: Map<String, Set<String>>) =
-  Specification<Note> { cn, q, cb ->
-    val (type, subType) = if (q.resultType == cn.javaType) {
-      @Suppress("UNCHECKED_CAST")
-      val subType = cn.fetch<Note, SubType>(Note.SUB_TYPE, JoinType.INNER) as Join<Note, SubType>
-
-      @Suppress("UNCHECKED_CAST")
-      val type = subType.fetch<SubType, Type>(SubType.TYPE, JoinType.INNER) as Join<SubType, Type>
-      (type to subType)
+  val typePredicate = typeMap.entries.map {
+    val matchParent = cb.equal(type.get<String>(Type.CODE), it.key)
+    if (it.value.isEmpty()) {
+      matchParent
     } else {
-      val subType = cn.join<Note, SubType>(Note.SUB_TYPE, JoinType.INNER)
-      val type = subType.join<SubType, Type>(SubType.TYPE, JoinType.INNER)
-      (type to subType)
+      cb.and(matchParent, subType.get<String>(SubType.CODE).`in`(it.value))
     }
+  }.toTypedArray().let { if (it.isEmpty()) cb.conjunction() else cb.or(*it) }
 
-    val typePredicate = typeMap.entries.map {
-      val matchParent = cb.equal(type.get<String>(Type.CODE), it.key)
-      if (it.value.isEmpty()) {
-        matchParent
-      } else {
-        cb.and(matchParent, subType.get<String>(SubType.CODE).`in`(it.value))
-      }
-    }.toTypedArray().let { if (it.isEmpty()) cb.conjunction() else cb.or(*it) }
-
-    val sensitivePredicate = if (includeSensitive) {
-      cb.conjunction()
-    } else {
-      cb.equal(subType.get<Boolean>(SubType.SENSITIVE), false)
-    }
-
-    cb.and(typePredicate, sensitivePredicate)
+  val sensitivePredicate = if (includeSensitive) {
+    cb.conjunction()
+  } else {
+    cb.equal(subType.get<Boolean>(SubType.SENSITIVE), false)
   }
+
+  cb.and(typePredicate, sensitivePredicate)
+}
 
 fun createdBetween(from: LocalDateTime, to: LocalDateTime, includeSyncToNomis: Boolean) = Specification { cn, _, cb ->
   if (!includeSyncToNomis) {

@@ -41,7 +41,10 @@ class Amendment(
   @Id
   @Column(name = "id", updatable = false, nullable = false)
   private val id: UUID,
-) : SimpleAudited(), Comparable<Amendment>, AmendmentState, Persistable<UUID> {
+) : SimpleAudited(),
+  Comparable<Amendment>,
+  AmendmentState,
+  Persistable<UUID> {
 
   override fun compareTo(other: Amendment): Int {
     val dif = createdAt.compareTo(other.createdAt)

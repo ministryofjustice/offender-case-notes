@@ -20,19 +20,16 @@ class SecurityUserContext {
 
   fun hasAnyRole(vararg roles: String): Boolean = hasMatchingRole(roles.toList())
 
-  fun isOverrideRole(vararg overrideRoles: String): Boolean =
-    hasMatchingRole(if (overrideRoles.isEmpty()) listOf("SYSTEM_USER") else overrideRoles.toList())
+  fun isOverrideRole(vararg overrideRoles: String): Boolean = hasMatchingRole(if (overrideRoles.isEmpty()) listOf("SYSTEM_USER") else overrideRoles.toList())
 
-  private fun getAuthorisedUser(): UserIdUser? =
-    when (val auth = getAuthentication()) {
-      is AuthAwareAuthenticationToken -> auth.userIdUser
-      else -> null
-    }
+  private fun getAuthorisedUser(): UserIdUser? = when (val auth = getAuthentication()) {
+    is AuthAwareAuthenticationToken -> auth.userIdUser
+    else -> null
+  }
 
-  private fun hasMatchingRole(roles: List<String>): Boolean =
-    getAuthentication().authorities?.any { a: GrantedAuthority? ->
-      roles.map { it.removeRolePrefix() }.contains(a!!.authority.removeRolePrefix())
-    } == true
+  private fun hasMatchingRole(roles: List<String>): Boolean = getAuthentication().authorities?.any { a: GrantedAuthority? ->
+    roles.map { it.removeRolePrefix() }.contains(a!!.authority.removeRolePrefix())
+  } == true
 
   private fun String.removeRolePrefix(): String = RegExUtils.replaceFirst(this, "ROLE_", "")
 

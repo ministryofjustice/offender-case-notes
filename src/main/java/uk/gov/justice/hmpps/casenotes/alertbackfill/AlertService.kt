@@ -12,22 +12,20 @@ import java.time.format.DateTimeFormatter.ISO_DATE
 
 @Service
 class AlertService(@Qualifier("alertsWebClient") private val webClient: WebClient) {
-  fun getAlertsOfInterest(personIdentifier: String, from: LocalDate, to: LocalDate): CaseNoteAlertResponse {
-    return webClient.get()
-      .uri {
-        it.path("/alerts/case-notes/{personIdentifier}")
-        it.queryParam("from", ISO_DATE.format(from))
-        it.queryParam("to", ISO_DATE.format(to))
-        it.build(personIdentifier)
+  fun getAlertsOfInterest(personIdentifier: String, from: LocalDate, to: LocalDate): CaseNoteAlertResponse = webClient.get()
+    .uri {
+      it.path("/alerts/case-notes/{personIdentifier}")
+      it.queryParam("from", ISO_DATE.format(from))
+      it.queryParam("to", ISO_DATE.format(to))
+      it.build(personIdentifier)
+    }
+    .exchangeToMono { res ->
+      when (res.statusCode()) {
+        HttpStatus.NOT_FOUND -> Mono.empty()
+        HttpStatus.OK -> res.bodyToMono<CaseNoteAlertResponse>()
+        else -> res.createError()
       }
-      .exchangeToMono { res ->
-        when (res.statusCode()) {
-          HttpStatus.NOT_FOUND -> Mono.empty()
-          HttpStatus.OK -> res.bodyToMono<CaseNoteAlertResponse>()
-          else -> res.createError()
-        }
-      }
-      .retryOnTransientException()
-      .block()!!
-  }
+    }
+    .retryOnTransientException()
+    .block()!!
 }

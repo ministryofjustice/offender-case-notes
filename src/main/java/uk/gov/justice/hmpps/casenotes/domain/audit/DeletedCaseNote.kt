@@ -120,7 +120,8 @@ data class NestedDetail(
   private val id: UUID,
   override val createdAt: LocalDateTime,
   override val createdBy: String,
-) : AmendmentState, Comparable<NestedDetail> {
+) : AmendmentState,
+  Comparable<NestedDetail> {
   override fun getId(): UUID = id
   override fun compareTo(other: NestedDetail): Int = createdAt.compareTo(other.createdAt)
 }

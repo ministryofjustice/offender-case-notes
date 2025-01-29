@@ -109,15 +109,14 @@ class ReadCaseNote(
   }
 }
 
-private fun CaseNoteFilter.asSpecification(prisonNumber: String) =
-  listOfNotNull(
-    matchesPersonIdentifier(prisonNumber),
-    matchesOnType(includeSensitive, getTypesAndSubTypes()),
-    locationId?.let { matchesLocationId(it) },
-    authorUsername?.let { matchesAuthorUsername(it) },
-    startDate?.let { occurredAfter(it) },
-    endDate?.let { occurredBefore(it) },
-  ).reduce { spec, current -> spec.and(current) }
+private fun CaseNoteFilter.asSpecification(prisonNumber: String) = listOfNotNull(
+  matchesPersonIdentifier(prisonNumber),
+  matchesOnType(includeSensitive, getTypesAndSubTypes()),
+  locationId?.let { matchesLocationId(it) },
+  authorUsername?.let { matchesAuthorUsername(it) },
+  startDate?.let { occurredAfter(it) },
+  endDate?.let { occurredBefore(it) },
+).reduce { spec, current -> spec.and(current) }
 
 private fun Pageable.forSpecification(): Pageable {
   val occurredAtSort = sort.getOrderFor("occurrenceDateTime")?.direction?.let { by(it, Note.OCCURRED_AT) }
@@ -127,10 +126,9 @@ private fun Pageable.forSpecification(): Pageable {
 
 private fun Set<TypeSubTypeRequest>.asMap() = associate { it.type to it.subTypes }
 
-private fun SearchNotesRequest.asSpecification(personIdentifier: String) =
-  listOfNotNull(
-    matchesPersonIdentifier(personIdentifier),
-    matchesOnType(includeSensitive, typeSubTypes.asMap()),
-    occurredFrom?.let { occurredAfter(it) },
-    occurredTo?.let { occurredBefore(it) },
-  ).reduce { spec, current -> spec.and(current) }
+private fun SearchNotesRequest.asSpecification(personIdentifier: String) = listOfNotNull(
+  matchesPersonIdentifier(personIdentifier),
+  matchesOnType(includeSensitive, typeSubTypes.asMap()),
+  occurredFrom?.let { occurredAfter(it) },
+  occurredTo?.let { occurredBefore(it) },
+).reduce { spec, current -> spec.and(current) }
