@@ -73,8 +73,10 @@ generic-service:
     groups:
       - internal
 
+  retryDlqCronjob:
+    enabled: true
+    retryDlqSchedule: "0 * * * *"
+
 generic-prometheus-alerts:
   targetApplication: offender-case-notes
 
-housekeeping:
-  schedule: "0 * * * *"
