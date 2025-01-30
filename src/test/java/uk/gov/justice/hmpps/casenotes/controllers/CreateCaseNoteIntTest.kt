@@ -163,7 +163,11 @@ class CreateCaseNoteIntTest : IntegrationTest() {
   @Test
   fun `successfully strips null character from text before saving`() {
     val type = getAllTypes().first { !it.syncToNomis }
-    val request = createCaseNoteRequest(type = type.typeCode, subType = type.code, text = "This is some text" + Char.MIN_VALUE)
+    val request = createCaseNoteRequest(
+      type = type.typeCode,
+      subType = type.code,
+      text = Char.MIN_VALUE + "This is " + Char.MIN_VALUE + "some text" + Char.MIN_VALUE,
+    )
     val response = createCaseNote(personIdentifier(), request).success<CaseNote>(HttpStatus.CREATED)
 
     val saved = requireNotNull(
