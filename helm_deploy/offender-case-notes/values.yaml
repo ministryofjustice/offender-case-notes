@@ -79,4 +79,5 @@ generic-service:
 
 generic-prometheus-alerts:
   targetApplication: offender-case-notes
+  applicationCronJobStatusFailedWindowMinutes: 120
 
