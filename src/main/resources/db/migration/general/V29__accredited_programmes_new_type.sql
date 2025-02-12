@@ -1,5 +1,5 @@
 insert
-into case_note_type(case_note_type_id, parent_type, sub_type, description, active, create_date_time, create_user_id,
+into case_note_type(id, type_code, code, description, active, created_at, create_by,
                     sensitive, restricted_use, sync_to_nomis, dps_user_selectable)
 values (nextval('case_note_type_case_note_type_id_seq'),
         'ACP',
