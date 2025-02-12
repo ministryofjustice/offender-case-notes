@@ -13,7 +13,6 @@ import uk.gov.justice.hmpps.casenotes.config.SecurityUserContext.Companion.ROLE_
 import uk.gov.justice.hmpps.casenotes.config.SecurityUserContext.Companion.ROLE_CASE_NOTES_WRITE
 import uk.gov.justice.hmpps.casenotes.domain.Note
 import uk.gov.justice.hmpps.casenotes.domain.NoteRepository
-import uk.gov.justice.hmpps.casenotes.domain.SubTypeRepository
 import uk.gov.justice.hmpps.casenotes.domain.TypeKey
 import uk.gov.justice.hmpps.casenotes.domain.matchesAuthorUsername
 import uk.gov.justice.hmpps.casenotes.domain.matchesLocationId
@@ -29,7 +28,6 @@ import java.util.UUID.fromString
 @PreAuthorize("hasAnyRole('$ROLE_CASE_NOTES_READ', '$ROLE_CASE_NOTES_WRITE', '$ROLE_CASE_NOTES_SYNC')")
 class ReadCaseNote(
   private val noteRepository: NoteRepository,
-  private val subTypeRepository: SubTypeRepository,
 ) {
   fun caseNotes(prisonNumber: String, filter: CaseNoteFilter, pageable: Pageable): Page<CaseNote> {
     val page = noteRepository.findAll(filter.asSpecification(prisonNumber), pageable.forSpecification())

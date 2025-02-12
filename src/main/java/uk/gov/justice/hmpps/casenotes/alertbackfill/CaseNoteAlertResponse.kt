@@ -15,12 +15,28 @@ data class CaseNoteAlert(
   val createdAt: LocalDateTime,
   val madeInactiveAt: LocalDateTime?,
 ) {
-  fun isInactive() = activeTo != null && !activeTo.isAfter(now())
-  fun madeInactive(): Boolean = isInactive() && madeInactiveAt != null
+  fun isActive() = activeTo == null || activeTo.isAfter(now())
+  fun madeInactive(): Boolean = !isActive() && madeInactiveAt != null
 
-  private fun baseText() = "Alert ${type.description} and ${subType.description} made"
+  private fun textTemplate(typeDescription: String, subTypeDescription: String) = "Alert $typeDescription and $subTypeDescription made"
+
+  private fun baseText(dateTime: LocalDateTime? = LocalDateTime.now()) = when (type.code to subType.code) {
+    "C" to "CPC" if (dateTime?.isBefore(cpcDateUpdated) == true) -> textTemplate(type.description, "PPRC")
+    "O" to "ONCR" if (dateTime?.isBefore(oncrDateUpdated) == true) -> textTemplate(
+      type.description,
+      "No-contact request",
+    )
+
+    else -> textTemplate(type.description, subType.description)
+  }
+
   fun activeText() = "${baseText()} active."
   fun inactiveText() = "${baseText()} inactive."
+  fun alternativeActiveText(): String = "${baseText(createdAt)} active."
+  fun alternativeInactiveText(): String = "${baseText(madeInactiveAt)} inactive."
+
+  private val cpcDateUpdated = LocalDateTime.parse("2024-11-25T09:54:57.787788")
+  private val oncrDateUpdated = LocalDateTime.parse("2024-11-25T09:54:29.816785")
 }
 
 data class CodedDescription(val code: String, val description: String)
