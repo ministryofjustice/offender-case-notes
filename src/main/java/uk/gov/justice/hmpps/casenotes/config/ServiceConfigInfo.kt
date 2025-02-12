@@ -10,8 +10,7 @@ class ServiceConfigInfo(
   private val serviceConfig: ServiceConfig,
 ) : InfoContributor {
   override fun contribute(builder: Info.Builder) {
-    builder
-      .withDetail("activeAgencies", serviceConfig.activePrisons)
+    builder.withDetail("activeAgencies", serviceConfig.activePrisons)
   }
 }
 
