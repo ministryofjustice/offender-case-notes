@@ -29,6 +29,5 @@ class SentryConfig {
     }
   }
 
-  private fun String.isHighUsage(): Boolean =
-    this == "/case-notes/types" || matches("(/sync)?/case-notes/[A-Z][0-9]{4}[A-Z]{2}", this)
+  private fun String.isHighUsage(): Boolean = this == "/case-notes/types" || matches("(/sync)?/case-notes/[A-Z][0-9]{4}[A-Z]{2}", this)
 }
