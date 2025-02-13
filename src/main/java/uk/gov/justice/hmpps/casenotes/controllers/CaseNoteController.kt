@@ -191,5 +191,5 @@ class CaseNoteController(
     @PathVariable caseNoteId: String,
   ) = save.deleteNote(personIdentifier, caseNoteId)
 
-  private fun String?.switchesCodePath(): Boolean = this != null && (serviceConfig.allPrisonsActive || this in serviceConfig.activePrisons)
+  private fun String?.switchesCodePath(): Boolean = !this.isNullOrBlank() && (serviceConfig.allPrisonsActive || this in serviceConfig.activePrisons)
 }
