@@ -1,0 +1,30 @@
+services:
+  db:
+    image: postgres:15
+    networks:
+      - hmpps
+    container_name: offender-case-notes-db
+    restart: always
+    ports:
+      - "5433:5432"
+    environment:
+      - POSTGRES_DB=offender-case-notes
+      - POSTGRES_PASSWORD=offender-case-notes
+      - POSTGRES_USER=offender-case-notes
+
+  localstack:
+    image: localstack/localstack:latest
+    networks:
+      - hmpps
+    container_name: localstack
+    ports:
+      - "4566-4597:4566-4597"
+    environment:
+      - SERVICES=sqs,sns
+      - DEBUG=${DEBUG-}
+      - DOCKER_HOST=unix:///var/run/docker.sock
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock"
+
+networks:
+  hmpps:
