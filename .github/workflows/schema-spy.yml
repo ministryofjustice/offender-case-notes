@@ -22,7 +22,7 @@ on:
       exclude:
         description: Regex of tables to be excluded
         type: string
-        default: 'flyway_schema_history'
+        default: 'flyway_schema_history|awsdms_heartbeat'
       docker_compose_file:
         description: Path to Docker Compose file to start localstack and postgres containers
         type: string
