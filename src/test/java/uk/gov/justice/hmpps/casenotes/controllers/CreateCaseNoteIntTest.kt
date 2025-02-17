@@ -9,20 +9,23 @@ import org.awaitility.kotlin.withPollDelay
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.springframework.http.HttpStatus
+import org.springframework.test.web.reactive.server.WebTestClient
 import uk.gov.justice.hmpps.casenotes.config.SecurityUserContext.Companion.ROLE_CASE_NOTES_READ
 import uk.gov.justice.hmpps.casenotes.config.SecurityUserContext.Companion.ROLE_CASE_NOTES_WRITE
 import uk.gov.justice.hmpps.casenotes.config.Source
+import uk.gov.justice.hmpps.casenotes.config.UsernameHeader
 import uk.gov.justice.hmpps.casenotes.domain.Note
 import uk.gov.justice.hmpps.casenotes.domain.System
 import uk.gov.justice.hmpps.casenotes.events.PersonCaseNoteEvent
 import uk.gov.justice.hmpps.casenotes.health.wiremock.ManageUsersApiExtension.Companion.manageUsersApi
+import uk.gov.justice.hmpps.casenotes.integrations.UserDetails
 import uk.gov.justice.hmpps.casenotes.notes.CaseNote
 import uk.gov.justice.hmpps.casenotes.notes.CreateCaseNoteRequest
 import uk.gov.justice.hmpps.casenotes.utils.NomisIdGenerator.personIdentifier
-import uk.gov.justice.hmpps.casenotes.utils.set
 import uk.gov.justice.hmpps.casenotes.utils.verifyAgainst
 import java.time.Duration.ofSeconds
 import java.time.LocalDateTime
+import java.util.UUID
 import java.util.UUID.fromString
 
 class CreateCaseNoteIntTest : IntegrationTest() {
@@ -78,22 +81,6 @@ class CreateCaseNoteIntTest : IntegrationTest() {
   }
 
   @Test
-  fun `can create a case note with write role using jwt subject`() {
-    val request = createCaseNoteRequest()
-    val response = createCaseNote(personIdentifier(), request).success<CaseNote>(HttpStatus.CREATED)
-
-    val saved = requireNotNull(
-      noteRepository.findByIdAndPersonIdentifier(fromString(response.id), response.personIdentifier),
-    )
-    saved.verifyAgainst(request)
-    assertThat(saved.authorUsername).isEqualTo(USERNAME)
-    response.verifyAgainst(saved)
-    assertThat(saved.system).isEqualTo(System.DPS)
-
-    hmppsEventsQueue.receivePersonCaseNoteEvent().verifyAgainst(PersonCaseNoteEvent.Type.CREATED, Source.DPS, saved)
-  }
-
-  @Test
   fun `400 bad request - field validation failures`() {
     val request = createCaseNoteRequest(
       type = "n".repeat(13),
@@ -115,6 +102,46 @@ class CreateCaseNoteIntTest : IntegrationTest() {
         """.trimMargin(),
       )
     }
+  }
+
+  @Test
+  fun `can create a case note with write role using jwt subject`() {
+    val request = createCaseNoteRequest()
+    val response = createCaseNote(personIdentifier(), request).success<CaseNote>(HttpStatus.CREATED)
+
+    val saved = requireNotNull(
+      noteRepository.findByIdAndPersonIdentifier(fromString(response.id), response.personIdentifier),
+    )
+    saved.verifyAgainst(request)
+    assertThat(saved.authorUsername).isEqualTo(USERNAME)
+    response.verifyAgainst(saved)
+    assertThat(saved.system).isEqualTo(System.DPS)
+
+    hmppsEventsQueue.receivePersonCaseNoteEvent().verifyAgainst(PersonCaseNoteEvent.Type.CREATED, Source.DPS, saved)
+  }
+
+  @Test
+  fun `can create a case note on behalf of user using username header`() {
+    val usernameHeader = "AN07H3R"
+    val userDetails = UserDetails(usernameHeader, true, "Another User", "nomis", "LEI", "7584", UUID.randomUUID())
+    manageUsersApi.stubGetUserDetails(userDetails)
+
+    val request = createCaseNoteRequest()
+    val response = createCaseNote(personIdentifier(), request, usernameHeader = usernameHeader)
+      .success<CaseNote>(HttpStatus.CREATED)
+
+    val saved = requireNotNull(
+      noteRepository.findByIdAndPersonIdentifier(fromString(response.id), response.personIdentifier),
+    )
+    saved.verifyAgainst(request)
+    assertThat(saved.authorUsername).isEqualTo(usernameHeader)
+    assertThat(saved.authorUserId).isEqualTo(userDetails.userId)
+    assertThat(saved.authorName).isEqualTo(userDetails.name)
+    assertThat(saved.system).isEqualTo(System.DPS)
+    response.verifyAgainst(saved)
+    assertThat(saved.system).isEqualTo(System.DPS)
+
+    hmppsEventsQueue.receivePersonCaseNoteEvent().verifyAgainst(PersonCaseNoteEvent.Type.CREATED, Source.DPS, saved)
   }
 
   @Test
@@ -200,6 +227,7 @@ class CreateCaseNoteIntTest : IntegrationTest() {
     params: Map<String, String> = mapOf("useRestrictedType" to "true"),
     roles: List<String> = listOf(ROLE_CASE_NOTES_WRITE),
     tokenUsername: String = USERNAME,
+    usernameHeader: String? = null,
   ) = webTestClient.post().uri { ub ->
     ub.path(urlToTest(prisonNumber))
     params.forEach {
@@ -208,6 +236,7 @@ class CreateCaseNoteIntTest : IntegrationTest() {
     ub.build()
   }.headers(addBearerAuthorisation(tokenUsername, roles))
     .header(CASELOAD_ID, ACTIVE_PRISON)
+    .optionalHeader(UsernameHeader.NAME, usernameHeader)
     .bodyValue(request)
     .exchange()
 
@@ -234,6 +263,14 @@ class CreateCaseNoteIntTest : IntegrationTest() {
     assertThat(subType.type.code).isEqualTo(request.type)
     assertThat(subType.code).isEqualTo(request.subType)
     assertThat(text).isEqualTo(request.text)
+  }
+
+  private fun WebTestClient.RequestBodySpec.optionalHeader(
+    name: String,
+    value: String?,
+  ): WebTestClient.RequestBodySpec {
+    value?.also { header(name, value) }
+    return this
   }
 
   companion object {

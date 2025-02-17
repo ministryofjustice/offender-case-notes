@@ -1,5 +1,9 @@
 package uk.gov.justice.hmpps.casenotes.config
 
+import io.swagger.v3.oas.annotations.Parameter
+import io.swagger.v3.oas.annotations.enums.ParameterIn
+import io.swagger.v3.oas.annotations.media.Content
+import io.swagger.v3.oas.annotations.media.Schema
 import io.swagger.v3.oas.models.OpenAPI
 import io.swagger.v3.oas.models.info.Contact
 import io.swagger.v3.oas.models.info.Info
@@ -72,4 +76,23 @@ class OpenApiConfiguration(buildProperties: BuildProperties, private val context
 
   private fun HandlerMethod.preAuthorizeForMethodOrClass() = getMethodAnnotation(PreAuthorize::class.java)?.value
     ?: beanType.getAnnotation(PreAuthorize::class.java)?.value
+}
+
+@Parameter(
+  name = UsernameHeader.NAME,
+  `in` = ParameterIn.HEADER,
+  description = """
+    The username of the user interacting with the client service.
+    This can be used instead of the token claim when the client service is acting on behalf of a user.
+    When provided, the value passed in the username header will take priority over the subject of the token.
+    """,
+  required = false,
+  content = [Content(schema = Schema(implementation = String::class))],
+)
+@Target(AnnotationTarget.CLASS, AnnotationTarget.FUNCTION)
+@Retention(AnnotationRetention.RUNTIME)
+internal annotation class UsernameHeader {
+  companion object {
+    const val NAME = "Username"
+  }
 }

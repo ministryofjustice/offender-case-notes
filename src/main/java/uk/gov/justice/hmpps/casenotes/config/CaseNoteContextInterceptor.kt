@@ -25,7 +25,7 @@ class CaseNoteContextConfiguration(private val caseNoteContextInterceptor: CaseN
   override fun addInterceptors(registry: InterceptorRegistry) {
     registry.addInterceptor(caseNoteContextInterceptor)
       .addPathPatterns("/case-notes/**", "/case-notes/**/**")
-      .excludePathPatterns("/case-notes/usage", "/case-notes/staff-usage", "/case-notes/prison-usage")
+      .excludePathPatterns("/case-notes/usage", "/case-notes/staff-usage")
   }
 }
 
@@ -33,12 +33,12 @@ class CaseNoteContextConfiguration(private val caseNoteContextInterceptor: CaseN
 class CaseNoteContextInterceptor(
   private val manageUserService: ManageUsersService,
   private val objectMapper: ObjectMapper,
+  private val serviceConfig: ServiceConfig,
 ) : HandlerInterceptor {
   override fun preHandle(request: HttpServletRequest, response: HttpServletResponse, handler: Any): Boolean {
     if (request.method in listOf(POST.name(), PUT.name(), PATCH.name(), DELETE.name())) {
-      // add request header to request in app insights to avoid having custom events
-      request.getHeader("CaseloadId")?.also { Span.current().setAttribute("caseloadId", it) }
-      val username = username()
+      val headers = request.extractHeaders()
+      val username = headers?.username ?: username()
       return manageUserService.getUserDetails(username)?.let {
         val context = CaseNoteRequestContext(
           username,
@@ -74,4 +74,22 @@ class CaseNoteContextInterceptor(
 
   private fun username(): String = authentication().name.takeIf { it.length <= 64 }
     ?: throw ValidationException("username for audit exceeds 64 characters")
+
+  private fun HttpServletRequest.extractHeaders(): Headers? {
+    return getHeader("CaseloadId")?.let {
+      if (it.isBlank()) return null
+      // add request header to request in app insights to avoid having custom events
+      Span.current().setAttribute("caseloadId", it)
+      // using usernameHeader as the username property is already set as part of client tracking config (user_name)
+      val username = getHeader(UsernameHeader.NAME)?.also { Span.current().setAttribute("usernameHeader", it) }
+      // only allow username header for switched path
+      if (serviceConfig.switchesPathFor(it)) {
+        Headers(it, username)
+      } else {
+        null
+      }
+    }
+  }
 }
+
+private data class Headers(val caseloadId: String, val username: String?)

@@ -21,4 +21,6 @@ data class ServiceConfig(
   val actionMissingCaseNotes: Boolean,
 ) {
   val allPrisonsActive = activePrisons.contains("***")
+
+  fun switchesPathFor(caseloadId: String?): Boolean = !caseloadId.isNullOrBlank() && (allPrisonsActive || caseloadId in activePrisons)
 }
