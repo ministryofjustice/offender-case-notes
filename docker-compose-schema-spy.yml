@@ -6,7 +6,7 @@ services:
     container_name: offender-case-notes-db
     restart: always
     ports:
-      - "5433:5432"
+      - "5432:5432"
     environment:
       - POSTGRES_DB=offender-case-notes
       - POSTGRES_PASSWORD=offender-case-notes
