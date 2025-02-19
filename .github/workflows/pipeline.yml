@@ -11,8 +11,8 @@ jobs:
     with:
       docker_compose_file: 'docker-compose-schema-spy.yml'
       init_db_cli: './gradlew initialiseDatabase'
-      database_name: 'offender-case-notes'
-      database_user: 'offender-case-notes'
-      database_password: 'offender-case-notes'
+      database_name: 'case_notes'
+      database_user: 'case'
+      database_password: 'notes'
       database_schema: 'public'
     secrets: inherit
