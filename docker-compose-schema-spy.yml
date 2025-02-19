@@ -8,9 +8,9 @@ services:
     ports:
       - "5432:5432"
     environment:
-      - POSTGRES_DB=offender-case-notes
-      - POSTGRES_PASSWORD=offender-case-notes
-      - POSTGRES_USER=offender-case-notes
+      - POSTGRES_DB=case-notes
+      - POSTGRES_PASSWORD=case
+      - POSTGRES_USER=notes
 
   localstack:
     image: localstack/localstack:latest
