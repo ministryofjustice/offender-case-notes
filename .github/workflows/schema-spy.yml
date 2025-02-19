@@ -76,10 +76,31 @@ jobs:
             *.gradle*
             **/gradle-wrapper.properties
 
-      - name: Initialise database and generate Schema Spy report
+      - name: Start database services
         shell: bash
         run: |
           docker compose -f ${{ inputs.docker_compose_file }} up -d 
+
+      - name: Debug Database Credentials
+        run: |
+          echo "Database Name: ${{ inputs.database_name }}"
+          echo "Database User: ${{ inputs.database_user }}"
+          echo "Database Password: ${{ inputs.database_password }}"
+
+      - name: Debug Docker Database Environment Variables
+        run: |
+          echo "Checking Docker Environment Variables..."
+          docker exec offender-case-notes-db env | grep POSTGRES_
+
+      - name: Test PostgreSQL Connection
+        run: |
+          echo "Testing Database Connection..."
+          sleep 10  # Give the database some time to start
+          PGPASSWORD="${{ inputs.database_password }}" psql -h localhost -U "${{ inputs.database_user }}" -d "${{ inputs.database_name }}" -c "\dt"
+
+      - name: Initialise database and generate Schema Spy report
+        shell: bash
+        run: |
           curl -L https://github.com/schemaspy/schemaspy/releases/download/v${{ inputs.schemaspy_version }}/schemaspy-${{ inputs.schemaspy_version }}.jar --output /tmp/schemaspy.jar
           curl -L https://jdbc.postgresql.org/download/postgresql-${{ inputs.postgres_driver_version }}.jar --output /tmp/postgres-driver.jar
           export JAVA_OPTS="${{ inputs.java_options }}"
