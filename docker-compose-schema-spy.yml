@@ -1,6 +1,6 @@
 services:
   db:
-    image: postgres:15
+    image: postgres:16
     networks:
       - hmpps
     container_name: offender-case-notes-db
@@ -9,8 +9,8 @@ services:
       - "5432:5432"
     environment:
       - POSTGRES_DB=case_notes
-      - POSTGRES_PASSWORD=case
-      - POSTGRES_USER=notes
+      - POSTGRES_USER=case
+      - POSTGRES_PASSWORD=notes
 
   localstack:
     image: localstack/localstack:latest
