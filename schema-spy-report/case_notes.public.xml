@@ -1,0 +1,175 @@
+<?xml version="1.0" encoding="UTF-8"?><database name="case_notes" schema="public" type="PostgreSQL - 16.7 (Debian 16.7-1.pgdg120+1)">
+   <sequences>
+      <sequence increment="-1" name="case_note_legacy_id_seq" startValue="-1"/>
+      <sequence increment="1" name="case_note_sub_type_id_seq" startValue="1"/>
+   </sequences>
+   <tables>
+      <table name="case_note" remarks="Records a case note for an offender" schema="public" type="TABLE">
+         <column autoUpdated="false" defaultValue="null" digits="0" id="0" name="id" nullable="false" remarks="" size="2147483647" type="uuid" typeCode="1111">
+            <child column="case_note_id" foreignKey="fk_case_note_amendment_case_note_id" implied="false" onDeleteCascade="false" schema="public" table="case_note_amendment"/>
+         </column>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="1" name="person_identifier" nullable="false" remarks="" size="12" type="varchar" typeCode="12"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="2" name="location_id" nullable="false" remarks="" size="12" type="varchar" typeCode="12"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="3" name="author_username" nullable="false" remarks="" size="64" type="varchar" typeCode="12"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="4" name="author_name" nullable="false" remarks="" size="80" type="varchar" typeCode="12"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="5" name="sub_type_id" nullable="false" remarks="" size="10" type="int4" typeCode="4">
+            <parent column="id" foreignKey="fk_case_note_sub_type_id" implied="false" onDeleteCascade="false" schema="public" table="case_note_sub_type"/>
+         </column>
+         <column autoUpdated="false" defaultValue="null" digits="6" id="6" name="occurred_at" nullable="false" remarks="" size="29" type="timestamp" typeCode="93"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="7" name="note_text" nullable="true" remarks="" size="2147483647" type="text" typeCode="12"/>
+         <column autoUpdated="false" defaultValue="null" digits="6" id="8" name="created_at" nullable="false" remarks="" size="29" type="timestamp" typeCode="93"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="9" name="created_by" nullable="false" remarks="" size="64" type="varchar" typeCode="12"/>
+         <column autoUpdated="true" defaultValue="nextval('case_note_legacy_id_seq'::regclass)" digits="0" id="10" name="legacy_id" nullable="false" remarks="" size="19" type="bigserial" typeCode="-5"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="11" name="author_user_id" nullable="false" remarks="" size="64" type="varchar" typeCode="12"/>
+         <column autoUpdated="false" defaultValue="false" digits="0" id="12" name="system_generated" nullable="false" remarks="" size="1" type="bool" typeCode="-7"/>
+         <column autoUpdated="false" defaultValue="'DPS'::character varying" digits="0" id="13" name="system" nullable="false" remarks="" size="6" type="varchar" typeCode="12"/>
+         <primaryKey column="id" sequenceNumberInPK="1"/>
+         <index name="case_note_pkey" unique="true">
+            <column ascending="true" name="id"/>
+         </index>
+         <index name="idx_author_id_sub_type_occurred_at" unique="false">
+            <column ascending="true" name="author_user_id"/>
+            <column ascending="true" name="sub_type_id"/>
+            <column ascending="true" name="occurred_at"/>
+         </index>
+         <index name="idx_case_note_author_user_id" unique="false">
+            <column ascending="true" name="author_user_id"/>
+         </index>
+         <index name="idx_case_note_author_username" unique="false">
+            <column ascending="true" name="author_username"/>
+         </index>
+         <index name="idx_case_note_author_username_lower" unique="false"/>
+         <index name="idx_case_note_created_at" unique="false">
+            <column ascending="true" name="created_at"/>
+         </index>
+         <index name="idx_case_note_location_id" unique="false">
+            <column ascending="true" name="location_id"/>
+         </index>
+         <index name="idx_case_note_location_id_lower" unique="false"/>
+         <index name="idx_case_note_occurred_at_location_id" unique="false">
+            <column ascending="true" name="occurred_at"/>
+            <column ascending="true" name="location_id"/>
+         </index>
+         <index name="idx_case_note_person_identifier" unique="false">
+            <column ascending="true" name="person_identifier"/>
+         </index>
+         <index name="idx_case_note_person_identifier_lower" unique="false"/>
+         <index name="idx_case_note_sub_type_id" unique="false">
+            <column ascending="true" name="sub_type_id"/>
+         </index>
+         <index name="idx_location_sub_type_occurred_at" unique="false">
+            <column ascending="true" name="sub_type_id"/>
+            <column ascending="true" name="occurred_at"/>
+         </index>
+         <index name="idx_person_identifier_sub_type" unique="false">
+            <column ascending="true" name="sub_type_id"/>
+         </index>
+         <index name="unq_legacy_id" unique="true">
+            <column ascending="true" name="legacy_id"/>
+         </index>
+         <checkConstraint constraint="(((system)::text = ANY ((ARRAY['DPS'::character varying, 'NOMIS'::character varying])::text[])))" name="check_system"/>
+      </table>
+      <table name="case_note_amendment" remarks="Records a case note amendments for an offender" schema="public" type="TABLE">
+         <column autoUpdated="false" defaultValue="null" digits="0" id="0" name="case_note_id" nullable="false" remarks="" size="2147483647" type="uuid" typeCode="1111">
+            <parent column="id" foreignKey="fk_case_note_amendment_case_note_id" implied="false" onDeleteCascade="false" schema="public" table="case_note"/>
+         </column>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="1" name="author_username" nullable="false" remarks="" size="64" type="varchar" typeCode="12"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="2" name="author_name" nullable="false" remarks="" size="80" type="varchar" typeCode="12"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="3" name="note_text" nullable="false" remarks="" size="2147483647" type="text" typeCode="12"/>
+         <column autoUpdated="false" defaultValue="null" digits="6" id="4" name="created_at" nullable="false" remarks="" size="29" type="timestamp" typeCode="93"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="5" name="created_by" nullable="false" remarks="" size="64" type="varchar" typeCode="12"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="6" name="author_user_id" nullable="false" remarks="" size="64" type="varchar" typeCode="12"/>
+         <column autoUpdated="false" defaultValue="gen_random_uuid()" digits="0" id="7" name="id" nullable="false" remarks="" size="2147483647" type="uuid" typeCode="1111"/>
+         <column autoUpdated="false" defaultValue="'DPS'::character varying" digits="0" id="8" name="system" nullable="false" remarks="" size="6" type="varchar" typeCode="12"/>
+         <primaryKey column="id" sequenceNumberInPK="1"/>
+         <index name="case_note_amendment_pkey" unique="true">
+            <column ascending="true" name="id"/>
+         </index>
+         <index name="case_note_amendment_case_note_id" unique="false">
+            <column ascending="true" name="case_note_id"/>
+         </index>
+         <index name="idx_case_note_amendment_created_at" unique="false">
+            <column ascending="true" name="created_at"/>
+         </index>
+         <checkConstraint constraint="(((system)::text = ANY ((ARRAY['DPS'::character varying, 'NOMIS'::character varying])::text[])))" name="check_system"/>
+      </table>
+      <table name="case_note_deleted" remarks="" schema="public" type="TABLE">
+         <column autoUpdated="false" defaultValue="null" digits="0" id="0" name="person_identifier" nullable="false" remarks="" size="2147483647" type="varchar" typeCode="12"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="1" name="case_note_id" nullable="false" remarks="" size="2147483647" type="uuid" typeCode="1111"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="2" name="legacy_id" nullable="true" remarks="" size="19" type="int8" typeCode="-5"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="3" name="case_note" nullable="false" remarks="" size="2147483647" type="jsonb" typeCode="1111"/>
+         <column autoUpdated="false" defaultValue="null" digits="6" id="4" name="deleted_at" nullable="false" remarks="" size="29" type="timestamp" typeCode="93"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="5" name="deleted_by" nullable="false" remarks="" size="64" type="varchar" typeCode="12"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="6" name="caseload_id" nullable="true" remarks="" size="12" type="varchar" typeCode="12"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="7" name="system" nullable="false" remarks="" size="6" type="varchar" typeCode="12"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="8" name="cause" nullable="false" remarks="" size="6" type="varchar" typeCode="12"/>
+         <column autoUpdated="false" defaultValue="gen_random_uuid()" digits="0" id="9" name="id" nullable="false" remarks="" size="2147483647" type="uuid" typeCode="1111"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="10" name="reason" nullable="true" remarks="" size="2147483647" type="text" typeCode="12"/>
+         <primaryKey column="id" sequenceNumberInPK="1"/>
+         <index name="case_note_deleted_pkey" unique="true">
+            <column ascending="true" name="id"/>
+         </index>
+         <index name="case_note_deleted_case_note_id" unique="false">
+            <column ascending="true" name="caseload_id"/>
+         </index>
+         <index name="case_note_deleted_cause" unique="false">
+            <column ascending="true" name="cause"/>
+         </index>
+         <index name="case_note_deleted_legacy_id" unique="false">
+            <column ascending="true" name="legacy_id"/>
+         </index>
+         <index name="case_note_deleted_person_identifier" unique="false">
+            <column ascending="true" name="person_identifier"/>
+         </index>
+         <checkConstraint constraint="(((cause)::text = ANY ((ARRAY['DELETE'::character varying, 'UPDATE'::character varying, 'MERGE'::character varying, 'MOVE'::character varying])::text[])))" name="check_cause"/>
+         <checkConstraint constraint="(((system)::text = ANY ((ARRAY['DPS'::character varying, 'NOMIS'::character varying])::text[])))" name="check_source"/>
+      </table>
+      <table name="case_note_sub_type" numRows="400" remarks="Holds case note types allowed in this service" schema="public" type="TABLE">
+         <column autoUpdated="true" defaultValue="nextval('case_note_sub_type_id_seq'::regclass)" digits="0" id="0" name="id" nullable="false" remarks="" size="10" type="serial" typeCode="4">
+            <child column="sub_type_id" foreignKey="fk_case_note_sub_type_id" implied="false" onDeleteCascade="false" schema="public" table="case_note"/>
+         </column>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="1" name="type_code" nullable="false" remarks="" size="12" type="varchar" typeCode="12">
+            <parent column="code" foreignKey="case_note_sub_type_type_code" implied="false" onDeleteCascade="false" schema="public" table="case_note_type"/>
+         </column>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="2" name="code" nullable="false" remarks="" size="12" type="varchar" typeCode="12">
+            <parent column="code" foreignKey="Implied Constraint" implied="true" onDeleteCascade="false" schema="public" table="case_note_type"/>
+         </column>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="3" name="description" nullable="false" remarks="" size="80" type="varchar" typeCode="12"/>
+         <column autoUpdated="false" defaultValue="true" digits="0" id="4" name="active" nullable="false" remarks="" size="1" type="bool" typeCode="-7"/>
+         <column autoUpdated="false" defaultValue="null" digits="6" id="5" name="created_at" nullable="false" remarks="" size="29" type="timestamp" typeCode="93"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="6" name="created_by" nullable="false" remarks="" size="64" type="varchar" typeCode="12"/>
+         <column autoUpdated="false" defaultValue="null" digits="6" id="7" name="last_modified_at" nullable="true" remarks="" size="29" type="timestamp" typeCode="93"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="8" name="last_modified_by" nullable="true" remarks="" size="64" type="varchar" typeCode="12"/>
+         <column autoUpdated="false" defaultValue="true" digits="0" id="9" name="sensitive" nullable="false" remarks="" size="1" type="bool" typeCode="-7"/>
+         <column autoUpdated="false" defaultValue="true" digits="0" id="10" name="restricted_use" nullable="false" remarks="" size="1" type="bool" typeCode="-7"/>
+         <column autoUpdated="false" defaultValue="false" digits="0" id="11" name="sync_to_nomis" nullable="false" remarks="" size="1" type="bool" typeCode="-7"/>
+         <column autoUpdated="false" defaultValue="true" digits="0" id="12" name="dps_user_selectable" nullable="false" remarks="" size="1" type="bool" typeCode="-7"/>
+         <primaryKey column="id" sequenceNumberInPK="1"/>
+         <index name="case_note_sub_type_pkey" unique="true">
+            <column ascending="true" name="id"/>
+         </index>
+         <index name="idx_case_note_sub_type_sync_to_nomis" unique="false">
+            <column ascending="true" name="sync_to_nomis"/>
+         </index>
+         <index name="unq_case_note_type_code_and_code" unique="true">
+            <column ascending="true" name="type_code"/>
+            <column ascending="true" name="code"/>
+         </index>
+      </table>
+      <table name="case_note_type" numRows="65" remarks="Holds case note types allowed in this service" schema="public" type="TABLE">
+         <column autoUpdated="false" defaultValue="null" digits="0" id="0" name="code" nullable="false" remarks="" size="12" type="varchar" typeCode="12">
+            <child column="code" foreignKey="Implied Constraint" implied="true" onDeleteCascade="false" schema="public" table="case_note_sub_type"/>
+            <child column="type_code" foreignKey="case_note_sub_type_type_code" implied="false" onDeleteCascade="false" schema="public" table="case_note_sub_type"/>
+         </column>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="1" name="description" nullable="false" remarks="" size="80" type="varchar" typeCode="12"/>
+         <column autoUpdated="false" defaultValue="null" digits="6" id="2" name="created_at" nullable="false" remarks="" size="29" type="timestamp" typeCode="93"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="3" name="created_by" nullable="false" remarks="" size="64" type="varchar" typeCode="12"/>
+         <column autoUpdated="false" defaultValue="null" digits="6" id="4" name="last_modified_at" nullable="true" remarks="" size="29" type="timestamp" typeCode="93"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="5" name="last_modified_by" nullable="true" remarks="" size="64" type="varchar" typeCode="12"/>
+         <primaryKey column="code" sequenceNumberInPK="1"/>
+         <index name="case_note_type_pkey" unique="true">
+            <column ascending="true" name="code"/>
+         </index>
+      </table>
+   </tables>
+</database>
