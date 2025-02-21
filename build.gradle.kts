@@ -1,10 +1,10 @@
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
-  id("uk.gov.justice.hmpps.gradle-spring-boot") version "7.1.1"
+  id("uk.gov.justice.hmpps.gradle-spring-boot") version "7.1.2"
   kotlin("plugin.spring") version "2.1.10"
   kotlin("plugin.jpa") version "2.1.10"
-  id("io.gatling.gradle") version "3.13.4"
+  id("io.gatling.gradle") version "3.13.4.1"
   jacoco
 }
 
@@ -34,15 +34,15 @@ dependencies {
   implementation("javax.transaction:javax.transaction-api:1.3")
 
   implementation("javax.xml.bind:jaxb-api:2.3.1")
-  implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.4")
+  implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.5")
   implementation("net.sf.ehcache:ehcache:2.10.9.2")
   implementation("org.apache.commons:commons-text:1.13.0")
   implementation("com.fasterxml.uuid:java-uuid-generator:5.1.0")
   implementation("com.pauldijou:jwt-core_2.11:5.0.0")
   implementation("com.google.guava:guava:33.4.0-jre")
 
-  implementation(platform("com.amazonaws:aws-java-sdk-bom:1.12.781"))
-  implementation("software.amazon.awssdk:sns:2.30.19")
+  implementation(platform("com.amazonaws:aws-java-sdk-bom:1.12.782"))
+  implementation("software.amazon.awssdk:sns:2.30.25")
 
   testAnnotationProcessor("org.projectlombok:lombok:1.18.36")
   testCompileOnly("org.projectlombok:lombok:1.18.36")
@@ -51,8 +51,8 @@ dependencies {
   testImplementation("net.javacrumbs.json-unit:json-unit-assertj:4.1.0")
   testImplementation("io.github.http-builder-ng:http-builder-ng-apache:1.0.4")
   testImplementation("org.wiremock:wiremock-standalone:3.12.0")
-  testImplementation("org.testcontainers:postgresql:1.20.4")
-  testImplementation("org.testcontainers:localstack:1.20.4")
+  testImplementation("org.testcontainers:postgresql:1.20.5")
+  testImplementation("org.testcontainers:localstack:1.20.5")
   testImplementation("io.jsonwebtoken:jjwt-impl:0.12.6")
   testImplementation("io.jsonwebtoken:jjwt-jackson:0.12.6")
   testImplementation("org.awaitility:awaitility:4.2.2")
