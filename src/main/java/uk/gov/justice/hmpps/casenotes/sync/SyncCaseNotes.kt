@@ -127,7 +127,7 @@ class SyncCaseNotes(
     val saved = amended ?: noteRepository.saveAndRefresh(
       request.asNoteWithAmendments(
         request.personIdentifier,
-        SyncOverrides.of(existing?.id),
+        SyncOverrides.of(existing?.id, existing?.legacyId),
         typeRepository::getByTypeCodeAndCode,
       ),
     )
