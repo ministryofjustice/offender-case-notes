@@ -136,7 +136,7 @@ class SyncCaseNotes(
 
     return SyncResult(
       saved.id,
-      saved.legacyId,
+      request.legacyId,
       if (existing == null) SyncResult.Action.CREATED else SyncResult.Action.UPDATED,
     )
   }
