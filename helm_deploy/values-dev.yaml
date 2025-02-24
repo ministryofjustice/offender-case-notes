@@ -14,7 +14,7 @@ generic-service:
     TOKENVERIFICATION_ENABLED: "false"
     SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_JWK_SET_URI: "https://sign-in-dev.hmpps.service.justice.gov.uk/auth/.well-known/jwks.json"
     APPLICATIONINSIGHTS_CONFIGURATION_FILE: applicationinsights.dev.json
-    SERVICE_ACTIVE_PRISONS: "FKI,FMI,IWI,LEI,LPI,RSI,WDI,WMI"
+    SERVICE_ACTIVE_PRISONS: "***"
 
   allowlist:
     delius-dev-1: 35.178.19.203/32
