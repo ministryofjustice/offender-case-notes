@@ -101,6 +101,7 @@ class SyncCaseNoteIntTest : IntegrationTest() {
     assertThat(response.action).isEqualTo(CREATED)
 
     val saved = requireNotNull(noteRepository.findByIdAndPersonIdentifier(response.id, request.personIdentifier))
+    assertThat(response.legacyId).isEqualTo(request.legacyId)
     saved.verifyAgainst(request)
     assertThat(saved.system).isEqualTo(System.NOMIS)
 
@@ -114,6 +115,7 @@ class SyncCaseNoteIntTest : IntegrationTest() {
     assertThat(response.action).isEqualTo(CREATED)
 
     val saved = requireNotNull(noteRepository.findByIdAndPersonIdentifier(response.id, request.personIdentifier))
+    assertThat(response.legacyId).isEqualTo(request.legacyId)
     saved.verifyAgainst(request)
     assertThat(saved.system).isEqualTo(System.NOMIS)
     val amended = saved.amendments().first()
@@ -124,16 +126,19 @@ class SyncCaseNoteIntTest : IntegrationTest() {
   }
 
   @Test
-  fun `200 ok - sync updates an existing case note using id`() {
+  fun `200 ok - sync updates an existing case note using id retaining dps legacy id`() {
     val prisonNumber = personIdentifier()
-    val existing = givenCaseNote(generateCaseNote(prisonNumber))
+    val dpsLegacyId = noteRepository.getNextLegacyId()
+    val existing = givenCaseNote(generateCaseNote(prisonNumber, legacyId = dpsLegacyId))
     val request =
-      existing.syncRequest().copy(text = "The text was updated in nomis by CENTRAL ADMIN", system = System.DPS)
+      existing.syncRequest()
+        .copy(text = "The text was updated in nomis by CENTRAL ADMIN", system = System.DPS, legacyId = 12)
     val response = syncCaseNote(request).success<SyncResult>(HttpStatus.OK)
     assertThat(response.action).isEqualTo(UPDATED)
 
     val saved = requireNotNull(noteRepository.findByIdAndPersonIdentifier(response.id, request.personIdentifier))
-    saved.verifyAgainst(request)
+    assertThat(response.legacyId).isEqualTo(request.legacyId)
+    saved.verifyAgainst(request, dpsLegacyId)
     assertThat(saved.system).isEqualTo(System.DPS)
 
     val deleted = deletedCaseNoteRepository.findByCaseNoteId(existing.id)
