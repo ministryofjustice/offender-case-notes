@@ -16,7 +16,7 @@ generic-service:
     TOKENVERIFICATION_ENABLED: "false"
     SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_JWK_SET_URI: "https://sign-in.hmpps.service.justice.gov.uk/auth/.well-known/jwks.json"
     APPLICATIONINSIGHTS_CONFIGURATION_FILE: applicationinsights.json
-    SERVICE_ACTIVE_PRISONS: "BFI,BRI,BZI,CDI,CKI,CLI,EHI,ESI,EYI,FDI,FWI,HBI,HPI,LTI,LWI,MSI,MTI,NWI,PBI,PFI,RCI,RHI,SLI,WII,WLI,WRI"
+    SERVICE_ACTIVE_PRISONS: "***"
 
   postgresDatabaseRestore:
     enabled: true
