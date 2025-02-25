@@ -42,7 +42,7 @@ dependencies {
   implementation("com.google.guava:guava:33.4.0-jre")
 
   implementation(platform("com.amazonaws:aws-java-sdk-bom:1.12.782"))
-  implementation("software.amazon.awssdk:sns:2.30.25")
+  implementation("software.amazon.awssdk:sns:2.30.27")
 
   testAnnotationProcessor("org.projectlombok:lombok:1.18.36")
   testCompileOnly("org.projectlombok:lombok:1.18.36")
@@ -55,8 +55,8 @@ dependencies {
   testImplementation("org.testcontainers:localstack:1.20.5")
   testImplementation("io.jsonwebtoken:jjwt-impl:0.12.6")
   testImplementation("io.jsonwebtoken:jjwt-jackson:0.12.6")
-  testImplementation("org.awaitility:awaitility:4.2.2")
-  testImplementation("org.awaitility:awaitility-kotlin:4.2.2")
+  testImplementation("org.awaitility:awaitility:4.3.0")
+  testImplementation("org.awaitility:awaitility-kotlin:4.3.0")
 
   testImplementation("org.springframework.security.oauth:spring-security-oauth2:2.5.2.RELEASE")
   testImplementation("org.springframework.security:spring-security-jwt:1.1.1.RELEASE")
