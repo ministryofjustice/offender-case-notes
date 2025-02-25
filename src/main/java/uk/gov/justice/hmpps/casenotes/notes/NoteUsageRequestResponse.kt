@@ -53,19 +53,3 @@ data class UsageByAuthorIdResponse(
   override val count: Int,
   override val latestNote: LatestNote? = null,
 ) : UsageResponse
-
-data class UsageByPrisonCodeRequest(
-  override val typeSubTypes: Set<TypeSubTypeRequest> = emptySet(),
-  override val occurredFrom: LocalDateTime? = null,
-  override val occurredTo: LocalDateTime? = null,
-  @field:NotEmpty(message = "At least one prison code is required")
-  val prisonCodes: Set<String> = setOf(),
-) : NoteUsageRequest
-
-data class UsageByPrisonCodeResponse(
-  val prisonCode: String,
-  override val type: String,
-  override val subType: String,
-  override val count: Int,
-  override val latestNote: LatestNote? = null,
-) : UsageResponse

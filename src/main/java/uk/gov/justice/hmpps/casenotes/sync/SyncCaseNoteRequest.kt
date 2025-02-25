@@ -56,9 +56,10 @@ internal fun SyncNoteRequest.typeKey() = TypeKey(type, subType)
 
 internal data class SyncOverrides(
   val id: UUID?,
+  val legacyId: Long?,
 ) {
   companion object {
-    fun of(id: UUID?) = if (id == null) null else SyncOverrides(id)
+    fun of(id: UUID?, legacyId: Long?) = if (id == null) null else SyncOverrides(id, legacyId)
   }
 }
 
@@ -106,7 +107,7 @@ internal fun SyncNoteRequest.asNote(
   system ?: System.NOMIS,
   id = overrides?.id ?: newUuid(),
 ).apply {
-  this.legacyId = this@asNote.legacyId
+  this.legacyId = (overrides?.legacyId ?: this@asNote.legacyId)
   this.createdAt = this@asNote.createdDateTime
   this.createdBy = this@asNote.createdByUsername
 }

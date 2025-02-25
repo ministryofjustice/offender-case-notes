@@ -32,7 +32,7 @@ fun CaseNoteAmendment.verifyAgainst(amendment: Amendment) {
   assertThat(authorUserId).isEqualTo(amendment.authorUserId)
 }
 
-fun Note.verifyAgainst(request: SyncNoteRequest) {
+fun Note.verifyAgainst(request: SyncNoteRequest, legacyIdOverride: Long? = null) {
   assertThat(subType.type.code).isEqualTo(request.type)
   assertThat(subType.code).isEqualTo(request.subType)
   assertThat(text).isEqualTo(request.text)
@@ -41,7 +41,7 @@ fun Note.verifyAgainst(request: SyncNoteRequest) {
   assertThat(authorName).isEqualTo(request.author.fullName())
   assertThat(authorUsername).isEqualTo(request.author.username)
   assertThat(authorUserId).isEqualTo(request.author.userId)
-  assertThat(legacyId).isEqualTo(request.legacyId)
+  assertThat(legacyId).isEqualTo(legacyIdOverride ?: request.legacyId)
   assertThat(createdBy).isEqualTo(request.createdByUsername)
 }
 
