@@ -84,7 +84,7 @@
                             </div>
                         </div><!-- /.box-header -->
                         <div class="box-body clearfix">
-                            <p>Holds case note types allowed in this service</p>
+                            <p>Second level categorisation of case notes grouped by type</p>
                         </div><!-- /.box-body -->
                     </div>
                 </section>
@@ -141,7 +141,7 @@
                                         <table border='0' cellspacing='0' cellpadding='0'>
                                         </table>
                                     </td>
-                                    <td></td>
+                                    <td><p>Internal primary key. Not returned by API</p></td>
                                 </tr>
                                 <tr>
                                     <td class='foreignKey' title='Foreign Key'><i class='icon ion-key iconkey' style='padding-left: 5px;'></i><span id="type_code">type_code</span></td>
@@ -163,7 +163,7 @@
                                             </tr>
                                         </table>
                                     </td>
-                                    <td></td>
+                                    <td><p>Foreign key to case note type</p></td>
                                 </tr>
                                 <tr>
                                     <td class='foreignKey' title='Foreign Key'><i class='icon ion-key iconkey' style='padding-left: 5px;'></i><span id="code">code</span></td>
@@ -185,7 +185,7 @@
                                             </tr>
                                         </table>
                                     </td>
-                                    <td></td>
+                                    <td><p>Public unique identifier and the short code for the case note sub-type</p></td>
                                 </tr>
                                 <tr>
                                     <td><span id="description">description</span></td>
@@ -202,7 +202,7 @@
                                         <table border='0' cellspacing='0' cellpadding='0'>
                                         </table>
                                     </td>
-                                    <td></td>
+                                    <td><p>The description of the case note sub-type</p></td>
                                 </tr>
                                 <tr>
                                     <td><span id="active">active</span></td>
@@ -219,7 +219,7 @@
                                         <table border='0' cellspacing='0' cellpadding='0'>
                                         </table>
                                     </td>
-                                    <td></td>
+                                    <td><p>Active status of the case note sub-type</p></td>
                                 </tr>
                                 <tr>
                                     <td><span id="created_at">created_at</span></td>
@@ -236,7 +236,7 @@
                                         <table border='0' cellspacing='0' cellpadding='0'>
                                         </table>
                                     </td>
-                                    <td></td>
+                                    <td><p>The date and time the case note sub-type was created</p></td>
                                 </tr>
                                 <tr>
                                     <td><span id="created_by">created_by</span></td>
@@ -253,7 +253,7 @@
                                         <table border='0' cellspacing='0' cellpadding='0'>
                                         </table>
                                     </td>
-                                    <td></td>
+                                    <td><p>The username of the user who created the case note sub-type</p></td>
                                 </tr>
                                 <tr>
                                     <td><span id="last_modified_at">last_modified_at</span></td>
@@ -270,7 +270,7 @@
                                         <table border='0' cellspacing='0' cellpadding='0'>
                                         </table>
                                     </td>
-                                    <td></td>
+                                    <td><p>The date and time the case note sub-type was last modified</p></td>
                                 </tr>
                                 <tr>
                                     <td><span id="last_modified_by">last_modified_by</span></td>
@@ -287,7 +287,7 @@
                                         <table border='0' cellspacing='0' cellpadding='0'>
                                         </table>
                                     </td>
-                                    <td></td>
+                                    <td><p>The username of the user who last modified the case note sub-type</p></td>
                                 </tr>
                                 <tr>
                                     <td><span id="sensitive">sensitive</span></td>
@@ -304,7 +304,7 @@
                                         <table border='0' cellspacing='0' cellpadding='0'>
                                         </table>
                                     </td>
-                                    <td></td>
+                                    <td><p>Case notes categorised by a sensitive sub-type may contain sensitive information and should only be displayed to POMs</p></td>
                                 </tr>
                                 <tr>
                                     <td><span id="restricted_use">restricted_use</span></td>
@@ -321,7 +321,7 @@
                                         <table border='0' cellspacing='0' cellpadding='0'>
                                         </table>
                                     </td>
-                                    <td></td>
+                                    <td><p>Only POMs can add case notes categorised with a restricted use sub-type</p></td>
                                 </tr>
                                 <tr>
                                     <td class='indexedColumn' title='Indexed'><i class='fa fa-sitemap fa-rotate-120' style='padding-right: 5px;'></i><span id="sync_to_nomis">sync_to_nomis</span></td>
@@ -338,7 +338,7 @@
                                         <table border='0' cellspacing='0' cellpadding='0'>
                                         </table>
                                     </td>
-                                    <td></td>
+                                    <td><p>Whether the case notes associated with a sub-type are included in the two-way sync with NOMIS or exist only in the DPS database</p></td>
                                 </tr>
                                 <tr>
                                     <td><span id="dps_user_selectable">dps_user_selectable</span></td>
@@ -355,7 +355,7 @@
                                         <table border='0' cellspacing='0' cellpadding='0'>
                                         </table>
                                     </td>
-                                    <td></td>
+                                    <td><p>Whether the sub-type can be selected by a user or case notes categorised by the sub-type are system generated</p></td>
                                 </tr>
                                 </tbody>
                             </table>

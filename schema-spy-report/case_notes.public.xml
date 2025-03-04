@@ -4,25 +4,25 @@
       <sequence increment="1" name="case_note_sub_type_id_seq" startValue="1"/>
    </sequences>
    <tables>
-      <table name="case_note" remarks="Records a case note for an offender" schema="public" type="TABLE">
-         <column autoUpdated="false" defaultValue="null" digits="0" id="0" name="id" nullable="false" remarks="" size="2147483647" type="uuid" typeCode="1111">
+      <table name="case_note" remarks="Individual case notes associated with a person identifier (prison number)" schema="public" type="TABLE">
+         <column autoUpdated="false" defaultValue="null" digits="0" id="0" name="id" nullable="false" remarks="Public primary key" size="2147483647" type="uuid" typeCode="1111">
             <child column="case_note_id" foreignKey="fk_case_note_amendment_case_note_id" implied="false" onDeleteCascade="false" schema="public" table="case_note_amendment"/>
          </column>
-         <column autoUpdated="false" defaultValue="null" digits="0" id="1" name="person_identifier" nullable="false" remarks="" size="12" type="varchar" typeCode="12"/>
-         <column autoUpdated="false" defaultValue="null" digits="0" id="2" name="location_id" nullable="false" remarks="" size="12" type="varchar" typeCode="12"/>
-         <column autoUpdated="false" defaultValue="null" digits="0" id="3" name="author_username" nullable="false" remarks="" size="64" type="varchar" typeCode="12"/>
-         <column autoUpdated="false" defaultValue="null" digits="0" id="4" name="author_name" nullable="false" remarks="" size="80" type="varchar" typeCode="12"/>
-         <column autoUpdated="false" defaultValue="null" digits="0" id="5" name="sub_type_id" nullable="false" remarks="" size="10" type="int4" typeCode="4">
+         <column autoUpdated="false" defaultValue="null" digits="0" id="1" name="person_identifier" nullable="false" remarks="The prison number of the person the case note is for" size="12" type="varchar" typeCode="12"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="2" name="location_id" nullable="false" remarks="The location of the person at the time the case note was created. A prison code, TRN or OUT" size="12" type="varchar" typeCode="12"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="3" name="author_username" nullable="false" remarks="The username of the user who authored (created) the note" size="64" type="varchar" typeCode="12"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="4" name="author_name" nullable="false" remarks="The first and last name of the user at the time the case note was created. Does not update if their name changes" size="80" type="varchar" typeCode="12"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="5" name="sub_type_id" nullable="false" remarks="Foreign key to case note sub-type categorising the note" size="10" type="int4" typeCode="4">
             <parent column="id" foreignKey="fk_case_note_sub_type_id" implied="false" onDeleteCascade="false" schema="public" table="case_note_sub_type"/>
          </column>
-         <column autoUpdated="false" defaultValue="null" digits="6" id="6" name="occurred_at" nullable="false" remarks="" size="29" type="timestamp" typeCode="93"/>
-         <column autoUpdated="false" defaultValue="null" digits="0" id="7" name="note_text" nullable="true" remarks="" size="2147483647" type="text" typeCode="12"/>
-         <column autoUpdated="false" defaultValue="null" digits="6" id="8" name="created_at" nullable="false" remarks="" size="29" type="timestamp" typeCode="93"/>
-         <column autoUpdated="false" defaultValue="null" digits="0" id="9" name="created_by" nullable="false" remarks="" size="64" type="varchar" typeCode="12"/>
-         <column autoUpdated="true" defaultValue="nextval('case_note_legacy_id_seq'::regclass)" digits="0" id="10" name="legacy_id" nullable="false" remarks="" size="19" type="bigserial" typeCode="-5"/>
-         <column autoUpdated="false" defaultValue="null" digits="0" id="11" name="author_user_id" nullable="false" remarks="" size="64" type="varchar" typeCode="12"/>
-         <column autoUpdated="false" defaultValue="false" digits="0" id="12" name="system_generated" nullable="false" remarks="" size="1" type="bool" typeCode="-7"/>
-         <column autoUpdated="false" defaultValue="'DPS'::character varying" digits="0" id="13" name="system" nullable="false" remarks="" size="6" type="varchar" typeCode="12"/>
+         <column autoUpdated="false" defaultValue="null" digits="6" id="6" name="occurred_at" nullable="false" remarks="The date and time the event the case note is recording took place. Will be on or before created at" size="29" type="timestamp" typeCode="93"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="7" name="note_text" nullable="true" remarks="The text of the case note" size="2147483647" type="text" typeCode="12"/>
+         <column autoUpdated="false" defaultValue="null" digits="6" id="8" name="created_at" nullable="false" remarks="The date and time the case note was created. Will be on or after occurred at" size="29" type="timestamp" typeCode="93"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="9" name="created_by" nullable="false" remarks="The username of the user who created the case note" size="64" type="varchar" typeCode="12"/>
+         <column autoUpdated="true" defaultValue="nextval('case_note_legacy_id_seq'::regclass)" digits="0" id="10" name="legacy_id" nullable="false" remarks="A numerical id for consuming services incompatible with UUID case note ids. Will be positive for migrated case notes and those synced from NOMIS, negative if created in the DPS database first" size="19" type="bigserial" typeCode="-5"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="11" name="author_user_id" nullable="false" remarks="The NOMIS staff id of the user who created the note. This is a NOMIS internal primary key used to support consuming services reliant on it" size="64" type="varchar" typeCode="12"/>
+         <column autoUpdated="false" defaultValue="false" digits="0" id="12" name="system_generated" nullable="false" remarks="Whether the case note was generated by a consuming service directly or as a side effect of another process" size="1" type="bool" typeCode="-7"/>
+         <column autoUpdated="false" defaultValue="'DPS'::character varying" digits="0" id="13" name="system" nullable="false" remarks="The system used to create the case note. Either DPS or NOMIS" size="6" type="varchar" typeCode="12"/>
          <primaryKey column="id" sequenceNumberInPK="1"/>
          <index name="case_note_pkey" unique="true">
             <column ascending="true" name="id"/>
@@ -69,18 +69,18 @@
          </index>
          <checkConstraint constraint="(((system)::text = ANY ((ARRAY['DPS'::character varying, 'NOMIS'::character varying])::text[])))" name="check_system"/>
       </table>
-      <table name="case_note_amendment" remarks="Records a case note amendments for an offender" schema="public" type="TABLE">
-         <column autoUpdated="false" defaultValue="null" digits="0" id="0" name="case_note_id" nullable="false" remarks="" size="2147483647" type="uuid" typeCode="1111">
+      <table name="case_note_amendment" remarks="Amendments added to case notes after creation" schema="public" type="TABLE">
+         <column autoUpdated="false" defaultValue="null" digits="0" id="0" name="case_note_id" nullable="false" remarks="Foreign key to case note" size="2147483647" type="uuid" typeCode="1111">
             <parent column="id" foreignKey="fk_case_note_amendment_case_note_id" implied="false" onDeleteCascade="false" schema="public" table="case_note"/>
          </column>
-         <column autoUpdated="false" defaultValue="null" digits="0" id="1" name="author_username" nullable="false" remarks="" size="64" type="varchar" typeCode="12"/>
-         <column autoUpdated="false" defaultValue="null" digits="0" id="2" name="author_name" nullable="false" remarks="" size="80" type="varchar" typeCode="12"/>
-         <column autoUpdated="false" defaultValue="null" digits="0" id="3" name="note_text" nullable="false" remarks="" size="2147483647" type="text" typeCode="12"/>
-         <column autoUpdated="false" defaultValue="null" digits="6" id="4" name="created_at" nullable="false" remarks="" size="29" type="timestamp" typeCode="93"/>
-         <column autoUpdated="false" defaultValue="null" digits="0" id="5" name="created_by" nullable="false" remarks="" size="64" type="varchar" typeCode="12"/>
-         <column autoUpdated="false" defaultValue="null" digits="0" id="6" name="author_user_id" nullable="false" remarks="" size="64" type="varchar" typeCode="12"/>
-         <column autoUpdated="false" defaultValue="gen_random_uuid()" digits="0" id="7" name="id" nullable="false" remarks="" size="2147483647" type="uuid" typeCode="1111"/>
-         <column autoUpdated="false" defaultValue="'DPS'::character varying" digits="0" id="8" name="system" nullable="false" remarks="" size="6" type="varchar" typeCode="12"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="1" name="author_username" nullable="false" remarks="The username of the user who authored (created) the amendment" size="64" type="varchar" typeCode="12"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="2" name="author_name" nullable="false" remarks="The first and last name of the user at the time the amendment was created. Does not update if their name changes" size="80" type="varchar" typeCode="12"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="3" name="note_text" nullable="false" remarks="The text of the amendment" size="2147483647" type="text" typeCode="12"/>
+         <column autoUpdated="false" defaultValue="null" digits="6" id="4" name="created_at" nullable="false" remarks="The date and time the amendment was created" size="29" type="timestamp" typeCode="93"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="5" name="created_by" nullable="false" remarks="The username of the user who created the amendment" size="64" type="varchar" typeCode="12"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="6" name="author_user_id" nullable="false" remarks="The NOMIS staff id of the user who created the amendment. This is a NOMIS internal primary key used to support consuming services reliant on it" size="64" type="varchar" typeCode="12"/>
+         <column autoUpdated="false" defaultValue="gen_random_uuid()" digits="0" id="7" name="id" nullable="false" remarks="Public primary key" size="2147483647" type="uuid" typeCode="1111"/>
+         <column autoUpdated="false" defaultValue="'DPS'::character varying" digits="0" id="8" name="system" nullable="false" remarks="The system used to create the amendment. Either DPS or NOMIS" size="6" type="varchar" typeCode="12"/>
          <primaryKey column="id" sequenceNumberInPK="1"/>
          <index name="case_note_amendment_pkey" unique="true">
             <column ascending="true" name="id"/>
@@ -93,18 +93,18 @@
          </index>
          <checkConstraint constraint="(((system)::text = ANY ((ARRAY['DPS'::character varying, 'NOMIS'::character varying])::text[])))" name="check_system"/>
       </table>
-      <table name="case_note_deleted" remarks="" schema="public" type="TABLE">
-         <column autoUpdated="false" defaultValue="null" digits="0" id="0" name="person_identifier" nullable="false" remarks="" size="2147483647" type="varchar" typeCode="12"/>
-         <column autoUpdated="false" defaultValue="null" digits="0" id="1" name="case_note_id" nullable="false" remarks="" size="2147483647" type="uuid" typeCode="1111"/>
-         <column autoUpdated="false" defaultValue="null" digits="0" id="2" name="legacy_id" nullable="true" remarks="" size="19" type="int8" typeCode="-5"/>
-         <column autoUpdated="false" defaultValue="null" digits="0" id="3" name="case_note" nullable="false" remarks="" size="2147483647" type="jsonb" typeCode="1111"/>
-         <column autoUpdated="false" defaultValue="null" digits="6" id="4" name="deleted_at" nullable="false" remarks="" size="29" type="timestamp" typeCode="93"/>
-         <column autoUpdated="false" defaultValue="null" digits="0" id="5" name="deleted_by" nullable="false" remarks="" size="64" type="varchar" typeCode="12"/>
-         <column autoUpdated="false" defaultValue="null" digits="0" id="6" name="caseload_id" nullable="true" remarks="" size="12" type="varchar" typeCode="12"/>
-         <column autoUpdated="false" defaultValue="null" digits="0" id="7" name="system" nullable="false" remarks="" size="6" type="varchar" typeCode="12"/>
-         <column autoUpdated="false" defaultValue="null" digits="0" id="8" name="cause" nullable="false" remarks="" size="6" type="varchar" typeCode="12"/>
-         <column autoUpdated="false" defaultValue="gen_random_uuid()" digits="0" id="9" name="id" nullable="false" remarks="" size="2147483647" type="uuid" typeCode="1111"/>
-         <column autoUpdated="false" defaultValue="null" digits="0" id="10" name="reason" nullable="true" remarks="" size="2147483647" type="text" typeCode="12"/>
+      <table name="case_note_deleted" remarks="Audit history of case notes hard deleted from the case_note table" schema="public" type="TABLE">
+         <column autoUpdated="false" defaultValue="null" digits="0" id="0" name="person_identifier" nullable="false" remarks="The prison number of the person the case note was for" size="2147483647" type="varchar" typeCode="12"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="1" name="case_note_id" nullable="false" remarks="The public primary key assigned to the case note before it was deleted" size="2147483647" type="uuid" typeCode="1111"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="2" name="legacy_id" nullable="true" remarks="The numerical id assigned to the case note before it was deleted" size="19" type="int8" typeCode="-5"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="3" name="case_note" nullable="false" remarks="The original data of the deleted case note serialised to JSON" size="2147483647" type="jsonb" typeCode="1111"/>
+         <column autoUpdated="false" defaultValue="null" digits="6" id="4" name="deleted_at" nullable="false" remarks="The date and time the case note was deleted" size="29" type="timestamp" typeCode="93"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="5" name="deleted_by" nullable="false" remarks="The username of the user who deleted the case note" size="64" type="varchar" typeCode="12"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="6" name="caseload_id" nullable="true" remarks="The active caseload of the user when the case note was deleted" size="12" type="varchar" typeCode="12"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="7" name="system" nullable="false" remarks="The system used to delete the case note. Either DPS or NOMIS" size="6" type="varchar" typeCode="12"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="8" name="cause" nullable="false" remarks="What caused the case note to be deleted. A merge, admin level update from NOMIS or an explicit delete request" size="6" type="varchar" typeCode="12"/>
+         <column autoUpdated="false" defaultValue="gen_random_uuid()" digits="0" id="9" name="id" nullable="false" remarks="Internal primary key" size="2147483647" type="uuid" typeCode="1111"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="10" name="reason" nullable="true" remarks="Intended to capture a user entered reason for editing or deleting the case note" size="2147483647" type="text" typeCode="12"/>
          <primaryKey column="id" sequenceNumberInPK="1"/>
          <index name="case_note_deleted_pkey" unique="true">
             <column ascending="true" name="id"/>
@@ -124,26 +124,26 @@
          <checkConstraint constraint="(((cause)::text = ANY ((ARRAY['DELETE'::character varying, 'UPDATE'::character varying, 'MERGE'::character varying, 'MOVE'::character varying])::text[])))" name="check_cause"/>
          <checkConstraint constraint="(((system)::text = ANY ((ARRAY['DPS'::character varying, 'NOMIS'::character varying])::text[])))" name="check_source"/>
       </table>
-      <table name="case_note_sub_type" numRows="400" remarks="Holds case note types allowed in this service" schema="public" type="TABLE">
-         <column autoUpdated="true" defaultValue="nextval('case_note_sub_type_id_seq'::regclass)" digits="0" id="0" name="id" nullable="false" remarks="" size="10" type="serial" typeCode="4">
+      <table name="case_note_sub_type" numRows="400" remarks="Second level categorisation of case notes grouped by type" schema="public" type="TABLE">
+         <column autoUpdated="true" defaultValue="nextval('case_note_sub_type_id_seq'::regclass)" digits="0" id="0" name="id" nullable="false" remarks="Internal primary key. Not returned by API" size="10" type="serial" typeCode="4">
             <child column="sub_type_id" foreignKey="fk_case_note_sub_type_id" implied="false" onDeleteCascade="false" schema="public" table="case_note"/>
          </column>
-         <column autoUpdated="false" defaultValue="null" digits="0" id="1" name="type_code" nullable="false" remarks="" size="12" type="varchar" typeCode="12">
+         <column autoUpdated="false" defaultValue="null" digits="0" id="1" name="type_code" nullable="false" remarks="Foreign key to case note type" size="12" type="varchar" typeCode="12">
             <parent column="code" foreignKey="case_note_sub_type_type_code" implied="false" onDeleteCascade="false" schema="public" table="case_note_type"/>
          </column>
-         <column autoUpdated="false" defaultValue="null" digits="0" id="2" name="code" nullable="false" remarks="" size="12" type="varchar" typeCode="12">
+         <column autoUpdated="false" defaultValue="null" digits="0" id="2" name="code" nullable="false" remarks="Public unique identifier and the short code for the case note sub-type" size="12" type="varchar" typeCode="12">
             <parent column="code" foreignKey="Implied Constraint" implied="true" onDeleteCascade="false" schema="public" table="case_note_type"/>
          </column>
-         <column autoUpdated="false" defaultValue="null" digits="0" id="3" name="description" nullable="false" remarks="" size="80" type="varchar" typeCode="12"/>
-         <column autoUpdated="false" defaultValue="true" digits="0" id="4" name="active" nullable="false" remarks="" size="1" type="bool" typeCode="-7"/>
-         <column autoUpdated="false" defaultValue="null" digits="6" id="5" name="created_at" nullable="false" remarks="" size="29" type="timestamp" typeCode="93"/>
-         <column autoUpdated="false" defaultValue="null" digits="0" id="6" name="created_by" nullable="false" remarks="" size="64" type="varchar" typeCode="12"/>
-         <column autoUpdated="false" defaultValue="null" digits="6" id="7" name="last_modified_at" nullable="true" remarks="" size="29" type="timestamp" typeCode="93"/>
-         <column autoUpdated="false" defaultValue="null" digits="0" id="8" name="last_modified_by" nullable="true" remarks="" size="64" type="varchar" typeCode="12"/>
-         <column autoUpdated="false" defaultValue="true" digits="0" id="9" name="sensitive" nullable="false" remarks="" size="1" type="bool" typeCode="-7"/>
-         <column autoUpdated="false" defaultValue="true" digits="0" id="10" name="restricted_use" nullable="false" remarks="" size="1" type="bool" typeCode="-7"/>
-         <column autoUpdated="false" defaultValue="false" digits="0" id="11" name="sync_to_nomis" nullable="false" remarks="" size="1" type="bool" typeCode="-7"/>
-         <column autoUpdated="false" defaultValue="true" digits="0" id="12" name="dps_user_selectable" nullable="false" remarks="" size="1" type="bool" typeCode="-7"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="3" name="description" nullable="false" remarks="The description of the case note sub-type" size="80" type="varchar" typeCode="12"/>
+         <column autoUpdated="false" defaultValue="true" digits="0" id="4" name="active" nullable="false" remarks="Active status of the case note sub-type" size="1" type="bool" typeCode="-7"/>
+         <column autoUpdated="false" defaultValue="null" digits="6" id="5" name="created_at" nullable="false" remarks="The date and time the case note sub-type was created" size="29" type="timestamp" typeCode="93"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="6" name="created_by" nullable="false" remarks="The username of the user who created the case note sub-type" size="64" type="varchar" typeCode="12"/>
+         <column autoUpdated="false" defaultValue="null" digits="6" id="7" name="last_modified_at" nullable="true" remarks="The date and time the case note sub-type was last modified" size="29" type="timestamp" typeCode="93"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="8" name="last_modified_by" nullable="true" remarks="The username of the user who last modified the case note sub-type" size="64" type="varchar" typeCode="12"/>
+         <column autoUpdated="false" defaultValue="true" digits="0" id="9" name="sensitive" nullable="false" remarks="Case notes categorised by a sensitive sub-type may contain sensitive information and should only be displayed to POMs" size="1" type="bool" typeCode="-7"/>
+         <column autoUpdated="false" defaultValue="true" digits="0" id="10" name="restricted_use" nullable="false" remarks="Only POMs can add case notes categorised with a restricted use sub-type" size="1" type="bool" typeCode="-7"/>
+         <column autoUpdated="false" defaultValue="false" digits="0" id="11" name="sync_to_nomis" nullable="false" remarks="Whether the case notes associated with a sub-type are included in the two-way sync with NOMIS or exist only in the DPS database" size="1" type="bool" typeCode="-7"/>
+         <column autoUpdated="false" defaultValue="true" digits="0" id="12" name="dps_user_selectable" nullable="false" remarks="Whether the sub-type can be selected by a user or case notes categorised by the sub-type are system generated" size="1" type="bool" typeCode="-7"/>
          <primaryKey column="id" sequenceNumberInPK="1"/>
          <index name="case_note_sub_type_pkey" unique="true">
             <column ascending="true" name="id"/>
@@ -156,16 +156,16 @@
             <column ascending="true" name="code"/>
          </index>
       </table>
-      <table name="case_note_type" numRows="65" remarks="Holds case note types allowed in this service" schema="public" type="TABLE">
-         <column autoUpdated="false" defaultValue="null" digits="0" id="0" name="code" nullable="false" remarks="" size="12" type="varchar" typeCode="12">
+      <table name="case_note_type" numRows="65" remarks="First level categorisation of case notes" schema="public" type="TABLE">
+         <column autoUpdated="false" defaultValue="null" digits="0" id="0" name="code" nullable="false" remarks="Public primary key and the short code for the case note type" size="12" type="varchar" typeCode="12">
             <child column="code" foreignKey="Implied Constraint" implied="true" onDeleteCascade="false" schema="public" table="case_note_sub_type"/>
             <child column="type_code" foreignKey="case_note_sub_type_type_code" implied="false" onDeleteCascade="false" schema="public" table="case_note_sub_type"/>
          </column>
-         <column autoUpdated="false" defaultValue="null" digits="0" id="1" name="description" nullable="false" remarks="" size="80" type="varchar" typeCode="12"/>
-         <column autoUpdated="false" defaultValue="null" digits="6" id="2" name="created_at" nullable="false" remarks="" size="29" type="timestamp" typeCode="93"/>
-         <column autoUpdated="false" defaultValue="null" digits="0" id="3" name="created_by" nullable="false" remarks="" size="64" type="varchar" typeCode="12"/>
-         <column autoUpdated="false" defaultValue="null" digits="6" id="4" name="last_modified_at" nullable="true" remarks="" size="29" type="timestamp" typeCode="93"/>
-         <column autoUpdated="false" defaultValue="null" digits="0" id="5" name="last_modified_by" nullable="true" remarks="" size="64" type="varchar" typeCode="12"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="1" name="description" nullable="false" remarks="The description of the case note type" size="80" type="varchar" typeCode="12"/>
+         <column autoUpdated="false" defaultValue="null" digits="6" id="2" name="created_at" nullable="false" remarks="The date and time the case note type was created" size="29" type="timestamp" typeCode="93"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="3" name="created_by" nullable="false" remarks="The username of the user who created the case note type" size="64" type="varchar" typeCode="12"/>
+         <column autoUpdated="false" defaultValue="null" digits="6" id="4" name="last_modified_at" nullable="true" remarks="The date and time the case note type was last modified" size="29" type="timestamp" typeCode="93"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="5" name="last_modified_by" nullable="true" remarks="The username of the user who last modified the case note type" size="64" type="varchar" typeCode="12"/>
          <primaryKey column="code" sequenceNumberInPK="1"/>
          <index name="case_note_type_pkey" unique="true">
             <column ascending="true" name="code"/>
