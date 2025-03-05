@@ -42,7 +42,7 @@ dependencies {
   implementation("com.google.guava:guava:33.4.0-jre")
 
   implementation(platform("com.amazonaws:aws-java-sdk-bom:1.12.782"))
-  implementation("software.amazon.awssdk:sns:2.30.32")
+  implementation("software.amazon.awssdk:sns:2.30.33")
 
   testAnnotationProcessor("org.projectlombok:lombok:1.18.36")
   testCompileOnly("org.projectlombok:lombok:1.18.36")
@@ -51,8 +51,8 @@ dependencies {
   testImplementation("net.javacrumbs.json-unit:json-unit-assertj:4.1.0")
   testImplementation("io.github.http-builder-ng:http-builder-ng-apache:1.0.4")
   testImplementation("org.wiremock:wiremock-standalone:3.12.1")
-  testImplementation("org.testcontainers:postgresql:1.20.5")
-  testImplementation("org.testcontainers:localstack:1.20.5")
+  testImplementation("org.testcontainers:postgresql:1.20.6")
+  testImplementation("org.testcontainers:localstack:1.20.6")
   testImplementation("io.jsonwebtoken:jjwt-impl:0.12.6")
   testImplementation("io.jsonwebtoken:jjwt-jackson:0.12.6")
   testImplementation("org.awaitility:awaitility:4.3.0")
