@@ -19,6 +19,7 @@ generic-service:
     SERVICE_ACTIVE_PRISONS: "***"
 
   postgresDatabaseRestore:
+    tag: "sha-a08734f"
     enabled: true
     timeout: 7200
     namespace_secrets:
