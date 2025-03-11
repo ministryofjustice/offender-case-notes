@@ -167,8 +167,8 @@ class NoteUsageByPersonIdentifiersIntTest : IntegrationTest() {
       UsageByPersonIdentifierRequest(
         personIdentifiers = setOf(personIdentifier),
         typeSubTypes = setOf(TypeSubTypeRequest(subType.typeCode, setOf(subType.code))),
-        occurredFrom = LocalDateTime.now().minusDays(6),
-        occurredTo = LocalDateTime.now().minusDays(4),
+        from = LocalDateTime.now().minusDays(6),
+        to = LocalDateTime.now().minusDays(4),
       ),
     )
 
@@ -198,8 +198,8 @@ class NoteUsageByPersonIdentifiersIntTest : IntegrationTest() {
       UsageByPersonIdentifierRequest(
         personIdentifiers = setOf(personIdentifier),
         typeSubTypes = setOf(TypeSubTypeRequest(subType.typeCode, setOf(subType.code))),
-        occurredFrom = LocalDateTime.now().minusDays(6),
-        occurredTo = LocalDateTime.now().minusDays(4),
+        from = LocalDateTime.now().minusDays(6),
+        to = LocalDateTime.now().minusDays(4),
         dateType = DateType.CREATED_AT,
       ),
     )

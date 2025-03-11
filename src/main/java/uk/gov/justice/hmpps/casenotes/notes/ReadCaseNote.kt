@@ -71,8 +71,8 @@ class ReadCaseNote(
         request.personIdentifiers.map { it.lowercase() }.toSet(),
         typeCodes,
         typeKeys,
-        request.occurredFrom,
-        request.occurredTo,
+        request.from,
+        request.to,
         request.authorIds.takeUnless { it.isEmpty() },
         request.prisonCode,
       )
@@ -81,8 +81,8 @@ class ReadCaseNote(
         request.personIdentifiers.map { it.lowercase() }.toSet(),
         typeCodes,
         typeKeys,
-        request.occurredFrom,
-        request.occurredTo,
+        request.from,
+        request.to,
         request.authorIds.takeUnless { it.isEmpty() },
         request.prisonCode,
       )
@@ -105,8 +105,8 @@ class ReadCaseNote(
         request.authorIds.toSet(),
         typeCodes,
         typeKeys,
-        request.occurredFrom,
-        request.occurredTo,
+        request.from,
+        request.to,
         request.prisonCode,
       )
 
@@ -114,8 +114,8 @@ class ReadCaseNote(
         request.authorIds.toSet(),
         typeCodes,
         typeKeys,
-        request.occurredFrom,
-        request.occurredTo,
+        request.from,
+        request.to,
         request.prisonCode,
       )
     }

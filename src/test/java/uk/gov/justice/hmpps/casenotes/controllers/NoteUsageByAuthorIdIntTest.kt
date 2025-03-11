@@ -188,8 +188,8 @@ class NoteUsageByAuthorIdIntTest : IntegrationTest() {
       UsageByAuthorIdRequest(
         authorIds = setOf(authorId),
         typeSubTypes = setOf(TypeSubTypeRequest(subType.typeCode, setOf(subType.code))),
-        occurredFrom = LocalDateTime.now().minusDays(6),
-        occurredTo = LocalDateTime.now().minusDays(4),
+        from = LocalDateTime.now().minusDays(6),
+        to = LocalDateTime.now().minusDays(4),
         dateType = DateType.OCCURRED_AT,
       ),
     )
@@ -238,8 +238,8 @@ class NoteUsageByAuthorIdIntTest : IntegrationTest() {
       UsageByAuthorIdRequest(
         authorIds = setOf(authorId),
         typeSubTypes = setOf(TypeSubTypeRequest(subType.typeCode, setOf(subType.code))),
-        occurredFrom = LocalDateTime.now().minusDays(6),
-        occurredTo = LocalDateTime.now().minusDays(4),
+        from = LocalDateTime.now().minusDays(6),
+        to = LocalDateTime.now().minusDays(4),
         dateType = DateType.CREATED_AT,
       ),
     )
