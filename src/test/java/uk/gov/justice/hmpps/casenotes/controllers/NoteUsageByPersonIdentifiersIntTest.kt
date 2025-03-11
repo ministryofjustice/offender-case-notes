@@ -10,12 +10,14 @@ import org.springframework.http.HttpStatus
 import uk.gov.justice.hmpps.casenotes.config.SecurityUserContext.Companion.ROLE_CASE_NOTES_READ
 import uk.gov.justice.hmpps.casenotes.legacy.dto.ErrorResponse
 import uk.gov.justice.hmpps.casenotes.notes.LatestNote
+import uk.gov.justice.hmpps.casenotes.notes.NoteUsageRequest.DateType
 import uk.gov.justice.hmpps.casenotes.notes.NoteUsageResponse
 import uk.gov.justice.hmpps.casenotes.notes.TypeSubTypeRequest
 import uk.gov.justice.hmpps.casenotes.notes.UsageByPersonIdentifierRequest
 import uk.gov.justice.hmpps.casenotes.notes.UsageByPersonIdentifierResponse
 import uk.gov.justice.hmpps.casenotes.utils.NomisIdGenerator.personIdentifier
 import java.time.LocalDateTime
+import java.time.temporal.ChronoUnit.SECONDS
 
 class NoteUsageByPersonIdentifiersIntTest : IntegrationTest() {
 
@@ -156,6 +158,7 @@ class NoteUsageByPersonIdentifiersIntTest : IntegrationTest() {
       UsageByPersonIdentifierRequest(
         personIdentifiers = setOf(personIdentifier),
         typeSubTypes = setOf(TypeSubTypeRequest(subType.typeCode, setOf(subType.code))),
+        dateType = DateType.OCCURRED_AT,
       ),
     )
     assertThat(all.content[personIdentifier]!!.first().count).isEqualTo(3)
@@ -164,13 +167,46 @@ class NoteUsageByPersonIdentifiersIntTest : IntegrationTest() {
       UsageByPersonIdentifierRequest(
         personIdentifiers = setOf(personIdentifier),
         typeSubTypes = setOf(TypeSubTypeRequest(subType.typeCode, setOf(subType.code))),
-        occurredFrom = LocalDateTime.now().minusDays(6),
-        occurredTo = LocalDateTime.now().minusDays(4),
+        from = LocalDateTime.now().minusDays(6),
+        to = LocalDateTime.now().minusDays(4),
       ),
     )
 
     assertThat(response.content[personIdentifier]!!.first().count).isEqualTo(1)
     assertThat(response.content[personIdentifier]!!.first().latestNote).isEqualTo(LatestNote(caseNote.occurredAt))
+  }
+
+  @Test
+  fun `can find by created at`() {
+    val personIdentifier = personIdentifier()
+    val subType = givenRandomType()
+    givenCaseNote(generateCaseNote(personIdentifier, subType, createdAt = LocalDateTime.now().minusDays(7)))
+    val caseNote =
+      givenCaseNote(generateCaseNote(personIdentifier, subType, createdAt = LocalDateTime.now().minusDays(5)))
+    givenCaseNote(generateCaseNote(personIdentifier, subType, createdAt = LocalDateTime.now().minusDays(3)))
+
+    val all = getUsageByPersonIdentifiers(
+      UsageByPersonIdentifierRequest(
+        personIdentifiers = setOf(personIdentifier),
+        typeSubTypes = setOf(TypeSubTypeRequest(subType.typeCode, setOf(subType.code))),
+        dateType = DateType.CREATED_AT,
+      ),
+    )
+    assertThat(all.content[personIdentifier]!!.first().count).isEqualTo(3)
+
+    val response = getUsageByPersonIdentifiers(
+      UsageByPersonIdentifierRequest(
+        personIdentifiers = setOf(personIdentifier),
+        typeSubTypes = setOf(TypeSubTypeRequest(subType.typeCode, setOf(subType.code))),
+        from = LocalDateTime.now().minusDays(6),
+        to = LocalDateTime.now().minusDays(4),
+        dateType = DateType.CREATED_AT,
+      ),
+    )
+
+    assertThat(response.content[personIdentifier]!!.first().count).isEqualTo(1)
+    assertThat(response.content[personIdentifier]!!.first().latestNote)
+      .isEqualTo(LatestNote(caseNote.createdAt.truncatedTo(SECONDS)))
   }
 
   @Test
@@ -208,8 +244,43 @@ class NoteUsageByPersonIdentifiersIntTest : IntegrationTest() {
     assertThat(response2.content[personIdentifier]!!.first().count).isEqualTo(2)
   }
 
+  @Test
+  fun `can filter by prison code`() {
+    val personIdentifier = personIdentifier()
+    val subType = givenRandomType()
+    givenCaseNote(generateCaseNote(personIdentifier, subType, locationId = "LOC1"))
+    givenCaseNote(generateCaseNote(personIdentifier, subType, locationId = "LOC2"))
+    givenCaseNote(generateCaseNote(personIdentifier, subType, locationId = "LOC2"))
+
+    val all = getUsageByPersonIdentifiers(
+      UsageByPersonIdentifierRequest(
+        personIdentifiers = setOf(personIdentifier),
+        typeSubTypes = setOf(TypeSubTypeRequest(subType.typeCode, setOf(subType.code))),
+      ),
+    )
+    assertThat(all.content[personIdentifier]!!.first().count).isEqualTo(3)
+
+    val response1 = getUsageByPersonIdentifiers(
+      UsageByPersonIdentifierRequest(
+        personIdentifiers = setOf(personIdentifier),
+        typeSubTypes = setOf(TypeSubTypeRequest(subType.typeCode, setOf(subType.code))),
+        prisonCode = "LOC1",
+      ),
+    )
+    assertThat(response1.content[personIdentifier]!!.first().count).isEqualTo(1)
+
+    val response2 = getUsageByPersonIdentifiers(
+      UsageByPersonIdentifierRequest(
+        personIdentifiers = setOf(personIdentifier),
+        typeSubTypes = setOf(TypeSubTypeRequest(subType.typeCode, setOf(subType.code))),
+        prisonCode = "LOC2",
+      ),
+    )
+    assertThat(response2.content[personIdentifier]!!.first().count).isEqualTo(2)
+  }
+
   private fun getUsageByPersonIdentifiersSpec(
-    request: UsageByPersonIdentifierRequest = UsageByPersonIdentifierRequest(),
+    request: UsageByPersonIdentifierRequest = UsageByPersonIdentifierRequest(dateType = DateType.OCCURRED_AT),
     roles: List<String> = listOf(ROLE_CASE_NOTES_READ),
     username: String = USERNAME,
   ) = webTestClient.post().uri(USAGE_URL)

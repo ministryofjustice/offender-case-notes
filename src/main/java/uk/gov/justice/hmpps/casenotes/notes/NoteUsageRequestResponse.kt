@@ -1,13 +1,26 @@
 package uk.gov.justice.hmpps.casenotes.notes
 
+import com.fasterxml.jackson.annotation.JsonAlias
 import jakarta.validation.constraints.NotEmpty
+import uk.gov.justice.hmpps.casenotes.notes.NoteUsageRequest.DateType
 import java.time.LocalDateTime
 
 interface NoteUsageRequest {
   @get:NotEmpty(message = "At least one type is required")
   val typeSubTypes: Set<TypeSubTypeRequest>
-  val occurredFrom: LocalDateTime?
-  val occurredTo: LocalDateTime?
+
+  @get:JsonAlias("occurredFrom")
+  val from: LocalDateTime?
+
+  @get:JsonAlias("occurredTo")
+  val to: LocalDateTime?
+  val prisonCode: String?
+  val dateType: DateType
+
+  enum class DateType {
+    CREATED_AT,
+    OCCURRED_AT,
+  }
 }
 
 data class NoteUsageResponse<T : UsageResponse>(val content: Map<String, List<T>>)
@@ -23,11 +36,13 @@ data class LatestNote(val occurredAt: LocalDateTime)
 
 data class UsageByPersonIdentifierRequest(
   override val typeSubTypes: Set<TypeSubTypeRequest> = emptySet(),
-  override val occurredFrom: LocalDateTime? = null,
-  override val occurredTo: LocalDateTime? = null,
+  override val from: LocalDateTime? = null,
+  override val to: LocalDateTime? = null,
   @field:NotEmpty(message = "At least one person identifier is required")
   val personIdentifiers: Set<String> = setOf(),
   val authorIds: Set<String> = setOf(),
+  override val prisonCode: String? = null,
+  override val dateType: DateType = DateType.OCCURRED_AT,
 ) : NoteUsageRequest
 
 data class UsageByPersonIdentifierResponse(
@@ -40,10 +55,12 @@ data class UsageByPersonIdentifierResponse(
 
 data class UsageByAuthorIdRequest(
   override val typeSubTypes: Set<TypeSubTypeRequest> = emptySet(),
-  override val occurredFrom: LocalDateTime? = null,
-  override val occurredTo: LocalDateTime? = null,
+  override val from: LocalDateTime? = null,
+  override val to: LocalDateTime? = null,
   @field:NotEmpty(message = "At least one author id is required")
   val authorIds: Set<String> = setOf(),
+  override val prisonCode: String? = null,
+  override val dateType: DateType = DateType.OCCURRED_AT,
 ) : NoteUsageRequest
 
 data class UsageByAuthorIdResponse(

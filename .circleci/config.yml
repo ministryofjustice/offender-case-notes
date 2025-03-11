@@ -90,6 +90,7 @@ workflows:
       - request-prod-approval:
           type: approval
           requires:
+            - deploy_dev
             - deploy_preprod
       - hmpps/deploy_env:
           name: deploy_prod

@@ -2,7 +2,6 @@ package uk.gov.justice.hmpps.casenotes.controllers
 
 import io.swagger.v3.oas.annotations.Hidden
 import io.swagger.v3.oas.annotations.Operation
-import io.swagger.v3.oas.annotations.Parameter
 import io.swagger.v3.oas.annotations.media.Content
 import io.swagger.v3.oas.annotations.media.Schema
 import io.swagger.v3.oas.annotations.responses.ApiResponse
@@ -23,8 +22,6 @@ import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestController
 import uk.gov.justice.hmpps.casenotes.config.SecurityUserContext.Companion.ROLE_CASE_NOTES_SYNC
 import uk.gov.justice.hmpps.casenotes.legacy.dto.ErrorResponse
-import uk.gov.justice.hmpps.casenotes.sync.MigrateCaseNoteRequest
-import uk.gov.justice.hmpps.casenotes.sync.MigrationResult
 import uk.gov.justice.hmpps.casenotes.sync.MoveCaseNotesRequest
 import uk.gov.justice.hmpps.casenotes.sync.ResendPersonCaseNoteEvents
 import uk.gov.justice.hmpps.casenotes.sync.SyncCaseNoteRequest
@@ -35,37 +32,6 @@ import java.util.UUID
 @Tag(name = "Sync Case Notes", description = "Endpoint for sync operations")
 @RestController
 class SyncController(private val sync: SyncCaseNotes) {
-  @Operation(summary = "Endpoint repurposed to remove duplicate case notes")
-  @ApiResponses(
-    value = [
-      ApiResponse(
-        responseCode = "200",
-        description = "Case Notes successfully migrated",
-      ),
-      ApiResponse(
-        responseCode = "400",
-        description = "Bad request",
-        content = [Content(schema = Schema(implementation = ErrorResponse::class))],
-      ),
-      ApiResponse(
-        responseCode = "401",
-        description = "Unauthorised, requires a valid Oauth2 token",
-        content = [Content(schema = Schema(implementation = ErrorResponse::class))],
-      ),
-      ApiResponse(
-        responseCode = "403",
-        description = "Forbidden, requires an appropriate role",
-        content = [Content(schema = Schema(implementation = ErrorResponse::class))],
-      ),
-    ],
-  )
-  @PostMapping("migrate/case-notes/{personIdentifier}")
-  @PreAuthorize("hasRole('$ROLE_CASE_NOTES_SYNC')")
-  fun migrateCaseNotes(
-    @Parameter(description = "Person Identifier", required = true, example = "A1234AA")
-    @PathVariable personIdentifier: String,
-    @Valid @RequestBody caseNotes: List<MigrateCaseNoteRequest>,
-  ): List<MigrationResult> = sync.migrationRequest(personIdentifier, caseNotes)
 
   @Operation(
     summary = "Endpoint to sync a case note from nomis to dps.",

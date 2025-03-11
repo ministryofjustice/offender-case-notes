@@ -8,14 +8,17 @@ import org.junit.jupiter.params.provider.MethodSource
 import org.springframework.core.ParameterizedTypeReference
 import org.springframework.http.HttpStatus
 import uk.gov.justice.hmpps.casenotes.config.SecurityUserContext.Companion.ROLE_CASE_NOTES_READ
+import uk.gov.justice.hmpps.casenotes.domain.Note.Companion.OCCURRED_AT
 import uk.gov.justice.hmpps.casenotes.legacy.dto.ErrorResponse
 import uk.gov.justice.hmpps.casenotes.notes.LatestNote
+import uk.gov.justice.hmpps.casenotes.notes.NoteUsageRequest.DateType
 import uk.gov.justice.hmpps.casenotes.notes.NoteUsageResponse
 import uk.gov.justice.hmpps.casenotes.notes.TypeSubTypeRequest
 import uk.gov.justice.hmpps.casenotes.notes.UsageByAuthorIdRequest
 import uk.gov.justice.hmpps.casenotes.notes.UsageByAuthorIdResponse
 import uk.gov.justice.hmpps.casenotes.utils.NomisIdGenerator.newId
 import java.time.LocalDateTime
+import java.time.temporal.ChronoUnit.SECONDS
 
 class NoteUsageByAuthorIdIntTest : IntegrationTest() {
 
@@ -97,6 +100,7 @@ class NoteUsageByAuthorIdIntTest : IntegrationTest() {
       UsageByAuthorIdRequest(
         authorIds = setOf(authorId),
         typeSubTypes = toFind.map { TypeSubTypeRequest(it.first, setOf(it.second)) }.toSet(),
+        dateType = DateType.OCCURRED_AT,
       ),
     )
 
@@ -126,6 +130,7 @@ class NoteUsageByAuthorIdIntTest : IntegrationTest() {
       UsageByAuthorIdRequest(
         authorIds = setOf(authorId),
         typeSubTypes = toFind.map { TypeSubTypeRequest(it, setOf()) }.toSet(),
+        dateType = DateType.OCCURRED_AT,
       ),
     )
 
@@ -174,6 +179,7 @@ class NoteUsageByAuthorIdIntTest : IntegrationTest() {
       UsageByAuthorIdRequest(
         authorIds = setOf(authorId),
         typeSubTypes = setOf(TypeSubTypeRequest(subType.typeCode, setOf(subType.code))),
+        dateType = DateType.OCCURRED_AT,
       ),
     )
     assertThat(all.content[authorId]!!.first().count).isEqualTo(3)
@@ -182,13 +188,65 @@ class NoteUsageByAuthorIdIntTest : IntegrationTest() {
       UsageByAuthorIdRequest(
         authorIds = setOf(authorId),
         typeSubTypes = setOf(TypeSubTypeRequest(subType.typeCode, setOf(subType.code))),
-        occurredFrom = LocalDateTime.now().minusDays(6),
-        occurredTo = LocalDateTime.now().minusDays(4),
+        from = LocalDateTime.now().minusDays(6),
+        to = LocalDateTime.now().minusDays(4),
+        dateType = DateType.OCCURRED_AT,
       ),
     )
 
     assertThat(response.content[authorId]!!.first().count).isEqualTo(1)
     assertThat(response.content[authorId]!!.first().latestNote).isEqualTo(LatestNote(caseNote.occurredAt))
+  }
+
+  @Test
+  fun `can find by created at`() {
+    val authorId = newId().toString()
+    val subType = givenRandomType()
+    givenCaseNote(
+      generateCaseNote(
+        type = subType,
+        createdAt = LocalDateTime.now().minusDays(7),
+        authorUserId = authorId,
+      ),
+    )
+    val caseNote =
+      givenCaseNote(
+        generateCaseNote(
+          type = subType,
+          createdAt = LocalDateTime.now().minusDays(5),
+          authorUserId = authorId,
+        ),
+      )
+    givenCaseNote(
+      generateCaseNote(
+        type = subType,
+        createdAt = LocalDateTime.now().minusDays(3),
+        authorUserId = authorId,
+      ),
+    )
+
+    val all = getUsageByAuthorId(
+      UsageByAuthorIdRequest(
+        authorIds = setOf(authorId),
+        typeSubTypes = setOf(TypeSubTypeRequest(subType.typeCode, setOf(subType.code))),
+        dateType = DateType.CREATED_AT,
+      ),
+    )
+    assertThat(all.content[authorId]!!.first().count).isEqualTo(3)
+
+    val response = getUsageByAuthorId(
+      UsageByAuthorIdRequest(
+        authorIds = setOf(authorId),
+        typeSubTypes = setOf(TypeSubTypeRequest(subType.typeCode, setOf(subType.code))),
+        from = LocalDateTime.now().minusDays(6),
+        to = LocalDateTime.now().minusDays(4),
+        dateType = DateType.CREATED_AT,
+      ),
+    )
+
+    assertThat(response.content[authorId]!!.first().count).isEqualTo(1)
+    assertThat(response.content[authorId]!!.first().latestNote)
+      .isEqualTo(LatestNote(caseNote.createdAt.truncatedTo(SECONDS)))
   }
 
   private fun getUsageByAuthorIdSpec(
@@ -201,7 +259,7 @@ class NoteUsageByAuthorIdIntTest : IntegrationTest() {
     .exchange()
 
   private fun getUsageByAuthorId(
-    request: UsageByAuthorIdRequest = UsageByAuthorIdRequest(),
+    request: UsageByAuthorIdRequest = UsageByAuthorIdRequest(dateType = DateType.OCCURRED_AT),
     roles: List<String> = listOf(ROLE_CASE_NOTES_READ),
     username: String = USERNAME,
   ): NoteUsageResponse<UsageByAuthorIdResponse> = getUsageByAuthorIdSpec(request, roles, username)

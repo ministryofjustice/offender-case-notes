@@ -1,6 +1,5 @@
 package uk.gov.justice.hmpps.casenotes.sync
 
-import com.microsoft.applicationinsights.TelemetryClient
 import org.springframework.context.ApplicationEventPublisher
 import org.springframework.data.jpa.domain.Specification
 import org.springframework.data.repository.findByIdOrNull
@@ -11,10 +10,7 @@ import uk.gov.justice.hmpps.casenotes.domain.Amendment
 import uk.gov.justice.hmpps.casenotes.domain.AmendmentRepository
 import uk.gov.justice.hmpps.casenotes.domain.Note
 import uk.gov.justice.hmpps.casenotes.domain.NoteRepository
-import uk.gov.justice.hmpps.casenotes.domain.SubType
 import uk.gov.justice.hmpps.casenotes.domain.SubTypeRepository
-import uk.gov.justice.hmpps.casenotes.domain.TypeKey
-import uk.gov.justice.hmpps.casenotes.domain.TypeLookup
 import uk.gov.justice.hmpps.casenotes.domain.createdBetween
 import uk.gov.justice.hmpps.casenotes.domain.getByTypeCodeAndCode
 import uk.gov.justice.hmpps.casenotes.domain.idIn
@@ -37,72 +33,7 @@ class SyncCaseNotes(
   private val noteRepository: NoteRepository,
   private val amendmentRepository: AmendmentRepository,
   private val eventPublisher: ApplicationEventPublisher,
-  private val telemetryClient: TelemetryClient,
 ) {
-  fun migrationRequest(personIdentifier: String, toMigrate: List<MigrateCaseNoteRequest>): List<MigrationResult> {
-    val existing = noteRepository.findNomisCaseNotesByPersonIdentifier(personIdentifier)
-    val existingLegacyIds = existing.map(Note::legacyId).toSet()
-    val toMigrateLegacyMap = toMigrate.associateBy(MigrateCaseNoteRequest::legacyId)
-
-    val deleted = existing.filter { it.legacyId !in toMigrateLegacyMap.keys }.delete()
-    val created = toMigrate.filter { it.legacyId !in existingLegacyIds }.mapToEntities(personIdentifier).create()
-    val updated = existing.filter { it.legacyId in toMigrateLegacyMap.keys }
-      .map {
-        val dates = requireNotNull(toMigrateLegacyMap[it.legacyId])
-        it.migrateDates(dates.occurrenceDateTime, dates.createdDateTime)
-      }
-
-    telemetryClient.trackEvent(
-      "Migration Request",
-      mapOf(
-        "personIdentifier" to personIdentifier,
-        "createdCaseNotes" to created.size.toString(),
-        "createdAmendments" to created.flatMap { it.amendments() }.size.toString(),
-        "deletedCaseNotes" to deleted.size.toString(),
-        "deletedAmendments" to deleted.flatMap { it.amendments() }.size.toString(),
-        "updatedCaseNotes" to updated.size.toString(),
-      ),
-      mapOf(),
-    )
-    return (created + updated).map { MigrationResult(it.id, it.legacyId) }
-  }
-
-  private fun List<Note>.delete(): List<Note> {
-    val amendments = flatMap(Note::amendments)
-    if (amendments.isNotEmpty()) {
-      amendmentRepository.deleteByIdIn(amendments.map(Amendment::getId))
-    }
-
-    if (isNotEmpty()) {
-      noteRepository.deleteByIdIn(map(Note::getId))
-      forEach(noteRepository::detach)
-    }
-    return this
-  }
-
-  private fun getTypesForSync(keys: Set<TypeKey>): Map<TypeKey, SubType> {
-    val types = typeRepository.findByKeyIn(keys).associateBy { it.key }
-    val missing = keys.subtract(types.keys)
-    check(missing.isEmpty()) {
-      "Case note types missing: ${missing.exceptionMessage()}"
-    }
-    val nonSyncToNomisTypes = types.values.filter { !it.syncToNomis }
-    check(nonSyncToNomisTypes.isEmpty()) {
-      "Case note types are not sync to nomis types: ${nonSyncToNomisTypes.exceptionMessage()}"
-    }
-    return types
-  }
-
-  private fun List<MigrateCaseNoteRequest>.mapToEntities(personIdentifier: String): List<NoteAndAmendments> {
-    val types = getTypesForSync(map { it.typeKey() }.toSet())
-    return map { it.asNoteAndAmendments(personIdentifier, null) { t, st -> requireNotNull(types[TypeKey(t, st)]) } }
-  }
-
-  private fun List<NoteAndAmendments>.create(): List<Note> {
-    val notes = noteRepository.saveAll(map { it.note })
-    amendmentRepository.saveAll(flatMap { it.amendments })
-    return notes
-  }
 
   fun syncNote(request: SyncCaseNoteRequest): SyncResult {
     val existing = when (request.id) {
@@ -176,15 +107,6 @@ private fun ResendPersonCaseNoteEvents.asSpecification(): Specification<Note> = 
   if (uuids.isNotEmpty()) idIn(uuids) else null,
   createdBetween?.let { createdBetween(createdBetween.from, createdBetween.to, createdBetween.includeSyncToNomis) },
 ).reduce { spec, current -> spec.and(current) }
-
-private fun <T : TypeLookup> Collection<T>.exceptionMessage() = sortedBy { it.typeCode }
-  .groupBy { it.typeCode }
-  .map { e ->
-    "${e.key}:${
-      e.value.sortedBy { it.code }.joinToString(prefix = "[", postfix = "]", separator = ", ") { it.code }
-    }"
-  }
-  .joinToString(separator = ", ", prefix = "{ ", postfix = " }")
 
 private infix fun SyncCaseNoteRequest.updates(note: Note): Boolean {
   val typeChanged = subType != note.subType.code || type != note.subType.typeCode
