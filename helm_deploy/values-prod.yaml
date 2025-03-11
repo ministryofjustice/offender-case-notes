@@ -21,7 +21,7 @@ generic-service:
   postgresDatabaseRestore:
     tag: "sha-a08734f"
     enabled: true
-    timeout: 7200
+    timeout: 10800
     namespace_secrets:
       dps-rds-instance-output:
         DB_NAME: "database_name"
