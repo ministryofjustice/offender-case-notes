@@ -21,6 +21,9 @@ import uk.gov.justice.hmpps.casenotes.domain.matchesPersonIdentifier
 import uk.gov.justice.hmpps.casenotes.domain.occurredAfter
 import uk.gov.justice.hmpps.casenotes.domain.occurredBefore
 import uk.gov.justice.hmpps.casenotes.legacy.service.EntityNotFoundException
+import uk.gov.justice.hmpps.casenotes.notes.NoteUsageRequest.DateType.CREATED_AT
+import uk.gov.justice.hmpps.casenotes.notes.NoteUsageRequest.DateType.OCCURRED_AT
+import java.time.temporal.ChronoUnit
 import java.util.UUID.fromString
 
 @Service
@@ -63,39 +66,66 @@ class ReadCaseNote(
 
   fun findByPersonIdentifier(request: UsageByPersonIdentifierRequest): Map<String, List<UsageByPersonIdentifierResponse>> {
     val (typeCodes, typeKeys) = request.allTypeKeys()
-    return noteRepository.findUsageByPersonIdentifier(
-      request.personIdentifiers.map { it.lowercase() }.toSet(),
-      typeCodes,
-      typeKeys,
-      request.occurredFrom,
-      request.occurredTo,
-      request.authorIds.takeUnless { it.isEmpty() },
-    ).map {
+    val usage = when (request.dateType) {
+      OCCURRED_AT -> noteRepository.findUsageByPersonIdentifierOccurredAt(
+        request.personIdentifiers.map { it.lowercase() }.toSet(),
+        typeCodes,
+        typeKeys,
+        request.occurredFrom,
+        request.occurredTo,
+        request.authorIds.takeUnless { it.isEmpty() },
+        request.prisonCode,
+      )
+
+      CREATED_AT -> noteRepository.findUsageByPersonIdentifierCreatedAt(
+        request.personIdentifiers.map { it.lowercase() }.toSet(),
+        typeCodes,
+        typeKeys,
+        request.occurredFrom,
+        request.occurredTo,
+        request.authorIds.takeUnless { it.isEmpty() },
+        request.prisonCode,
+      )
+    }
+    return usage.map {
       UsageByPersonIdentifierResponse(
         it.key,
         it.type,
         it.subType,
         it.count,
-        LatestNote(it.latestAt),
+        LatestNote(it.latestAt.truncatedTo(ChronoUnit.SECONDS)),
       )
     }.groupBy { it.personIdentifier }
   }
 
   fun findByAuthorId(request: UsageByAuthorIdRequest): Map<String, List<UsageByAuthorIdResponse>> {
     val (typeCodes, typeKeys) = request.allTypeKeys()
-    return noteRepository.findUsageByAuthorId(
-      request.authorIds.toSet(),
-      typeCodes,
-      typeKeys,
-      request.occurredFrom,
-      request.occurredTo,
-    ).map {
+    val usage = when (request.dateType) {
+      OCCURRED_AT -> noteRepository.findUsageByAuthorIdOccurredAt(
+        request.authorIds.toSet(),
+        typeCodes,
+        typeKeys,
+        request.occurredFrom,
+        request.occurredTo,
+        request.prisonCode,
+      )
+
+      CREATED_AT -> noteRepository.findUsageByAuthorIdCreatedAt(
+        request.authorIds.toSet(),
+        typeCodes,
+        typeKeys,
+        request.occurredFrom,
+        request.occurredTo,
+        request.prisonCode,
+      )
+    }
+    return usage.map {
       UsageByAuthorIdResponse(
         it.key,
         it.type,
         it.subType,
         it.count,
-        LatestNote(it.latestAt),
+        LatestNote(it.latestAt.truncatedTo(ChronoUnit.SECONDS)),
       )
     }.groupBy { it.authorId }
   }

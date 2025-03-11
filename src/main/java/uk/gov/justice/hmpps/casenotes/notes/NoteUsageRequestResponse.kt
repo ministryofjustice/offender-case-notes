@@ -1,6 +1,7 @@
 package uk.gov.justice.hmpps.casenotes.notes
 
 import jakarta.validation.constraints.NotEmpty
+import uk.gov.justice.hmpps.casenotes.notes.NoteUsageRequest.DateType
 import java.time.LocalDateTime
 
 interface NoteUsageRequest {
@@ -8,6 +9,13 @@ interface NoteUsageRequest {
   val typeSubTypes: Set<TypeSubTypeRequest>
   val occurredFrom: LocalDateTime?
   val occurredTo: LocalDateTime?
+  val prisonCode: String?
+  val dateType: DateType
+
+  enum class DateType {
+    CREATED_AT,
+    OCCURRED_AT,
+  }
 }
 
 data class NoteUsageResponse<T : UsageResponse>(val content: Map<String, List<T>>)
@@ -28,6 +36,8 @@ data class UsageByPersonIdentifierRequest(
   @field:NotEmpty(message = "At least one person identifier is required")
   val personIdentifiers: Set<String> = setOf(),
   val authorIds: Set<String> = setOf(),
+  override val prisonCode: String? = null,
+  override val dateType: DateType = DateType.OCCURRED_AT,
 ) : NoteUsageRequest
 
 data class UsageByPersonIdentifierResponse(
@@ -44,6 +54,8 @@ data class UsageByAuthorIdRequest(
   override val occurredTo: LocalDateTime? = null,
   @field:NotEmpty(message = "At least one author id is required")
   val authorIds: Set<String> = setOf(),
+  override val prisonCode: String? = null,
+  override val dateType: DateType = DateType.OCCURRED_AT,
 ) : NoteUsageRequest
 
 data class UsageByAuthorIdResponse(

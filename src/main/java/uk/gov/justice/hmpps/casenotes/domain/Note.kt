@@ -23,7 +23,6 @@ import org.springframework.data.jpa.domain.Specification
 import org.springframework.data.jpa.repository.EntityGraph
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor
-import org.springframework.data.jpa.repository.Modifying
 import org.springframework.data.jpa.repository.Query
 import uk.gov.justice.hmpps.casenotes.config.CaseNoteRequestContext
 import uk.gov.justice.hmpps.casenotes.domain.IdGenerator.newUuid
@@ -169,11 +168,6 @@ class Note(
     }.toSortedSet()
   }
 
-  fun migrateDates(occurredAt: LocalDateTime, createdAt: LocalDateTime) = apply {
-    this.occurredAt = occurredAt
-    this.createdAt = createdAt
-  }
-
   companion object {
     val ID = Note::id.name
     val SUB_TYPE = Note::subType.name
@@ -231,23 +225,36 @@ interface NoteRepository :
   )
   fun findSarContent(personIdentifier: String, from: LocalDateTime?, to: LocalDateTime?): List<Note>
 
+  fun existsByPersonIdentifierAndSubTypeSensitiveIn(personIdentifier: String, sensitive: Set<Boolean>): Boolean
+
   @Query(
     """
-    select cn from Note cn
-    join fetch cn.subType st
-    join fetch st.type t
-    left join fetch cn.amendments a
-    where cn.personIdentifier = :personIdentifier
-    and st.syncToNomis = true and cn.legacyId > 0
+        select 
+            n.personIdentifier  as key, 
+            st.key.typeCode     as type, 
+            st.key.code         as subType, 
+            count(n)            as count, 
+            max(n.createdAt)    as latestAt
+        from Note n
+        join n.subType st
+        where lower(n.personIdentifier) in :personIdentifiers 
+        and (st.type.code in :typeCodes or st.key in :typeKeys)
+        and (cast(:createdBefore as timestamp) is null or n.createdAt <= :createdBefore) 
+        and (cast(:createdAfter as timestamp) is null or n.createdAt >= :createdAfter)
+        and (:authorIds is null or n.authorUserId in :authorIds)
+        and (:prisonCode is null or n.locationId = :prisonCode)
+        group by n.personIdentifier, st.key.typeCode, st.key.code  
     """,
   )
-  fun findNomisCaseNotesByPersonIdentifier(personIdentifier: String): List<Note>
-
-  @Modifying
-  @Query("delete from Note n where n.id in :ids")
-  fun deleteByIdIn(ids: List<UUID>)
-
-  fun existsByPersonIdentifierAndSubTypeSensitiveIn(personIdentifier: String, sensitive: Set<Boolean>): Boolean
+  fun findUsageByPersonIdentifierCreatedAt(
+    personIdentifiers: Set<String>,
+    typeCodes: Set<String>,
+    typeKeys: Set<TypeKey>,
+    createdAfter: LocalDateTime?,
+    createdBefore: LocalDateTime?,
+    authorIds: Set<String>?,
+    prisonCode: String?,
+  ): List<UsageCount>
 
   @Query(
     """
@@ -264,16 +271,45 @@ interface NoteRepository :
         and (cast(:occurredBefore as timestamp) is null or n.occurredAt <= :occurredBefore) 
         and (cast(:occurredAfter as timestamp) is null or n.occurredAt >= :occurredAfter)
         and (:authorIds is null or n.authorUserId in :authorIds)
+        and (:prisonCode is null or n.locationId = :prisonCode)
         group by n.personIdentifier, st.key.typeCode, st.key.code  
     """,
   )
-  fun findUsageByPersonIdentifier(
+  fun findUsageByPersonIdentifierOccurredAt(
     personIdentifiers: Set<String>,
     typeCodes: Set<String>,
     typeKeys: Set<TypeKey>,
     occurredAfter: LocalDateTime?,
     occurredBefore: LocalDateTime?,
     authorIds: Set<String>?,
+    prisonCode: String?,
+  ): List<UsageCount>
+
+  @Query(
+    """
+        select 
+            n.authorUserId      as key, 
+            st.key.typeCode     as type, 
+            st.key.code         as subType, 
+            count(n)            as count, 
+            max(n.createdAt)    as latestAt
+        from Note n
+        join n.subType st
+        where n.authorUserId in :authorIds 
+        and (st.type.code in :typeCodes or st.key in :typeKeys)
+        and (cast(:createdBefore as timestamp) is null or n.createdAt <= :createdBefore) 
+        and (cast(:createdAfter as timestamp) is null or n.createdAt >= :createdAfter)
+        and (:prisonCode is null or n.locationId = :prisonCode)
+        group by n.authorUserId, st.key.typeCode, st.key.code  
+    """,
+  )
+  fun findUsageByAuthorIdCreatedAt(
+    authorIds: Set<String>,
+    typeCodes: Set<String>,
+    typeKeys: Set<TypeKey>,
+    createdAfter: LocalDateTime?,
+    createdBefore: LocalDateTime?,
+    prisonCode: String?,
   ): List<UsageCount>
 
   @Query(
@@ -290,15 +326,17 @@ interface NoteRepository :
         and (st.type.code in :typeCodes or st.key in :typeKeys)
         and (cast(:occurredBefore as timestamp) is null or n.occurredAt <= :occurredBefore) 
         and (cast(:occurredAfter as timestamp) is null or n.occurredAt >= :occurredAfter)
+        and (:prisonCode is null or n.locationId = :prisonCode)
         group by n.authorUserId, st.key.typeCode, st.key.code  
     """,
   )
-  fun findUsageByAuthorId(
+  fun findUsageByAuthorIdOccurredAt(
     authorIds: Set<String>,
     typeCodes: Set<String>,
     typeKeys: Set<TypeKey>,
     occurredAfter: LocalDateTime?,
     occurredBefore: LocalDateTime?,
+    prisonCode: String?,
   ): List<UsageCount>
 }
 
