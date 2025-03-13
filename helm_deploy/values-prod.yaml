@@ -19,9 +19,8 @@ generic-service:
     SERVICE_ACTIVE_PRISONS: "***"
 
   postgresDatabaseRestore:
-    tag: "sha-a08734f"
     enabled: true
-    timeout: 10800
+    timeout: 12600
     namespace_secrets:
       dps-rds-instance-output:
         DB_NAME: "database_name"
