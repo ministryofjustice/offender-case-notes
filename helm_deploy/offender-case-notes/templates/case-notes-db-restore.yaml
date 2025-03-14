@@ -33,7 +33,7 @@ spec:
               command:
                 - /bin/entrypoint.sh
               volumeMounts:
-                - name: case-notes-restore-script
+                - name: db-restore-script
                   mountPath: /bin/entrypoint.sh
                   readOnly: true
                   subPath: entrypoint.sh
