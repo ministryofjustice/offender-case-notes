@@ -84,7 +84,7 @@ fi
 # Dump postgres database from production
 pg_dump -h "$DB_HOST" -U "$DB_USER" ${SCHEMA_TO_RESTORE:+-n $SCHEMA_TO_RESTORE} -Fc --no-privileges --data-only -t case_note -t case_note_amendment -t case_note_deleted -v --file=/tmp/db.dump "$DB_NAME"
 
-psql_preprod "truncate case_note_deleted; truncate case_note_amendment; truncate case_note;"
+psql_preprod "truncate case_note_deleted, case_note_amendment, case_note;"
 
 # Restore database to preprod
 pg_restore -h "$DB_HOST_PREPROD" -U "$DB_USER_PREPROD" ${SCHEMA_TO_RESTORE:+-n $SCHEMA_TO_RESTORE} --no-owner --single-transaction -t case_note -t case_note_amendment -t case_note_deleted -v -d "$DB_NAME_PREPROD" /tmp/db.dump
