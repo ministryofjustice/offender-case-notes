@@ -19,7 +19,7 @@ generic-service:
     SERVICE_ACTIVE_PRISONS: "***"
 
   postgresDatabaseRestore:
-    enabled: true
+    enabled: false # default implementation doesn't work with case notes
     timeout: 12600
     namespace_secrets:
       dps-rds-instance-output:
@@ -50,3 +50,21 @@ generic-prometheus-alerts:
   rdsAlertsDatabases:
     cloud-platform-b6244d8c893e1d12: 'offender case notes'
   rdsAlertsConnectionThreshold: 100
+
+db_restore:
+  enabled: true
+  schedule: "0 2 * * *"
+  image: "ghcr.io/ministryofjustice/hmpps-postgres-tools"
+  tag: "main"
+
+  namespace_secrets:
+    dps-rds-instance-output:
+      DB_NAME: "database_name"
+      DB_USER: "database_username"
+      DB_PASS: "database_password"
+      DB_HOST: "rds_instance_address"
+    dps-rds-instance-output-preprod:
+      DB_NAME_PREPROD: "database_name"
+      DB_USER_PREPROD: "database_username"
+      DB_PASS_PREPROD: "database_password"
+      DB_HOST_PREPROD: "rds_instance_address"

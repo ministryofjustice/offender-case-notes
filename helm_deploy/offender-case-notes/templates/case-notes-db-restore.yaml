@@ -1,0 +1,62 @@
+{{- if .Values.db_restore.enabled -}}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: db-restore-script
+data:
+  entrypoint.sh: |-
+{{ .Files.Get "case-notes-restore.sh" | indent 4 }}
+
+---
+
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: case-notes-db-restore
+spec:
+  schedule: {{ .Values.db_restore.schedule }}
+  concurrencyPolicy: "Forbid"
+  successfulJobsHistoryLimit: 1
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      # Tidy up all jobs after 4 days
+      ttlSecondsAfterFinished: 345600
+      backoffLimit: 0
+      activeDeadlineSeconds: {{ .Values.db_restore.timeout | default 10800 }}
+      template:
+        spec:
+          containers:
+            - name: postgres-restore
+              image: "{{ .Values.db_restore.image }}:{{ .Values.db_restore.tag }}"
+              command:
+                - /bin/entrypoint.sh
+              volumeMounts:
+                - name: case-notes-restore-script
+                  mountPath: /bin/entrypoint.sh
+                  readOnly: true
+                  subPath: entrypoint.sh
+              securityContext:
+                capabilities:
+                  drop:
+                    - ALL
+                runAsNonRoot: true
+                allowPrivilegeEscalation: false
+                seccompProfile:
+                  type: RuntimeDefault
+              resources:
+                limits:
+                  cpu: 4096m
+                  memory: 4Gi
+                requests:
+                  cpu: 4096m
+                  memory: 4Gi
+    {{- include "db_restore.envs" .Values | nindent 14 }}
+          restartPolicy: "Never"
+          volumes:
+            - name: db-restore-script
+              configMap:
+                name: db-restore-script
+                defaultMode: 0755
+{{- end }}
