@@ -23,7 +23,10 @@ import org.springframework.web.bind.annotation.RequestHeader
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestController
+import uk.gov.justice.hmpps.casenotes.config.ADMIN_ONLY
 import uk.gov.justice.hmpps.casenotes.config.CaseloadIdHeader
+import uk.gov.justice.hmpps.casenotes.config.RO_OPERATIONS
+import uk.gov.justice.hmpps.casenotes.config.RW_OPERATIONS
 import uk.gov.justice.hmpps.casenotes.config.SecurityUserContext
 import uk.gov.justice.hmpps.casenotes.config.SecurityUserContext.Companion.ROLE_CASE_NOTES_SYNC
 import uk.gov.justice.hmpps.casenotes.config.ServiceConfig
@@ -39,7 +42,6 @@ import uk.gov.justice.hmpps.casenotes.notes.CreateCaseNoteRequest
 import uk.gov.justice.hmpps.casenotes.notes.ReadCaseNote
 import uk.gov.justice.hmpps.casenotes.notes.WriteCaseNote
 
-@Tag(name = "case-notes", description = "Case Note Controller")
 @RestController
 @RequestMapping("case-notes")
 class CaseNoteController(
@@ -51,6 +53,7 @@ class CaseNoteController(
   private val caseNoteEventPusher: CaseNoteEventPusher,
   private val search: PrisonerSearchService,
 ) {
+  @Tag(name = RO_OPERATIONS)
   @Operation(summary = "Retrieves a case note")
   @ApiResponses(
     ApiResponse(responseCode = "200", description = "OK"),
@@ -74,6 +77,7 @@ class CaseNoteController(
     caseNoteService.getCaseNote(personIdentifier, caseNoteIdentifier)
   }
 
+  @Tag(name = RO_OPERATIONS)
   @Operation(
     deprecated = true,
     summary = "Please do not use - this has been superseded by search/case-notes/{personIdentifier}",
@@ -93,6 +97,7 @@ class CaseNoteController(
     caseNoteService.getCaseNotes(personIdentifier, filter, pageable)
   }
 
+  @Tag(name = RW_OPERATIONS)
   @Operation(
     summary = "Add a user supplied case note for an offender.",
     description =
@@ -142,6 +147,7 @@ class CaseNoteController(
     return caseNote
   }
 
+  @Tag(name = RW_OPERATIONS)
   @Operation(
     summary = "Amend Case Note for offender",
     description = "Amend a case note information adds and additional entry to the note",
@@ -179,6 +185,7 @@ class CaseNoteController(
     return caseNote
   }
 
+  @Tag(name = ADMIN_ONLY)
   @Operation(summary = "Deletes a case note")
   @ApiResponses(
     ApiResponse(responseCode = "200", description = "OK"),

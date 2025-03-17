@@ -11,6 +11,7 @@ import io.swagger.v3.oas.models.info.Info
 import io.swagger.v3.oas.models.security.SecurityRequirement
 import io.swagger.v3.oas.models.security.SecurityScheme
 import io.swagger.v3.oas.models.servers.Server
+import io.swagger.v3.oas.models.tags.Tag
 import org.springdoc.core.customizers.OperationCustomizer
 import org.springframework.boot.info.BuildProperties
 import org.springframework.context.ApplicationContext
@@ -23,7 +24,16 @@ import org.springframework.expression.spel.support.StandardEvaluationContext
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.web.method.HandlerMethod
 import uk.gov.justice.hmpps.casenotes.config.SecurityUserContext.Companion.ROLE_CASE_NOTES_READ
+import uk.gov.justice.hmpps.casenotes.config.SecurityUserContext.Companion.ROLE_CASE_NOTES_SYNC
 import uk.gov.justice.hmpps.casenotes.config.SecurityUserContext.Companion.ROLE_CASE_NOTES_WRITE
+import uk.gov.justice.hmpps.casenotes.config.SecurityUserContext.Companion.ROLE_PRISONER_ALERTS__ADMIN
+import uk.gov.justice.hmpps.casenotes.config.SecurityUserContext.Companion.ROLE_SYSTEM_GENERATED_RW
+
+const val RO_OPERATIONS = "Retrieve case notes, types and sub-types"
+const val RW_OPERATIONS = "Create and amend case notes"
+const val SYSTEM_GENERATED_OPERATIONS = "Create system generated case notes"
+const val ADMIN_ONLY = "Admin only"
+const val NOMIS_SYNC_ONLY = "NOMIS sync only"
 
 @Configuration
 class OpenApiConfiguration(buildProperties: BuildProperties, private val context: ApplicationContext) {
@@ -67,13 +77,15 @@ class OpenApiConfiguration(buildProperties: BuildProperties, private val context
             |The usage of the combined case notes dataset in DPS was released nationally in February 2025.
             |The combined dataset uses UUIDs for case note identifiers replacing the legacy numeric ids.
             |This is a potentially breaking change for typed clients and therefore they cannot be automatically switched.
-            |Instead API clients can 'opt in' to using the combined dataset by including a non empty `""".trimMargin() + CaseloadIdHeader.NAME + """` header value.
+            |Instead API clients can 'opt in' to using the combined dataset by including a non empty `
+          """.trimMargin() + CaseloadIdHeader.NAME + """` header value.
             |The presence of this header value declares that the client is:
             |
             |- Following the responsibilities of the client for prisoner visibility, note sensitivity and restricted use sub-types listed above
             |- Compatible with UUID identifiers
             |- Authenticating with a client token containing one or more of the required role claims
-            |- Supplying a username for any write endpoints either in the JWT subject or the `""".trimMargin() + UsernameHeader.NAME + """` header
+            |- Supplying a username for any write endpoints either in the JWT subject or the `
+          """.trimMargin() + UsernameHeader.NAME + """` header
             |
             |## Authentication
             |
@@ -83,10 +95,14 @@ class OpenApiConfiguration(buildProperties: BuildProperties, private val context
             |## Authorisation
             |
             |The API uses roles to control access to the endpoints. The roles required for each endpoint are documented in the endpoint descriptions.
-            |Services integrating with the API should request one of the two following roles depending on their needs:
+            |Services integrating with the API should request one of the following roles depending on their needs:
             |
-            |1. `""".trimMargin() + ROLE_CASE_NOTES_READ + """` - Grants read only access to the API e.g. retrieving case notes for a person
-            |2. `""".trimMargin() + ROLE_CASE_NOTES_WRITE + """` - Grants read/write access to the API e.g. creating case notes and adding amendments
+            |1. `
+          """.trimMargin() + ROLE_CASE_NOTES_READ + """` - Grants read only access to the API e.g. retrieving case notes for a person
+            |2. `
+          """.trimMargin() + ROLE_CASE_NOTES_WRITE + """` - Grants read/write access to the API e.g. creating case notes and adding amendments
+            |3. `
+          """.trimMargin() + ROLE_SYSTEM_GENERATED_RW + """` - Grants the ability to create system generated case notes with custom author information
             |
             |**IMPORTANT** clients should never request the admin role or call admin only endpoints e.g. delete
             |
@@ -94,12 +110,15 @@ class OpenApiConfiguration(buildProperties: BuildProperties, private val context
             |
             |Endpoints that modify case notes require the user to be identified via their username.
             |This is to correctly populate the case note author and for auditing purposes.
+            |The username supplied when creating a case note using a sub-type that syncs to NOMIS must exist in NOMIS.
+            |Case note sub-types that do not sync to NOMIS can be associated with a username from any user known to HMPPS Auth.
             |The username for the request can be supplied in two ways:
             |
             |1. **Token claim** - Via a `subject` claim in the JWT
-            |2. **Header** - Via the '""".trimMargin() + UsernameHeader.NAME + """' header which will take priority over 1.
+            |2. **Header** - Via the '
+          """.trimMargin() + UsernameHeader.NAME + """' header which will take priority over 1.
             |
-            |Where possible clients are expected to use the token claim subject to supply the username.            |
+            |Where possible clients are expected to use the token claim subject to supply the username.
           """.trimMargin(),
         ).contact(
           Contact()
@@ -119,6 +138,20 @@ class OpenApiConfiguration(buildProperties: BuildProperties, private val context
       ),
     )
     .addSecurityItem(SecurityRequirement().addList("bearer-jwt", listOf("read", "write")))
+    .addTagsItem(Tag().name(RO_OPERATIONS).description("Endpoints for read operations - accepts both RO and RW roles"))
+    .addTagsItem(Tag().name(RW_OPERATIONS).description("Endpoints for write operations - must have RW role and must supply a valid username"))
+    .addTagsItem(Tag().name(SYSTEM_GENERATED_OPERATIONS).description("Endpoints for creating system generated case notes with custom author information"))
+    .addTagsItem(
+      Tag().name("No Further Operations")
+        .description("Endpoints below this point are for special and explicit usage and should not be used under any circumstances without prior consultation with the team maintaining this API."),
+    )
+    .addTagsItem(
+      Tag().name(NOMIS_SYNC_ONLY).description("Endpoints for NOMIS sync only - not to be use by any other client"),
+    )
+    .addTagsItem(
+      Tag().name(ADMIN_ONLY)
+        .description("Endpoints for case notes admin only - Not to be used by any service other than those used by central admin"),
+    )
 
   @Bean
   fun preAuthorizeCustomizer(): OperationCustomizer = OperationCustomizer { operation, handlerMethod ->
@@ -139,6 +172,7 @@ class OpenApiConfiguration(buildProperties: BuildProperties, private val context
         emptyList()
       }
       if (roles.isNotEmpty()) {
+        val filteredRoles = roles.filter { r -> r != ROLE_CASE_NOTES_SYNC && r != ROLE_PRISONER_ALERTS__ADMIN }
         operation.description =
           listOf(
             operation.description ?: "",

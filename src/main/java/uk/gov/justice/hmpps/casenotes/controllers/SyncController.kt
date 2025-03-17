@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.PutMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestController
+import uk.gov.justice.hmpps.casenotes.config.NOMIS_SYNC_ONLY
 import uk.gov.justice.hmpps.casenotes.config.SecurityUserContext.Companion.ROLE_CASE_NOTES_SYNC
 import uk.gov.justice.hmpps.casenotes.legacy.dto.ErrorResponse
 import uk.gov.justice.hmpps.casenotes.sync.MoveCaseNotesRequest
@@ -29,7 +30,7 @@ import uk.gov.justice.hmpps.casenotes.sync.SyncCaseNotes
 import uk.gov.justice.hmpps.casenotes.sync.SyncResult
 import java.util.UUID
 
-@Tag(name = "Sync Case Notes", description = "Endpoint for sync operations")
+@Tag(name = NOMIS_SYNC_ONLY)
 @RestController
 class SyncController(private val sync: SyncCaseNotes) {
 

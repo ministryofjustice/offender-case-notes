@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
+import uk.gov.justice.hmpps.casenotes.config.RO_OPERATIONS
 import uk.gov.justice.hmpps.casenotes.config.SecurityUserContext.Companion.ROLE_CASE_NOTES_READ
 import uk.gov.justice.hmpps.casenotes.config.SecurityUserContext.Companion.ROLE_CASE_NOTES_WRITE
 import uk.gov.justice.hmpps.casenotes.legacy.dto.ErrorResponse
@@ -18,7 +19,7 @@ import uk.gov.justice.hmpps.casenotes.types.CaseNoteType
 import uk.gov.justice.hmpps.casenotes.types.ReadCaseNoteType
 import uk.gov.justice.hmpps.casenotes.types.SelectableBy
 
-@Tag(name = "case-note-types", description = "Case Note Types Controller")
+@Tag(name = RO_OPERATIONS)
 @RestController
 @RequestMapping("case-notes")
 class CaseNoteTypeController(private val readCaseNoteType: ReadCaseNoteType) {

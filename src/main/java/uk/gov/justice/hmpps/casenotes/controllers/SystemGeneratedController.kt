@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.RestController
 import org.springframework.web.context.request.RequestContextHolder.getRequestAttributes
 import uk.gov.justice.hmpps.casenotes.config.AuthAwareAuthenticationToken
 import uk.gov.justice.hmpps.casenotes.config.CaseNoteRequestContext
+import uk.gov.justice.hmpps.casenotes.config.SYSTEM_GENERATED_OPERATIONS
 import uk.gov.justice.hmpps.casenotes.config.SecurityUserContext.Companion.ROLE_SYSTEM_GENERATED_RW
 import uk.gov.justice.hmpps.casenotes.integrations.PrisonerSearchService
 import uk.gov.justice.hmpps.casenotes.legacy.dto.ErrorResponse
@@ -27,7 +28,7 @@ import uk.gov.justice.hmpps.casenotes.notes.CaseNote
 import uk.gov.justice.hmpps.casenotes.systemgenerated.CreateSysGenNote
 import uk.gov.justice.hmpps.casenotes.systemgenerated.SystemGeneratedRequest
 
-@Tag(name = "System Generated Case Notes", description = "Endpoints system generated case notes")
+@Tag(name = SYSTEM_GENERATED_OPERATIONS)
 @RestController
 @RequestMapping("system-generated/case-notes/{personIdentifier}")
 class SystemGeneratedController(
@@ -36,7 +37,7 @@ class SystemGeneratedController(
   private val eventPusher: CaseNoteEventPusher,
 ) {
 
-  @Operation(summary = "Endpoint to create system generated case notes.")
+  @Operation(summary = "Create system generated case notes with custom author information")
   @ApiResponses(
     value = [
       ApiResponse(
