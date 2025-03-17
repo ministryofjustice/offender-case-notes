@@ -10,6 +10,7 @@ import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.springframework.http.HttpStatus
 import org.springframework.test.web.reactive.server.WebTestClient
+import uk.gov.justice.hmpps.casenotes.config.CaseloadIdHeader
 import uk.gov.justice.hmpps.casenotes.config.SecurityUserContext.Companion.ROLE_CASE_NOTES_READ
 import uk.gov.justice.hmpps.casenotes.config.SecurityUserContext.Companion.ROLE_CASE_NOTES_WRITE
 import uk.gov.justice.hmpps.casenotes.config.Source
@@ -235,7 +236,7 @@ class CreateCaseNoteIntTest : IntegrationTest() {
     }
     ub.build()
   }.headers(addBearerAuthorisation(tokenUsername, roles))
-    .header(CASELOAD_ID, ACTIVE_PRISON)
+    .header(CaseloadIdHeader.NAME, ACTIVE_PRISON)
     .optionalHeader(UsernameHeader.NAME, usernameHeader)
     .bodyValue(request)
     .exchange()
@@ -253,7 +254,7 @@ class CreateCaseNoteIntTest : IntegrationTest() {
     }
     ub.build()
   }.headers(addBearerAuthorisation(tokenUsername, roles))
-    .header(CASELOAD_ID, ACTIVE_PRISON)
+    .header(CaseloadIdHeader.NAME, ACTIVE_PRISON)
     .bodyValue(request)
     .exchange()
 

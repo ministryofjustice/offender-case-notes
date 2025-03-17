@@ -94,3 +94,6 @@ service:
   active-prisons:
   base-url:
   action-missing-case-notes: false
+
+springdoc:
+  paths-to-exclude: "/queue-admin/**"

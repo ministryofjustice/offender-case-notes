@@ -18,7 +18,7 @@ services:
       - hmpps
     container_name: localstack
     ports:
-      - "4566-4597:4566-4597"
+      - "4567-4598:4566-4597"
     environment:
       - SERVICES=sqs,sns
       - DEBUG=${DEBUG-}

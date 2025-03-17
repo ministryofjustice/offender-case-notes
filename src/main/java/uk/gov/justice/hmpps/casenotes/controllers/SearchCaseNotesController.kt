@@ -11,11 +11,12 @@ import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
+import uk.gov.justice.hmpps.casenotes.config.RO_OPERATIONS
 import uk.gov.justice.hmpps.casenotes.notes.ReadCaseNote
 import uk.gov.justice.hmpps.casenotes.notes.SearchNotesRequest
 import uk.gov.justice.hmpps.casenotes.notes.SearchNotesResponse
 
-@Tag(name = "search-case-notes", description = "Search Case Notes Controller")
+@Tag(name = RO_OPERATIONS)
 @RestController
 @RequestMapping("search/case-notes")
 class SearchCaseNotesController(private val search: ReadCaseNote) {

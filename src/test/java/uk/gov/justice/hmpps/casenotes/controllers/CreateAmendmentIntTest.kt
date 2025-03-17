@@ -8,6 +8,7 @@ import org.awaitility.kotlin.withPollDelay
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.springframework.http.HttpStatus
+import uk.gov.justice.hmpps.casenotes.config.CaseloadIdHeader
 import uk.gov.justice.hmpps.casenotes.config.SecurityUserContext
 import uk.gov.justice.hmpps.casenotes.config.Source
 import uk.gov.justice.hmpps.casenotes.domain.System
@@ -172,7 +173,7 @@ class CreateAmendmentIntTest : IntegrationTest() {
     }
     ub.build(prisonNumber, caseNoteId)
   }.headers(addBearerAuthorisation(tokenUsername, roles))
-    .addHeader(CASELOAD_ID, caseloadId)
+    .addHeader(CaseloadIdHeader.NAME, caseloadId)
     .bodyValue(request)
     .exchange()
 

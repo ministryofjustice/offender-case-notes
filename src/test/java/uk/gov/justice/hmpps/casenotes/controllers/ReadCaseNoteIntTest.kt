@@ -6,6 +6,7 @@ import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments
 import org.junit.jupiter.params.provider.MethodSource
 import org.junit.jupiter.params.provider.ValueSource
+import uk.gov.justice.hmpps.casenotes.config.CaseloadIdHeader
 import uk.gov.justice.hmpps.casenotes.config.SecurityUserContext
 import uk.gov.justice.hmpps.casenotes.domain.SubType
 import uk.gov.justice.hmpps.casenotes.notes.CaseNote
@@ -84,7 +85,7 @@ class ReadCaseNoteIntTest : IntegrationTest() {
     caseloadId: String? = ACTIVE_PRISON,
   ) = webTestClient.get().uri(urlToTest(prisonNumber, caseNoteId))
     .headers(addBearerAuthorisation(username, roles))
-    .header(CASELOAD_ID, caseloadId)
+    .header(CaseloadIdHeader.NAME, caseloadId)
     .exchange()
 
   private fun urlToTest(prisonNumber: String, caseNoteId: String) = "/case-notes/$prisonNumber/$caseNoteId"

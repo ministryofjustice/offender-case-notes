@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.ValueSource
 import org.springframework.test.web.reactive.server.WebTestClient
+import uk.gov.justice.hmpps.casenotes.config.CaseloadIdHeader
 import uk.gov.justice.hmpps.casenotes.config.SecurityUserContext.Companion.ROLE_CASE_NOTES_READ
 import uk.gov.justice.hmpps.casenotes.config.SecurityUserContext.Companion.ROLE_CASE_NOTES_WRITE
 import uk.gov.justice.hmpps.casenotes.notes.CaseNote
@@ -198,7 +199,7 @@ class ReadCaseNotesIntTest : IntegrationTest() {
     }
     ub.build()
   }.headers(addBearerAuthorisation(username, roles))
-    .header(CASELOAD_ID, ACTIVE_PRISON)
+    .header(CaseloadIdHeader.NAME, ACTIVE_PRISON)
     .exchange()
 
   private fun urlToTest(prisonNumber: String) = "/case-notes/$prisonNumber"
