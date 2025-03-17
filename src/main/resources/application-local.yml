@@ -1,0 +1,53 @@
+spring:
+  flyway:
+    enabled: true
+    locations: classpath:db/migration/general,classpath:db/migration/{vendor}
+
+  jpa:
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+        generate_statistics: true
+
+  datasource:
+    url: 'jdbc:postgresql://localhost:5433/case_notes?reWriteBatchedInserts=true'
+    username: case
+    password: notes
+    hikari:
+      maximum-pool-size: 5
+
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          public-key-location: classpath:local-public-key.pub
+
+server:
+  shutdown: immediate
+
+service:
+  base-url: http://localhost:8080
+  active-prisons: ${SERVICE_ACTIVE_PRISONS:***}
+
+elite2.api.base.url: https://prison-api-dev.prison.service.justice.gov.uk
+oauth.api.base.url: https://sign-in-dev.hmpps.service.justice.gov.uk/auth
+prisoner-search.api.base.url: https://prisoner-search-dev.prison.service.justice.gov.uk
+manage-users.api.base.url: https://manage-users-api-dev.hmpps.service.justice.gov.uk
+alerts.api.base.url: https://alerts-api-dev.hmpps.service.justice.gov.uk
+tokenverification:
+  api.base.url: https://token-verification-api-dev.prison.service.justice.gov.uk
+  enabled: true
+spring.security.oauth2.resourceserver.jwt.jwk-set-uri: https://sign-in-dev.hmpps.service.justice.gov.uk/auth/.well-known/jwks.json
+
+hmpps.sqs:
+  provider: localstack
+  queues:
+    domaineventsqueue:
+      queueName: ${random.uuid}
+      dlqName: ${random.uuid}
+      subscribeTopicId: domainevents
+      subscribeFilter: '{"eventType":["prison-offender-events.prisoner.merged", "case-notes.alerts.reconciliation"]}'
+  topics:
+    domainevents:
+      arn: arn:aws:sns:eu-west-2:000000000000:domain_events
