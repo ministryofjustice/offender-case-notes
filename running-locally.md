@@ -20,5 +20,5 @@ Command line for retrieving secrets in k8s dev namespace:
 
 Run the following commands from the root directory of the project:
 
-1. docker compose -f docker-compose-local.yml up -d
+1. docker compose up -d
 2. ./run-local.sh
