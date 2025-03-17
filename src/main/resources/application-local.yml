@@ -42,6 +42,7 @@ spring.security.oauth2.resourceserver.jwt.jwk-set-uri: https://sign-in-dev.hmpps
 
 hmpps.sqs:
   provider: localstack
+  localstackUrl: http://localhost:4567
   queues:
     domaineventsqueue:
       queueName: ${random.uuid}
