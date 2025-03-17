@@ -23,6 +23,7 @@ import org.springframework.web.bind.annotation.RequestHeader
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestController
+import uk.gov.justice.hmpps.casenotes.config.CaseloadIdHeader
 import uk.gov.justice.hmpps.casenotes.config.SecurityUserContext
 import uk.gov.justice.hmpps.casenotes.config.SecurityUserContext.Companion.ROLE_CASE_NOTES_SYNC
 import uk.gov.justice.hmpps.casenotes.config.ServiceConfig
@@ -37,8 +38,6 @@ import uk.gov.justice.hmpps.casenotes.notes.CaseNoteFilter
 import uk.gov.justice.hmpps.casenotes.notes.CreateCaseNoteRequest
 import uk.gov.justice.hmpps.casenotes.notes.ReadCaseNote
 import uk.gov.justice.hmpps.casenotes.notes.WriteCaseNote
-
-const val CASELOAD_ID = "CaseloadId"
 
 @Tag(name = "case-notes", description = "Case Note Controller")
 @RestController
@@ -61,13 +60,14 @@ class CaseNoteController(
       content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))],
     ),
   )
+  @CaseloadIdHeader
   @GetMapping("/{personIdentifier}/{caseNoteIdentifier}")
   fun getCaseNote(
     @Parameter(description = "Person Identifier", required = true, example = "A1234AA")
     @PathVariable personIdentifier: String,
     @Parameter(description = "Case Note Id", required = true, example = "518b2200-6489-4c77-8514-10cf80ccd488")
     @PathVariable caseNoteIdentifier: String,
-    @RequestHeader(CASELOAD_ID) caseloadId: String? = null,
+    @RequestHeader(CaseloadIdHeader.NAME) caseloadId: String? = null,
   ): CaseNote = if ((serviceConfig.switchesPathFor(caseloadId)) || securityUserContext.hasAnyRole(ROLE_CASE_NOTES_SYNC)) {
     find.caseNote(personIdentifier, caseNoteIdentifier)
   } else {
@@ -79,13 +79,14 @@ class CaseNoteController(
     summary = "Please do not use - this has been superseded by search/case-notes/{personIdentifier}",
   )
   @ApiResponses(ApiResponse(responseCode = "200", description = "OK"))
+  @CaseloadIdHeader
   @GetMapping("/{personIdentifier}")
   fun getCaseNotes(
     @Parameter(description = "Person Identifier", required = true, example = "A1234AA")
     @PathVariable personIdentifier: String,
     @Parameter(description = "Optionally specify a case note filter") filter: CaseNoteFilter,
     @PageableDefault(sort = ["occurrenceDateTime"], direction = Sort.Direction.DESC) pageable: Pageable,
-    @RequestHeader(CASELOAD_ID) caseloadId: String? = null,
+    @RequestHeader(CaseloadIdHeader.NAME) caseloadId: String? = null,
   ): Page<CaseNote> = if (serviceConfig.switchesPathFor(caseloadId)) {
     find.caseNotes(personIdentifier, filter, pageable)
   } else {
@@ -117,6 +118,7 @@ class CaseNoteController(
       ),
     ],
   )
+  @CaseloadIdHeader
   @UsernameHeader
   @ResponseStatus(HttpStatus.CREATED)
   @PostMapping("/{personIdentifier}")
@@ -124,7 +126,7 @@ class CaseNoteController(
     @Parameter(description = "Person Identifier", required = true, example = "A1234AA")
     @PathVariable personIdentifier: String,
     @Valid @RequestBody createCaseNote: CreateCaseNoteRequest,
-    @RequestHeader(required = false, value = CASELOAD_ID) caseloadId: String? = null,
+    @RequestHeader(required = false, value = CaseloadIdHeader.NAME) caseloadId: String? = null,
   ): CaseNote {
     val request = if (createCaseNote.locationId == null) {
       createCaseNote.copy(locationId = search.getPrisonerDetails(personIdentifier).prisonId)
@@ -157,6 +159,7 @@ class CaseNoteController(
       ),
     ],
   )
+  @CaseloadIdHeader
   @UsernameHeader
   @PutMapping("/{personIdentifier}/{caseNoteIdentifier}")
   fun amendCaseNote(
@@ -165,7 +168,7 @@ class CaseNoteController(
     @Parameter(description = "Case Note Id", required = true, example = "518b2200-6489-4c77-8514-10cf80ccd488")
     @PathVariable caseNoteIdentifier: String,
     @Valid @RequestBody amendedText: AmendCaseNoteRequest,
-    @RequestHeader(required = false, value = CASELOAD_ID) caseloadId: String? = null,
+    @RequestHeader(required = false, value = CaseloadIdHeader.NAME) caseloadId: String? = null,
   ): CaseNote {
     val caseNote = if (serviceConfig.switchesPathFor(caseloadId)) {
       save.createAmendment(personIdentifier, caseNoteIdentifier, amendedText)

@@ -5,6 +5,7 @@ import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
+import uk.gov.justice.hmpps.casenotes.config.CaseloadIdHeader
 import uk.gov.justice.hmpps.casenotes.config.SecurityUserContext.Companion.ROLE_CASE_NOTES_READ
 import uk.gov.justice.hmpps.casenotes.config.SecurityUserContext.Companion.ROLE_CASE_NOTES_WRITE
 import uk.gov.justice.hmpps.casenotes.config.Source
@@ -72,7 +73,7 @@ class DeleteCaseNoteIntTest : IntegrationTest() {
     caseloadId: String? = ACTIVE_PRISON,
   ) = webTestClient.delete().uri(urlToTest(prisonNumber, caseNoteId))
     .headers(addBearerAuthorisation(username, roles))
-    .headers { if (caseloadId != null) it[CASELOAD_ID] = caseloadId }
+    .headers { if (caseloadId != null) it[CaseloadIdHeader.NAME] = caseloadId }
     .exchange()
 
   private fun urlToTest(prisonNumber: String, caseNoteId: String) = "/case-notes/$prisonNumber/$caseNoteId"

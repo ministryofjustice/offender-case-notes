@@ -14,6 +14,7 @@ import org.mockito.kotlin.eq
 import org.mockito.kotlin.verify
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.test.context.bean.override.mockito.MockitoSpyBean
+import uk.gov.justice.hmpps.casenotes.config.CaseloadIdHeader
 import uk.gov.justice.hmpps.casenotes.config.SecurityUserContext.Companion.ROLE_CASE_NOTES_WRITE
 import uk.gov.justice.hmpps.casenotes.health.wiremock.Elite2Extension.Companion.elite2Api
 import uk.gov.justice.hmpps.casenotes.health.wiremock.ManageUsersApiExtension.Companion.manageUsersApi
@@ -527,7 +528,7 @@ class CaseNoteResourceTest : IntegrationTest() {
 
     val postResponse = webTestClient.post().uri("/case-notes/{offenderIdentifier}", "A1234BA")
       .headers(addBearerToken(token))
-      .header(CASELOAD_ID, "MDI")
+      .header(CaseloadIdHeader.NAME, "MDI")
       .bodyValue(CREATE_CASE_NOTE_WITHOUT_LOC.format("This is a case note"))
       .exchange()
       .expectStatus().isCreated
@@ -536,7 +537,7 @@ class CaseNoteResourceTest : IntegrationTest() {
 
     webTestClient.get().uri("/case-notes/{offenderIdentifier}/{caseNoteIdentifier}", "A1234BA", id)
       .headers(addBearerToken(token))
-      .header(CASELOAD_ID, "MDI")
+      .header(CaseloadIdHeader.NAME, "MDI")
       .exchange()
       .expectStatus().isOk
       .expectBody()
