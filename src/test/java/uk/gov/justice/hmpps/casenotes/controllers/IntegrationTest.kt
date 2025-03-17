@@ -53,7 +53,7 @@ import java.util.function.Consumer
 internal const val ACTIVE_PRISON = "MDI"
 internal const val USERNAME = "TestUser"
 
-@ActiveProfiles("test", "noqueue", "token-verification")
+@ActiveProfiles("test", "test-token-verification")
 @SpringBootTest(webEnvironment = RANDOM_PORT)
 @ExtendWith(
   Elite2Extension::class,
