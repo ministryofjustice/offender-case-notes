@@ -1,4 +1,4 @@
-package uk.gov.justice.hmpps.casenotes.backfill
+package uk.gov.justice.hmpps.casenotes.alertnotes
 
 import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.client.WireMock.aResponse
@@ -10,7 +10,6 @@ import org.junit.jupiter.api.extension.AfterAllCallback
 import org.junit.jupiter.api.extension.BeforeAllCallback
 import org.junit.jupiter.api.extension.BeforeEachCallback
 import org.junit.jupiter.api.extension.ExtensionContext
-import uk.gov.justice.hmpps.casenotes.alertbackfill.CaseNoteAlertResponse
 import uk.gov.justice.hmpps.casenotes.utils.JsonHelper
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter.ISO_DATE
@@ -48,6 +47,16 @@ class AlertsApiServer : WireMockServer(WIREMOCK_PORT) {
         aResponse()
           .withHeader("Content-Type", "application/json")
           .withBody(mapper.writeValueAsString(response))
+          .withStatus(200),
+      ),
+  )
+
+  fun withAlert(alert: Alert): StubMapping = stubFor(
+    get(urlPathMatching("/alerts/${alert.alertUuid}"))
+      .willReturn(
+        aResponse()
+          .withHeader("Content-Type", "application/json")
+          .withBody(mapper.writeValueAsString(alert))
           .withStatus(200),
       ),
   )

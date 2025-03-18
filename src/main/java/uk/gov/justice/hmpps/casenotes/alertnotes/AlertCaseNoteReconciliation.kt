@@ -1,12 +1,12 @@
-package uk.gov.justice.hmpps.casenotes.alertbackfill
+package uk.gov.justice.hmpps.casenotes.alertnotes
 
 import com.microsoft.applicationinsights.TelemetryClient
 import jakarta.annotation.PostConstruct
 import org.springframework.context.ApplicationEventPublisher
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
-import uk.gov.justice.hmpps.casenotes.alertbackfill.ActiveInactive.ACTIVE
-import uk.gov.justice.hmpps.casenotes.alertbackfill.ActiveInactive.INACTIVE
+import uk.gov.justice.hmpps.casenotes.alertnotes.ActiveInactive.ACTIVE
+import uk.gov.justice.hmpps.casenotes.alertnotes.ActiveInactive.INACTIVE
 import uk.gov.justice.hmpps.casenotes.config.ServiceConfig
 import uk.gov.justice.hmpps.casenotes.domain.Note
 import uk.gov.justice.hmpps.casenotes.domain.NoteRepository
@@ -219,11 +219,6 @@ class AlertCaseNoteReconciliation(
     private var dpsUser: UserDetails? = null
     const val TYPE = "ALERT"
   }
-}
-
-enum class ActiveInactive {
-  ACTIVE,
-  INACTIVE,
 }
 
 enum class InOutScope {

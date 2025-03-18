@@ -1,6 +1,5 @@
-package uk.gov.justice.hmpps.casenotes.backfill
+package uk.gov.justice.hmpps.casenotes.alertnotes
 
-import com.microsoft.applicationinsights.TelemetryClient
 import org.assertj.core.api.Assertions.assertThat
 import org.awaitility.kotlin.await
 import org.awaitility.kotlin.matches
@@ -9,15 +8,8 @@ import org.junit.jupiter.api.Test
 import org.mockito.kotlin.any
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.verify
-import org.springframework.test.context.bean.override.mockito.MockitoSpyBean
-import uk.gov.justice.hmpps.casenotes.alertbackfill.ActiveInactive
-import uk.gov.justice.hmpps.casenotes.alertbackfill.AlertCaseNoteReconciliation
-import uk.gov.justice.hmpps.casenotes.alertbackfill.AlertCaseNoteReconciliation.Companion.TYPE
-import uk.gov.justice.hmpps.casenotes.alertbackfill.AlertReconciliationInformation
-import uk.gov.justice.hmpps.casenotes.alertbackfill.CaseNoteAlert
-import uk.gov.justice.hmpps.casenotes.alertbackfill.CaseNoteAlertResponse
-import uk.gov.justice.hmpps.casenotes.alertbackfill.CodedDescription
-import uk.gov.justice.hmpps.casenotes.backfill.AlertsApiExtension.Companion.alertsApi
+import uk.gov.justice.hmpps.casenotes.alertnotes.AlertCaseNoteReconciliation.Companion.TYPE
+import uk.gov.justice.hmpps.casenotes.alertnotes.AlertsApiExtension.Companion.alertsApi
 import uk.gov.justice.hmpps.casenotes.controllers.IntegrationTest
 import uk.gov.justice.hmpps.casenotes.domain.Note
 import uk.gov.justice.hmpps.casenotes.domain.matchesPersonIdentifier
@@ -37,9 +29,6 @@ import java.time.temporal.ChronoUnit
 import java.util.UUID
 
 class AlertCaseNoteReconciliationIntTest : IntegrationTest() {
-
-  @MockitoSpyBean
-  lateinit var telemetryClient: TelemetryClient
 
   @Test
   fun `verify creates all case notes when non exist`() {
@@ -136,7 +125,7 @@ class AlertCaseNoteReconciliationIntTest : IntegrationTest() {
           type = inactive,
           text = "Alert Type 4 and Sub type 4 made inactive.",
           createdAt = alertWithExisting.madeInactiveAt,
-          occurredAt = alertWithExisting.activeTo!!.atStartOfDay(),
+          occurredAt = alertWithExisting.activeTo.atStartOfDay(),
         ),
       ),
     )

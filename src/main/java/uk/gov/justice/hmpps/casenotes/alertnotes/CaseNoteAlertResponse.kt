@@ -1,4 +1,4 @@
-package uk.gov.justice.hmpps.casenotes.alertbackfill
+package uk.gov.justice.hmpps.casenotes.alertnotes
 
 import java.time.LocalDate
 import java.time.LocalDate.now
