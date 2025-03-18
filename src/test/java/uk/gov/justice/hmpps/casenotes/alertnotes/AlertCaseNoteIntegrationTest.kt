@@ -35,6 +35,20 @@ import java.util.UUID
 class AlertCaseNoteIntegrationTest : IntegrationTest() {
 
   @Test
+  fun `no alert active case note created if prison switch endpoint returns 404`() {
+    val prisonCode = "ANY"
+    val alert = alert()
+    alertsApi.withAlert(alert)
+    prisonerSearchApi.stubPrisonerDetails(alert.prisonNumber, prisonCode)
+    elite2Api.stubPrisonSwitchNotFound()
+
+    publishEventToTopic(alert.domainEvent(ALERT_CREATED))
+    await untilCallTo { domainEventsQueue.countAllMessagesOnQueue() } matches { it == 0 }
+
+    verify(noteRepository, never()).save(any())
+  }
+
+  @Test
   fun `no alert active case note created if prison not active`() {
     val prisonCode = "INA"
     val alert = alert()

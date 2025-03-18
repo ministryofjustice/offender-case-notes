@@ -198,6 +198,17 @@ class Elite2MockServer : WireMockServer(WIREMOCK_PORT) {
     )
   }
 
+  fun stubPrisonSwitchNotFound(serviceCode: String = "ALERTS_CASE_NOTES") {
+    stubFor(
+      get(urlPathMatching("/api/service-prisons/$serviceCode"))
+        .willReturn(
+          aResponse()
+            .withHeader("Content-Type", "application/json")
+            .withStatus(404),
+        ),
+    )
+  }
+
   companion object {
     private const val WIREMOCK_PORT = 8999
     private const val API_PREFIX = "/api"
