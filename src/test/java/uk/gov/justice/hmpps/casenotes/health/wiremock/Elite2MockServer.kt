@@ -9,6 +9,7 @@ import org.junit.jupiter.api.extension.AfterAllCallback
 import org.junit.jupiter.api.extension.BeforeAllCallback
 import org.junit.jupiter.api.extension.BeforeEachCallback
 import org.junit.jupiter.api.extension.ExtensionContext
+import uk.gov.justice.hmpps.casenotes.integrations.PrisonDetail
 import uk.gov.justice.hmpps.casenotes.legacy.dto.NomisCaseNote
 import uk.gov.justice.hmpps.casenotes.utils.JsonHelper.objectMapper
 import java.time.LocalDateTime
@@ -181,6 +182,29 @@ class Elite2MockServer : WireMockServer(WIREMOCK_PORT) {
             .withHeader("Content-Type", "application/json")
             .withBody(body)
             .withStatus(200),
+        ),
+    )
+  }
+
+  fun stubPrisonSwitch(serviceCode: String = "ALERTS_CASE_NOTES", response: List<PrisonDetail>) {
+    stubFor(
+      get(urlPathMatching("/api/service-prisons/$serviceCode"))
+        .willReturn(
+          aResponse()
+            .withHeader("Content-Type", "application/json")
+            .withBody(objectMapper.writeValueAsString(response))
+            .withStatus(200),
+        ),
+    )
+  }
+
+  fun stubPrisonSwitchNotFound(serviceCode: String = "ALERTS_CASE_NOTES") {
+    stubFor(
+      get(urlPathMatching("/api/service-prisons/$serviceCode"))
+        .willReturn(
+          aResponse()
+            .withHeader("Content-Type", "application/json")
+            .withStatus(404),
         ),
     )
   }

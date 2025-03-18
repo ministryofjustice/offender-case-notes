@@ -1,4 +1,4 @@
-package uk.gov.justice.hmpps.casenotes.alertbackfill
+package uk.gov.justice.hmpps.casenotes.alertnotes
 
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.http.HttpStatus
@@ -9,6 +9,7 @@ import reactor.core.publisher.Mono
 import uk.gov.justice.hmpps.casenotes.integrations.retryOnTransientException
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter.ISO_DATE
+import java.util.UUID
 
 @Service
 class AlertService(@Qualifier("alertsWebClient") private val webClient: WebClient) {
@@ -23,6 +24,18 @@ class AlertService(@Qualifier("alertsWebClient") private val webClient: WebClien
       when (res.statusCode()) {
         HttpStatus.NOT_FOUND -> Mono.empty()
         HttpStatus.OK -> res.bodyToMono<CaseNoteAlertResponse>()
+        else -> res.createError()
+      }
+    }
+    .retryOnTransientException()
+    .block()!!
+
+  fun getAlert(uuid: UUID): Alert = webClient.get()
+    .uri("/alerts/$uuid")
+    .exchangeToMono { res ->
+      when (res.statusCode()) {
+        HttpStatus.NOT_FOUND -> Mono.empty()
+        HttpStatus.OK -> res.bodyToMono<Alert>()
         else -> res.createError()
       }
     }

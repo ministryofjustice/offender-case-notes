@@ -1,9 +1,7 @@
-package uk.gov.justice.hmpps.casenotes.backfill
+package uk.gov.justice.hmpps.casenotes.alertnotes
 
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
-import uk.gov.justice.hmpps.casenotes.alertbackfill.CaseNoteAlert
-import uk.gov.justice.hmpps.casenotes.alertbackfill.CodedDescription
 import java.time.LocalDateTime
 
 class CaseNoteAlertTest {

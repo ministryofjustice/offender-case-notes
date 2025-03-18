@@ -104,7 +104,7 @@ class WebClientConfiguration(
   }
 
   @Bean
-  fun elite2ClientCredentialsWebClient(
+  fun prisonApiWebClient(
     @Qualifier(value = "authorizedClientManagerAppScope") authorizedClientManager: OAuth2AuthorizedClientManager,
     builder: Builder,
   ): WebClient = getOAuthWebClient(authorizedClientManager, builder, elite2ApiBaseUrl)

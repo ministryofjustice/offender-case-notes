@@ -3,10 +3,12 @@ package uk.gov.justice.hmpps.casenotes.controllers
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import com.fasterxml.uuid.Generators
+import com.microsoft.applicationinsights.TelemetryClient
 import org.assertj.core.api.Assertions.assertThat
 import org.awaitility.kotlin.await
 import org.awaitility.kotlin.matches
 import org.awaitility.kotlin.untilCallTo
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
@@ -15,10 +17,12 @@ import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.test.context.ActiveProfiles
+import org.springframework.test.context.bean.override.mockito.MockitoSpyBean
 import org.springframework.test.web.reactive.server.WebTestClient
 import org.springframework.test.web.reactive.server.WebTestClient.RequestBodySpec
+import software.amazon.awssdk.services.sqs.model.PurgeQueueRequest
 import software.amazon.awssdk.services.sqs.model.ReceiveMessageRequest
-import uk.gov.justice.hmpps.casenotes.backfill.AlertsApiExtension
+import uk.gov.justice.hmpps.casenotes.alertnotes.AlertsApiExtension
 import uk.gov.justice.hmpps.casenotes.domain.Amendment
 import uk.gov.justice.hmpps.casenotes.domain.Note
 import uk.gov.justice.hmpps.casenotes.domain.NoteRepository
@@ -71,7 +75,7 @@ abstract class IntegrationTest : BasicIntegrationTest() {
   @Autowired
   internal lateinit var jwtHelper: JwtAuthHelper
 
-  @Autowired
+  @MockitoSpyBean
   internal lateinit var noteRepository: NoteRepository
 
   @Autowired
@@ -79,6 +83,9 @@ abstract class IntegrationTest : BasicIntegrationTest() {
 
   @Autowired
   internal lateinit var hmppsQueueService: HmppsQueueService
+
+  @MockitoSpyBean
+  internal lateinit var telemetryClient: TelemetryClient
 
   internal val hmppsEventsQueue by lazy {
     hmppsQueueService.findByQueueId("hmppseventtestqueue")
@@ -120,6 +127,12 @@ abstract class IntegrationTest : BasicIntegrationTest() {
     return event
   }
 
+  @BeforeEach
+  fun clearQueues() {
+    hmppsEventsQueue.sqsClient.purgeQueue(PurgeQueueRequest.builder().queueUrl(hmppsEventsQueue.queueUrl).build()).get()
+    domainEventsQueue.sqsClient.purgeQueue(PurgeQueueRequest.builder().queueUrl(hmppsEventsQueue.queueUrl).build()).get()
+  }
+
   fun addBearerAuthorisation(user: String, roles: List<String> = listOf()): Consumer<HttpHeaders> {
     val jwt = jwtHelper.createJwt(user, roles = roles)
     return addBearerToken(jwt)
@@ -154,9 +167,9 @@ abstract class IntegrationTest : BasicIntegrationTest() {
     includeRestricted: Boolean = true,
     dpsSelectableOnly: Boolean = false,
   ): List<SubType> = parentTypeRepository.findAllWithParams(
-    includeInactive = true,
-    includeRestricted = true,
-    dpsUserSelectableOnly = false,
+    includeInactive = includeInactive,
+    includeRestricted = includeRestricted,
+    dpsUserSelectableOnly = dpsSelectableOnly,
   ).flatMap { it.getSubtypes() }
 
   fun givenRandomType(active: Boolean? = null, sensitive: Boolean? = null, restricted: Boolean? = null): SubType = getAllTypes().filter {
