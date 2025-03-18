@@ -10,36 +10,44 @@ import java.time.LocalDateTime
 @JsonInclude(JsonInclude.Include.NON_NULL)
 data class CaseNote(
   @JsonProperty("caseNoteId")
-  @Schema(requiredMode = REQUIRED, description = "Case Note Id (unique)", example = "12311312")
+  @Schema(
+    requiredMode = REQUIRED,
+    description = "Case Note Identifier. Will be a UUID for all consumers of the combined dataset but can be numeric for those that have not opted in. See documentation above",
+    example = "518b2200-6489-4c77-8514-10cf80ccd488",
+  )
   val id: String,
 
   @JsonProperty("offenderIdentifier")
-  @Schema(requiredMode = REQUIRED, description = "Offender Unique Identifier", example = "A1234AA")
+  @Schema(
+    requiredMode = REQUIRED,
+    description = "Person identifier. Their assigned prison number also known as prisoner number, offender number, offender id or NOMS id",
+    example = "A1234AA",
+  )
   val personIdentifier: String,
 
-  @Schema(requiredMode = REQUIRED, description = "Case Note Type", example = "KA")
+  @Schema(requiredMode = REQUIRED, description = "The type code categorising the case note", example = "CAB")
   val type: String,
 
-  @Schema(requiredMode = REQUIRED, description = "Case Note Type Description", example = "Key Worker")
+  @Schema(requiredMode = REQUIRED, description = "Description of the case note type", example = "Conduct & Behaviour")
   val typeDescription: String,
 
-  @Schema(requiredMode = REQUIRED, description = "Case Note Sub Type", example = "KS")
+  @Schema(requiredMode = REQUIRED, description = "The sub-type code further categorising the case note", example = "EDUCATION")
   val subType: String,
 
-  @Schema(requiredMode = REQUIRED, description = "Case Note Sub Type Description", example = "Key Worker Session")
+  @Schema(requiredMode = REQUIRED, description = "Description of the case note sub-type", example = "Education")
   val subTypeDescription: String,
 
   @Schema(requiredMode = REQUIRED, deprecated = true, description = "Deprecated for removal", example = "INST|AUTO|OCNS")
   val source: String,
 
   @JsonProperty("creationDateTime")
-  @Schema(requiredMode = REQUIRED, description = "Date and Time of Case Note creation", example = "2017-10-31T01:30:00")
+  @Schema(requiredMode = REQUIRED, description = "Date and time the case note was added", example = "2017-10-31T01:30:00")
   val createdAt: LocalDateTime,
 
   @JsonProperty("occurrenceDateTime")
   @Schema(
     requiredMode = REQUIRED,
-    description = "Date and Time of when case note contact with offender was made",
+    description = "Date and time of the event recorded by this case note e.g. when a member of prison staff interacted with the prisoner. Displayed as 'Happened' in DPS",
     example = "2017-10-31T01:30:00",
   )
   val occurredAt: LocalDateTime,
@@ -49,7 +57,7 @@ data class CaseNote(
 
   @Schema(
     requiredMode = REQUIRED,
-    description = "User Id of case note author - staffId for nomis users, username for auth users",
+    description = "User identifier of case note author - staffId for NOMIS users, username for auth users",
     example = "12345 or USERNAME_12345",
   )
   val authorUserId: String,
@@ -57,10 +65,17 @@ data class CaseNote(
   @Schema(requiredMode = REQUIRED, description = "Username of the case note author", example = "USER1")
   val authorUsername: String,
 
-  @Schema(requiredMode = REQUIRED, description = "Case Note Text", example = "This is some text")
+  @Schema(
+    requiredMode = REQUIRED,
+    description = "The text of the case note only. The text for added amendments is associated with each amendment",
+    example = "This is some text",
+  )
   val text: String,
 
-  @Schema(description = "Location Id representing where Case Note was made.", example = "MDI")
+  @Schema(
+    description = "The prison code the prisoner was resident at or a code indicating their transfer or released status at the time of the case note was added",
+    example = "MDI",
+  )
   val locationId: String? = null,
 
   @Schema(
@@ -71,16 +86,23 @@ data class CaseNote(
   )
   val eventId: Long,
 
-  @Schema(requiredMode = REQUIRED, description = "Sensitive Note", example = "true")
+  @Schema(
+    requiredMode = REQUIRED,
+    description = "Whether the text contains potentially sensitive information. Sensitive notes should only be displayed to users with one of the `POM`, `VIEW_SENSITIVE_CASE_NOTES` or `ADD_SENSITIVE_CASE_NOTES` DPS roles",
+    example = "true",
+  )
   val sensitive: Boolean = false,
 
-  @Schema(requiredMode = REQUIRED, description = "Ordered list of amendments to the case note (oldest first)")
+  @Schema(requiredMode = REQUIRED, description = "Ordered list of amendments added to the case note (oldest first)")
   val amendments: List<CaseNoteAmendment> = listOf(),
 
   @Schema(requiredMode = REQUIRED, description = "Flag to indicate if the case note was system generated or not")
   val systemGenerated: Boolean,
 
-  @Schema(description = "A temporary field that holds the legacy (nomis) id for services that have a dependency on the legacy id")
+  @Schema(
+    description = "The assigned numeric id for the case note. Can be positive or negative. Should only be used temporarily by clients that want to opt into the combined data set but are not fully compatible with UUID case note identifiers",
+    deprecated = true,
+  )
   val legacyId: Long,
 ) {
 
