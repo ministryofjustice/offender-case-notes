@@ -9,7 +9,7 @@ import java.time.LocalDateTime
 @JsonInclude(JsonInclude.Include.NON_NULL)
 data class CaseNoteAmendment(
   @JsonProperty("creationDateTime")
-  @Schema(required = false, description = "Date and Time of Case Note creation", example = "2018-12-01T13:45:00")
+  @Schema(required = false, description = "Date and time the amendment to the case note was added", example = "2018-12-01T13:45:00")
   val createdAt: LocalDateTime?,
 
   @Schema(required = true, description = "Username of the user amending the case note", example = "USER1")
@@ -21,10 +21,10 @@ data class CaseNoteAmendment(
   @Schema(
     required = false,
     example = "12345",
-    description = "User Id of the user amending the case note - staffId for nomis users, userId for auth users",
+    description = "User identifier of the user amending the case note - staffId for NOMIS users, userId for auth users",
   )
   val authorUserId: String?,
 
-  @Schema(required = true, description = "Additional Case Note Information", example = "Some Additional Text")
+  @Schema(required = true, description = "The text of the case note amendment", example = "Some Additional Text")
   val additionalNoteText: String,
 )
