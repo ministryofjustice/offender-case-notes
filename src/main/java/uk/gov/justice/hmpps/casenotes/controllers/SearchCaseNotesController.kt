@@ -33,5 +33,5 @@ class SearchCaseNotesController(private val search: ReadCaseNote) {
     @Parameter(description = "Person Identifier", required = true, example = "A1234AA")
     @PathVariable personIdentifier: String,
     @Valid @RequestBody request: SearchNotesRequest,
-  ): SearchNotesResponse = search.findNotes(personIdentifier, request)
+  ): SearchNotesResponse = search.findNotes(personIdentifier.uppercase(), request)
 }

@@ -72,9 +72,9 @@ class CaseNoteController(
     @PathVariable caseNoteIdentifier: String,
     @RequestHeader(CaseloadIdHeader.NAME) caseloadId: String? = null,
   ): CaseNote = if ((serviceConfig.switchesPathFor(caseloadId)) || securityUserContext.hasAnyRole(ROLE_CASE_NOTES_SYNC)) {
-    find.caseNote(personIdentifier, caseNoteIdentifier)
+    find.caseNote(personIdentifier.uppercase(), caseNoteIdentifier)
   } else {
-    caseNoteService.getCaseNote(personIdentifier, caseNoteIdentifier)
+    caseNoteService.getCaseNote(personIdentifier.uppercase(), caseNoteIdentifier)
   }
 
   @Tag(name = RO_OPERATIONS)
@@ -92,9 +92,9 @@ class CaseNoteController(
     @PageableDefault(sort = ["occurrenceDateTime"], direction = Sort.Direction.DESC) pageable: Pageable,
     @RequestHeader(CaseloadIdHeader.NAME) caseloadId: String? = null,
   ): Page<CaseNote> = if (serviceConfig.switchesPathFor(caseloadId)) {
-    find.caseNotes(personIdentifier, filter, pageable)
+    find.caseNotes(personIdentifier.uppercase(), filter, pageable)
   } else {
-    caseNoteService.getCaseNotes(personIdentifier, filter, pageable)
+    caseNoteService.getCaseNotes(personIdentifier.uppercase(), filter, pageable)
   }
 
   @Tag(name = RW_OPERATIONS)
@@ -134,14 +134,14 @@ class CaseNoteController(
     @RequestHeader(required = false, value = CaseloadIdHeader.NAME) caseloadId: String? = null,
   ): CaseNote {
     val request = if (createCaseNote.locationId == null) {
-      createCaseNote.copy(locationId = search.getPrisonerDetails(personIdentifier).prisonId)
+      createCaseNote.copy(locationId = search.getPrisonerDetails(personIdentifier.uppercase()).prisonId)
     } else {
       createCaseNote
     }
     val caseNote = if (serviceConfig.switchesPathFor(caseloadId)) {
-      save.createNote(personIdentifier, request)
+      save.createNote(personIdentifier.uppercase(), request)
     } else {
-      caseNoteService.createCaseNote(personIdentifier, request)
+      caseNoteService.createCaseNote(personIdentifier.uppercase(), request)
     }
     caseNoteEventPusher.sendEvent(caseNote)
     return caseNote
@@ -177,9 +177,9 @@ class CaseNoteController(
     @RequestHeader(required = false, value = CaseloadIdHeader.NAME) caseloadId: String? = null,
   ): CaseNote {
     val caseNote = if (serviceConfig.switchesPathFor(caseloadId)) {
-      save.createAmendment(personIdentifier, caseNoteIdentifier, amendedText)
+      save.createAmendment(personIdentifier.uppercase(), caseNoteIdentifier, amendedText)
     } else {
-      caseNoteService.amendCaseNote(personIdentifier, caseNoteIdentifier, amendedText)
+      caseNoteService.amendCaseNote(personIdentifier.uppercase(), caseNoteIdentifier, amendedText)
     }
     caseNoteEventPusher.sendEvent(caseNote)
     return caseNote
@@ -202,5 +202,5 @@ class CaseNoteController(
     @PathVariable personIdentifier: String,
     @Parameter(description = "Case Note Id", required = true, example = "518b2200-6489-4c77-8514-10cf80ccd488")
     @PathVariable caseNoteId: String,
-  ) = save.deleteNote(personIdentifier, caseNoteId)
+  ) = save.deleteNote(personIdentifier.uppercase(), caseNoteId)
 }

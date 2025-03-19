@@ -355,12 +355,12 @@ fun NoteRepository.saveAndRefresh(note: Note): Note {
 }
 
 fun matchesPersonIdentifier(prisonNumber: String) = Specification<Note> { cn, _, cb ->
-  cb.equal(cb.lower(cn[PERSON_IDENTIFIER]), prisonNumber.lowercase())
+  cb.equal(cn.get<String>(PERSON_IDENTIFIER), prisonNumber)
 }
 
-fun matchesLocationId(locationId: String) = Specification<Note> { cn, _, cb -> cb.equal(cb.lower(cn[LOCATION_ID]), locationId.lowercase()) }
+fun matchesLocationId(locationId: String) = Specification<Note> { cn, _, cb -> cb.equal(cn.get<String>(LOCATION_ID), locationId) }
 
-fun matchesAuthorUsername(authorUsername: String) = Specification<Note> { cn, _, cb -> cb.equal(cb.lower(cn[AUTHOR_USERNAME]), authorUsername.lowercase()) }
+fun matchesAuthorUsername(authorUsername: String) = Specification<Note> { cn, _, cb -> cb.equal(cn.get<String>(AUTHOR_USERNAME), authorUsername) }
 
 fun occurredBefore(to: LocalDateTime) = Specification<Note> { csip, _, cb -> cb.lessThanOrEqualTo(csip[OCCURRED_AT], to) }
 
