@@ -237,7 +237,7 @@ interface NoteRepository :
             max(n.createdAt)    as latestAt
         from Note n
         join n.subType st
-        where lower(n.personIdentifier) in :personIdentifiers 
+        where n.personIdentifier in :personIdentifiers 
         and (st.type.code in :typeCodes or st.key in :typeKeys)
         and (cast(:createdBefore as timestamp) is null or n.createdAt <= :createdBefore) 
         and (cast(:createdAfter as timestamp) is null or n.createdAt >= :createdAfter)
@@ -266,7 +266,7 @@ interface NoteRepository :
             max(n.occurredAt)   as latestAt
         from Note n
         join n.subType st
-        where lower(n.personIdentifier) in :personIdentifiers 
+        where n.personIdentifier in :personIdentifiers 
         and (st.type.code in :typeCodes or st.key in :typeKeys)
         and (cast(:occurredBefore as timestamp) is null or n.occurredAt <= :occurredBefore) 
         and (cast(:occurredAfter as timestamp) is null or n.occurredAt >= :occurredAfter)

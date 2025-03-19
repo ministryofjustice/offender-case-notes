@@ -68,7 +68,7 @@ class ReadCaseNote(
     val (typeCodes, typeKeys) = request.allTypeKeys()
     val usage = when (request.dateType) {
       OCCURRED_AT -> noteRepository.findUsageByPersonIdentifierOccurredAt(
-        request.personIdentifiers.map { it.lowercase() }.toSet(),
+        request.personIdentifiers.toSet(),
         typeCodes,
         typeKeys,
         request.from,
@@ -78,7 +78,7 @@ class ReadCaseNote(
       )
 
       CREATED_AT -> noteRepository.findUsageByPersonIdentifierCreatedAt(
-        request.personIdentifiers.map { it.lowercase() }.toSet(),
+        request.personIdentifiers.toSet(),
         typeCodes,
         typeKeys,
         request.from,
