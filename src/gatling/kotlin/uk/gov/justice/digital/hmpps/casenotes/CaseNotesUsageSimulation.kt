@@ -19,7 +19,6 @@ class CaseNotesUsageSimulation : Simulation() {
 
   private val personIdentifiers = csv("person-identifiers-${getenv("ENVIRONMENT_NAME")}.csv").random()
   private val authorIds = csv("author-ids-${getenv("ENVIRONMENT_NAME")}.csv").random()
-  private val prisonCodes = csv("prison-codes-${getenv("ENVIRONMENT_NAME")}.csv").random()
   private val kwType = "KA"
   private val kwSubType = "KS"
 
