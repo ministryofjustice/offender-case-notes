@@ -69,8 +69,8 @@ class SystemGeneratedController(
     @Valid @RequestBody request: SystemGeneratedRequest,
   ): CaseNote {
     setContext()
-    val create = if (request.locationId == null) request.copy(locationId = search.getPrisonerDetails(personIdentifier).prisonId) else request
-    return save.systemGeneratedCaseNote(personIdentifier, create).also { eventPusher.sendEvent(it) }
+    val create = if (request.locationId == null) request.copy(locationId = search.getPrisonerDetails(personIdentifier.uppercase()).prisonId) else request
+    return save.systemGeneratedCaseNote(personIdentifier.uppercase(), create).also { eventPusher.sendEvent(it) }
   }
 
   private fun setContext() {
