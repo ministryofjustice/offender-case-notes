@@ -42,14 +42,12 @@
          <index name="idx_case_note_author_username" unique="false">
             <column ascending="true" name="author_username"/>
          </index>
-         <index name="idx_case_note_author_username_lower" unique="false"/>
          <index name="idx_case_note_created_at" unique="false">
             <column ascending="true" name="created_at"/>
          </index>
          <index name="idx_case_note_location_id" unique="false">
             <column ascending="true" name="location_id"/>
          </index>
-         <index name="idx_case_note_location_id_lower" unique="false"/>
          <index name="idx_case_note_occurred_at_location_id" unique="false">
             <column ascending="true" name="occurred_at"/>
             <column ascending="true" name="location_id"/>
@@ -57,16 +55,17 @@
          <index name="idx_case_note_person_identifier" unique="false">
             <column ascending="true" name="person_identifier"/>
          </index>
-         <index name="idx_case_note_person_identifier_lower" unique="false"/>
          <index name="idx_case_note_sub_type_id" unique="false">
             <column ascending="true" name="sub_type_id"/>
          </index>
-         <index name="idx_person_identifier_sub_type_created_at_location" unique="false">
+         <index name="idx_person_identifier_sub_type_id_created_at_location_id" unique="false">
+            <column ascending="true" name="person_identifier"/>
             <column ascending="true" name="sub_type_id"/>
             <column ascending="true" name="created_at"/>
             <column ascending="true" name="location_id"/>
          </index>
-         <index name="idx_person_identifier_sub_type_occurred_at_location" unique="false">
+         <index name="idx_person_identifier_sub_type_id_occurred_at_location_id" unique="false">
+            <column ascending="true" name="person_identifier"/>
             <column ascending="true" name="sub_type_id"/>
             <column ascending="true" name="occurred_at"/>
             <column ascending="true" name="location_id"/>

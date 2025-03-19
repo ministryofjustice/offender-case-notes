@@ -424,12 +424,6 @@
                                     <td>author_username</td>
                                 </tr>
                                 <tr>
-                                    <td title='Indexed'>idx_case_note_author_username_lower</td>
-                                    <td>Performance</td>
-                                    <td></td>
-                                    <td></td>
-                                </tr>
-                                <tr>
                                     <td title='Indexed'>idx_case_note_created_at</td>
                                     <td>Performance</td>
                                     <td><span title='Ascending'>Asc</span></td>
@@ -440,12 +434,6 @@
                                     <td>Performance</td>
                                     <td><span title='Ascending'>Asc</span></td>
                                     <td>location_id</td>
-                                </tr>
-                                <tr>
-                                    <td title='Indexed'>idx_case_note_location_id_lower</td>
-                                    <td>Performance</td>
-                                    <td></td>
-                                    <td></td>
                                 </tr>
                                 <tr>
                                     <td title='Indexed'>idx_case_note_occurred_at_location_id</td>
@@ -460,28 +448,22 @@
                                     <td>person_identifier</td>
                                 </tr>
                                 <tr>
-                                    <td title='Indexed'>idx_case_note_person_identifier_lower</td>
-                                    <td>Performance</td>
-                                    <td></td>
-                                    <td></td>
-                                </tr>
-                                <tr>
                                     <td title='Indexed'>idx_case_note_sub_type_id</td>
                                     <td>Performance</td>
                                     <td><span title='Ascending'>Asc</span></td>
                                     <td>sub_type_id</td>
                                 </tr>
                                 <tr>
-                                    <td title='Indexed'>idx_person_identifier_sub_type_created_at_location</td>
+                                    <td title='Indexed'>idx_person_identifier_sub_type_id_created_at_location_id</td>
                                     <td>Performance</td>
-                                    <td><span title='Ascending'>Asc</span>/<span title='Ascending'>Asc</span>/<span title='Ascending'>Asc</span></td>
-                                    <td>sub_type_id + created_at + location_id</td>
+                                    <td><span title='Ascending'>Asc</span>/<span title='Ascending'>Asc</span>/<span title='Ascending'>Asc</span>/<span title='Ascending'>Asc</span></td>
+                                    <td>person_identifier + sub_type_id + created_at + location_id</td>
                                 </tr>
                                 <tr>
-                                    <td title='Indexed'>idx_person_identifier_sub_type_occurred_at_location</td>
+                                    <td title='Indexed'>idx_person_identifier_sub_type_id_occurred_at_location_id</td>
                                     <td>Performance</td>
-                                    <td><span title='Ascending'>Asc</span>/<span title='Ascending'>Asc</span>/<span title='Ascending'>Asc</span></td>
-                                    <td>sub_type_id + occurred_at + location_id</td>
+                                    <td><span title='Ascending'>Asc</span>/<span title='Ascending'>Asc</span>/<span title='Ascending'>Asc</span>/<span title='Ascending'>Asc</span></td>
+                                    <td>person_identifier + sub_type_id + occurred_at + location_id</td>
                                 </tr>
                                 <tr>
                                     <td class='uniqueKey' title='Unique Key'><i class='icon ion-key iconkey'></i> unq_legacy_id</td>
