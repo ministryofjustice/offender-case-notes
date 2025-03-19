@@ -79,7 +79,7 @@ class SubjectAccessRequestController(private val sar: SubjectAccessRequest) {
     @RequestParam(value = "toDate")
     toDate: LocalDate?,
   ): ResponseEntity<SubjectAccessResponse> = prn?.let {
-    sar.getSarContent(prn, fromDate, toDate)?.let { ResponseEntity.ok(it) }
+    sar.getSarContent(prn.uppercase(), fromDate, toDate)?.let { ResponseEntity.ok(it) }
       ?: ResponseEntity.status(HttpStatus.NO_CONTENT).build()
   } ?: ResponseEntity.status(209).build()
 }

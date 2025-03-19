@@ -39,11 +39,12 @@ class ReadCaseNotesIntTest : IntegrationTest() {
   @Test
   fun `can filter case notes by author name`() {
     val prisonNumber = personIdentifier()
-    val caseNote = givenCaseNote(generateCaseNote(prisonNumber, authorUsername = "AuCn2"))
+    val authorUsername = "AUCN2"
+    val caseNote = givenCaseNote(generateCaseNote(prisonNumber, authorUsername = authorUsername))
     givenCaseNote(generateCaseNote(prisonNumber, authorUsername = "AuCn1"))
     assertThat(getCaseNotes(prisonNumber).page().totalElements).isEqualTo(2)
 
-    val response = getCaseNotes(prisonNumber, mapOf("authorUsername" to "AUCN2")).page()
+    val response = getCaseNotes(prisonNumber, mapOf("authorUsername" to authorUsername)).page()
     assertThat(response.totalElements).isEqualTo(1)
     val first = response.content.first()
     first.verifyAgainst(caseNote)
@@ -52,11 +53,12 @@ class ReadCaseNotesIntTest : IntegrationTest() {
   @Test
   fun `can filter case notes by location id`() {
     val prisonNumber = personIdentifier()
-    val caseNote = givenCaseNote(generateCaseNote(prisonNumber, locationId = "SWI"))
+    val locationId = "SWI"
+    val caseNote = givenCaseNote(generateCaseNote(prisonNumber, locationId = locationId))
     givenCaseNote(generateCaseNote(prisonNumber, locationId = "LEI"))
     assertThat(getCaseNotes(prisonNumber).page().totalElements).isEqualTo(2)
 
-    val response = getCaseNotes(prisonNumber, mapOf("locationId" to "Swi")).page()
+    val response = getCaseNotes(prisonNumber, mapOf("locationId" to locationId)).page()
     assertThat(response.totalElements).isEqualTo(1)
     val first = response.content.first()
     first.verifyAgainst(caseNote)
