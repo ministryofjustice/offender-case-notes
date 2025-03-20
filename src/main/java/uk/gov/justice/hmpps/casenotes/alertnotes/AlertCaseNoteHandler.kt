@@ -6,7 +6,6 @@ import uk.gov.justice.hmpps.casenotes.alertnotes.ActiveInactive.INACTIVE
 import uk.gov.justice.hmpps.casenotes.alertnotes.AlertCaseNoteReconciliation.Companion.TYPE
 import uk.gov.justice.hmpps.casenotes.domain.Note
 import uk.gov.justice.hmpps.casenotes.domain.NoteRepository
-import uk.gov.justice.hmpps.casenotes.domain.SubType
 import uk.gov.justice.hmpps.casenotes.domain.SubTypeRepository
 import uk.gov.justice.hmpps.casenotes.domain.System
 import uk.gov.justice.hmpps.casenotes.domain.TypeKey
@@ -30,40 +29,44 @@ class AlertCaseNoteHandler(
   private val noteRepository: NoteRepository,
 ) {
   fun handleAlertCreated(domainEvent: DomainEvent<AlertAdditionalInformation>) {
-    val alert = alertsService.getAlert(domainEvent.additionalInformation.alertUuid)
-    val prisonCode = prisonerSearchService.getPrisonerDetails(alert.prisonNumber).prisonId
+    val (alert, prisonCode) = domainEvent.alertAndLocation()
     if (!prisonApiService.alertCaseNotesFor(prisonCode)) return
 
     val userDetail = manageUsersService.getUserDetails(alert.createdBy)
-    val subType = checkNotNull(subTypeRepository.findByKey(TypeKey(TYPE, ACTIVE.name)))
-    noteRepository.save(alert.toNote(prisonCode, ACTIVE, subType, userDetail, null))
+    noteRepository.save(alert.toNote(prisonCode, userDetail, alert.createdAt))
   }
 
   fun handleAlertInactive(domainEvent: DomainEvent<AlertAdditionalInformation>) {
-    val alert = alertsService.getAlert(domainEvent.additionalInformation.alertUuid)
-    val prisonCode = prisonerSearchService.getPrisonerDetails(alert.prisonNumber).prisonId
+    val (alert, prisonCode) = domainEvent.alertAndLocation()
     if (!prisonApiService.alertCaseNotesFor(prisonCode)) return
 
     val username = alert.inactiveUsername()
     val userDetail = username?.let { manageUsersService.getUserDetails(it) }
-    val subType = checkNotNull(subTypeRepository.findByKey(TypeKey(TYPE, INACTIVE.name)))
-    noteRepository.save(alert.toNote(prisonCode, INACTIVE, subType, userDetail, domainEvent.occurredAt.toLocalDateTime()))
+    noteRepository.save(
+      alert.toNote(prisonCode, userDetail, domainEvent.occurredAt.toLocalDateTime()),
+    )
+  }
+
+  private fun DomainEvent<AlertAdditionalInformation>.alertAndLocation(): Pair<Alert, String> {
+    val alert = alertsService.getAlert(additionalInformation.alertUuid)
+    val prisonCode = prisonerSearchService.getPrisonerDetails(alert.prisonNumber).prisonId
+    return alert to prisonCode
   }
 
   data class AlertAdditionalInformation(
     val alertUuid: UUID,
   ) : AdditionalInformation
 
+  fun Alert.activeInactive() = if (isActive) ACTIVE else INACTIVE
+
   fun Alert.toNote(
     prisonCode: String,
-    activeInactive: ActiveInactive,
-    subType: SubType,
     userDetails: UserDetails?,
     madeInactiveAt: LocalDateTime?,
   ) = Note(
     prisonNumber,
-    subType,
-    when (activeInactive) {
+    checkNotNull(subTypeRepository.findByKey(TypeKey(TYPE, activeInactive().name))),
+    when (activeInactive()) {
       ACTIVE -> activeFrom.atStartOfDay()
       INACTIVE -> requireNotNull(activeTo).atStartOfDay()
     },
@@ -71,7 +74,7 @@ class AlertCaseNoteHandler(
     userDetails?.username ?: "OMS_OWNER",
     userDetails?.userId ?: "1",
     userDetails?.name ?: "System Generated",
-    when (activeInactive) {
+    when (activeInactive()) {
       ACTIVE -> activeText()
       INACTIVE -> inactiveText()
     },
@@ -80,7 +83,7 @@ class AlertCaseNoteHandler(
   ).apply {
     legacyId = noteRepository.getNextLegacyId()
     createdBy = userDetails?.username ?: "OMS_OWNER"
-    this.createdAt = when (activeInactive) {
+    this.createdAt = when (activeInactive()) {
       ACTIVE -> this@toNote.createdAt.truncatedTo(SECONDS)
       INACTIVE -> checkNotNull(madeInactiveAt)
     }
