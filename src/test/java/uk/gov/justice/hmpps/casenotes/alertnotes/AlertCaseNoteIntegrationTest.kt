@@ -12,12 +12,14 @@ import uk.gov.justice.hmpps.casenotes.alertnotes.ActiveInactive.ACTIVE
 import uk.gov.justice.hmpps.casenotes.alertnotes.ActiveInactive.INACTIVE
 import uk.gov.justice.hmpps.casenotes.alertnotes.AlertCaseNoteHandler.AlertAdditionalInformation
 import uk.gov.justice.hmpps.casenotes.alertnotes.AlertsApiExtension.Companion.alertsApi
+import uk.gov.justice.hmpps.casenotes.config.Source
 import uk.gov.justice.hmpps.casenotes.controllers.IntegrationTest
 import uk.gov.justice.hmpps.casenotes.domain.IdGenerator.newUuid
 import uk.gov.justice.hmpps.casenotes.domain.Note
 import uk.gov.justice.hmpps.casenotes.events.DomainEvent
 import uk.gov.justice.hmpps.casenotes.events.DomainEventListener.Companion.ALERT_CREATED
 import uk.gov.justice.hmpps.casenotes.events.DomainEventListener.Companion.ALERT_INACTIVE
+import uk.gov.justice.hmpps.casenotes.events.PersonCaseNoteEvent
 import uk.gov.justice.hmpps.casenotes.events.PersonReference
 import uk.gov.justice.hmpps.casenotes.health.wiremock.Elite2Extension.Companion.elite2Api
 import uk.gov.justice.hmpps.casenotes.health.wiremock.ManageUsersApiExtension.Companion.manageUsersApi
@@ -25,6 +27,7 @@ import uk.gov.justice.hmpps.casenotes.health.wiremock.PrisonerSearchApiExtension
 import uk.gov.justice.hmpps.casenotes.integrations.PrisonDetail
 import uk.gov.justice.hmpps.casenotes.integrations.UserDetails
 import uk.gov.justice.hmpps.casenotes.utils.NomisIdGenerator.personIdentifier
+import uk.gov.justice.hmpps.casenotes.utils.verifyAgainst
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.ZoneId
@@ -81,6 +84,8 @@ class AlertCaseNoteIntegrationTest : IntegrationTest() {
     }
 
     caseNote.verifyAgainst(alert, userDetails, null)
+
+    hmppsEventsQueue.receivePersonCaseNoteEvent().verifyAgainst(PersonCaseNoteEvent.Type.CREATED, Source.DPS, caseNote)
   }
 
   @Test
@@ -107,6 +112,8 @@ class AlertCaseNoteIntegrationTest : IntegrationTest() {
     }
 
     caseNote.verifyAgainst(alert, userDetails, null)
+
+    hmppsEventsQueue.receivePersonCaseNoteEvent().verifyAgainst(PersonCaseNoteEvent.Type.CREATED, Source.DPS, caseNote)
   }
 
   @Test
@@ -133,6 +140,8 @@ class AlertCaseNoteIntegrationTest : IntegrationTest() {
     }
 
     caseNote.verifyAgainst(alert, userDetails, alert.createdAt)
+
+    hmppsEventsQueue.receivePersonCaseNoteEvent().verifyAgainst(PersonCaseNoteEvent.Type.CREATED, Source.DPS, caseNote)
   }
 
   @Test
@@ -171,6 +180,8 @@ class AlertCaseNoteIntegrationTest : IntegrationTest() {
     }
 
     caseNote.verifyAgainst(alert, userDetails, event.occurredAt.toLocalDateTime())
+
+    hmppsEventsQueue.receivePersonCaseNoteEvent().verifyAgainst(PersonCaseNoteEvent.Type.CREATED, Source.DPS, caseNote)
   }
 
   @Test
@@ -200,6 +211,8 @@ class AlertCaseNoteIntegrationTest : IntegrationTest() {
     }
 
     caseNote.verifyAgainst(alert, userDetails, event.occurredAt.toLocalDateTime())
+
+    hmppsEventsQueue.receivePersonCaseNoteEvent().verifyAgainst(PersonCaseNoteEvent.Type.CREATED, Source.DPS, caseNote)
   }
 
   @Test
@@ -225,6 +238,8 @@ class AlertCaseNoteIntegrationTest : IntegrationTest() {
       UserDetails("OMS_OWNER", true, "System Generated", "nomis", null, "1", null),
       event.occurredAt.toLocalDateTime(),
     )
+
+    hmppsEventsQueue.receivePersonCaseNoteEvent().verifyAgainst(PersonCaseNoteEvent.Type.CREATED, Source.DPS, caseNote)
   }
 }
 

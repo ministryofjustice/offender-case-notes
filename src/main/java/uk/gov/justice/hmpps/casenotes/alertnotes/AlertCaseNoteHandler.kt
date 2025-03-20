@@ -1,9 +1,12 @@
 package uk.gov.justice.hmpps.casenotes.alertnotes
 
+import org.springframework.context.ApplicationEventPublisher
 import org.springframework.stereotype.Component
+import org.springframework.transaction.annotation.Transactional
 import uk.gov.justice.hmpps.casenotes.alertnotes.ActiveInactive.ACTIVE
 import uk.gov.justice.hmpps.casenotes.alertnotes.ActiveInactive.INACTIVE
 import uk.gov.justice.hmpps.casenotes.alertnotes.AlertCaseNoteReconciliation.Companion.TYPE
+import uk.gov.justice.hmpps.casenotes.config.Source
 import uk.gov.justice.hmpps.casenotes.domain.Note
 import uk.gov.justice.hmpps.casenotes.domain.NoteRepository
 import uk.gov.justice.hmpps.casenotes.domain.SubTypeRepository
@@ -11,6 +14,8 @@ import uk.gov.justice.hmpps.casenotes.domain.System
 import uk.gov.justice.hmpps.casenotes.domain.TypeKey
 import uk.gov.justice.hmpps.casenotes.events.AdditionalInformation
 import uk.gov.justice.hmpps.casenotes.events.DomainEvent
+import uk.gov.justice.hmpps.casenotes.events.PersonCaseNoteEvent.Companion.createEvent
+import uk.gov.justice.hmpps.casenotes.events.PersonCaseNoteEvent.Type.CREATED
 import uk.gov.justice.hmpps.casenotes.integrations.ManageUsersService
 import uk.gov.justice.hmpps.casenotes.integrations.PrisonApiService
 import uk.gov.justice.hmpps.casenotes.integrations.PrisonerSearchService
@@ -19,6 +24,7 @@ import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit.SECONDS
 import java.util.UUID
 
+@Transactional
 @Component
 class AlertCaseNoteHandler(
   private val alertsService: AlertService,
@@ -27,13 +33,15 @@ class AlertCaseNoteHandler(
   private val manageUsersService: ManageUsersService,
   private val subTypeRepository: SubTypeRepository,
   private val noteRepository: NoteRepository,
+  private val eventPublisher: ApplicationEventPublisher,
 ) {
   fun handleAlertCreated(domainEvent: DomainEvent<AlertAdditionalInformation>) {
     val (alert, prisonCode) = domainEvent.alertAndLocation()
     if (!prisonApiService.alertCaseNotesFor(prisonCode)) return
 
     val userDetail = manageUsersService.getUserDetails(alert.createdBy)
-    noteRepository.save(alert.toNote(prisonCode, userDetail, alert.createdAt))
+    val saved = noteRepository.save(alert.toNote(prisonCode, userDetail, alert.createdAt))
+    eventPublisher.publishEvent(saved.createEvent(CREATED, sourceOverride = Source.DPS))
   }
 
   fun handleAlertInactive(domainEvent: DomainEvent<AlertAdditionalInformation>) {
@@ -42,9 +50,8 @@ class AlertCaseNoteHandler(
 
     val username = alert.inactiveUsername()
     val userDetail = username?.let { manageUsersService.getUserDetails(it) }
-    noteRepository.save(
-      alert.toNote(prisonCode, userDetail, domainEvent.occurredAt.toLocalDateTime()),
-    )
+    val saved = noteRepository.save(alert.toNote(prisonCode, userDetail, domainEvent.occurredAt.toLocalDateTime()))
+    eventPublisher.publishEvent(saved.createEvent(CREATED, sourceOverride = Source.DPS))
   }
 
   private fun DomainEvent<AlertAdditionalInformation>.alertAndLocation(): Pair<Alert, String> {
