@@ -127,7 +127,7 @@
          <checkConstraint constraint="(((cause)::text = ANY ((ARRAY['DELETE'::character varying, 'UPDATE'::character varying, 'MERGE'::character varying, 'MOVE'::character varying])::text[])))" name="check_cause"/>
          <checkConstraint constraint="(((system)::text = ANY ((ARRAY['DPS'::character varying, 'NOMIS'::character varying])::text[])))" name="check_source"/>
       </table>
-      <table name="case_note_sub_type" numRows="386" remarks="Second level categorisation of case notes grouped by type" schema="public" type="TABLE">
+      <table name="case_note_sub_type" numRows="400" remarks="Second level categorisation of case notes grouped by type" schema="public" type="TABLE">
          <column autoUpdated="true" defaultValue="nextval('case_note_sub_type_id_seq'::regclass)" digits="0" id="0" name="id" nullable="false" remarks="Internal primary key. Not returned by API" size="10" type="serial" typeCode="4">
             <child column="sub_type_id" foreignKey="fk_case_note_sub_type_id" implied="false" onDeleteCascade="false" schema="public" table="case_note"/>
          </column>
@@ -159,7 +159,7 @@
             <column ascending="true" name="code"/>
          </index>
       </table>
-      <table name="case_note_type" remarks="First level categorisation of case notes" schema="public" type="TABLE">
+      <table name="case_note_type" numRows="65" remarks="First level categorisation of case notes" schema="public" type="TABLE">
          <column autoUpdated="false" defaultValue="null" digits="0" id="0" name="code" nullable="false" remarks="Public primary key and the short code for the case note type" size="12" type="varchar" typeCode="12">
             <child column="code" foreignKey="Implied Constraint" implied="true" onDeleteCascade="false" schema="public" table="case_note_sub_type"/>
             <child column="type_code" foreignKey="case_note_sub_type_type_code" implied="false" onDeleteCascade="false" schema="public" table="case_note_sub_type"/>
