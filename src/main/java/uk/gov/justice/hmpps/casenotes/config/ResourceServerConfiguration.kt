@@ -29,6 +29,7 @@ class ResourceServerConfiguration(private val tokenVerifyingAuthManager: TokenVe
           "/swagger-resources", "/swagger-resources/configuration/ui", "/swagger-resources/configuration/security",
           "/queue-admin/retry-all-dlqs", "/ping",
           "/resend-person-case-note-events",
+          "/case-notes/alerts/reconciliation",
         ).forEach { authorize(it, permitAll) }
         authorize(anyRequest, authenticated)
       }

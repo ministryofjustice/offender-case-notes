@@ -39,8 +39,20 @@ class AlertsApiExtension :
 class AlertsApiServer : WireMockServer(WIREMOCK_PORT) {
   private val mapper = JsonHelper.objectMapper
 
-  fun withAlerts(prisonNumber: String, from: LocalDate, to: LocalDate, response: CaseNoteAlertResponse): StubMapping = stubFor(
-    get(urlPathMatching("/alerts/case-notes/$prisonNumber"))
+  fun withPersonIdentifiers(from: LocalDate, to: LocalDate, vararg prisonNumbers: String): StubMapping = stubFor(
+    get(urlPathMatching("/alerts/case-notes/changed"))
+      .withQueryParam("from", equalTo(ISO_DATE.format(from)))
+      .withQueryParam("to", equalTo(ISO_DATE.format(to)))
+      .willReturn(
+        aResponse()
+          .withHeader("Content-Type", "application/json")
+          .withBody(mapper.writeValueAsString(PersonIdentifiersOfInterest(prisonNumbers.toSet())))
+          .withStatus(200),
+      ),
+  )
+
+  fun withAlerts(personIdentifier: String, from: LocalDate, to: LocalDate, response: CaseNoteAlertResponse): StubMapping = stubFor(
+    get(urlPathMatching("/alerts/case-notes/$personIdentifier"))
       .withQueryParam("from", equalTo(ISO_DATE.format(from)))
       .withQueryParam("to", equalTo(ISO_DATE.format(to)))
       .willReturn(
