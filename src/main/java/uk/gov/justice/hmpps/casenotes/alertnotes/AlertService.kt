@@ -13,6 +13,18 @@ import java.util.UUID
 
 @Service
 class AlertService(@Qualifier("alertsWebClient") private val webClient: WebClient) {
+  fun getPrisonNumbersOfInterest(from: LocalDate, to: LocalDate): PersonIdentifiersOfInterest = webClient.get()
+    .uri {
+      it.path("/alerts/case-notes/changed")
+      it.queryParam("from", ISO_DATE.format(from))
+      it.queryParam("to", ISO_DATE.format(to))
+      it.build()
+    }
+    .retrieve()
+    .bodyToMono<PersonIdentifiersOfInterest>()
+    .retryOnTransientException()
+    .block()!!
+
   fun getAlertsOfInterest(personIdentifier: String, from: LocalDate, to: LocalDate): CaseNoteAlertResponse = webClient.get()
     .uri {
       it.path("/alerts/case-notes/{personIdentifier}")

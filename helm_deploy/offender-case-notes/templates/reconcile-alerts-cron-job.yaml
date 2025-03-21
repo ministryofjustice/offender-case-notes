@@ -1,0 +1,24 @@
+{{- if .Values.reconcile_alerts.schedule -}}
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: reconcile-alert-case-notes
+spec:
+  schedule: {{ .Values.reconcile_alerts.schedule }}
+  concurrencyPolicy: Forbid
+  failedJobsHistoryLimit: 3
+  startingDeadlineSeconds: 120
+  successfulJobsHistoryLimit: 1
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+            - name: reconcile-alert-case-notes
+              image: ghcr.io/ministryofjustice/hmpps-devops-tools
+              args:
+                - /bin/sh
+                - -c
+                - curl -XPOST --connect-timeout 5 --max-time 10 --retry 3 --retry-delay 50 http://{{ include "generic-service.fullname" . }}/case-notes/alerts/reconciliation
+          restartPolicy: Never
+  {{- end}}

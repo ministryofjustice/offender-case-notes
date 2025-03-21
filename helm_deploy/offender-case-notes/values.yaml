@@ -32,6 +32,10 @@ generic-service:
           deny all;
           return 401;
         }
+        location /case-notes/alerts/reconciliation {
+          deny all;
+          return 401;
+        }
     tlsSecretName: offender-case-notes-cert
 
   serviceAccountName: offender-case-notes
@@ -80,4 +84,7 @@ generic-service:
 generic-prometheus-alerts:
   targetApplication: offender-case-notes
   applicationCronJobStatusFailedWindowMinutes: 120
+
+reconcile_alerts:
+  schedule: "0 6 * * *"
 
