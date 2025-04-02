@@ -244,7 +244,8 @@ class AlertCaseNoteIntegrationTest : IntegrationTest() {
 }
 
 fun Alert.domainEvent(eventName: String): DomainEvent<AlertAdditionalInformation> = DomainEvent(
-  occurredAt = activeToLastSetAt?.atZone(ZoneId.systemDefault()) ?: ZonedDateTime.now(),
+  occurredAt = activeToLastSetAt?.atZone(ZoneId.systemDefault())
+    ?: ZonedDateTime.now().withZoneSameInstant(ZoneId.systemDefault()),
   eventName,
   null,
   "An alert was created or made inactive",
