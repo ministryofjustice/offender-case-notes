@@ -12,6 +12,7 @@ import uk.gov.justice.hmpps.casenotes.alertnotes.ActiveInactive.ACTIVE
 import uk.gov.justice.hmpps.casenotes.alertnotes.ActiveInactive.INACTIVE
 import uk.gov.justice.hmpps.casenotes.alertnotes.AlertCaseNoteHandler.AlertAdditionalInformation
 import uk.gov.justice.hmpps.casenotes.alertnotes.AlertsApiExtension.Companion.alertsApi
+import uk.gov.justice.hmpps.casenotes.config.EuropeLondon
 import uk.gov.justice.hmpps.casenotes.config.Source
 import uk.gov.justice.hmpps.casenotes.controllers.IntegrationTest
 import uk.gov.justice.hmpps.casenotes.domain.IdGenerator.newUuid
@@ -244,8 +245,7 @@ class AlertCaseNoteIntegrationTest : IntegrationTest() {
 }
 
 fun Alert.domainEvent(eventName: String): DomainEvent<AlertAdditionalInformation> = DomainEvent(
-  occurredAt = activeToLastSetAt?.atZone(ZoneId.systemDefault())
-    ?: ZonedDateTime.now().withZoneSameInstant(ZoneId.systemDefault()),
+  occurredAt = activeToLastSetAt?.atZone(EuropeLondon) ?: ZonedDateTime.now(EuropeLondon),
   eventName,
   null,
   "An alert was created or made inactive",
