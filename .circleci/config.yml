@@ -7,6 +7,7 @@ orbs:
 jobs:
   validate:
     executor:
+      resource_class: large
       name: hmpps/java_localstack_postgres_with_db_name
       jdk_tag: "21.0"
       localstack_tag: "3"

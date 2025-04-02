@@ -9,10 +9,6 @@ spring:
         jdbc:
           lob:
             non_contextual_creation: true
-          batch_size: 500
-          batch_versioned_data: true
-        order_inserts: true
-        order_updates: true
     show-sql: false
     generate-ddl: false
     hibernate:
