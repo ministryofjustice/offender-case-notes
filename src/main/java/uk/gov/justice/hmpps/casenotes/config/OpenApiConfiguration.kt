@@ -23,10 +23,10 @@ import org.springframework.expression.spel.standard.SpelExpressionParser
 import org.springframework.expression.spel.support.StandardEvaluationContext
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.web.method.HandlerMethod
+import uk.gov.justice.hmpps.casenotes.config.SecurityUserContext.Companion.ROLE_CASE_NOTES_ADMIN
 import uk.gov.justice.hmpps.casenotes.config.SecurityUserContext.Companion.ROLE_CASE_NOTES_READ
 import uk.gov.justice.hmpps.casenotes.config.SecurityUserContext.Companion.ROLE_CASE_NOTES_SYNC
 import uk.gov.justice.hmpps.casenotes.config.SecurityUserContext.Companion.ROLE_CASE_NOTES_WRITE
-import uk.gov.justice.hmpps.casenotes.config.SecurityUserContext.Companion.ROLE_PRISONER_ALERTS__ADMIN
 
 const val RO_OPERATIONS = "Retrieve case notes, types and sub-types"
 const val RW_OPERATIONS = "Create and amend case notes"
@@ -164,13 +164,13 @@ class OpenApiConfiguration(buildProperties: BuildProperties, private val context
         emptyList()
       }
       if (roles.isNotEmpty()) {
-        val filteredRoles = roles.filter { r -> r != ROLE_CASE_NOTES_SYNC && r != ROLE_PRISONER_ALERTS__ADMIN }
+        val filteredRoles = roles.filter { r -> r != ROLE_CASE_NOTES_SYNC && r != ROLE_CASE_NOTES_ADMIN }
         operation.description =
-          listOf(
-            operation.description ?: "",
-            "Requires one of the following roles: ",
-          ).joinToString(separator = System.lineSeparator()) +
-          roles.joinToString(
+          buildList {
+            add(operation.description ?: "")
+            if (filteredRoles.isNotEmpty()) add("Requires one of the following roles: ")
+          }.joinToString(separator = System.lineSeparator()) +
+          filteredRoles.joinToString(
             prefix = "${System.lineSeparator()}* ",
             separator = "${System.lineSeparator()}* ",
           )

@@ -741,6 +741,7 @@ class CaseNoteServiceTest {
           authorName = "author",
           authorUserId = "12345",
           additionalNoteText = "text",
+          UUID.randomUUID(),
         )
 
         assertThat(caseNote.amendments[0]).usingRecursiveComparison()

@@ -17,7 +17,6 @@ class DomainEventListener(
 ) {
   @SqsListener("domaineventsqueue", factory = "hmppsQueueContainerFactoryProxy")
   fun receive(notification: Notification) {
-    println("Notification: $notification")
     when (notification.eventType) {
       PRISONER_MERGED -> mergeEventHandler.handle(objectMapper.readValue(notification.message))
       RECONCILE_ALERTS -> alertReconciliation.reconcile(objectMapper.readValue(notification.message))

@@ -159,7 +159,7 @@ class CreateAmendmentIntTest : IntegrationTest() {
   ) = AmendCaseNoteRequest(text)
 
   private fun amendCaseNote(
-    prisonNumber: String,
+    personIdentifier: String,
     caseNoteId: String,
     request: AmendCaseNoteRequest,
     params: Map<String, String> = mapOf("useRestrictedType" to "true"),
@@ -171,7 +171,7 @@ class CreateAmendmentIntTest : IntegrationTest() {
     params.forEach {
       ub.queryParam(it.key, it.value)
     }
-    ub.build(prisonNumber, caseNoteId)
+    ub.build(personIdentifier, caseNoteId)
   }.headers(addBearerAuthorisation(tokenUsername, roles))
     .addHeader(CaseloadIdHeader.NAME, caseloadId)
     .bodyValue(request)

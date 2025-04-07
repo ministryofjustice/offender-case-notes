@@ -39,7 +39,7 @@ class DeletedEntityListener {
           Source.NOMIS -> System.NOMIS
         },
         causeOfDelete(),
-        null,
+        context.deletionReason,
       ),
     )
   }
@@ -59,5 +59,5 @@ class DeletedEntityListener {
   private fun getRequestMethod(): HttpMethod? = (RequestContextHolder.getRequestAttributes() as ServletRequestAttributes?)?.request?.let { HttpMethod.valueOf(it.method) }
 
   private fun isMoveRequest(): Boolean = (RequestContextHolder.getRequestAttributes() as ServletRequestAttributes?)?.request?.requestURL
-    ?.contains("/move/case-notes") ?: false
+    ?.contains("/move/case-notes") == true
 }

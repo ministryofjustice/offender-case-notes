@@ -36,11 +36,11 @@ class CreateSysGenNote(
   }
 
   private fun SystemGeneratedRequest.toEntity(
-    prisonNumber: String,
+    personIdentifier: String,
     type: SubType,
     context: CaseNoteRequestContext,
   ) = Note(
-    prisonNumber,
+    personIdentifier,
     type,
     occurrenceDateTime ?: context.requestAt,
     requireNotNull(locationId),

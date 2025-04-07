@@ -162,7 +162,8 @@ public class CaseNoteService {
                     a.getAuthorUsername(),
                     a.getAuthorName(),
                     a.getAuthorUserId(),
-                    a.getText()
+                    a.getText(),
+                    a.getId()
                 )
             ).toList())
             .locationId(cn.getLocationId())
@@ -194,7 +195,8 @@ public class CaseNoteService {
                     a.getAuthorUsername(),
                     a.getAuthorName(),
                     a.getAuthorUserId(),
-                    a.getAdditionalNoteText()
+                    a.getAdditionalNoteText(),
+                    null
                 )
             ).toList())
             .locationId(cn.getAgencyId())

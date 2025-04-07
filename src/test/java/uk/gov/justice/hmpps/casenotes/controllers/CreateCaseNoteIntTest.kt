@@ -223,14 +223,14 @@ class CreateCaseNoteIntTest : IntegrationTest() {
   ) = CreateCaseNoteRequest(locationId, type, subType, occurrenceDateTime, text, systemGenerated)
 
   private fun createCaseNote(
-    prisonNumber: String,
+    personIdentifier: String,
     request: CreateCaseNoteRequest,
     params: Map<String, String> = mapOf("useRestrictedType" to "true"),
     roles: List<String> = listOf(ROLE_CASE_NOTES_WRITE),
     tokenUsername: String = USERNAME,
     usernameHeader: String? = null,
   ) = webTestClient.post().uri { ub ->
-    ub.path(urlToTest(prisonNumber))
+    ub.path(urlToTest(personIdentifier))
     params.forEach {
       ub.queryParam(it.key, it.value)
     }
@@ -242,13 +242,13 @@ class CreateCaseNoteIntTest : IntegrationTest() {
     .exchange()
 
   private fun createCaseNoteWithStringRequestBody(
-    prisonNumber: String,
+    personIdentifier: String,
     request: String,
     params: Map<String, String> = mapOf("useRestrictedType" to "true"),
     roles: List<String> = listOf(ROLE_CASE_NOTES_WRITE),
     tokenUsername: String = USERNAME,
   ) = webTestClient.post().uri { ub ->
-    ub.path(urlToTest(prisonNumber))
+    ub.path(urlToTest(personIdentifier))
     params.forEach {
       ub.queryParam(it.key, it.value)
     }
@@ -258,7 +258,7 @@ class CreateCaseNoteIntTest : IntegrationTest() {
     .bodyValue(request)
     .exchange()
 
-  private fun urlToTest(prisonNumber: String) = "/case-notes/$prisonNumber"
+  private fun urlToTest(personIdentifier: String) = "/case-notes/$personIdentifier"
 
   private fun Note.verifyAgainst(request: CreateCaseNoteRequest) {
     assertThat(subType.type.code).isEqualTo(request.type)

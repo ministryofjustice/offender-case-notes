@@ -32,9 +32,9 @@ class SearchCaseNotesIntTest : IntegrationTest() {
   @ParameterizedTest
   @MethodSource("invalidRequests")
   fun `400 bad request - invalid request fields`(request: SearchNotesRequest, expected: ErrorResponse) {
-    val prisonNumber = personIdentifier()
+    val personIdentifier = personIdentifier()
 
-    val res = findCaseNotesSpec(prisonNumber, request).expectStatus().isBadRequest.errorResponse(HttpStatus.BAD_REQUEST)
+    val res = findCaseNotesSpec(personIdentifier, request).expectStatus().isBadRequest.errorResponse(HttpStatus.BAD_REQUEST)
     with(res) {
       assertThat(status).isEqualTo(HttpStatus.BAD_REQUEST.value())
       assertThat(developerMessage).isEqualTo(expected.developerMessage)
@@ -55,15 +55,15 @@ class SearchCaseNotesIntTest : IntegrationTest() {
 
   @Test
   fun `can find sensitive and non-sensitive case notes`() {
-    val prisonNumber = personIdentifier()
+    val personIdentifier = personIdentifier()
     val sensitiveType = givenRandomType(sensitive = true)
     val nonSensitiveType = givenRandomType(sensitive = false)
-    val caseNote = givenCaseNote(generateCaseNote(prisonNumber, nonSensitiveType))
-    givenCaseNote(generateCaseNote(prisonNumber, sensitiveType))
+    val caseNote = givenCaseNote(generateCaseNote(personIdentifier, nonSensitiveType))
+    givenCaseNote(generateCaseNote(personIdentifier, sensitiveType))
 
-    assertThat(findCaseNotes(prisonNumber, searchRequest(includeSensitive = true)).metadata.totalElements).isEqualTo(2)
+    assertThat(findCaseNotes(personIdentifier, searchRequest(includeSensitive = true)).metadata.totalElements).isEqualTo(2)
 
-    val response = findCaseNotes(prisonNumber, searchRequest(includeSensitive = false))
+    val response = findCaseNotes(personIdentifier, searchRequest(includeSensitive = false))
     assertThat(response.metadata.totalElements).isEqualTo(1)
     assertThat(response.hasCaseNotes).isTrue()
     val first = response.content.first()
@@ -72,14 +72,14 @@ class SearchCaseNotesIntTest : IntegrationTest() {
 
   @Test
   fun `can find by occurred at`() {
-    val prisonNumber = personIdentifier()
-    givenCaseNote(generateCaseNote(prisonNumber, occurredAt = LocalDateTime.now().minusDays(7)))
-    val caseNote = givenCaseNote(generateCaseNote(prisonNumber, occurredAt = LocalDateTime.now().minusDays(5)))
-    givenCaseNote(generateCaseNote(prisonNumber, occurredAt = LocalDateTime.now().minusDays(3)))
-    assertThat(findCaseNotes(prisonNumber).metadata.totalElements).isEqualTo(3)
+    val personIdentifier = personIdentifier()
+    givenCaseNote(generateCaseNote(personIdentifier, occurredAt = LocalDateTime.now().minusDays(7)))
+    val caseNote = givenCaseNote(generateCaseNote(personIdentifier, occurredAt = LocalDateTime.now().minusDays(5)))
+    givenCaseNote(generateCaseNote(personIdentifier, occurredAt = LocalDateTime.now().minusDays(3)))
+    assertThat(findCaseNotes(personIdentifier).metadata.totalElements).isEqualTo(3)
 
     val response = findCaseNotes(
-      prisonNumber,
+      personIdentifier,
       searchRequest(occurredFrom = LocalDateTime.now().minusDays(6), occurredTo = LocalDateTime.now().minusDays(4)),
     )
     assertThat(response.metadata.totalElements).isEqualTo(1)
@@ -90,17 +90,17 @@ class SearchCaseNotesIntTest : IntegrationTest() {
 
   @Test
   fun `can sort by occurred at`() {
-    val prisonNumber = personIdentifier()
-    givenCaseNote(generateCaseNote(prisonNumber, text = "SEVEN", occurredAt = LocalDateTime.now().minusDays(7)))
-    givenCaseNote(generateCaseNote(prisonNumber, text = "FIVE", occurredAt = LocalDateTime.now().minusDays(5)))
-    givenCaseNote(generateCaseNote(prisonNumber, text = "THREE", occurredAt = LocalDateTime.now().minusDays(3)))
+    val personIdentifier = personIdentifier()
+    givenCaseNote(generateCaseNote(personIdentifier, text = "SEVEN", occurredAt = LocalDateTime.now().minusDays(7)))
+    givenCaseNote(generateCaseNote(personIdentifier, text = "FIVE", occurredAt = LocalDateTime.now().minusDays(5)))
+    givenCaseNote(generateCaseNote(personIdentifier, text = "THREE", occurredAt = LocalDateTime.now().minusDays(3)))
 
-    val response1 = findCaseNotes(prisonNumber, searchRequest(sort = "occurredAt,asc"))
+    val response1 = findCaseNotes(personIdentifier, searchRequest(sort = "occurredAt,asc"))
     assertThat(response1.metadata.totalElements).isEqualTo(3)
     assertThat(response1.hasCaseNotes).isTrue()
     assertThat(response1.content.map { it.text }).containsExactly("SEVEN", "FIVE", "THREE")
 
-    val response2 = findCaseNotes(prisonNumber, searchRequest(sort = "occurredAt,desc"))
+    val response2 = findCaseNotes(personIdentifier, searchRequest(sort = "occurredAt,desc"))
     assertThat(response2.metadata.totalElements).isEqualTo(3)
     assertThat(response2.hasCaseNotes).isTrue()
     assertThat(response2.content.map { it.text }).containsExactly("THREE", "FIVE", "SEVEN")
@@ -108,34 +108,34 @@ class SearchCaseNotesIntTest : IntegrationTest() {
 
   @Test
   fun `can sort by created at`() {
-    val prisonNumber = personIdentifier()
-    givenCaseNote(generateCaseNote(prisonNumber, text = "SEVEN", createdAt = LocalDateTime.now().minusDays(7)))
-    givenCaseNote(generateCaseNote(prisonNumber, text = "FIVE", createdAt = LocalDateTime.now().minusDays(5)))
-    givenCaseNote(generateCaseNote(prisonNumber, text = "THREE", createdAt = LocalDateTime.now().minusDays(3)))
+    val personIdentifier = personIdentifier()
+    givenCaseNote(generateCaseNote(personIdentifier, text = "SEVEN", createdAt = LocalDateTime.now().minusDays(7)))
+    givenCaseNote(generateCaseNote(personIdentifier, text = "FIVE", createdAt = LocalDateTime.now().minusDays(5)))
+    givenCaseNote(generateCaseNote(personIdentifier, text = "THREE", createdAt = LocalDateTime.now().minusDays(3)))
 
-    val response1 = findCaseNotes(prisonNumber, searchRequest(sort = "createdAt,asc"))
+    val response1 = findCaseNotes(personIdentifier, searchRequest(sort = "createdAt,asc"))
     assertThat(response1.metadata.totalElements).isEqualTo(3)
     assertThat(response1.content.map { it.text }).containsExactly("SEVEN", "FIVE", "THREE")
 
-    val response2 = findCaseNotes(prisonNumber, searchRequest(sort = "createdAt,desc"))
+    val response2 = findCaseNotes(personIdentifier, searchRequest(sort = "createdAt,desc"))
     assertThat(response2.metadata.totalElements).isEqualTo(3)
     assertThat(response2.content.map { it.text }).containsExactly("THREE", "FIVE", "SEVEN")
   }
 
   @Test
   fun `can find by parent type`() {
-    val prisonNumber = personIdentifier()
+    val personIdentifier = personIdentifier()
     val types = getAllTypes().asSequence()
       .filter { !it.sensitive }
       .groupBy { it.type.code }
       .map { it.value.take(2) }.flatten().take(20)
       .shuffled().toList()
-    val caseNotes = types.map { givenCaseNote(generateCaseNote(prisonNumber, it)) }
+    val caseNotes = types.map { givenCaseNote(generateCaseNote(personIdentifier, it)) }
 
     val parent = types.random().type
     val toFind = caseNotes.filter { it.subType.type.code == parent.code }
     val response = findCaseNotes(
-      prisonNumber,
+      personIdentifier,
       searchRequest(typeSubTypes = setOf(TypeSubTypeRequest(parent.code, emptySet()))),
     )
 
@@ -147,18 +147,18 @@ class SearchCaseNotesIntTest : IntegrationTest() {
 
   @Test
   fun `can find by a single sub type`() {
-    val prisonNumber = personIdentifier()
+    val personIdentifier = personIdentifier()
     val types = getAllTypes().asSequence()
       .filter { !it.sensitive }
       .groupBy { it.type.code }
       .map { it.value.take(2) }.flatten().take(20)
       .toList()
-    val caseNotes = types.map { givenCaseNote(generateCaseNote(prisonNumber, it)) }
+    val caseNotes = types.map { givenCaseNote(generateCaseNote(personIdentifier, it)) }
 
     val toFind = caseNotes.random()
 
     val response = findCaseNotes(
-      prisonNumber,
+      personIdentifier,
       searchRequest(typeSubTypes = setOf(TypeSubTypeRequest(toFind.subType.type.code, setOf(toFind.subType.code)))),
     )
 
@@ -173,18 +173,18 @@ class SearchCaseNotesIntTest : IntegrationTest() {
 
   @Test
   fun `can retrieve paginated case notes with amendments`() {
-    val prisonNumber = personIdentifier()
+    val personIdentifier = personIdentifier()
     val types = getAllTypes().asSequence().take(30)
-    types.forEach { givenCaseNote(generateCaseNote(prisonNumber, it)).withAmendment().withAmendment().withAmendment() }
+    types.forEach { givenCaseNote(generateCaseNote(personIdentifier, it)).withAmendment().withAmendment().withAmendment() }
 
-    val response1 = findCaseNotes(prisonNumber, searchRequest())
+    val response1 = findCaseNotes(personIdentifier, searchRequest())
     assertThat(response1.metadata.size).isEqualTo(25)
     assertThat(response1.metadata.page).isEqualTo(1)
     assertThat(response1.metadata.totalElements).isEqualTo(30)
     assertThat(response1.content.size).isEqualTo(25)
     assertThat(response1.hasCaseNotes).isTrue()
 
-    val response2 = findCaseNotes(prisonNumber, searchRequest(page = 2, size = 20))
+    val response2 = findCaseNotes(personIdentifier, searchRequest(page = 2, size = 20))
     assertThat(response2.metadata.size).isEqualTo(20)
     assertThat(response2.metadata.page).isEqualTo(2)
     assertThat(response2.metadata.totalElements).isEqualTo(30)
@@ -194,43 +194,43 @@ class SearchCaseNotesIntTest : IntegrationTest() {
 
   @Test
   fun `when no case notes exist`() {
-    val prisonNumber = personIdentifier()
+    val personIdentifier = personIdentifier()
 
-    val response = findCaseNotes(prisonNumber, searchRequest())
+    val response = findCaseNotes(personIdentifier, searchRequest())
     assertThat(response.metadata.totalElements).isEqualTo(0)
     assertThat(response.hasCaseNotes).isFalse()
   }
 
   @Test
   fun `when no case non-sensitive notes exist`() {
-    val prisonNumber = personIdentifier()
+    val personIdentifier = personIdentifier()
     val type = givenRandomType(sensitive = true)
-    givenCaseNote(generateCaseNote(prisonNumber, type))
-    assertThat(findCaseNotes(prisonNumber, searchRequest(includeSensitive = true)).hasCaseNotes).isTrue()
+    givenCaseNote(generateCaseNote(personIdentifier, type))
+    assertThat(findCaseNotes(personIdentifier, searchRequest(includeSensitive = true)).hasCaseNotes).isTrue()
 
-    val response = findCaseNotes(prisonNumber, searchRequest(includeSensitive = false))
+    val response = findCaseNotes(personIdentifier, searchRequest(includeSensitive = false))
     assertThat(response.metadata.totalElements).isEqualTo(0)
     assertThat(response.hasCaseNotes).isFalse()
   }
 
-  private fun urlToTest(prisonNumber: String) = "/search/case-notes/$prisonNumber"
+  private fun urlToTest(personIdentifier: String) = "/search/case-notes/$personIdentifier"
 
   private fun findCaseNotesSpec(
-    prisonNumber: String,
+    personIdentifier: String,
     request: SearchNotesRequest = searchRequest(),
     roles: List<String> = listOf(ROLE_CASE_NOTES_READ),
     username: String = USERNAME,
-  ) = webTestClient.post().uri(urlToTest(prisonNumber))
+  ) = webTestClient.post().uri(urlToTest(personIdentifier))
     .bodyValue(request)
     .headers(addBearerAuthorisation(username, roles))
     .exchange()
 
   private fun findCaseNotes(
-    prisonNumber: String,
+    personIdentifier: String,
     request: SearchNotesRequest = searchRequest(),
     roles: List<String> = listOf(ROLE_CASE_NOTES_READ),
     username: String = USERNAME,
-  ): SearchNotesResponse = findCaseNotesSpec(prisonNumber, request, roles, username)
+  ): SearchNotesResponse = findCaseNotesSpec(personIdentifier, request, roles, username)
     .expectStatus().isOk
     .expectBody(SearchNotesResponse::class.java).returnResult().responseBody!!
 

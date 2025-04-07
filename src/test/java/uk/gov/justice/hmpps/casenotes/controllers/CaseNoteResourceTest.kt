@@ -14,8 +14,7 @@ import org.mockito.kotlin.eq
 import org.mockito.kotlin.verify
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.test.context.bean.override.mockito.MockitoSpyBean
-import uk.gov.justice.hmpps.casenotes.config.CaseloadIdHeader
-import uk.gov.justice.hmpps.casenotes.config.SecurityUserContext.Companion.ROLE_CASE_NOTES_WRITE
+import uk.gov.justice.hmpps.casenotes.config.SecurityUserContext.Companion.ROLE_CASE_NOTES_ADMIN
 import uk.gov.justice.hmpps.casenotes.health.wiremock.Elite2Extension.Companion.elite2Api
 import uk.gov.justice.hmpps.casenotes.health.wiremock.ManageUsersApiExtension.Companion.manageUsersApi
 import uk.gov.justice.hmpps.casenotes.health.wiremock.PrisonerSearchApiExtension.Companion.prisonerSearchApi
@@ -521,47 +520,6 @@ class CaseNoteResourceTest : IntegrationTest() {
   }
 
   @Test
-  fun testCanDeleteCaseNote() {
-    manageUsersApi.stubGetUserDetails("DELETE_CASE_NOTE_USER")
-    prisonerSearchApi.stubPrisonerDetails("A1234BA", "LEI")
-    val token = jwtHelper.createJwt("DELETE_CASE_NOTE_USER", roles = listOf(ROLE_CASE_NOTES_WRITE))
-
-    val postResponse = webTestClient.post().uri("/case-notes/{offenderIdentifier}", "A1234BA")
-      .headers(addBearerToken(token))
-      .header(CaseloadIdHeader.NAME, "MDI")
-      .bodyValue(CREATE_CASE_NOTE_WITHOUT_LOC.format("This is a case note"))
-      .exchange()
-      .expectStatus().isCreated
-      .returnResult(CaseNote::class.java)
-    val id = postResponse.responseBody.blockFirst()!!.id
-
-    webTestClient.get().uri("/case-notes/{offenderIdentifier}/{caseNoteIdentifier}", "A1234BA", id)
-      .headers(addBearerToken(token))
-      .header(CaseloadIdHeader.NAME, "MDI")
-      .exchange()
-      .expectStatus().isOk
-      .expectBody()
-      .json(readFile("A1234BA-single-casenote.json"))
-
-    webTestClient.delete().uri("/case-notes/{offenderIdentifier}/{caseNoteId}", "A1234BA", id)
-      .headers(addBearerToken(token))
-      .exchange()
-      .expectStatus().isOk
-
-    webTestClient.get().uri("/case-notes/{offenderIdentifier}/{caseNoteIdentifier}", "A1234BA", id)
-      .headers(addBearerToken(token))
-      .exchange()
-      .expectStatus().isNotFound
-      .expectBody()
-      .json(
-        "{" +
-          "'status':404," +
-          "'developerMessage':'Resource with id [$id] not found." +
-          "'}",
-      )
-  }
-
-  @Test
   fun testSoftDeleteCaseNoteUserDoesntHaveRole() {
     manageUsersApi.stubGetUserDetails("SECURE_CASENOTE_USER")
     val token = jwtHelper.createJwt("SECURE_CASENOTE_USER", roles = CASENOTES_ROLES)
@@ -576,7 +534,7 @@ class CaseNoteResourceTest : IntegrationTest() {
   @Test
   fun testDeleteCaseNoteNotFound() {
     manageUsersApi.stubGetUserDetails("DELETE_CASE_NOTE_USER")
-    val token = jwtHelper.createJwt("DELETE_CASE_NOTE_USER", roles = listOf(ROLE_CASE_NOTES_WRITE))
+    val token = jwtHelper.createJwt("DELETE_CASE_NOTE_USER", roles = listOf(ROLE_CASE_NOTES_ADMIN))
     webTestClient.delete()
       .uri("/case-notes/{offenderIdentifier}/{caseNoteId}", "Z1234ZZ", "231eb4ee-c06c-49a3-846c-1b542cc0ed6b")
       .headers(addBearerToken(token))

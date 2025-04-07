@@ -34,6 +34,7 @@ import uk.gov.justice.hmpps.casenotes.domain.Note.Companion.OCCURRED_AT
 import uk.gov.justice.hmpps.casenotes.domain.Note.Companion.PERSON_IDENTIFIER
 import uk.gov.justice.hmpps.casenotes.domain.audit.DeletedEntityListener
 import uk.gov.justice.hmpps.casenotes.domain.audit.SimpleAudited
+import uk.gov.justice.hmpps.casenotes.notes.ReplaceAmendmentRequest
 import uk.gov.justice.hmpps.casenotes.notes.TextRequest
 import uk.gov.justice.hmpps.casenotes.sync.SyncAmendmentRequest
 import java.time.LocalDateTime
@@ -136,6 +137,11 @@ class Note(
     }
   }
 
+  fun findAmendment(id: UUID): Amendment? = amendments.find { it.id == id }
+  fun withAmendment(request: ReplaceAmendmentRequest, original: (UUID) -> Amendment): Note = apply {
+    amendments.add(original(request.id).amend(this, request.text))
+  }
+
   fun merge(personIdentifier: String): Note = Note(
     personIdentifier,
     subType,
@@ -184,10 +190,10 @@ interface NoteRepository :
   JpaRepository<Note, UUID>,
   RefreshRepository<Note, UUID> {
   @EntityGraph(attributePaths = ["subType.type", "amendments"])
-  fun findByIdAndPersonIdentifier(id: UUID, prisonNumber: String): Note?
+  fun findByIdAndPersonIdentifier(id: UUID, personIdentifier: String): Note?
 
   @EntityGraph(attributePaths = ["subType.type", "amendments"])
-  fun findByLegacyIdAndPersonIdentifier(legacyId: Long, prisonNumber: String): Note?
+  fun findByLegacyIdAndPersonIdentifier(legacyId: Long, personIdentifier: String): Note?
 
   @EntityGraph(attributePaths = ["subType.type", "amendments"])
   override fun findById(id: UUID): Optional<Note>
@@ -354,8 +360,8 @@ fun NoteRepository.saveAndRefresh(note: Note): Note {
   return saved
 }
 
-fun matchesPersonIdentifier(prisonNumber: String) = Specification<Note> { cn, _, cb ->
-  cb.equal(cn.get<String>(PERSON_IDENTIFIER), prisonNumber)
+fun matchesPersonIdentifier(personIdentifier: String) = Specification<Note> { cn, _, cb ->
+  cb.equal(cn.get<String>(PERSON_IDENTIFIER), personIdentifier)
 }
 
 fun matchesLocationId(locationId: String) = Specification<Note> { cn, _, cb -> cb.equal(cn.get<String>(LOCATION_ID), locationId) }
@@ -407,7 +413,11 @@ fun createdBetween(from: LocalDateTime, to: LocalDateTime, includeSyncToNomis: B
   }
 }
 
-private fun CriteriaBuilder.createdIncludingAmendments(from: LocalDateTime, to: LocalDateTime, cn: Root<Note>): Predicate {
+private fun CriteriaBuilder.createdIncludingAmendments(
+  from: LocalDateTime,
+  to: LocalDateTime,
+  cn: Root<Note>,
+): Predicate {
   val cnBetween = between(cn[CREATED_AT], from, to)
   val amendment = cn.join<Note, Amendment>("amendments", JoinType.LEFT)
   val amBetween = between(amendment[CREATED_AT], from, to)

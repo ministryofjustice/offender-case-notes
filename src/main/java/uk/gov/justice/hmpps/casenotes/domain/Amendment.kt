@@ -11,8 +11,6 @@ import jakarta.persistence.Table
 import jakarta.persistence.Transient
 import org.springframework.data.domain.Persistable
 import org.springframework.data.jpa.repository.JpaRepository
-import org.springframework.data.jpa.repository.Modifying
-import org.springframework.data.jpa.repository.Query
 import uk.gov.justice.hmpps.casenotes.domain.audit.SimpleAudited
 import java.util.UUID
 
@@ -55,6 +53,16 @@ class Amendment(
     }
   }
 
+  fun amend(note: Note, text: String) = Amendment(
+    note,
+    authorUsername,
+    authorName,
+    authorUserId,
+    text,
+    system,
+    id,
+  ).apply { createdAt = this@Amendment.createdAt }
+
   override fun getId(): UUID = id
 
   @Transient
@@ -62,8 +70,4 @@ class Amendment(
   override fun isNew(): Boolean = new
 }
 
-interface AmendmentRepository : JpaRepository<Amendment, UUID> {
-  @Modifying
-  @Query("delete from Amendment a where a.id in :ids")
-  fun deleteByIdIn(ids: List<UUID>)
-}
+interface AmendmentRepository : JpaRepository<Amendment, UUID>

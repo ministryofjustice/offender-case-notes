@@ -8,6 +8,7 @@ import org.springframework.data.domain.Sort.by
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import uk.gov.justice.hmpps.casenotes.config.SecurityUserContext.Companion.ROLE_CASE_NOTES_ADMIN
 import uk.gov.justice.hmpps.casenotes.config.SecurityUserContext.Companion.ROLE_CASE_NOTES_READ
 import uk.gov.justice.hmpps.casenotes.config.SecurityUserContext.Companion.ROLE_CASE_NOTES_SYNC
 import uk.gov.justice.hmpps.casenotes.config.SecurityUserContext.Companion.ROLE_CASE_NOTES_WRITE
@@ -28,20 +29,20 @@ import java.util.UUID.fromString
 
 @Service
 @Transactional(readOnly = true)
-@PreAuthorize("hasAnyRole('$ROLE_CASE_NOTES_READ', '$ROLE_CASE_NOTES_WRITE', '$ROLE_CASE_NOTES_SYNC')")
+@PreAuthorize("hasAnyRole('$ROLE_CASE_NOTES_READ', '$ROLE_CASE_NOTES_WRITE', '$ROLE_CASE_NOTES_ADMIN', '$ROLE_CASE_NOTES_SYNC')")
 class ReadCaseNote(
   private val noteRepository: NoteRepository,
 ) {
-  fun caseNotes(prisonNumber: String, filter: CaseNoteFilter, pageable: Pageable): Page<CaseNote> {
-    val page = noteRepository.findAll(filter.asSpecification(prisonNumber), pageable.forSpecification())
+  fun caseNotes(personIdentifier: String, filter: CaseNoteFilter, pageable: Pageable): Page<CaseNote> {
+    val page = noteRepository.findAll(filter.asSpecification(personIdentifier), pageable.forSpecification())
     val records = noteRepository.findAllByIdIn(page.content.map { it.id }).associateBy { it.id }
     return page.map { records[it.id]!!.toModel() }
   }
 
-  fun caseNote(prisonNumber: String, caseNoteId: String): CaseNote {
+  fun caseNote(personIdentifier: String, caseNoteId: String): CaseNote {
     val caseNote = when (val legacyId = caseNoteId.asLegacyId()) {
-      null -> noteRepository.findByIdAndPersonIdentifier(fromString(caseNoteId), prisonNumber)
-      else -> noteRepository.findByLegacyIdAndPersonIdentifier(legacyId, prisonNumber)
+      null -> noteRepository.findByIdAndPersonIdentifier(fromString(caseNoteId), personIdentifier)
+      else -> noteRepository.findByLegacyIdAndPersonIdentifier(legacyId, personIdentifier)
     } ?: throw EntityNotFoundException.withId(caseNoteId)
     return caseNote.toModel()
   }
@@ -137,8 +138,8 @@ class ReadCaseNote(
   }
 }
 
-private fun CaseNoteFilter.asSpecification(prisonNumber: String) = listOfNotNull(
-  matchesPersonIdentifier(prisonNumber),
+private fun CaseNoteFilter.asSpecification(personIdentifier: String) = listOfNotNull(
+  matchesPersonIdentifier(personIdentifier),
   matchesOnType(includeSensitive, getTypesAndSubTypes()),
   locationId?.let { matchesLocationId(it) },
   authorUsername?.let { matchesAuthorUsername(it) },

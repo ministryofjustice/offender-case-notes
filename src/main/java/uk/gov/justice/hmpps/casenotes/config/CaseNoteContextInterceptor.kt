@@ -24,7 +24,7 @@ import uk.gov.justice.hmpps.casenotes.legacy.dto.UserDetails.Companion.NOMIS
 class CaseNoteContextConfiguration(private val caseNoteContextInterceptor: CaseNoteContextInterceptor) : WebMvcConfigurer {
   override fun addInterceptors(registry: InterceptorRegistry) {
     registry.addInterceptor(caseNoteContextInterceptor)
-      .addPathPatterns("/case-notes/**", "/case-notes/**/**")
+      .addPathPatterns("/case-notes/**", "/admin/case-notes/**")
       .excludePathPatterns("/case-notes/usage", "/case-notes/staff-usage", "/case-notes/alerts/reconciliation")
   }
 }

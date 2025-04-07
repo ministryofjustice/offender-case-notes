@@ -4,8 +4,8 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus
-import uk.gov.justice.hmpps.casenotes.config.CaseloadIdHeader
 import uk.gov.justice.hmpps.casenotes.config.SecurityUserContext.Companion.ROLE_CASE_NOTES_ADMIN
 import uk.gov.justice.hmpps.casenotes.config.SecurityUserContext.Companion.ROLE_CASE_NOTES_WRITE
 import uk.gov.justice.hmpps.casenotes.config.Source
@@ -14,33 +14,31 @@ import uk.gov.justice.hmpps.casenotes.domain.System
 import uk.gov.justice.hmpps.casenotes.domain.audit.DeletedCaseNoteRepository
 import uk.gov.justice.hmpps.casenotes.events.PersonCaseNoteEvent
 import uk.gov.justice.hmpps.casenotes.health.wiremock.ManageUsersApiExtension.Companion.manageUsersApi
+import uk.gov.justice.hmpps.casenotes.notes.DeleteCaseNoteRequest
 import uk.gov.justice.hmpps.casenotes.utils.NomisIdGenerator.personIdentifier
 import uk.gov.justice.hmpps.casenotes.utils.verifyAgainst
 import java.util.UUID
 
-class DeleteCaseNoteIntTest : IntegrationTest() {
+class AdminDeleteCaseNoteIntTest : IntegrationTest() {
 
   @Autowired
   lateinit var deletedCaseNoteRepository: DeletedCaseNoteRepository
 
   @Test
   fun `401 unauthorised`() {
-    webTestClient.post().uri(urlToTest(personIdentifier(), UUID.randomUUID().toString()))
+    webTestClient.method(HttpMethod.DELETE).uri(urlToTest(personIdentifier(), UUID.randomUUID()))
       .exchange().expectStatus().isUnauthorized
   }
 
   @Test
   fun `403 forbidden - does not have the right role`() {
-    deleteCaseNote(
-      personIdentifier(),
-      UUID.randomUUID(),
-      roles = listOf(ROLE_CASE_NOTES_WRITE),
-    ).expectStatus().isForbidden
+    deleteCaseNote(personIdentifier(), UUID.randomUUID(), "Reason", roles = listOf(ROLE_CASE_NOTES_WRITE))
+      .expectStatus().isForbidden
   }
 
   @Test
   fun `cannot delete case note without user details`() {
-    val response = deleteCaseNote(personIdentifier(), UUID.randomUUID(), username = "NoneExistentUser")
+    val response = deleteCaseNote(personIdentifier(), UUID.randomUUID(), "Reason", username = "NoneExistentUser")
       .errorResponse(HttpStatus.BAD_REQUEST)
 
     with(response) {
@@ -52,7 +50,8 @@ class DeleteCaseNoteIntTest : IntegrationTest() {
   @Test
   fun `can delete a case note with admin role`() {
     val caseNote = givenCaseNote(generateCaseNote(personIdentifier()).withAmendment())
-    deleteCaseNote(caseNote.personIdentifier, caseNote.id).expectStatus().isNoContent
+    val deletionReason = "Admin decision"
+    deleteCaseNote(caseNote.personIdentifier, caseNote.id, deletionReason).expectStatus().isNoContent
 
     val saved = noteRepository.findByIdAndPersonIdentifier(caseNote.id, caseNote.personIdentifier)
     assertThat(saved).isNull()
@@ -60,6 +59,7 @@ class DeleteCaseNoteIntTest : IntegrationTest() {
     assertThat(deleted!!.caseNote).isNotNull()
     assertThat(deleted.cause).isEqualTo(DELETE)
     assertThat(deleted.system).isEqualTo(System.DPS)
+    assertThat(deleted.reason).isEqualTo(deletionReason)
     deleted.caseNote.verifyAgainst(caseNote)
 
     hmppsEventsQueue.receivePersonCaseNoteEvent().verifyAgainst(PersonCaseNoteEvent.Type.DELETED, Source.DPS, caseNote)
@@ -68,15 +68,16 @@ class DeleteCaseNoteIntTest : IntegrationTest() {
   private fun deleteCaseNote(
     personIdentifier: String,
     caseNoteId: UUID,
+    reason: String,
     roles: List<String> = listOf(ROLE_CASE_NOTES_ADMIN),
     username: String = USERNAME,
-    caseloadId: String? = ACTIVE_PRISON,
-  ) = webTestClient.delete().uri(urlToTest(personIdentifier, caseNoteId.toString()))
+  ) = webTestClient.method(HttpMethod.DELETE)
+    .uri(urlToTest(personIdentifier, caseNoteId))
+    .bodyValue(DeleteCaseNoteRequest(reason))
     .headers(addBearerAuthorisation(username, roles))
-    .headers { if (caseloadId != null) it[CaseloadIdHeader.NAME] = caseloadId }
     .exchange()
 
-  private fun urlToTest(personIdentifier: String, caseNoteId: String) = "/case-notes/$personIdentifier/$caseNoteId"
+  private fun urlToTest(personIdentifier: String, caseNoteId: UUID) = "/admin/case-notes/$personIdentifier/$caseNoteId"
 
   companion object {
     @JvmStatic

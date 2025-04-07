@@ -186,21 +186,15 @@ class CaseNoteController(
   }
 
   @Tag(name = ADMIN_ONLY)
-  @Operation(summary = "Deletes a case note")
-  @ApiResponses(
-    ApiResponse(responseCode = "200", description = "OK"),
-    ApiResponse(
-      responseCode = "404",
-      description = "Offender or case note not found",
-      content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))],
-    ),
-  )
-  @ResponseStatus(HttpStatus.OK)
+  @Operation(summary = "Deprecated endpoint for deleting a case note", deprecated = true)
+  @ResponseStatus(HttpStatus.NO_CONTENT)
   @DeleteMapping("/{personIdentifier}/{caseNoteId}")
   fun deleteCaseNote(
     @Parameter(description = "Person Identifier", required = true, example = "A1234AA")
     @PathVariable personIdentifier: String,
     @Parameter(description = "Case Note Id", required = true, example = "518b2200-6489-4c77-8514-10cf80ccd488")
     @PathVariable caseNoteId: String,
-  ) = save.deleteNote(personIdentifier.uppercase(), caseNoteId)
+  ) {
+    save.deleteNote(personIdentifier.uppercase(), caseNoteId)
+  }
 }
