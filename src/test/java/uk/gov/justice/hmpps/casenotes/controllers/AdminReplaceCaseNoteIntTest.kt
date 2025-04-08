@@ -71,6 +71,12 @@ class AdminReplaceCaseNoteIntTest : IntegrationTest() {
   }
 
   @Test
+  fun `404 not found - case note does not exist`() {
+    replaceCaseNote(personIdentifier(), UUID.randomUUID(), replaceNoteRequest(), ROLE_CASE_NOTES_ADMIN)
+      .expectStatus().isNotFound
+  }
+
+  @Test
   fun `404 not found - admin attempts to amends an amendment that does not exist`() {
     val personIdentifier = personIdentifier()
     val existing = givenCaseNote(generateCaseNote(personIdentifier).withAmendment())

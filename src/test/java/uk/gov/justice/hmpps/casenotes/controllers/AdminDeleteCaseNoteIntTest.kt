@@ -37,6 +37,11 @@ class AdminDeleteCaseNoteIntTest : IntegrationTest() {
   }
 
   @Test
+  fun `404 not found - id to delete does not exist`() {
+    deleteCaseNote(personIdentifier(), UUID.randomUUID(), "Reason").expectStatus().isNotFound
+  }
+
+  @Test
   fun `cannot delete case note without user details`() {
     val response = deleteCaseNote(personIdentifier(), UUID.randomUUID(), "Reason", username = "NoneExistentUser")
       .errorResponse(HttpStatus.BAD_REQUEST)
