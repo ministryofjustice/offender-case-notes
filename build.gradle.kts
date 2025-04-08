@@ -39,10 +39,10 @@ dependencies {
   implementation("org.apache.commons:commons-text:1.13.0")
   implementation("com.fasterxml.uuid:java-uuid-generator:5.1.0")
   implementation("com.pauldijou:jwt-core_2.11:5.0.0")
-  implementation("com.google.guava:guava:33.4.6-jre")
+  implementation("com.google.guava:guava:33.4.7-android")
 
   implementation(platform("com.amazonaws:aws-java-sdk-bom:1.12.782"))
-  implementation("software.amazon.awssdk:sns:2.31.13")
+  implementation("software.amazon.awssdk:sns:2.31.17")
 
   testAnnotationProcessor("org.projectlombok:lombok:1.18.38")
   testCompileOnly("org.projectlombok:lombok:1.18.38")
