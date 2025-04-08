@@ -11,6 +11,7 @@ data class CaseNoteRequestContext(
   val source: Source = Source.DPS,
   val requestAt: LocalDateTime = LocalDateTime.now(),
   val nomisUser: Boolean = false,
+  var deletionReason: String? = null,
 ) {
   constructor(username: String) : this(username, username, username)
 

@@ -78,17 +78,17 @@ class ReadCaseNoteIntTest : IntegrationTest() {
   }
 
   private fun getCaseNote(
-    prisonNumber: String,
+    personIdentifier: String,
     caseNoteId: String,
     roles: List<String> = listOf(SecurityUserContext.ROLE_CASE_NOTES_READ),
     username: String = USERNAME,
     caseloadId: String? = ACTIVE_PRISON,
-  ) = webTestClient.get().uri(urlToTest(prisonNumber, caseNoteId))
+  ) = webTestClient.get().uri(urlToTest(personIdentifier, caseNoteId))
     .headers(addBearerAuthorisation(username, roles))
     .header(CaseloadIdHeader.NAME, caseloadId)
     .exchange()
 
-  private fun urlToTest(prisonNumber: String, caseNoteId: String) = "/case-notes/$prisonNumber/$caseNoteId"
+  private fun urlToTest(personIdentifier: String, caseNoteId: String) = "/case-notes/$personIdentifier/$caseNoteId"
 
   companion object {
     @JvmStatic

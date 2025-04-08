@@ -20,7 +20,7 @@ data class PersonReference(val identifiers: Set<Identifier> = setOf()) {
 
   companion object {
     private const val NOMS_NUMBER_TYPE = "NOMS"
-    fun withIdentifier(prisonNumber: String) = PersonReference(setOf(Identifier(NOMS_NUMBER_TYPE, prisonNumber)))
+    fun withIdentifier(personIdentifier: String) = PersonReference(setOf(Identifier(NOMS_NUMBER_TYPE, personIdentifier)))
   }
 
   data class Identifier(val type: String, val value: String)

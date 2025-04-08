@@ -7,6 +7,7 @@ import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import uk.gov.justice.hmpps.casenotes.config.CaseNoteRequestContext
+import uk.gov.justice.hmpps.casenotes.config.SecurityUserContext.Companion.ROLE_CASE_NOTES_ADMIN
 import uk.gov.justice.hmpps.casenotes.config.SecurityUserContext.Companion.ROLE_CASE_NOTES_WRITE
 import uk.gov.justice.hmpps.casenotes.domain.Note
 import uk.gov.justice.hmpps.casenotes.domain.NoteRepository
@@ -24,12 +25,12 @@ import java.util.UUID.fromString
 
 @Service
 @Transactional
-@PreAuthorize("hasAnyRole('$ROLE_CASE_NOTES_WRITE')")
 class WriteCaseNote(
   private val subTypeRepository: SubTypeRepository,
   private val noteRepository: NoteRepository,
   private val eventPublisher: ApplicationEventPublisher,
 ) {
+  @PreAuthorize("hasAnyRole('$ROLE_CASE_NOTES_WRITE')")
   fun createNote(personIdentifier: String, request: CreateCaseNoteRequest): CaseNote {
     val type = subTypeRepository.getByTypeCodeAndCode(request.type, request.subType)
       .validateTypeUsage()
@@ -41,6 +42,7 @@ class WriteCaseNote(
     return saved.toModel()
   }
 
+  @PreAuthorize("hasAnyRole('$ROLE_CASE_NOTES_WRITE')")
   fun createAmendment(
     personIdentifier: String,
     caseNoteId: String,
@@ -55,6 +57,7 @@ class WriteCaseNote(
     return caseNote.toModel()
   }
 
+  @PreAuthorize("hasAnyRole('$ROLE_CASE_NOTES_ADMIN')")
   fun deleteNote(personIdentifier: String, caseNoteId: String) {
     getCaseNote(personIdentifier, caseNoteId).also {
       noteRepository.delete(it)

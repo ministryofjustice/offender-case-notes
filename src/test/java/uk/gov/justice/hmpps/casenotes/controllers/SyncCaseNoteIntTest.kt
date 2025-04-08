@@ -127,9 +127,9 @@ class SyncCaseNoteIntTest : IntegrationTest() {
 
   @Test
   fun `200 ok - sync updates an existing case note using id retaining dps legacy id`() {
-    val prisonNumber = personIdentifier()
+    val personIdentifier = personIdentifier()
     val dpsLegacyId = noteRepository.getNextLegacyId()
-    val existing = givenCaseNote(generateCaseNote(prisonNumber, legacyId = dpsLegacyId))
+    val existing = givenCaseNote(generateCaseNote(personIdentifier, legacyId = dpsLegacyId))
     val request =
       existing.syncRequest()
         .copy(text = "The text was updated in nomis by CENTRAL ADMIN", system = System.DPS, legacyId = 12)
@@ -152,8 +152,8 @@ class SyncCaseNoteIntTest : IntegrationTest() {
 
   @Test
   fun `200 ok - sync updates case note occurred at`() {
-    val prisonNumber = personIdentifier()
-    val existing = givenCaseNote(generateCaseNote(prisonNumber))
+    val personIdentifier = personIdentifier()
+    val existing = givenCaseNote(generateCaseNote(personIdentifier))
     val request =
       existing.syncRequest().copy(occurrenceDateTime = existing.occurredAt.minusHours(4), system = System.DPS)
     val response = syncCaseNote(request).success<SyncResult>(HttpStatus.OK)
@@ -177,8 +177,8 @@ class SyncCaseNoteIntTest : IntegrationTest() {
     val types = getAllTypes()
     val type1 = types.random()
     val type2 = types.filter { it.typeCode != type1.typeCode && it.code != type1.code }.random()
-    val prisonNumber = personIdentifier()
-    val existing = givenCaseNote(generateCaseNote(prisonNumber, type1))
+    val personIdentifier = personIdentifier()
+    val existing = givenCaseNote(generateCaseNote(personIdentifier, type1))
     val request = existing.syncRequest().copy(type = type2.typeCode, subType = type2.code, system = System.DPS)
     val response = syncCaseNote(request).success<SyncResult>(HttpStatus.OK)
     assertThat(response.action).isEqualTo(UPDATED)
@@ -198,8 +198,8 @@ class SyncCaseNoteIntTest : IntegrationTest() {
 
   @Test
   fun `200 ok - sync amends a case note`() {
-    val prisonNumber = personIdentifier()
-    val existing = givenCaseNote(generateCaseNote(prisonNumber).withAmendment(createdAt = now().minusDays(5)))
+    val personIdentifier = personIdentifier()
+    val existing = givenCaseNote(generateCaseNote(personIdentifier).withAmendment(createdAt = now().minusDays(5)))
     val newAmendment = syncAmendmentRequest("A new amendment", createdDateTime = now().minusDays(2))
     val request = existing.syncRequest().let { it.copy(amendments = it.amendments + newAmendment) }
     val response = syncCaseNote(request).success<SyncResult>(HttpStatus.OK)
@@ -219,8 +219,8 @@ class SyncCaseNoteIntTest : IntegrationTest() {
 
   @Test
   fun `200 ok - sync updates an existing case note using legacy id`() {
-    val prisonNumber = personIdentifier()
-    val existing = givenCaseNote(generateCaseNote(prisonNumber, system = System.NOMIS))
+    val personIdentifier = personIdentifier()
+    val existing = givenCaseNote(generateCaseNote(personIdentifier, system = System.NOMIS))
     val request = existing.syncRequest().copy(id = null, text = "The text was updated in nomis by CENTRAL ADMIN")
     val response = syncCaseNote(request).success<SyncResult>(HttpStatus.OK)
     assertThat(response.action).isEqualTo(UPDATED)
@@ -240,9 +240,9 @@ class SyncCaseNoteIntTest : IntegrationTest() {
 
   @Test
   fun `200 ok - sync updates an existing case note with amendments`() {
-    val prisonNumber = personIdentifier()
+    val personIdentifier = personIdentifier()
     val existing = givenCaseNote(
-      generateCaseNote(prisonNumber).withAmendment(createdAt = now().minusSeconds(5)),
+      generateCaseNote(personIdentifier).withAmendment(createdAt = now().minusSeconds(5)),
     )
     val request = existing.syncRequest().let { r ->
       r.copy(
@@ -276,8 +276,8 @@ class SyncCaseNoteIntTest : IntegrationTest() {
 
   @Test
   fun `204 no content - delete case note`() {
-    val prisonNumber = personIdentifier()
-    val note = givenCaseNote(generateCaseNote(prisonNumber))
+    val personIdentifier = personIdentifier()
+    val note = givenCaseNote(generateCaseNote(personIdentifier))
     val cns = { noteRepository.findByIdOrNull(note.id) }
     assertThat(cns()).isNotNull()
 
@@ -316,8 +316,8 @@ class SyncCaseNoteIntTest : IntegrationTest() {
 
   @Test
   fun `200 ok - resends case note updated event`() {
-    val prisonNumber = personIdentifier()
-    val existing = givenCaseNote(generateCaseNote(prisonNumber).withAmendment(createdAt = now().minusDays(5)))
+    val personIdentifier = personIdentifier()
+    val existing = givenCaseNote(generateCaseNote(personIdentifier).withAmendment(createdAt = now().minusDays(5)))
 
     val request = ResendPersonCaseNoteEvents(setOf(existing.id))
     webTestClient.post().uri("/resend-person-case-note-events")
@@ -330,13 +330,13 @@ class SyncCaseNoteIntTest : IntegrationTest() {
 
   @Test
   fun `200 ok - resends case note respects include sync to nomis limiter`() {
-    val prisonNumber = personIdentifier()
+    val personIdentifier = personIdentifier()
     val types = getAllTypes()
     val stn = givenCaseNote(
-      generateCaseNote(prisonNumber, types.filter { it.syncToNomis }.random(), createdAt = now().minusDays(50)),
+      generateCaseNote(personIdentifier, types.filter { it.syncToNomis }.random(), createdAt = now().minusDays(50)),
     )
     val nstn = givenCaseNote(
-      generateCaseNote(prisonNumber, types.filter { !it.syncToNomis }.random(), createdAt = now().minusDays(50)),
+      generateCaseNote(personIdentifier, types.filter { !it.syncToNomis }.random(), createdAt = now().minusDays(50)),
     )
 
     val request1 = ResendPersonCaseNoteEvents(setOf(), CreatedBetween(now().minusDays(51), now().minusDays(49)))
@@ -369,26 +369,26 @@ class SyncCaseNoteIntTest : IntegrationTest() {
 
   @Test
   fun `200 ok - resends case note created and updated event for date range`() {
-    val prisonNumber = personIdentifier()
+    val personIdentifier = personIdentifier()
     val types = getAllTypes().filter { !it.syncToNomis }
     val toFind = listOf(
-      givenCaseNote(generateCaseNote(prisonNumber, types.random(), createdAt = now().minusDays(80))),
+      givenCaseNote(generateCaseNote(personIdentifier, types.random(), createdAt = now().minusDays(80))),
       givenCaseNote(
         generateCaseNote(
-          prisonNumber,
+          personIdentifier,
           types.random(),
           createdAt = now().minusDays(120),
         ).withAmendment(createdAt = now().minusDays(80)),
       ),
     )
-    givenCaseNote(generateCaseNote(prisonNumber, types.random(), createdAt = now().minusDays(70)))
-    givenCaseNote(generateCaseNote(prisonNumber, types.random(), createdAt = now().minusDays(90)))
+    givenCaseNote(generateCaseNote(personIdentifier, types.random(), createdAt = now().minusDays(70)))
+    givenCaseNote(generateCaseNote(personIdentifier, types.random(), createdAt = now().minusDays(90)))
     givenCaseNote(
-      generateCaseNote(prisonNumber, types.random(), createdAt = now().minusDays(120))
+      generateCaseNote(personIdentifier, types.random(), createdAt = now().minusDays(120))
         .withAmendment(createdAt = now()),
     )
     givenCaseNote(
-      generateCaseNote(prisonNumber, types.random(), createdAt = now().minusDays(90))
+      generateCaseNote(personIdentifier, types.random(), createdAt = now().minusDays(90))
         .withAmendment(createdAt = now().minusDays(90)),
     )
 
