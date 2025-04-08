@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus
+import org.springframework.test.web.reactive.server.WebTestClient
 import uk.gov.justice.hmpps.casenotes.config.SecurityUserContext.Companion.ROLE_CASE_NOTES_ADMIN
 import uk.gov.justice.hmpps.casenotes.config.SecurityUserContext.Companion.ROLE_CASE_NOTES_WRITE
 import uk.gov.justice.hmpps.casenotes.config.Source
@@ -26,24 +27,24 @@ class AdminDeleteCaseNoteIntTest : IntegrationTest() {
 
   @Test
   fun `401 unauthorised`() {
-    webTestClient.method(HttpMethod.DELETE).uri(urlToTest(personIdentifier(), UUID.randomUUID()))
+    webTestClient.method(HttpMethod.DELETE).uri(urlToTest(UUID.randomUUID()))
       .exchange().expectStatus().isUnauthorized
   }
 
   @Test
   fun `403 forbidden - does not have the right role`() {
-    deleteCaseNote(personIdentifier(), UUID.randomUUID(), "Reason", roles = listOf(ROLE_CASE_NOTES_WRITE))
+    deleteCaseNote(UUID.randomUUID(), "Reason", roles = listOf(ROLE_CASE_NOTES_WRITE))
       .expectStatus().isForbidden
   }
 
   @Test
   fun `404 not found - id to delete does not exist`() {
-    deleteCaseNote(personIdentifier(), UUID.randomUUID(), "Reason").expectStatus().isNotFound
+    deleteCaseNote(UUID.randomUUID(), "Reason").expectStatus().isNotFound
   }
 
   @Test
   fun `cannot delete case note without user details`() {
-    val response = deleteCaseNote(personIdentifier(), UUID.randomUUID(), "Reason", username = "NoneExistentUser")
+    val response = deleteCaseNote(UUID.randomUUID(), "Reason", username = "NoneExistentUser")
       .errorResponse(HttpStatus.BAD_REQUEST)
 
     with(response) {
@@ -56,7 +57,7 @@ class AdminDeleteCaseNoteIntTest : IntegrationTest() {
   fun `can delete a case note with admin role`() {
     val caseNote = givenCaseNote(generateCaseNote(personIdentifier()).withAmendment())
     val deletionReason = "Admin decision"
-    deleteCaseNote(caseNote.personIdentifier, caseNote.id, deletionReason).expectStatus().isNoContent
+    deleteCaseNote(caseNote.id, deletionReason).expectStatus().isNoContent
 
     val saved = noteRepository.findByIdAndPersonIdentifier(caseNote.id, caseNote.personIdentifier)
     assertThat(saved).isNull()
@@ -71,18 +72,17 @@ class AdminDeleteCaseNoteIntTest : IntegrationTest() {
   }
 
   private fun deleteCaseNote(
-    personIdentifier: String,
     caseNoteId: UUID,
     reason: String,
     roles: List<String> = listOf(ROLE_CASE_NOTES_ADMIN),
     username: String = USERNAME,
-  ) = webTestClient.method(HttpMethod.DELETE)
-    .uri(urlToTest(personIdentifier, caseNoteId))
+  ): WebTestClient.ResponseSpec = webTestClient.method(HttpMethod.DELETE)
+    .uri(urlToTest(caseNoteId))
     .bodyValue(DeleteCaseNoteRequest(reason))
     .headers(addBearerAuthorisation(username, roles))
     .exchange()
 
-  private fun urlToTest(personIdentifier: String, caseNoteId: UUID) = "/admin/case-notes/$personIdentifier/$caseNoteId"
+  private fun urlToTest(caseNoteId: UUID) = "/admin/case-notes/$caseNoteId"
 
   companion object {
     @JvmStatic

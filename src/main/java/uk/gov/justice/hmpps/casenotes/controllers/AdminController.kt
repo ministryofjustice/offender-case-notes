@@ -61,14 +61,13 @@ class AdminController(private val caseNoteAdmin: CaseNoteAdminService) {
       ),
     ],
   )
-  @PutMapping("/case-notes/{personIdentifier}/{id}")
+  @PutMapping("/case-notes/{id}")
   fun replaceCaseNote(
-    @PathVariable personIdentifier: String,
     @PathVariable id: UUID,
     @Valid @RequestBody request: ReplaceNoteRequest,
   ): CaseNote {
     CaseNoteRequestContext.get().deletionReason = request.reason
-    return caseNoteAdmin.replaceCaseNote(personIdentifier.uppercase(), id, request)
+    return caseNoteAdmin.replaceCaseNote(id, request)
   }
 
   @Operation(summary = "Endpoint to delete an existing case note")
@@ -88,21 +87,15 @@ class AdminController(private val caseNoteAdmin: CaseNoteAdminService) {
         description = "Forbidden, requires an appropriate role",
         content = [Content(schema = Schema(implementation = ErrorResponse::class))],
       ),
-      ApiResponse(
-        responseCode = "404",
-        description = "Case note not found",
-        content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))],
-      ),
     ],
   )
   @ResponseStatus(HttpStatus.NO_CONTENT)
-  @DeleteMapping("/case-notes/{personIdentifier}/{id}")
+  @DeleteMapping("/case-notes/{id}")
   fun deleteCaseNote(
-    @PathVariable personIdentifier: String,
     @PathVariable id: UUID,
     @RequestBody request: DeleteCaseNoteRequest,
   ) {
     CaseNoteRequestContext.get().deletionReason = request.reason
-    caseNoteAdmin.deleteNote(personIdentifier.uppercase(), id)
+    caseNoteAdmin.deleteNote(id)
   }
 }

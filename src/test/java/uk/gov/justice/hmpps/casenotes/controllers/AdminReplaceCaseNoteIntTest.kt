@@ -5,6 +5,7 @@ import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
+import org.springframework.test.web.reactive.server.WebTestClient
 import uk.gov.justice.hmpps.casenotes.config.SecurityUserContext.Companion.ROLE_CASE_NOTES_ADMIN
 import uk.gov.justice.hmpps.casenotes.config.SecurityUserContext.Companion.ROLE_CASE_NOTES_WRITE
 import uk.gov.justice.hmpps.casenotes.config.Source
@@ -31,22 +32,16 @@ class AdminReplaceCaseNoteIntTest : IntegrationTest() {
 
   @Test
   fun `401 unauthorised`() {
-    webTestClient.put().uri(BASE_URL, personIdentifier(), UUID.randomUUID()).exchange().expectStatus().isUnauthorized
+    webTestClient.put().uri(BASE_URL, UUID.randomUUID()).exchange().expectStatus().isUnauthorized
   }
 
   @Test
   fun `403 forbidden - does not have the right role`() {
-    replaceCaseNote(
-      personIdentifier(),
-      UUID.randomUUID(),
-      replaceNoteRequest(),
-      ROLE_CASE_NOTES_WRITE,
-    ).expectStatus().isForbidden
+    replaceCaseNote(UUID.randomUUID(), replaceNoteRequest(), ROLE_CASE_NOTES_WRITE).expectStatus().isForbidden
   }
 
   @Test
   fun `400 bad request - field validation failures`() {
-    val personIdentifier = personIdentifier()
     val id = UUID.randomUUID()
     val request = replaceNoteRequest(
       type = "n".repeat(13),
@@ -54,7 +49,7 @@ class AdminReplaceCaseNoteIntTest : IntegrationTest() {
       text = "",
       amendments = listOf(ReplaceAmendmentRequest(UUID.randomUUID(), "")),
     )
-    val response = replaceCaseNote(personIdentifier, id, request).errorResponse(HttpStatus.BAD_REQUEST)
+    val response = replaceCaseNote(id, request).errorResponse(HttpStatus.BAD_REQUEST)
     with(response) {
       assertThat(status).isEqualTo(HttpStatus.BAD_REQUEST.value())
       assertThat(developerMessage).isEqualTo(
@@ -72,7 +67,7 @@ class AdminReplaceCaseNoteIntTest : IntegrationTest() {
 
   @Test
   fun `404 not found - case note does not exist`() {
-    replaceCaseNote(personIdentifier(), UUID.randomUUID(), replaceNoteRequest(), ROLE_CASE_NOTES_ADMIN)
+    replaceCaseNote(UUID.randomUUID(), replaceNoteRequest())
       .expectStatus().isNotFound
   }
 
@@ -85,7 +80,7 @@ class AdminReplaceCaseNoteIntTest : IntegrationTest() {
       amendments = listOf(ReplaceAmendmentRequest(UUID.randomUUID(), firstAmendment.text)),
     )
 
-    val response = replaceCaseNote(personIdentifier, existing.id, request).errorResponse(HttpStatus.NOT_FOUND)
+    val response = replaceCaseNote(existing.id, request).errorResponse(HttpStatus.NOT_FOUND)
     assertThat(response.developerMessage).isEqualTo("No amendment for this case note with id ${request.amendments.first().id}")
   }
 
@@ -99,7 +94,7 @@ class AdminReplaceCaseNoteIntTest : IntegrationTest() {
       text = "The text was updated by CENTRAL ADMIN",
       occurrenceDateTime = now(),
     )
-    val response = replaceCaseNote(personIdentifier, existing.id, request).success<CaseNote>(HttpStatus.OK)
+    val response = replaceCaseNote(existing.id, request).success<CaseNote>(HttpStatus.OK)
     assertThat(response.text).isEqualTo(request.text)
     assertThat(response.type).isEqualTo(request.type)
     assertThat(response.subType).isEqualTo(request.subType)
@@ -123,7 +118,7 @@ class AdminReplaceCaseNoteIntTest : IntegrationTest() {
     val existing = givenCaseNote(generateCaseNote(personIdentifier).withAmendment().withAmendment())
     val request = existing.replaceRequest().copy(text = "The text was updated by CENTRAL ADMIN")
 
-    val response = replaceCaseNote(personIdentifier, existing.id, request).success<CaseNote>(HttpStatus.OK)
+    val response = replaceCaseNote(existing.id, request).success<CaseNote>(HttpStatus.OK)
     assertThat(response.text).isEqualTo(request.text)
     assertThat(response.amendments).hasSize(2)
 
@@ -149,7 +144,7 @@ class AdminReplaceCaseNoteIntTest : IntegrationTest() {
       amendments = listOf(ReplaceAmendmentRequest(firstAmendment.id, firstAmendment.text)),
     )
 
-    val response = replaceCaseNote(personIdentifier, existing.id, request).success<CaseNote>(HttpStatus.OK)
+    val response = replaceCaseNote(existing.id, request).success<CaseNote>(HttpStatus.OK)
     assertThat(response.text).isEqualTo(request.text)
     assertThat(response.amendments).hasSize(1)
     assertThat(response.amendments.first().additionalNoteText).isEqualTo(request.amendments.first().text)
@@ -175,7 +170,7 @@ class AdminReplaceCaseNoteIntTest : IntegrationTest() {
       amendments = listOf(ReplaceAmendmentRequest(firstAmendment.id, "This text was updated by CENTRAL ADMIN")),
     )
 
-    val response = replaceCaseNote(personIdentifier, existing.id, request).success<CaseNote>(HttpStatus.OK)
+    val response = replaceCaseNote(existing.id, request).success<CaseNote>(HttpStatus.OK)
     assertThat(response.text).isEqualTo(request.text)
     assertThat(response.amendments).hasSize(1)
     assertThat(response.amendments.first().additionalNoteText).isEqualTo(request.amendments.first().text)
@@ -202,11 +197,10 @@ class AdminReplaceCaseNoteIntTest : IntegrationTest() {
   ) = ReplaceNoteRequest(type, subType, text, occurrenceDateTime, reason, amendments)
 
   private fun replaceCaseNote(
-    personIdentifier: String,
     id: UUID,
     request: ReplaceNoteRequest,
     roles: String = ROLE_CASE_NOTES_ADMIN,
-  ) = webTestClient.put().uri(BASE_URL, personIdentifier, id)
+  ): WebTestClient.ResponseSpec = webTestClient.put().uri(BASE_URL, id)
     .bodyValue(request)
     .headers(addBearerAuthorisation("AdminUser", listOf(roles)))
     .exchange()
@@ -229,7 +223,7 @@ class AdminReplaceCaseNoteIntTest : IntegrationTest() {
   }
 
   companion object {
-    private const val BASE_URL = "/admin/case-notes/{personIdentifier}/{id}"
+    private const val BASE_URL = "/admin/case-notes/{id}"
 
     @BeforeAll
     @JvmStatic

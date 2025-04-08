@@ -1,6 +1,7 @@
 package uk.gov.justice.hmpps.casenotes.notes
 
 import org.springframework.context.ApplicationEventPublisher
+import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import uk.gov.justice.hmpps.casenotes.domain.Note
@@ -22,10 +23,8 @@ class CaseNoteAdminService(
   private val eventPublisher: ApplicationEventPublisher,
 ) {
 
-  fun replaceCaseNote(personIdentifier: String, id: UUID, request: ReplaceNoteRequest): CaseNote {
-    val existing = noteRepository.findByIdAndPersonIdentifier(id, personIdentifier)
-      ?: throw EntityNotFoundException.withId(id.toString())
-
+  fun replaceCaseNote(id: UUID, request: ReplaceNoteRequest): CaseNote {
+    val existing = noteRepository.findByIdOrNull(id) ?: throw EntityNotFoundException.withId(id.toString())
     noteRepository.delete(existing)
     noteRepository.flush()
     return noteRepository.save(
@@ -33,17 +32,13 @@ class CaseNoteAdminService(
     ).also { eventPublisher.publishEvent(it.createEvent(UPDATED)) }.toModel()
   }
 
-  fun deleteNote(personIdentifier: String, caseNoteId: UUID) {
-    getCaseNote(personIdentifier, caseNoteId).also {
-      noteRepository.delete(it)
-      eventPublisher.publishEvent(it.createEvent(DELETED))
-    }
+  fun deleteNote(id: UUID) {
+    val existing = noteRepository.findByIdOrNull(id) ?: throw EntityNotFoundException.withId(id.toString())
+    noteRepository.delete(existing)
+    eventPublisher.publishEvent(existing.createEvent(DELETED))
   }
 
-  private fun getCaseNote(personIdentifier: String, caseNoteId: UUID): Note = noteRepository.findByIdAndPersonIdentifier(caseNoteId, personIdentifier)
-    ?.takeIf { it.personIdentifier == personIdentifier } ?: throw EntityNotFoundException.withId("$caseNoteId")
-
-  private fun ReplaceNoteRequest.asNote(
+  fun ReplaceNoteRequest.asNote(
     existing: Note,
     typeSupplier: (String, String) -> SubType,
   ): Note = Note(
