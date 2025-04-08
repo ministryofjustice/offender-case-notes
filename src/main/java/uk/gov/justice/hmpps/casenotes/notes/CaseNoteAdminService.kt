@@ -33,9 +33,10 @@ class CaseNoteAdminService(
   }
 
   fun deleteNote(id: UUID) {
-    val existing = noteRepository.findByIdOrNull(id) ?: throw EntityNotFoundException.withId(id.toString())
-    noteRepository.delete(existing)
-    eventPublisher.publishEvent(existing.createEvent(DELETED))
+    noteRepository.findByIdOrNull(id)?.also {
+      noteRepository.delete(it)
+      eventPublisher.publishEvent(it.createEvent(DELETED))
+    }
   }
 
   fun ReplaceNoteRequest.asNote(
