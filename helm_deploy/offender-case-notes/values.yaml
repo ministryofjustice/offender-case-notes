@@ -13,7 +13,7 @@ generic-service:
       memory: 1280Mi
 
   image:
-    repository: quay.io/hmpps/offender-case-notes
+    repository: ghcr.io/ministryofjustice/offender-case-notes
     tag: app_version # override at deployment time
     port: 8080
 
