@@ -28,7 +28,7 @@ dependencies {
   implementation("org.springframework.boot:spring-boot-starter-oauth2-client")
   implementation("org.springframework.boot:spring-boot-starter-webflux")
   implementation("uk.gov.justice.service.hmpps:hmpps-sqs-spring-boot-starter:5.4.2")
-  implementation("io.sentry:sentry-spring-boot-starter-jakarta:8.6.0")
+  implementation("io.sentry:sentry-spring-boot-starter-jakarta:8.7.0")
 
   implementation("javax.activation:activation:1.1.1")
   implementation("javax.transaction:javax.transaction-api:1.3")
@@ -39,10 +39,10 @@ dependencies {
   implementation("org.apache.commons:commons-text:1.13.0")
   implementation("com.fasterxml.uuid:java-uuid-generator:5.1.0")
   implementation("com.pauldijou:jwt-core_2.11:5.0.0")
-  implementation("com.google.guava:guava:33.4.7-android")
+  implementation("com.google.guava:guava:33.4.7-jre")
 
   implementation(platform("com.amazonaws:aws-java-sdk-bom:1.12.782"))
-  implementation("software.amazon.awssdk:sns:2.31.17")
+  implementation("software.amazon.awssdk:sns:2.31.20")
 
   testAnnotationProcessor("org.projectlombok:lombok:1.18.38")
   testCompileOnly("org.projectlombok:lombok:1.18.38")
