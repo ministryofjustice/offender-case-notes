@@ -1,6 +1,7 @@
 package uk.gov.justice.hmpps.casenotes.notes
 
 import io.swagger.v3.oas.annotations.Parameter
+import io.swagger.v3.oas.annotations.media.Schema
 import jakarta.validation.ValidationException
 import jakarta.validation.constraints.Min
 import org.springframework.data.domain.PageRequest
@@ -42,4 +43,11 @@ interface PagedRequest {
   fun pageable(): Pageable = PageRequest.of(page - 1, size, sort())
 }
 
-data class PageMeta(val totalElements: Int, val page: Int, val size: Int)
+data class PageMeta(
+  @Schema(description = "The total number of results across all pages", example = "1")
+  val totalElements: Int,
+  @Schema(description = "The current page number", example = "1")
+  val page: Int,
+  @Schema(description = "The maximum number of results per page", example = "10")
+  val size: Int,
+)
