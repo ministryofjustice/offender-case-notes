@@ -49,5 +49,5 @@ data class PageMeta(
   @Schema(description = "The current page number", example = "1")
   val page: Int,
   @Schema(description = "The maximum number of results per page", example = "10")
-  val size: Int
+  val size: Int,
 )
