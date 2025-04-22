@@ -12,10 +12,6 @@ import uk.gov.justice.hmpps.casenotes.domain.NoteRepository
 import uk.gov.justice.hmpps.casenotes.domain.SubTypeRepository
 import uk.gov.justice.hmpps.casenotes.domain.System
 import uk.gov.justice.hmpps.casenotes.domain.TypeKey
-import uk.gov.justice.hmpps.casenotes.domain.matchesOnType
-import uk.gov.justice.hmpps.casenotes.domain.matchesPersonIdentifier
-import uk.gov.justice.hmpps.casenotes.domain.occurredAfter
-import uk.gov.justice.hmpps.casenotes.domain.occurredBefore
 import uk.gov.justice.hmpps.casenotes.events.AdditionalInformation
 import uk.gov.justice.hmpps.casenotes.events.DomainEvent
 import uk.gov.justice.hmpps.casenotes.events.PersonCaseNoteEvent.Companion.createEvent
@@ -43,10 +39,8 @@ class AlertCaseNoteHandler(
     val (alert, prisonCode) = domainEvent.alertAndLocation()
     if (!prisonApiService.alertCaseNotesFor(prisonCode)) return
 
-    if (existsFor(alert)) return
-
     val userDetail = manageUsersService.getUserDetails(alert.createdBy)
-    val saved = noteRepository.save(alert.toNote(prisonCode, userDetail, alert.createdAt))
+    val saved = noteRepository.save(alert.toNote(prisonCode, userDetail, alert.madeInactiveAt))
     eventPublisher.publishEvent(saved.createEvent(CREATED, sourceOverride = Source.DPS))
   }
 
@@ -54,22 +48,9 @@ class AlertCaseNoteHandler(
     val (alert, prisonCode) = domainEvent.alertAndLocation()
     if (!prisonApiService.alertCaseNotesFor(prisonCode)) return
 
-    val username = alert.inactiveUsername()
-    val userDetail = username?.let { manageUsersService.getUserDetails(it) }
+    val userDetail = alert.madeInactiveBy?.let { manageUsersService.getUserDetails(it) }
     val saved = noteRepository.save(alert.toNote(prisonCode, userDetail, domainEvent.occurredAt.toLocalDateTime()))
     eventPublisher.publishEvent(saved.createEvent(CREATED, sourceOverride = Source.DPS))
-  }
-
-  private fun existsFor(alert: Alert): Boolean = noteRepository.findAll(
-    matchesPersonIdentifier(alert.prisonNumber)
-      .and(matchesOnType(true, mapOf(TYPE to setOf(alert.activeInactive().name))))
-      .and(occurredAfter(alert.activeFrom.atStartOfDay()))
-      .and(occurredBefore(alert.activeTo?.plusDays(1)?.atStartOfDay() ?: alert.activeFrom.plusDays(1).atStartOfDay())),
-  ).any {
-    when (alert.activeInactive()) {
-      ACTIVE -> it.text == alert.activeText()
-      INACTIVE -> it.text == alert.inactiveText()
-    }
   }
 
   private fun DomainEvent<AlertAdditionalInformation>.alertAndLocation(): Pair<Alert, String> {

@@ -145,44 +145,6 @@ class AlertCaseNoteIntegrationTest : IntegrationTest() {
   }
 
   @Test
-  fun `alert inactive case note not created if already exists`() {
-    val prisonCode = "CDP"
-    val alert = alert(
-      activeTo = LocalDate.now().minusDays(1),
-      createdBy = "AN07H3R",
-      activeToLastSetAt = LocalDateTime.now(),
-      activeToLastSetBy = "AN07H3R",
-    )
-    alertsApi.withAlert(alert)
-    prisonerSearchApi.stubPrisonerDetails(alert.prisonNumber, prisonCode)
-    elite2Api.stubPrisonSwitch(response = listOf(PrisonDetail("*ALL*", "All Active")))
-
-    val type = getAllTypes().single { it.typeCode == "ALERT" && it.code == "INACTIVE" }
-    givenCaseNote(
-      generateCaseNote(
-        alert.prisonNumber,
-        locationId = prisonCode,
-        type = type,
-        occurredAt = alert.activeFrom.atStartOfDay(),
-        text = alert.inactiveText(),
-      ).apply {
-        legacyId = noteRepository.getNextLegacyId()
-        createdBy = "OMS_OWNER"
-        createdAt = alert.activeToLastSetAt!!
-      },
-    )
-
-    publishEventToTopic(alert.domainEvent(ALERT_CREATED))
-    await untilCallTo { domainEventsQueue.countAllMessagesOnQueue() } matches { it == 0 }
-
-    assertThat(
-      noteRepository.findAll().filter {
-        it.personIdentifier == alert.prisonNumber && it.locationId == prisonCode
-      },
-    ).hasSize(1)
-  }
-
-  @Test
   fun `no alert inactive case note created if prison not active`() {
     val prisonCode = "INA"
     val alert = alert(activeTo = LocalDate.now(), activeToLastSetAt = LocalDateTime.now())
@@ -200,13 +162,13 @@ class AlertCaseNoteIntegrationTest : IntegrationTest() {
   fun `alert inactive case note created if prison active`() {
     val prisonCode = "ACT"
     val alert =
-      alert(activeTo = LocalDate.now(), activeToLastSetAt = LocalDateTime.now(), activeToLastSetBy = "BCreated")
+      alert(activeTo = LocalDate.now(), madeInactiveAt = LocalDateTime.now(), madeInactiveBy = "BCreated")
     alertsApi.withAlert(alert)
     prisonerSearchApi.stubPrisonerDetails(alert.prisonNumber, prisonCode)
     elite2Api.stubPrisonSwitch(response = listOf(PrisonDetail("ACT", "Active Prison")))
 
     val userDetails =
-      UserDetails(alert.activeToLastSetBy!!, true, "Brian Created", "nomis", "null", "5761427", newUuid())
+      UserDetails(alert.madeInactiveBy!!, true, "Brian Created", "nomis", "null", "5761427", newUuid())
     manageUsersApi.stubGetUserDetails(userDetails)
 
     val event = alert.domainEvent(ALERT_INACTIVE)
@@ -226,7 +188,7 @@ class AlertCaseNoteIntegrationTest : IntegrationTest() {
   fun `alert inactive case note created if all prisons active`() {
     val prisonCode = "SOM"
     val alert =
-      alert(activeTo = LocalDate.now(), activeToLastSetAt = LocalDateTime.now(), activeToLastSetBy = "AN07H3R")
+      alert(activeTo = LocalDate.now(), madeInactiveAt = LocalDateTime.now(), madeInactiveBy = "AN07H3R")
     alertsApi.withAlert(alert)
     prisonerSearchApi.stubPrisonerDetails(alert.prisonNumber, prisonCode)
     elite2Api.stubPrisonSwitch(
@@ -237,7 +199,7 @@ class AlertCaseNoteIntegrationTest : IntegrationTest() {
     )
 
     val userDetails =
-      UserDetails(alert.activeToLastSetBy!!, true, "Another Person", "nomis", "null", "81946582", newUuid())
+      UserDetails(alert.madeInactiveBy!!, true, "Another Person", "nomis", "null", "81946582", newUuid())
     manageUsersApi.stubGetUserDetails(userDetails)
 
     val event = alert.domainEvent(ALERT_INACTIVE)
@@ -299,6 +261,8 @@ fun alert(
   createdBy: String = "BCreated",
   activeToLastSetAt: LocalDateTime? = null,
   activeToLastSetBy: String? = null,
+  madeInactiveAt: LocalDateTime? = null,
+  madeInactiveBy: String? = null,
   alertUuid: UUID = newUuid(),
 ) = Alert(
   alertUuid,
@@ -311,6 +275,8 @@ fun alert(
   createdBy,
   activeToLastSetAt,
   activeToLastSetBy,
+  madeInactiveAt,
+  madeInactiveBy,
 )
 
 private fun Note.verifyAgainst(alert: Alert, userDetails: UserDetails, madeInactiveAt: LocalDateTime?) {

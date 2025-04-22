@@ -15,12 +15,12 @@ data class Alert(
   val createdBy: String,
   val activeToLastSetAt: LocalDateTime?,
   val activeToLastSetBy: String?,
+  val madeInactiveAt: LocalDateTime?,
+  val madeInactiveBy: String?,
 ) {
   private fun textTemplate() = "Alert ${alertCode.alertTypeDescription} and ${alertCode.description} made"
   fun activeText() = "${textTemplate()} active."
   fun inactiveText() = "${textTemplate()} inactive."
-
-  fun inactiveUsername(): String? = if (activeTo == activeToLastSetAt?.toLocalDate()) activeToLastSetBy else null
 }
 
 data class AlertCodeSummary(
