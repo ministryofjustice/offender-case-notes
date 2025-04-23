@@ -20,7 +20,6 @@ import uk.gov.justice.hmpps.casenotes.integrations.ManageUsersService
 import uk.gov.justice.hmpps.casenotes.integrations.PrisonApiService
 import uk.gov.justice.hmpps.casenotes.integrations.PrisonerSearchService
 import uk.gov.justice.hmpps.casenotes.integrations.UserDetails
-import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit.SECONDS
 import java.util.UUID
 
@@ -40,7 +39,7 @@ class AlertCaseNoteHandler(
     if (!prisonApiService.alertCaseNotesFor(prisonCode)) return
 
     val userDetail = manageUsersService.getUserDetails(alert.createdBy)
-    val saved = noteRepository.save(alert.toNote(prisonCode, userDetail, alert.madeInactiveAt))
+    val saved = noteRepository.save(alert.toNote(prisonCode, userDetail))
     eventPublisher.publishEvent(saved.createEvent(CREATED, sourceOverride = Source.DPS))
   }
 
@@ -49,7 +48,7 @@ class AlertCaseNoteHandler(
     if (!prisonApiService.alertCaseNotesFor(prisonCode)) return
 
     val userDetail = alert.madeInactiveBy?.let { manageUsersService.getUserDetails(it) }
-    val saved = noteRepository.save(alert.toNote(prisonCode, userDetail, domainEvent.occurredAt.toLocalDateTime()))
+    val saved = noteRepository.save(alert.toNote(prisonCode, userDetail))
     eventPublisher.publishEvent(saved.createEvent(CREATED, sourceOverride = Source.DPS))
   }
 
@@ -68,7 +67,6 @@ class AlertCaseNoteHandler(
   fun Alert.toNote(
     prisonCode: String,
     userDetails: UserDetails?,
-    madeInactiveAt: LocalDateTime?,
   ) = Note(
     prisonNumber,
     checkNotNull(subTypeRepository.findByKey(TypeKey(TYPE, activeInactive().name))),
