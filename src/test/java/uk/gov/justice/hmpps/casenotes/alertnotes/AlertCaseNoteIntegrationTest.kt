@@ -83,7 +83,7 @@ class AlertCaseNoteIntegrationTest : IntegrationTest() {
       it.personIdentifier == alert.prisonNumber && it.locationId == prisonCode
     }
 
-    caseNote.verifyAgainst(alert, userDetails, null)
+    caseNote.verifyAgainst(alert, userDetails)
 
     hmppsEventsQueue.receivePersonCaseNoteEvent().verifyAgainst(PersonCaseNoteEvent.Type.CREATED, Source.DPS, caseNote)
   }
@@ -111,7 +111,7 @@ class AlertCaseNoteIntegrationTest : IntegrationTest() {
       it.personIdentifier == alert.prisonNumber && it.locationId == prisonCode
     }
 
-    caseNote.verifyAgainst(alert, userDetails, null)
+    caseNote.verifyAgainst(alert, userDetails)
 
     hmppsEventsQueue.receivePersonCaseNoteEvent().verifyAgainst(PersonCaseNoteEvent.Type.CREATED, Source.DPS, caseNote)
   }
@@ -122,8 +122,8 @@ class AlertCaseNoteIntegrationTest : IntegrationTest() {
     val alert = alert(
       activeTo = LocalDate.now().minusDays(1),
       createdBy = "AN07H3R",
-      activeToLastSetAt = LocalDateTime.now(),
-      activeToLastSetBy = "AN07H3R",
+      madeInactiveAt = LocalDateTime.now(),
+      madeInactiveBy = "AN07H3R",
     )
     alertsApi.withAlert(alert)
     prisonerSearchApi.stubPrisonerDetails(alert.prisonNumber, prisonCode)
@@ -139,7 +139,7 @@ class AlertCaseNoteIntegrationTest : IntegrationTest() {
       it.personIdentifier == alert.prisonNumber && it.locationId == prisonCode
     }
 
-    caseNote.verifyAgainst(alert, userDetails, alert.createdAt)
+    caseNote.verifyAgainst(alert, userDetails)
 
     hmppsEventsQueue.receivePersonCaseNoteEvent().verifyAgainst(PersonCaseNoteEvent.Type.CREATED, Source.DPS, caseNote)
   }
@@ -162,13 +162,13 @@ class AlertCaseNoteIntegrationTest : IntegrationTest() {
   fun `alert inactive case note created if prison active`() {
     val prisonCode = "ACT"
     val alert =
-      alert(activeTo = LocalDate.now(), activeToLastSetAt = LocalDateTime.now(), activeToLastSetBy = "BCreated")
+      alert(activeTo = LocalDate.now(), madeInactiveAt = LocalDateTime.now(), madeInactiveBy = "BCreated")
     alertsApi.withAlert(alert)
     prisonerSearchApi.stubPrisonerDetails(alert.prisonNumber, prisonCode)
     elite2Api.stubPrisonSwitch(response = listOf(PrisonDetail("ACT", "Active Prison")))
 
     val userDetails =
-      UserDetails(alert.activeToLastSetBy!!, true, "Brian Created", "nomis", "null", "5761427", newUuid())
+      UserDetails(alert.madeInactiveBy!!, true, "Brian Created", "nomis", "null", "5761427", newUuid())
     manageUsersApi.stubGetUserDetails(userDetails)
 
     val event = alert.domainEvent(ALERT_INACTIVE)
@@ -179,7 +179,7 @@ class AlertCaseNoteIntegrationTest : IntegrationTest() {
       it.personIdentifier == alert.prisonNumber && it.locationId == prisonCode
     }
 
-    caseNote.verifyAgainst(alert, userDetails, event.occurredAt.toLocalDateTime())
+    caseNote.verifyAgainst(alert, userDetails)
 
     hmppsEventsQueue.receivePersonCaseNoteEvent().verifyAgainst(PersonCaseNoteEvent.Type.CREATED, Source.DPS, caseNote)
   }
@@ -188,7 +188,7 @@ class AlertCaseNoteIntegrationTest : IntegrationTest() {
   fun `alert inactive case note created if all prisons active`() {
     val prisonCode = "SOM"
     val alert =
-      alert(activeTo = LocalDate.now(), activeToLastSetAt = LocalDateTime.now(), activeToLastSetBy = "AN07H3R")
+      alert(activeTo = LocalDate.now(), madeInactiveAt = LocalDateTime.now(), madeInactiveBy = "AN07H3R")
     alertsApi.withAlert(alert)
     prisonerSearchApi.stubPrisonerDetails(alert.prisonNumber, prisonCode)
     elite2Api.stubPrisonSwitch(
@@ -199,7 +199,7 @@ class AlertCaseNoteIntegrationTest : IntegrationTest() {
     )
 
     val userDetails =
-      UserDetails(alert.activeToLastSetBy!!, true, "Another Person", "nomis", "null", "81946582", newUuid())
+      UserDetails(alert.madeInactiveBy!!, true, "Another Person", "nomis", "null", "81946582", newUuid())
     manageUsersApi.stubGetUserDetails(userDetails)
 
     val event = alert.domainEvent(ALERT_INACTIVE)
@@ -210,7 +210,7 @@ class AlertCaseNoteIntegrationTest : IntegrationTest() {
       it.personIdentifier == alert.prisonNumber && it.locationId == prisonCode
     }
 
-    caseNote.verifyAgainst(alert, userDetails, event.occurredAt.toLocalDateTime())
+    caseNote.verifyAgainst(alert, userDetails)
 
     hmppsEventsQueue.receivePersonCaseNoteEvent().verifyAgainst(PersonCaseNoteEvent.Type.CREATED, Source.DPS, caseNote)
   }
@@ -218,7 +218,7 @@ class AlertCaseNoteIntegrationTest : IntegrationTest() {
   @Test
   fun `alert inactive case note created when automatically made inactive`() {
     val prisonCode = "ACT"
-    val alert = alert(activeTo = LocalDate.now())
+    val alert = alert(activeTo = LocalDate.now(), madeInactiveAt = LocalDateTime.now(), madeInactiveBy = "deactiv8")
     alertsApi.withAlert(alert)
     prisonerSearchApi.stubPrisonerDetails(alert.prisonNumber, prisonCode)
     elite2Api.stubPrisonSwitch(
@@ -236,7 +236,6 @@ class AlertCaseNoteIntegrationTest : IntegrationTest() {
     caseNote.verifyAgainst(
       alert,
       UserDetails("OMS_OWNER", true, "System Generated", "nomis", null, "1", null),
-      event.occurredAt.toLocalDateTime(),
     )
 
     hmppsEventsQueue.receivePersonCaseNoteEvent().verifyAgainst(PersonCaseNoteEvent.Type.CREATED, Source.DPS, caseNote)
@@ -261,6 +260,8 @@ fun alert(
   createdBy: String = "BCreated",
   activeToLastSetAt: LocalDateTime? = null,
   activeToLastSetBy: String? = null,
+  madeInactiveAt: LocalDateTime? = null,
+  madeInactiveBy: String? = null,
   alertUuid: UUID = newUuid(),
 ) = Alert(
   alertUuid,
@@ -273,10 +274,12 @@ fun alert(
   createdBy,
   activeToLastSetAt,
   activeToLastSetBy,
+  madeInactiveAt,
+  madeInactiveBy,
 )
 
-private fun Note.verifyAgainst(alert: Alert, userDetails: UserDetails, madeInactiveAt: LocalDateTime?) {
-  assertThat(createdAt.truncatedTo(SECONDS)).isEqualTo(alert.createdAt(madeInactiveAt)!!.truncatedTo(SECONDS))
+private fun Note.verifyAgainst(alert: Alert, userDetails: UserDetails) {
+  assertThat(createdAt.truncatedTo(SECONDS)).isEqualTo(alert.createdAt()!!.truncatedTo(SECONDS))
   assertThat(ActiveInactive.valueOf(subType.code)).isEqualTo(if (alert.isActive) ACTIVE else INACTIVE)
   assertThat(authorUsername).isEqualTo(userDetails.username)
   assertThat(authorUserId).isEqualTo(userDetails.userId)
@@ -284,4 +287,4 @@ private fun Note.verifyAgainst(alert: Alert, userDetails: UserDetails, madeInact
   assertThat(text).isEqualTo(if (alert.isActive) alert.activeText() else alert.inactiveText())
 }
 
-private fun Alert.createdAt(madeInactiveAt: LocalDateTime?) = if (isActive) createdAt else madeInactiveAt
+private fun Alert.createdAt() = if (isActive) createdAt else madeInactiveAt
