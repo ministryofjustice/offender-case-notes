@@ -25,7 +25,7 @@ generic-service:
     delius-test-3: 52.56.195.113/32
 
 generic-prometheus-alerts:
-  alertSeverity: hmpps-alerts-api-non-prod
+  alertSeverity: hmpps-prisoner-profile-non-prod
   rdsAlertsDatabases:
     cloud-platform-58ca03d8cef2cd18: 'offender case notes'
   businessHoursOnly: true
