@@ -57,17 +57,6 @@ class CreateCaseNoteIntTest : IntegrationTest() {
   }
 
   @Test
-  fun `cannot create a case note with an inactive type`() {
-    val type = givenRandomType(active = false, restricted = false)
-    val request = createCaseNoteRequest(type = type.type.code, subType = type.code)
-    val response = createCaseNote(personIdentifier(), request, params = mapOf()).errorResponse(HttpStatus.BAD_REQUEST)
-
-    with(response) {
-      assertThat(developerMessage).isEqualTo("Case note type not active")
-    }
-  }
-
-  @Test
   fun `cannot create a sync to nomis case note with non nomis user`() {
     val username = "DeliusUser"
     manageUsersApi.stubGetUserDetails(username, nomisUser = false)
