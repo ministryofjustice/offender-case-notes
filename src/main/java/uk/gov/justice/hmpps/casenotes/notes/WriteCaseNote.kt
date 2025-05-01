@@ -1,6 +1,5 @@
 package uk.gov.justice.hmpps.casenotes.notes
 
-import jakarta.validation.ValidationException
 import org.springframework.context.ApplicationEventPublisher
 import org.springframework.security.access.AccessDeniedException
 import org.springframework.security.access.prepost.PreAuthorize
@@ -34,8 +33,6 @@ class WriteCaseNote(
   fun createNote(personIdentifier: String, request: CreateCaseNoteRequest): CaseNote {
     val type = subTypeRepository.getByTypeCodeAndCode(request.type, request.subType)
       .validateTypeUsage()
-
-    if (!type.active) throw ValidationException("Case note type not active")
 
     val saved = noteRepository.saveAndRefresh(request.toEntity(personIdentifier, type, CaseNoteRequestContext.get()))
     eventPublisher.publishEvent(saved.createEvent(CREATED))
