@@ -42,7 +42,7 @@ dependencies {
   implementation("com.google.guava:guava:33.4.8-jre")
 
   implementation(platform("com.amazonaws:aws-java-sdk-bom:1.12.783"))
-  implementation("software.amazon.awssdk:sns:2.31.33")
+  implementation("software.amazon.awssdk:sns:2.31.34")
 
   testAnnotationProcessor("org.projectlombok:lombok:1.18.38")
   testCompileOnly("org.projectlombok:lombok:1.18.38")
