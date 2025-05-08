@@ -12,10 +12,9 @@ with new_types(code, description) as (values ('VET_VICSO', 'ViCSO'),
                                              ('VET_EDU_EMP', 'Education/Employment'),
                                              ('VET_OTHER', 'Other'))
 insert
-into case_note_sub_type(id, type_code, code, description, active, created_at, created_by,
+into case_note_sub_type(type_code, code, description, active, created_at, created_by,
                     sensitive, restricted_use, sync_to_nomis, dps_user_selectable)
-select nextval('case_note_sub_type_id_seq'),
-       'VETERAN',
+select 'VETERAN',
        nt.code,
        nt.description,
        true,
