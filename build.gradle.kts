@@ -42,13 +42,13 @@ dependencies {
   implementation("com.google.guava:guava:33.4.8-jre")
 
   implementation(platform("com.amazonaws:aws-java-sdk-bom:1.12.783"))
-  implementation("software.amazon.awssdk:sns:2.31.38")
+  implementation("software.amazon.awssdk:sns:2.31.40")
 
   testAnnotationProcessor("org.projectlombok:lombok:1.18.38")
   testCompileOnly("org.projectlombok:lombok:1.18.38")
   testImplementation("org.springframework.security:spring-security-test")
   testImplementation("com.tngtech.java:junit-dataprovider:1.13.1")
-  testImplementation("net.javacrumbs.json-unit:json-unit-assertj:4.1.0")
+  testImplementation("net.javacrumbs.json-unit:json-unit-assertj:4.1.1")
   testImplementation("io.github.http-builder-ng:http-builder-ng-apache:1.0.4")
   testImplementation("org.wiremock:wiremock-standalone:3.13.0")
   testImplementation("org.testcontainers:postgresql:1.21.0")
@@ -61,7 +61,7 @@ dependencies {
   testImplementation("org.springframework.security.oauth:spring-security-oauth2:2.5.2.RELEASE")
   testImplementation("org.springframework.security:spring-security-jwt:1.1.1.RELEASE")
   testImplementation("org.mockito.kotlin:mockito-kotlin:5.4.0")
-  testImplementation("io.swagger.parser.v3:swagger-parser-v3:2.1.26")
+  testImplementation("io.swagger.parser.v3:swagger-parser-v3:2.1.27")
 }
 
 java {
