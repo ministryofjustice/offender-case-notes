@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<suppressions xmlns="https://jeremylong.github.io/DependencyCheck/dependency-suppression.1.3.xsd">
+  <!-- Dependency of Gatling gradle plugin, not used in production code -->
+  <suppress>
+      <notes><![CDATA[
+     file name: pebble-3.2.4.jar
+     ]]></notes>
+      <packageUrl regex="true">^pkg:maven/io\.pebbletemplates/pebble@.*$</packageUrl>
+      <cve>CVE-2025-1686</cve>
+  </suppress>
+</suppressions>
