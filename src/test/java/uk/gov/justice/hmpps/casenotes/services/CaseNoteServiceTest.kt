@@ -931,7 +931,7 @@ class CaseNoteServiceTest {
     .locationId("MDI")
     .authorUsername("USER2")
     .authorUserId("some user")
-    .authorName("Mickey Mouse")
+    .authorName("John Smith")
     .personIdentifier("A1234AC")
     .subType(caseNoteSubType)
     .text("HELLO")

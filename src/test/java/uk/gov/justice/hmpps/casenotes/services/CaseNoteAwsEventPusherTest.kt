@@ -89,7 +89,7 @@ class CaseNoteAwsEventPusherTest {
     .locationId("MDI")
     .authorUserId("some user")
     .authorUsername("SOME_USER")
-    .authorName("Mickey Mouse")
+    .authorName("John Smith")
     .personIdentifier("A1234AC")
     .type("GEN")
     .typeDescription("Description of GEN")

@@ -47,7 +47,7 @@ class ManageUsersApiServer : WireMockServer(WIREMOCK_PORT) {
               UserDetails(
                 username = username,
                 active = true,
-                name = "Mikey Mouse",
+                name = "John Smith",
                 authSource = if (nomisUser) "nomis" else "delius",
                 activeCaseLoadId = "MDI",
                 userId = "1111",
