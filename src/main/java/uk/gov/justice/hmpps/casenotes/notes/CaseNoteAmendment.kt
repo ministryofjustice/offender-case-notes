@@ -20,7 +20,7 @@ data class CaseNoteAmendment(
   @Schema(required = true, description = "Username of the user amending the case note", example = "USER1")
   val authorUserName: String,
 
-  @Schema(required = true, description = "Name of the user amending the case note", example = "Mickey Mouse")
+  @Schema(required = true, description = "Name of the user amending the case note", example = "John Smith")
   val authorName: String,
 
   @Schema(

@@ -54,7 +54,7 @@ class Elite2MockServer : WireMockServer(WIREMOCK_PORT) {
             "occurrenceDateTime": "2021-06-07T14:58:14.917397",
             "staffId": 1231232,
             "authorUsername": "MIC123",
-            "authorName": "Mickey Mouse",
+            "authorName": "John Smith",
             "text": "Some Text",
             "originalNoteText": "Some Text",
             "agencyId": "LEI",
@@ -138,7 +138,7 @@ class Elite2MockServer : WireMockServer(WIREMOCK_PORT) {
     .id(131232)
     .agencyId("LEI")
     .authorUsername("MIC123")
-    .authorName("Mickey Mouse")
+    .authorName("John Smith")
     .createdAt(LocalDateTime.now().minusMonths(1))
     .source("INST")
     .originalNoteText("Some Text")
