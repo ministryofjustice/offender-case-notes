@@ -2,13 +2,8 @@ import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
   id("uk.gov.justice.hmpps.gradle-spring-boot") version "8.1.0"
-<<<<<<< Updated upstream
   kotlin("plugin.spring") version "2.1.21"
   kotlin("plugin.jpa") version "2.1.21"
-=======
-  kotlin("plugin.spring") version "2.1.20"
-  kotlin("plugin.jpa") version "2.1.20"
->>>>>>> Stashed changes
   id("io.gatling.gradle") version "3.14.1.4"
   jacoco
 }
