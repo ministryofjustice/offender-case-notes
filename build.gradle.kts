@@ -67,6 +67,10 @@ java {
   toolchain.languageVersion.set(JavaLanguageVersion.of(21))
 }
 
+dependencyCheck {
+  suppressionFiles.add("$rootDir/dependencyCheck/suppression.xml")
+}
+
 tasks {
   withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
     compilerOptions {
