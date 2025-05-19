@@ -288,7 +288,7 @@ class CaseNoteResourceTest : IntegrationTest() {
                 "source": "INST",
                 "creationDateTime": "2021-06-07T14:58:14.917306",
                 "occurrenceDateTime": "2021-06-07T14:58:14.917397",
-                "authorName": "Mickey Mouse",
+                "authorName": "John Smith",
                 "authorUserId": "1231232",
                 "text": "Some Text",
                 "locationId": "LEI",

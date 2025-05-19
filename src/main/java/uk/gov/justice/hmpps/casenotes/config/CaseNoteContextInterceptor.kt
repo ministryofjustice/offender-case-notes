@@ -76,7 +76,7 @@ class CaseNoteContextInterceptor(
     ?: throw ValidationException("username for audit exceeds 64 characters")
 
   private fun HttpServletRequest.extractHeaders(): Headers? {
-    return getHeader("CaseloadId")?.let {
+    return getHeader(CaseloadIdHeader.NAME)?.let {
       if (it.isBlank()) return null
       // add request header to request in app insights to avoid having custom events
       Span.current().setAttribute("caseloadId", it)

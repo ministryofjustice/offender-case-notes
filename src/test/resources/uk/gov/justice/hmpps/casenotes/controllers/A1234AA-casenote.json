@@ -7,7 +7,7 @@
       "subType": "GEN",
       "subTypeDescription": "General POM Note",
       "authorUserId": "1111",
-      "authorName": "Mikey Mouse",
+      "authorName": "John Smith",
       "text": "This is a case note",
       "locationId": "LEI",
       "amendments": []
@@ -21,7 +21,7 @@
       "subTypeDescription": "General",
       "source": "INST",
       "authorUserId": "1231232",
-      "authorName": "Mickey Mouse",
+      "authorName": "John Smith",
       "text": "Some Text",
       "locationId": "LEI",
       "amendments": []

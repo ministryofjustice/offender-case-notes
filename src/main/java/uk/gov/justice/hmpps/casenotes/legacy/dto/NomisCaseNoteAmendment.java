@@ -38,7 +38,7 @@ public class NomisCaseNoteAmendment {
     @NotBlank
     private String authorUsername;
 
-    @Schema(requiredMode = REQUIRED, description = "Name of the user amending the case note", example = "Mickey Mouse")
+    @Schema(requiredMode = REQUIRED, description = "Name of the user amending the case note", example = "John Smith")
     @NotBlank
     private String authorName;
 
