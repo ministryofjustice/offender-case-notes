@@ -69,7 +69,7 @@ java {
 }
 
 dependencyCheck {
-  suppressionFiles.add("$rootDir/dependencyCheck/suppression.xml")
+  suppressionFiles.add("dependencyCheck/suppression.xml")
 }
 
 tasks {
