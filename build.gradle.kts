@@ -4,7 +4,7 @@ plugins {
   id("uk.gov.justice.hmpps.gradle-spring-boot") version "8.1.0"
   kotlin("plugin.spring") version "2.1.21"
   kotlin("plugin.jpa") version "2.1.21"
-  id("io.gatling.gradle") version "3.14.1.4"
+  id("io.gatling.gradle") version "3.14.3"
   jacoco
 }
 
@@ -41,7 +41,7 @@ dependencies {
   implementation("com.google.guava:guava:33.4.8-jre")
 
   implementation(platform("com.amazonaws:aws-java-sdk-bom:1.12.783"))
-  implementation("software.amazon.awssdk:sns:2.31.45")
+  implementation("software.amazon.awssdk:sns:2.31.48")
 
   testAnnotationProcessor("org.projectlombok:lombok:1.18.38")
   testCompileOnly("org.projectlombok:lombok:1.18.38")
