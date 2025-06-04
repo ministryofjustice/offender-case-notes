@@ -40,8 +40,8 @@ dependencies {
   implementation("com.pauldijou:jwt-core_2.11:5.0.0")
   implementation("com.google.guava:guava:33.4.8-jre")
 
-  implementation(platform("com.amazonaws:aws-java-sdk-bom:1.12.783"))
-  implementation("software.amazon.awssdk:sns:2.31.52")
+  implementation(platform("com.amazonaws:aws-java-sdk-bom:1.12.785"))
+  implementation("software.amazon.awssdk:sns:2.31.56")
 
   testAnnotationProcessor("org.projectlombok:lombok:1.18.38")
   testCompileOnly("org.projectlombok:lombok:1.18.38")
@@ -50,8 +50,8 @@ dependencies {
   testImplementation("net.javacrumbs.json-unit:json-unit-assertj:4.1.1")
   testImplementation("io.github.http-builder-ng:http-builder-ng-apache:1.0.4")
   testImplementation("org.wiremock:wiremock-standalone:3.13.0")
-  testImplementation("org.testcontainers:postgresql:1.21.0")
-  testImplementation("org.testcontainers:localstack:1.21.0")
+  testImplementation("org.testcontainers:postgresql:1.21.1")
+  testImplementation("org.testcontainers:localstack:1.21.1")
   testImplementation("io.jsonwebtoken:jjwt-impl:0.12.6")
   testImplementation("io.jsonwebtoken:jjwt-jackson:0.12.6")
   testImplementation("org.awaitility:awaitility:4.3.0")
