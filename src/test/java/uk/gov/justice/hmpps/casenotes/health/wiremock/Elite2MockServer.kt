@@ -188,7 +188,7 @@ class Elite2MockServer : WireMockServer(WIREMOCK_PORT) {
 
   fun stubPrisonSwitch(serviceCode: String = "ALERTS_CASE_NOTES", response: List<PrisonDetail>) {
     stubFor(
-      get(urlPathMatching("/api/service-prisons/$serviceCode"))
+      get(urlPathMatching("/api/agency-switches/$serviceCode"))
         .willReturn(
           aResponse()
             .withHeader("Content-Type", "application/json")
@@ -200,7 +200,7 @@ class Elite2MockServer : WireMockServer(WIREMOCK_PORT) {
 
   fun stubPrisonSwitchNotFound(serviceCode: String = "ALERTS_CASE_NOTES") {
     stubFor(
-      get(urlPathMatching("/api/service-prisons/$serviceCode"))
+      get(urlPathMatching("/api/agency-switches/$serviceCode"))
         .willReturn(
           aResponse()
             .withHeader("Content-Type", "application/json")

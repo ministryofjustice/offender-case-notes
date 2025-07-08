@@ -26,7 +26,7 @@ class PrisonApiService(@Qualifier("prisonApiWebClient") private val webClient: W
 
   companion object {
     const val SERVICE_CODE = "ALERTS_CASE_NOTES"
-    const val GET_PRISON_SWITCH = "/api/service-prisons/{serviceCode}"
+    const val GET_PRISON_SWITCH = "/api/agency-switches/{serviceCode}"
   }
 }
 
