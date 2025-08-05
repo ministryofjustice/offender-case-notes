@@ -32,14 +32,14 @@ import java.time.Duration.ofSeconds
 
 @Configuration
 class WebClientConfiguration(
-  @Value("\${elite2.api.base.url}") private val elite2ApiBaseUrl: @URL String,
-  @Value("\${oauth.api.base.url}") private val oauthApiBaseUrl: @URL String,
-  @Value("\${prisoner-search.api.base.url}") private val prisonerSearchApiBaseUrl: @URL String,
-  @Value("\${manage-users.api.base.url}") private val manageUsersApiBaseUrl: @URL String,
-  @Value("\${alerts.api.base.url}") private val alertsApiBaseUrl: @URL String,
-  @Value("\${tokenverification.api.base.url}") private val tokenVerificationApiBaseUrl: @URL String,
-  @Value("\${api.health-timeout:1s}") private val healthTimeout: Duration,
-  @Value("\${api.response-timeout:2s}") private val responseTimeout: Duration,
+  @param:Value("\${elite2.api.base.url}") private val elite2ApiBaseUrl: @URL String,
+  @param:Value("\${oauth.api.base.url}") private val oauthApiBaseUrl: @URL String,
+  @param:Value("\${prisoner-search.api.base.url}") private val prisonerSearchApiBaseUrl: @URL String,
+  @param:Value("\${manage-users.api.base.url}") private val manageUsersApiBaseUrl: @URL String,
+  @param:Value("\${alerts.api.base.url}") private val alertsApiBaseUrl: @URL String,
+  @param:Value("\${tokenverification.api.base.url}") private val tokenVerificationApiBaseUrl: @URL String,
+  @param:Value("\${api.health-timeout:1s}") private val healthTimeout: Duration,
+  @param:Value("\${api.response-timeout:2s}") private val responseTimeout: Duration,
 ) {
 
   @Bean
