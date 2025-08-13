@@ -76,7 +76,7 @@ jobs:
           PERSISTENCE: 1
           SERVICES: "${{ inputs.services }}"
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v5
     - name: refresh cache
       id: initial-cache
       uses: actions/cache@v4
