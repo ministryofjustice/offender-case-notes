@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 import uk.gov.justice.hmpps.casenotes.config.RO_OPERATIONS
+import uk.gov.justice.hmpps.casenotes.notes.AuthorNotesResponse
 import uk.gov.justice.hmpps.casenotes.notes.ReadCaseNote
 import uk.gov.justice.hmpps.casenotes.notes.SearchNotesRequest
 import uk.gov.justice.hmpps.casenotes.notes.SearchNotesResponse
@@ -34,4 +35,25 @@ class SearchCaseNotesController(private val search: ReadCaseNote) {
     @PathVariable personIdentifier: String,
     @Valid @RequestBody request: SearchNotesRequest,
   ): SearchNotesResponse = search.findNotes(personIdentifier.uppercase(), request)
+
+  @Operation(
+    summary = "Finds matching case notes",
+    description = "Sorting can be applied on occurrenceDateTime (default) or creationDateTime. Any other sort parameter will have the default result (occurrenceDateTime,desc)",
+  )
+  @ApiResponses(
+    ApiResponse(
+      responseCode = "200",
+      description = "OK - successfully conducted search, providing matching results or empty content when no matching case notes are found",
+    ),
+    ApiResponse(
+      responseCode = "400",
+      description = "Bad request - the search request did not meet validation requirements",
+    ),
+  )
+  @PostMapping("prisons/{prisonCode}/authors/{authorIdentifier}")
+  fun findAuthorCaseNotes(
+    @PathVariable prisonCode: String,
+    @PathVariable authorIdentifier: String,
+    @Valid @RequestBody request: SearchNotesRequest,
+  ): AuthorNotesResponse = search.findAuthorNotes(prisonCode, authorIdentifier, request)
 }

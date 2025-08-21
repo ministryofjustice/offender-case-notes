@@ -15,6 +15,7 @@ import uk.gov.justice.hmpps.casenotes.config.SecurityUserContext.Companion.ROLE_
 import uk.gov.justice.hmpps.casenotes.domain.Note
 import uk.gov.justice.hmpps.casenotes.domain.NoteRepository
 import uk.gov.justice.hmpps.casenotes.domain.TypeKey
+import uk.gov.justice.hmpps.casenotes.domain.matchesAuthorIdentifier
 import uk.gov.justice.hmpps.casenotes.domain.matchesAuthorUsername
 import uk.gov.justice.hmpps.casenotes.domain.matchesLocationId
 import uk.gov.justice.hmpps.casenotes.domain.matchesOnType
@@ -62,6 +63,16 @@ class ReadCaseNote(
       results,
       PageMeta(page.totalElements.toInt(), request.page, request.size),
       records.isNotEmpty() || hasCaseNotes(),
+    )
+  }
+
+  fun findAuthorNotes(prisonCode: String, authorIdentifier: String, request: SearchNotesRequest): AuthorNotesResponse {
+    val page = noteRepository.findAll(request.authorSpecification(prisonCode, authorIdentifier), request.pageable())
+    val records = noteRepository.findAllByIdIn(page.content.map { it.id }).associateBy { it.id }
+    val results = page.content.map { requireNotNull(records[it.id]).toModel() }
+    return AuthorNotesResponse(
+      results,
+      PageMeta(page.totalElements.toInt(), request.page, request.size),
     )
   }
 
@@ -157,6 +168,14 @@ private fun Set<TypeSubTypeRequest>.asMap() = associate { it.type to it.subTypes
 
 private fun SearchNotesRequest.asSpecification(personIdentifier: String) = listOfNotNull(
   matchesPersonIdentifier(personIdentifier),
+  matchesOnType(includeSensitive, typeSubTypes.asMap()),
+  occurredFrom?.let { occurredAfter(it) },
+  occurredTo?.let { occurredBefore(it) },
+).reduce { spec, current -> spec.and(current) }
+
+private fun SearchNotesRequest.authorSpecification(prisonCode: String, authorIdentifier: String) = listOfNotNull(
+  matchesLocationId(prisonCode),
+  matchesAuthorIdentifier(authorIdentifier),
   matchesOnType(includeSensitive, typeSubTypes.asMap()),
   occurredFrom?.let { occurredAfter(it) },
   occurredTo?.let { occurredBefore(it) },
