@@ -26,3 +26,8 @@ data class SearchNotesResponse(
   val metadata: PageMeta,
   val hasCaseNotes: Boolean,
 )
+
+data class AuthorNotesResponse(
+  val content: List<CaseNote>,
+  val metadata: PageMeta,
+)

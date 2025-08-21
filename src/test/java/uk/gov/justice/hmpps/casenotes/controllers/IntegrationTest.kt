@@ -8,7 +8,7 @@ import org.assertj.core.api.Assertions.assertThat
 import org.awaitility.kotlin.await
 import org.awaitility.kotlin.matches
 import org.awaitility.kotlin.untilCallTo
-import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
@@ -42,6 +42,7 @@ import uk.gov.justice.hmpps.casenotes.health.wiremock.TokenVerificationExtension
 import uk.gov.justice.hmpps.casenotes.legacy.dto.ErrorResponse
 import uk.gov.justice.hmpps.casenotes.utils.JwtAuthHelper
 import uk.gov.justice.hmpps.casenotes.utils.NomisIdGenerator
+import uk.gov.justice.hmpps.casenotes.utils.NomisIdGenerator.newId
 import uk.gov.justice.hmpps.casenotes.utils.setByName
 import uk.gov.justice.hmpps.sqs.HmppsQueue
 import uk.gov.justice.hmpps.sqs.HmppsQueueService
@@ -127,7 +128,7 @@ abstract class IntegrationTest : BasicIntegrationTest() {
     return event
   }
 
-  @BeforeEach
+  @AfterEach
   fun clearQueues() {
     hmppsEventsQueue.sqsClient.purgeQueue(PurgeQueueRequest.builder().queueUrl(hmppsEventsQueue.queueUrl).build()).get()
     domainEventsQueue.sqsClient.purgeQueue(PurgeQueueRequest.builder().queueUrl(hmppsEventsQueue.queueUrl).build()).get()
@@ -184,12 +185,12 @@ abstract class IntegrationTest : BasicIntegrationTest() {
     occurredAt: LocalDateTime = LocalDateTime.now().minusDays(3),
     locationId: String = "MDI",
     authorUsername: String = "AuthorUsername",
-    authorUserId: String = "AuthorId",
+    authorUserId: String = newId().toString(),
     authorName: String = "Author Name",
     text: String = "Text about the case note saved in the case note database",
     systemGenerated: Boolean = false,
     system: System = System.DPS,
-    legacyId: Long = NomisIdGenerator.newId(),
+    legacyId: Long = newId(),
     createdAt: LocalDateTime? = null,
   ) = Note(
     personIdentifier,

@@ -26,6 +26,7 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor
 import org.springframework.data.jpa.repository.Query
 import uk.gov.justice.hmpps.casenotes.config.CaseNoteRequestContext
 import uk.gov.justice.hmpps.casenotes.domain.IdGenerator.newUuid
+import uk.gov.justice.hmpps.casenotes.domain.Note.Companion.AUTHOR_ID
 import uk.gov.justice.hmpps.casenotes.domain.Note.Companion.AUTHOR_USERNAME
 import uk.gov.justice.hmpps.casenotes.domain.Note.Companion.CREATED_AT
 import uk.gov.justice.hmpps.casenotes.domain.Note.Companion.ID
@@ -179,6 +180,7 @@ class Note(
     val SUB_TYPE = Note::subType.name
     val PERSON_IDENTIFIER = Note::personIdentifier.name
     val AUTHOR_USERNAME = Note::authorUsername.name
+    val AUTHOR_ID = Note::authorUserId.name
     val LOCATION_ID = Note::locationId.name
     val OCCURRED_AT = Note::occurredAt.name
     val CREATED_AT = Note::createdAt.name
@@ -367,6 +369,13 @@ fun matchesPersonIdentifier(personIdentifier: String) = Specification<Note> { cn
 fun matchesLocationId(locationId: String) = Specification<Note> { cn, _, cb -> cb.equal(cn.get<String>(LOCATION_ID), locationId) }
 
 fun matchesAuthorUsername(authorUsername: String) = Specification<Note> { cn, _, cb -> cb.equal(cn.get<String>(AUTHOR_USERNAME), authorUsername) }
+
+fun matchesAuthorIdentifier(authorIdentifier: String) = Specification<Note> { cn, _, cb ->
+  cb.or(
+    cb.equal(cn.get<String>(AUTHOR_ID), authorIdentifier),
+    cb.equal(cn.get<String>(AUTHOR_USERNAME), authorIdentifier),
+  )
+}
 
 fun occurredBefore(to: LocalDateTime) = Specification<Note> { csip, _, cb -> cb.lessThanOrEqualTo(csip[OCCURRED_AT], to) }
 
