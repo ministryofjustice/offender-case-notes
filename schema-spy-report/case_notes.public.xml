@@ -39,8 +39,10 @@
             <column ascending="true" name="occurred_at"/>
             <column ascending="true" name="location_id"/>
          </index>
-         <index name="idx_case_note_author_username" unique="false">
+         <index name="idx_author_username_location_id_sub_type_id" unique="false">
             <column ascending="true" name="author_username"/>
+            <column ascending="true" name="location_id"/>
+            <column ascending="true" name="sub_type_id"/>
          </index>
          <index name="idx_case_note_created_at" unique="false">
             <column ascending="true" name="created_at"/>
