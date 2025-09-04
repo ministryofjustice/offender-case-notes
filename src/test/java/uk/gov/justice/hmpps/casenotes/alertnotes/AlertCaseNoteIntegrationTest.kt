@@ -4,6 +4,7 @@ import org.assertj.core.api.Assertions.assertThat
 import org.awaitility.kotlin.await
 import org.awaitility.kotlin.matches
 import org.awaitility.kotlin.untilCallTo
+import org.awaitility.kotlin.withPollDelay
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.any
 import org.mockito.kotlin.never
@@ -29,6 +30,7 @@ import uk.gov.justice.hmpps.casenotes.integrations.PrisonDetail
 import uk.gov.justice.hmpps.casenotes.integrations.UserDetails
 import uk.gov.justice.hmpps.casenotes.utils.NomisIdGenerator.personIdentifier
 import uk.gov.justice.hmpps.casenotes.utils.verifyAgainst
+import java.time.Duration.ofMillis
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.ZonedDateTime
@@ -67,17 +69,17 @@ class AlertCaseNoteIntegrationTest : IntegrationTest() {
 
   @Test
   fun `alert active case note created if prison active`() {
-    val prisonCode = "ACT"
+    val prisonCode = "AC2"
     val alert = alert()
     alertsApi.withAlert(alert)
     prisonerSearchApi.stubPrisonerDetails(alert.prisonNumber, prisonCode)
-    elite2Api.stubPrisonSwitch(response = listOf(PrisonDetail("ACT", "Active Prison")))
+    elite2Api.stubPrisonSwitch(response = listOf(PrisonDetail(prisonCode, "Active Prison")))
 
     val userDetails = UserDetails(alert.createdBy, true, "Brian Created", "nomis", "null", "5761427", newUuid())
     manageUsersApi.stubGetUserDetails(userDetails)
 
     publishEventToTopic(alert.domainEvent(ALERT_CREATED))
-    await untilCallTo { domainEventsQueue.countAllMessagesOnQueue() } matches { it == 0 }
+    await withPollDelay ofMillis(500) untilCallTo { domainEventsQueue.countAllMessagesOnQueue() } matches { it == 0 }
 
     val caseNote = noteRepository.findAll().single {
       it.personIdentifier == alert.prisonNumber && it.locationId == prisonCode
@@ -105,7 +107,7 @@ class AlertCaseNoteIntegrationTest : IntegrationTest() {
     manageUsersApi.stubGetUserDetails(userDetails)
 
     publishEventToTopic(alert.domainEvent(ALERT_CREATED))
-    await untilCallTo { domainEventsQueue.countAllMessagesOnQueue() } matches { it == 0 }
+    await withPollDelay ofMillis(500) untilCallTo { domainEventsQueue.countAllMessagesOnQueue() } matches { it == 0 }
 
     val caseNote = noteRepository.findAll().single {
       it.personIdentifier == alert.prisonNumber && it.locationId == prisonCode
@@ -133,7 +135,7 @@ class AlertCaseNoteIntegrationTest : IntegrationTest() {
     manageUsersApi.stubGetUserDetails(userDetails)
 
     publishEventToTopic(alert.domainEvent(ALERT_CREATED))
-    await untilCallTo { domainEventsQueue.countAllMessagesOnQueue() } matches { it == 0 }
+    await withPollDelay ofMillis(500) untilCallTo { domainEventsQueue.countAllMessagesOnQueue() } matches { it == 0 }
 
     val caseNote = noteRepository.findAll().single {
       it.personIdentifier == alert.prisonNumber && it.locationId == prisonCode
@@ -160,12 +162,12 @@ class AlertCaseNoteIntegrationTest : IntegrationTest() {
 
   @Test
   fun `alert inactive case note created if prison active`() {
-    val prisonCode = "ACT"
+    val prisonCode = "AC3"
     val alert =
       alert(activeTo = LocalDate.now(), madeInactiveAt = LocalDateTime.now(), madeInactiveBy = "BCreated")
     alertsApi.withAlert(alert)
     prisonerSearchApi.stubPrisonerDetails(alert.prisonNumber, prisonCode)
-    elite2Api.stubPrisonSwitch(response = listOf(PrisonDetail("ACT", "Active Prison")))
+    elite2Api.stubPrisonSwitch(response = listOf(PrisonDetail(prisonCode, "Active Prison")))
 
     val userDetails =
       UserDetails(alert.madeInactiveBy!!, true, "Brian Created", "nomis", "null", "5761427", newUuid())
@@ -173,7 +175,7 @@ class AlertCaseNoteIntegrationTest : IntegrationTest() {
 
     val event = alert.domainEvent(ALERT_INACTIVE)
     publishEventToTopic(event)
-    await untilCallTo { domainEventsQueue.countAllMessagesOnQueue() } matches { it == 0 }
+    await withPollDelay ofMillis(500) untilCallTo { domainEventsQueue.countAllMessagesOnQueue() } matches { it == 0 }
 
     val caseNote = noteRepository.findAll().single {
       it.personIdentifier == alert.prisonNumber && it.locationId == prisonCode
@@ -217,17 +219,17 @@ class AlertCaseNoteIntegrationTest : IntegrationTest() {
 
   @Test
   fun `alert inactive case note created when automatically made inactive`() {
-    val prisonCode = "ACT"
+    val prisonCode = "AC1"
     val alert = alert(activeTo = LocalDate.now(), madeInactiveAt = LocalDateTime.now(), madeInactiveBy = "deactiv8")
     alertsApi.withAlert(alert)
     prisonerSearchApi.stubPrisonerDetails(alert.prisonNumber, prisonCode)
     elite2Api.stubPrisonSwitch(
-      response = listOf(PrisonDetail("ACT", "Active Prison"), PrisonDetail("*ALL*", "Active Prison")),
+      response = listOf(PrisonDetail(prisonCode, "Active Prison"), PrisonDetail("*ALL*", "Active Prison")),
     )
 
     val event = alert.domainEvent(ALERT_INACTIVE)
     publishEventToTopic(event)
-    await untilCallTo { domainEventsQueue.countAllMessagesOnQueue() } matches { it == 0 }
+    await withPollDelay ofMillis(500) untilCallTo { domainEventsQueue.countAllMessagesOnQueue() } matches { it == 0 }
 
     val caseNote = noteRepository.findAll().single {
       it.personIdentifier == alert.prisonNumber && it.locationId == prisonCode
