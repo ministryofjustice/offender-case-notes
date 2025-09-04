@@ -34,14 +34,14 @@ dependencies {
   implementation("javax.transaction:javax.transaction-api:1.3")
 
   implementation("javax.xml.bind:jaxb-api:2.3.1")
-  implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.11")
+  implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.12")
   implementation("org.apache.commons:commons-text:1.14.0")
   implementation("com.fasterxml.uuid:java-uuid-generator:5.1.0")
   implementation("com.pauldijou:jwt-core_2.11:5.0.0")
   implementation("com.google.guava:guava:33.4.8-jre")
 
   implementation(platform("com.amazonaws:aws-java-sdk-bom:1.12.788"))
-  implementation("software.amazon.awssdk:sns:2.32.30")
+  implementation("software.amazon.awssdk:sns:2.33.1")
 
   testAnnotationProcessor("org.projectlombok:lombok:1.18.38")
   testCompileOnly("org.projectlombok:lombok:1.18.38")
@@ -60,7 +60,7 @@ dependencies {
   testImplementation("org.springframework.security.oauth:spring-security-oauth2:2.5.2.RELEASE")
   testImplementation("org.springframework.security:spring-security-jwt:1.1.1.RELEASE")
   testImplementation("org.mockito.kotlin:mockito-kotlin:6.0.0")
-  testImplementation("io.swagger.parser.v3:swagger-parser-v3:2.1.32")
+  testImplementation("io.swagger.parser.v3:swagger-parser-v3:2.1.33")
 }
 
 java {
