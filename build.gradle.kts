@@ -1,10 +1,10 @@
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
-  id("uk.gov.justice.hmpps.gradle-spring-boot") version "9.0.1"
+  id("uk.gov.justice.hmpps.gradle-spring-boot") version "9.1.1"
   kotlin("plugin.spring") version "2.2.20"
   kotlin("plugin.jpa") version "2.2.20"
-  id("io.gatling.gradle") version "3.14.3.7"
+  id("io.gatling.gradle") version "3.14.5"
   jacoco
 }
 
@@ -13,9 +13,9 @@ configurations {
 }
 
 dependencies {
-  annotationProcessor("org.projectlombok:lombok:1.18.40")
+  annotationProcessor("org.projectlombok:lombok:1.18.42")
 
-  compileOnly("org.projectlombok:lombok:1.18.40")
+  compileOnly("org.projectlombok:lombok:1.18.42")
 
   runtimeOnly("org.flywaydb:flyway-core")
   runtimeOnly("org.flywaydb:flyway-database-postgresql")
@@ -27,8 +27,8 @@ dependencies {
   implementation("org.springframework.boot:spring-boot-starter-oauth2-resource-server")
   implementation("org.springframework.boot:spring-boot-starter-oauth2-client")
   implementation("org.springframework.boot:spring-boot-starter-webflux")
-  implementation("uk.gov.justice.service.hmpps:hmpps-sqs-spring-boot-starter:5.4.10")
-  implementation("io.sentry:sentry-spring-boot-starter-jakarta:8.21.1")
+  implementation("uk.gov.justice.service.hmpps:hmpps-sqs-spring-boot-starter:5.4.11")
+  implementation("io.sentry:sentry-spring-boot-starter-jakarta:8.22.0")
 
   implementation("javax.activation:activation:1.1.1")
   implementation("javax.transaction:javax.transaction-api:1.3")
@@ -38,13 +38,13 @@ dependencies {
   implementation("org.apache.commons:commons-text:1.14.0")
   implementation("com.fasterxml.uuid:java-uuid-generator:5.1.0")
   implementation("com.pauldijou:jwt-core_2.11:5.0.0")
-  implementation("com.google.guava:guava:33.4.8-jre")
+  implementation("com.google.guava:guava:33.5.0-jre")
 
   implementation(platform("com.amazonaws:aws-java-sdk-bom:1.12.791"))
-  implementation("software.amazon.awssdk:sns:2.33.5")
+  implementation("software.amazon.awssdk:sns:2.34.2")
 
-  testAnnotationProcessor("org.projectlombok:lombok:1.18.40")
-  testCompileOnly("org.projectlombok:lombok:1.18.40")
+  testAnnotationProcessor("org.projectlombok:lombok:1.18.42")
+  testCompileOnly("org.projectlombok:lombok:1.18.42")
   testImplementation("org.springframework.security:spring-security-test")
   testImplementation("com.tngtech.java:junit-dataprovider:1.13.1")
   testImplementation("net.javacrumbs.json-unit:json-unit-assertj:4.1.1")
@@ -60,7 +60,7 @@ dependencies {
   testImplementation("org.springframework.security.oauth:spring-security-oauth2:2.5.2.RELEASE")
   testImplementation("org.springframework.security:spring-security-jwt:1.1.1.RELEASE")
   testImplementation("org.mockito.kotlin:mockito-kotlin:6.0.0")
-  testImplementation("io.swagger.parser.v3:swagger-parser-v3:2.1.33")
+  testImplementation("io.swagger.parser.v3:swagger-parser-v3:2.1.34")
 }
 
 java {
