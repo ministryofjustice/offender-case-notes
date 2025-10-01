@@ -28,7 +28,7 @@ dependencies {
   implementation("org.springframework.boot:spring-boot-starter-oauth2-client")
   implementation("org.springframework.boot:spring-boot-starter-webflux")
   implementation("uk.gov.justice.service.hmpps:hmpps-sqs-spring-boot-starter:5.4.11")
-  implementation("io.sentry:sentry-spring-boot-starter-jakarta:8.22.0")
+  implementation("io.sentry:sentry-spring-boot-starter-jakarta:8.23.0")
 
   implementation("javax.activation:activation:1.1.1")
   implementation("javax.transaction:javax.transaction-api:1.3")
@@ -36,12 +36,12 @@ dependencies {
   implementation("javax.xml.bind:jaxb-api:2.3.1")
   implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.13")
   implementation("org.apache.commons:commons-text:1.14.0")
-  implementation("com.fasterxml.uuid:java-uuid-generator:5.1.0")
+  implementation("com.fasterxml.uuid:java-uuid-generator:5.1.1")
   implementation("com.pauldijou:jwt-core_2.11:5.0.0")
   implementation("com.google.guava:guava:33.5.0-jre")
 
   implementation(platform("com.amazonaws:aws-java-sdk-bom:1.12.791"))
-  implementation("software.amazon.awssdk:sns:2.34.2")
+  implementation("software.amazon.awssdk:sns:2.34.7")
 
   testAnnotationProcessor("org.projectlombok:lombok:1.18.42")
   testCompileOnly("org.projectlombok:lombok:1.18.42")
@@ -59,7 +59,7 @@ dependencies {
 
   testImplementation("org.springframework.security.oauth:spring-security-oauth2:2.5.2.RELEASE")
   testImplementation("org.springframework.security:spring-security-jwt:1.1.1.RELEASE")
-  testImplementation("org.mockito.kotlin:mockito-kotlin:6.0.0")
+  testImplementation("org.mockito.kotlin:mockito-kotlin:6.1.0")
   testImplementation("io.swagger.parser.v3:swagger-parser-v3:2.1.34")
 }
 
