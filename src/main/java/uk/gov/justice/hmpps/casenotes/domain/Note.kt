@@ -35,6 +35,7 @@ import uk.gov.justice.hmpps.casenotes.domain.Note.Companion.OCCURRED_AT
 import uk.gov.justice.hmpps.casenotes.domain.Note.Companion.PERSON_IDENTIFIER
 import uk.gov.justice.hmpps.casenotes.domain.audit.DeletedEntityListener
 import uk.gov.justice.hmpps.casenotes.domain.audit.SimpleAudited
+import uk.gov.justice.hmpps.casenotes.notes.AuthorIdentifierType
 import uk.gov.justice.hmpps.casenotes.notes.ReplaceAmendmentRequest
 import uk.gov.justice.hmpps.casenotes.notes.TextRequest
 import uk.gov.justice.hmpps.casenotes.sync.SyncAmendmentRequest
@@ -370,11 +371,11 @@ fun matchesLocationId(locationId: String) = Specification<Note> { cn, _, cb -> c
 
 fun matchesAuthorUsername(authorUsername: String) = Specification<Note> { cn, _, cb -> cb.equal(cn.get<String>(AUTHOR_USERNAME), authorUsername) }
 
-fun matchesAuthorIdentifier(authorIdentifier: String) = Specification<Note> { cn, _, cb ->
-  cb.or(
-    cb.equal(cn.get<String>(AUTHOR_ID), authorIdentifier),
-    cb.equal(cn.get<String>(AUTHOR_USERNAME), authorIdentifier),
-  )
+fun matchesAuthorIdentifier(authorIdentifier: String, authorIdentifierType: AuthorIdentifierType) = Specification<Note> { cn, _, cb ->
+  when (authorIdentifierType) {
+    AuthorIdentifierType.AUTHOR_ID -> cb.equal(cn.get<String>(AUTHOR_ID), authorIdentifier)
+    AuthorIdentifierType.USERNAME -> cb.equal(cn.get<String>(AUTHOR_USERNAME), authorIdentifier)
+  }
 }
 
 fun occurredBefore(to: LocalDateTime) = Specification<Note> { csip, _, cb -> cb.lessThanOrEqualTo(csip[OCCURRED_AT], to) }
