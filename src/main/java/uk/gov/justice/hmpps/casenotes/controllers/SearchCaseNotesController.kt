@@ -10,8 +10,10 @@ import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
 import uk.gov.justice.hmpps.casenotes.config.RO_OPERATIONS
+import uk.gov.justice.hmpps.casenotes.notes.AuthorIdentifierType
 import uk.gov.justice.hmpps.casenotes.notes.AuthorNotesResponse
 import uk.gov.justice.hmpps.casenotes.notes.ReadCaseNote
 import uk.gov.justice.hmpps.casenotes.notes.SearchNotesRequest
@@ -55,5 +57,6 @@ class SearchCaseNotesController(private val search: ReadCaseNote) {
     @PathVariable prisonCode: String,
     @PathVariable authorIdentifier: String,
     @Valid @RequestBody request: SearchNotesRequest,
-  ): AuthorNotesResponse = search.findAuthorNotes(prisonCode, authorIdentifier, request)
+    @RequestParam(required = false, defaultValue = "AUTHOR_ID") authorIdentifierType: AuthorIdentifierType,
+  ): AuthorNotesResponse = search.findAuthorNotes(prisonCode, authorIdentifier, authorIdentifierType, request)
 }

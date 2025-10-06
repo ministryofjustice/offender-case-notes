@@ -66,8 +66,13 @@ class ReadCaseNote(
     )
   }
 
-  fun findAuthorNotes(prisonCode: String, authorIdentifier: String, request: SearchNotesRequest): AuthorNotesResponse {
-    val page = noteRepository.findAll(request.authorSpecification(prisonCode, authorIdentifier), request.pageable())
+  fun findAuthorNotes(
+    prisonCode: String,
+    authorIdentifier: String,
+    authorIdentifierType: AuthorIdentifierType,
+    request: SearchNotesRequest,
+  ): AuthorNotesResponse {
+    val page = noteRepository.findAll(request.authorSpecification(prisonCode, authorIdentifier, authorIdentifierType), request.pageable())
     val records = noteRepository.findAllByIdIn(page.content.map { it.id }).associateBy { it.id }
     val results = page.content.map { requireNotNull(records[it.id]).toModel() }
     return AuthorNotesResponse(
@@ -173,9 +178,13 @@ private fun SearchNotesRequest.asSpecification(personIdentifier: String) = listO
   occurredTo?.let { occurredBefore(it) },
 ).reduce { spec, current -> spec.and(current) }
 
-private fun SearchNotesRequest.authorSpecification(prisonCode: String, authorIdentifier: String) = listOfNotNull(
+private fun SearchNotesRequest.authorSpecification(
+  prisonCode: String,
+  authorIdentifier: String,
+  authorIdentifierType: AuthorIdentifierType,
+) = listOfNotNull(
   matchesLocationId(prisonCode),
-  matchesAuthorIdentifier(authorIdentifier),
+  matchesAuthorIdentifier(authorIdentifier, authorIdentifierType),
   matchesOnType(includeSensitive, typeSubTypes.asMap()),
   occurredFrom?.let { occurredAfter(it) },
   occurredTo?.let { occurredBefore(it) },

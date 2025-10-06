@@ -11,6 +11,7 @@ import uk.gov.justice.hmpps.casenotes.config.SecurityUserContext.Companion.ROLE_
 import uk.gov.justice.hmpps.casenotes.config.SecurityUserContext.Companion.ROLE_CASE_NOTES_WRITE
 import uk.gov.justice.hmpps.casenotes.domain.Note
 import uk.gov.justice.hmpps.casenotes.legacy.dto.ErrorResponse
+import uk.gov.justice.hmpps.casenotes.notes.AuthorIdentifierType
 import uk.gov.justice.hmpps.casenotes.notes.AuthorNotesResponse
 import uk.gov.justice.hmpps.casenotes.notes.SearchNotesRequest
 import uk.gov.justice.hmpps.casenotes.notes.TypeSubTypeRequest
@@ -85,12 +86,13 @@ class SearchAuthorNotesIntTest : IntegrationTest() {
     val caseNote =
       givenCaseNote(generateCaseNote(authorUsername = authorUsername, occurredAt = LocalDateTime.now().minusDays(5)))
     givenCaseNote(generateCaseNote(authorUsername = authorUsername, occurredAt = LocalDateTime.now().minusDays(3)))
-    assertThat(findAuthorNotes(caseNote.locationId, authorUsername).metadata.totalElements).isEqualTo(3)
+    assertThat(findAuthorNotes(caseNote.locationId, authorUsername, authorIdType = AuthorIdentifierType.USERNAME).metadata.totalElements).isEqualTo(3)
 
     val response = findAuthorNotes(
       caseNote.locationId,
       authorUsername,
       searchRequest(occurredFrom = LocalDateTime.now().minusDays(6), occurredTo = LocalDateTime.now().minusDays(4)),
+      AuthorIdentifierType.USERNAME,
     )
     assertThat(response.metadata.totalElements).isEqualTo(1)
     val first = response.content.first()
@@ -235,10 +237,14 @@ class SearchAuthorNotesIntTest : IntegrationTest() {
     prisonCode: String,
     authorId: String,
     request: SearchNotesRequest = searchRequest(),
+    authorIdType: AuthorIdentifierType = AuthorIdentifierType.AUTHOR_ID,
     roles: List<String> = listOf(ROLE_CASE_NOTES_READ),
     username: String = USERNAME,
-  ) = webTestClient.post().uri(AUTHOR_SEARCH_URL, prisonCode, authorId)
-    .bodyValue(request)
+  ) = webTestClient.post().uri {
+    it.path(AUTHOR_SEARCH_URL)
+    it.queryParam("authorIdentifierType", authorIdType)
+    it.build(prisonCode, authorId)
+  }.bodyValue(request)
     .headers(addBearerAuthorisation(username, roles))
     .exchange()
 
@@ -246,9 +252,10 @@ class SearchAuthorNotesIntTest : IntegrationTest() {
     prisonCode: String,
     authorId: String,
     request: SearchNotesRequest = searchRequest(),
+    authorIdType: AuthorIdentifierType = AuthorIdentifierType.AUTHOR_ID,
     roles: List<String> = listOf(ROLE_CASE_NOTES_READ),
     username: String = USERNAME,
-  ): AuthorNotesResponse = findAuthorNotesSpec(prisonCode, authorId, request, roles, username)
+  ): AuthorNotesResponse = findAuthorNotesSpec(prisonCode, authorId, request, authorIdType, roles, username)
     .expectStatus().isOk
     .expectBody(AuthorNotesResponse::class.java).returnResult().responseBody!!
 
