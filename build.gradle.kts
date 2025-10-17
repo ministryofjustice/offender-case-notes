@@ -1,3 +1,5 @@
+@file:Suppress("UnstableApiUsage")
+
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
@@ -80,12 +82,15 @@ tasks {
     }
   }
 
-  register("initialiseDatabase", Test::class) {
-    include("**/SchemaSpyIntTest.class")
-  }
-
   test {
     exclude("**/SchemaSpyIntTest.class")
+  }
+
+  val testSuite = testing.suites.named("test", JvmTestSuite::class)
+  register("initialiseDatabase", Test::class) {
+    testClassesDirs = files(testSuite.map { it.sources.output.classesDirs })
+    classpath = files(testSuite.map { it.sources.runtimeClasspath })
+    include("**/SchemaSpyIntTest.class")
   }
 
   getByName("initialiseDatabase") {
