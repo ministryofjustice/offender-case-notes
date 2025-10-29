@@ -6,7 +6,7 @@ on:
       java_version:
         description: Java version
         type: string
-        default: '21'
+        default: '25'
       java_options:
         description: Java options
         type: string
@@ -14,7 +14,7 @@ on:
       schemaspy_version:
         description: Schema Spy version
         type: string
-        default: '6.2.4'
+        default: '7.0.2'
       postgres_driver_version:
         description: Postgres version
         type: string
