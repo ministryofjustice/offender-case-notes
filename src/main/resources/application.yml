@@ -47,8 +47,10 @@ spring:
         provider:
           hmpps-auth:
             token-uri: ${oauth.api.base.url}/oauth/token
-  codec:
-    max-in-memory-size: 10MB
+
+  http:
+    codecs:
+      max-in-memory-size: 10MB
 
   mvc:
     pathmatch:
