@@ -18,7 +18,7 @@ on:
       postgres_driver_version:
         description: Postgres version
         type: string
-        default: '42.7.3'
+        default: '42.7.8'
       exclude:
         description: Regex of tables to be excluded
         type: string
@@ -80,7 +80,7 @@ jobs:
         shell: bash
         run: |
           docker compose -f docker-compose.yml -f ${{ inputs.docker_compose_file }} up -d 
-          curl -L https://github.com/schemaspy/schemaspy/releases/download/v${{ inputs.schemaspy_version }}/schemaspy-${{ inputs.schemaspy_version }}.jar --output /tmp/schemaspy.jar
+          curl -L https://github.com/schemaspy/schemaspy/releases/download/v${{ inputs.schemaspy_version }}/schemaspy-app.jar --output /tmp/schemaspy.jar
           curl -L https://jdbc.postgresql.org/download/postgresql-${{ inputs.postgres_driver_version }}.jar --output /tmp/postgres-driver.jar
           export JAVA_OPTS="${{ inputs.java_options }}"
           ${{ inputs.init_db_cli }}
@@ -91,3 +91,8 @@ jobs:
         with:
           folder: /tmp/schema-spy-report/
           target-folder: schema-spy-report
+
+      - name: Link workflow summary to report
+        shell: bash
+        run: |
+          echo '[SchemaSpy report](https://ministryofjustice.github.io/offender-case-notes/schema-spy-report/)' >> $GITHUB_STEP_SUMMARY
