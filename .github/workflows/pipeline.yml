@@ -46,7 +46,7 @@ jobs:
     with:
       java-version: '25'
       localstack-tag: '4'
-      postgres-tag: '16'
+      postgres-tag: '17'
       postgres-db: 'case_notes'
       postgres-username: 'case'
       postgres-password: 'notes'
