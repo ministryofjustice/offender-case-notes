@@ -6,7 +6,7 @@ plugins {
   id("uk.gov.justice.hmpps.gradle-spring-boot") version "9.1.4"
   kotlin("plugin.spring") version "2.2.21"
   kotlin("plugin.jpa") version "2.2.21"
-  id("io.gatling.gradle") version "3.14.6"
+  id("io.gatling.gradle") version "3.14.9"
   jacoco
 }
 
@@ -32,20 +32,20 @@ dependencies {
   implementation("org.springframework.boot:spring-boot-starter-oauth2-client")
   implementation("org.springframework.boot:spring-boot-starter-webflux")
   implementation("uk.gov.justice.service.hmpps:hmpps-sqs-spring-boot-starter:5.6.1")
-  implementation("io.sentry:sentry-spring-boot-starter-jakarta:8.24.0")
+  implementation("io.sentry:sentry-spring-boot-starter-jakarta:8.26.0")
 
   implementation("javax.activation:activation:1.1.1")
   implementation("javax.transaction:javax.transaction-api:1.3")
 
   implementation("javax.xml.bind:jaxb-api:2.3.1")
-  implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.13")
+  implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.14")
   implementation("org.apache.commons:commons-text:1.14.0")
   implementation("com.fasterxml.uuid:java-uuid-generator:5.1.1")
   implementation("com.pauldijou:jwt-core_2.11:5.0.0")
   implementation("com.google.guava:guava:33.5.0-jre")
 
-  implementation(platform("com.amazonaws:aws-java-sdk-bom:1.12.792"))
-  implementation("software.amazon.awssdk:sns:2.36.3")
+  implementation(platform("com.amazonaws:aws-java-sdk-bom:1.12.793"))
+  implementation("software.amazon.awssdk:sns:2.38.9")
 
   testAnnotationProcessor("org.projectlombok:lombok:1.18.42")
   testCompileOnly("org.projectlombok:lombok:1.18.42")
@@ -53,7 +53,7 @@ dependencies {
   testImplementation("com.tngtech.java:junit-dataprovider:1.13.1")
   testImplementation("net.javacrumbs.json-unit:json-unit-assertj:4.1.1")
   testImplementation("io.github.http-builder-ng:http-builder-ng-apache:1.0.4")
-  testImplementation("org.wiremock:wiremock-standalone:3.13.1")
+  testImplementation("org.wiremock:wiremock-standalone:3.13.2")
   testImplementation("org.testcontainers:postgresql:1.21.3")
   testImplementation("org.testcontainers:localstack:1.21.3")
   testImplementation("io.jsonwebtoken:jjwt-impl:0.13.0")
