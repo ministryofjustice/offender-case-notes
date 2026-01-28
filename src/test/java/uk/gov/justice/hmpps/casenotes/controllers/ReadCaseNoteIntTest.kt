@@ -85,7 +85,7 @@ class ReadCaseNoteIntTest : IntegrationTest() {
     caseloadId: String? = ACTIVE_PRISON,
   ) = webTestClient.get().uri(urlToTest(personIdentifier, caseNoteId))
     .headers(addBearerAuthorisation(username, roles))
-    .header(CaseloadIdHeader.NAME, caseloadId)
+    .apply { if (caseloadId != null) this.header(CaseloadIdHeader.NAME, caseloadId) }
     .exchange()
 
   private fun urlToTest(personIdentifier: String, caseNoteId: String) = "/case-notes/$personIdentifier/$caseNoteId"

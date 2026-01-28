@@ -72,7 +72,7 @@ class ControllerAdvice {
   @ExceptionHandler(HandlerMethodValidationException::class)
   fun handleHandlerMethodValidationException(e: HandlerMethodValidationException): ResponseEntity<ErrorResponse> = e.allErrors.mapErrors()
 
-  private fun List<MessageSourceResolvable>.mapErrors() = map { it.defaultMessage }.distinct().sorted().let {
+  private fun List<MessageSourceResolvable>.mapErrors() = mapNotNull { it.defaultMessage }.distinct().sorted().let {
     val validationFailure = "Validation failure"
     val message = if (it.size > 1) {
       """

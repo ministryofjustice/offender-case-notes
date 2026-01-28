@@ -36,7 +36,7 @@ const val NOMIS_SYNC_ONLY = "NOMIS sync only"
 
 @Configuration
 class OpenApiConfiguration(buildProperties: BuildProperties, private val context: ApplicationContext) {
-  private val version: String = buildProperties.version
+  private val version: String = buildProperties.version ?: "unknown"
 
   @Bean
   fun customOpenAPI(): OpenAPI = OpenAPI()
