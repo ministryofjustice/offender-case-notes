@@ -1,6 +1,5 @@
 package uk.gov.justice.hmpps.casenotes.alertnotes
 
-import com.fasterxml.jackson.databind.ObjectMapper
 import org.springframework.retry.RetryPolicy
 import org.springframework.retry.backoff.BackOffPolicy
 import org.springframework.retry.support.RetryTemplate
@@ -8,6 +7,7 @@ import org.springframework.stereotype.Service
 import software.amazon.awssdk.services.sqs.model.SendMessageBatchRequest
 import software.amazon.awssdk.services.sqs.model.SendMessageBatchRequestEntry
 import software.amazon.awssdk.services.sqs.model.SendMessageBatchResponse
+import tools.jackson.databind.json.JsonMapper
 import uk.gov.justice.hmpps.casenotes.events.DomainEvent
 import uk.gov.justice.hmpps.casenotes.events.DomainEventListener
 import uk.gov.justice.hmpps.casenotes.events.MessageAttributes
@@ -24,7 +24,7 @@ import java.util.UUID
 @Service
 class ReconciliationEventGenerator(
   private val queueService: HmppsQueueService,
-  private val objectMapper: ObjectMapper,
+  private val jsonMapper: JsonMapper,
   private val alertService: AlertService,
 ) {
   private val eventQueue: HmppsQueue by lazy {
@@ -68,11 +68,11 @@ class ReconciliationEventGenerator(
         .entries(
           events.map {
             val notification =
-              Notification(objectMapper.writeValueAsString(it), attributes = MessageAttributes(it.eventType))
+              Notification(jsonMapper.writeValueAsString(it), attributes = MessageAttributes(it.eventType))
             SendMessageBatchRequestEntry
               .builder()
               .id(UUID.randomUUID().toString())
-              .messageBody(objectMapper.writeValueAsString(notification))
+              .messageBody(jsonMapper.writeValueAsString(notification))
               .build()
           },
         ).build()

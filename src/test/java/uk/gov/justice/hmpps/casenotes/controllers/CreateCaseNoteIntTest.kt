@@ -10,6 +10,7 @@ import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.springframework.http.HttpStatus
 import org.springframework.test.web.reactive.server.WebTestClient
+import tools.jackson.module.kotlin.readValue
 import uk.gov.justice.hmpps.casenotes.config.CaseloadIdHeader
 import uk.gov.justice.hmpps.casenotes.config.SecurityUserContext.Companion.ROLE_CASE_NOTES_READ
 import uk.gov.justice.hmpps.casenotes.config.SecurityUserContext.Companion.ROLE_CASE_NOTES_WRITE
@@ -152,7 +153,7 @@ class CreateCaseNoteIntTest : IntegrationTest() {
     val saved = requireNotNull(
       noteRepository.findByIdAndPersonIdentifier(fromString(response.id), response.personIdentifier),
     )
-    saved.verifyAgainst(objectMapper.readValue<CreateCaseNoteRequest>(request))
+    saved.verifyAgainst(jsonMapper.readValue<CreateCaseNoteRequest>(request))
     assertThat(saved.authorUsername).isEqualTo(USERNAME)
     response.verifyAgainst(saved)
     assertThat(saved.system).isEqualTo(System.DPS)

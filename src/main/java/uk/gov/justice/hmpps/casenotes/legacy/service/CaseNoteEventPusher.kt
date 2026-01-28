@@ -1,12 +1,12 @@
 package uk.gov.justice.hmpps.casenotes.legacy.service
 
-import com.fasterxml.jackson.databind.ObjectMapper
 import org.apache.commons.lang3.math.NumberUtils
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Component
 import software.amazon.awssdk.services.sns.model.MessageAttributeValue
+import tools.jackson.databind.json.JsonMapper
 import uk.gov.justice.hmpps.casenotes.notes.CaseNote
 import uk.gov.justice.hmpps.sqs.HmppsQueueService
 import uk.gov.justice.hmpps.sqs.HmppsTopic
@@ -23,7 +23,7 @@ interface CaseNoteEventPusher {
 @Component
 class CaseNoteAwsEventPusher(
   private val hmppsQueueService: HmppsQueueService,
-  private val objectMapper: ObjectMapper,
+  private val jsonMapper: JsonMapper,
   @param:Value("\${service.base-url}") private val serviceBaseUrl: String,
 ) : CaseNoteEventPusher {
   companion object {
@@ -39,7 +39,7 @@ class CaseNoteAwsEventPusher(
       try {
         val publishResponse = eventTopic.publish(
           cne.eventType,
-          objectMapper.writeValueAsString(cne),
+          jsonMapper.writeValueAsString(cne),
           attributes = mapOf(
             "eventType" to MessageAttributeValue.builder().dataType("String").stringValue(cne.eventType).build(),
             "contentType" to MessageAttributeValue.builder().dataType("String")

@@ -1,6 +1,5 @@
 package uk.gov.justice.hmpps.casenotes.services
 
-import com.fasterxml.jackson.databind.ObjectMapper
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.any
@@ -12,6 +11,7 @@ import software.amazon.awssdk.services.sns.SnsAsyncClient
 import software.amazon.awssdk.services.sns.model.MessageAttributeValue
 import software.amazon.awssdk.services.sns.model.PublishRequest
 import software.amazon.awssdk.services.sns.model.PublishResponse
+import tools.jackson.databind.json.JsonMapper
 import uk.gov.justice.hmpps.casenotes.legacy.service.CaseNoteAdditionalInformation
 import uk.gov.justice.hmpps.casenotes.legacy.service.CaseNoteAwsEventPusher
 import uk.gov.justice.hmpps.casenotes.legacy.service.HmppsDomainEvent
@@ -26,19 +26,19 @@ import java.util.concurrent.CompletableFuture.completedFuture
 class CaseNoteAwsEventPusherTest {
   private val hmppsQueueService: HmppsQueueService = mock()
   private val snsClient: SnsAsyncClient = mock()
-  private val objectMapper: ObjectMapper = mock()
-  private val service = CaseNoteAwsEventPusher(hmppsQueueService, objectMapper, "http://localhost:8080")
+  private val jsonMapper: JsonMapper = mock()
+  private val service = CaseNoteAwsEventPusher(hmppsQueueService, jsonMapper, "http://localhost:8080")
 
   @Test
   fun `send event converts to case note event`() {
-    whenever(objectMapper.writeValueAsString(any())).thenReturn("messageAsJson")
+    whenever(jsonMapper.writeValueAsString(any())).thenReturn("messageAsJson")
     whenever(hmppsQueueService.findByTopicId("domainevents")).thenReturn(HmppsTopic("id", "topicUrn", snsClient))
 
     val publishResponse = PublishResponse.builder().messageId("Hello").build()
     whenever(snsClient.publish(any<PublishRequest>())).thenReturn(completedFuture(publishResponse))
 
     service.sendEvent(caseCaseNote())
-    verify(objectMapper).writeValueAsString(
+    verify(jsonMapper).writeValueAsString(
       check<HmppsDomainEvent> {
         assertThat(it).isEqualTo(
           HmppsDomainEvent(
@@ -58,7 +58,7 @@ class CaseNoteAwsEventPusherTest {
 
   @Test
   fun `send event sends to the sns client1`() {
-    whenever(objectMapper.writeValueAsString(any())).thenReturn("messageAsJson")
+    whenever(jsonMapper.writeValueAsString(any())).thenReturn("messageAsJson")
     whenever(hmppsQueueService.findByTopicId("domainevents")).thenReturn(HmppsTopic("id", "topicArn", snsClient))
     val publishResponse = mock<PublishResponse>()
     whenever(snsClient.publish(any<PublishRequest>())).thenReturn(completedFuture(publishResponse))

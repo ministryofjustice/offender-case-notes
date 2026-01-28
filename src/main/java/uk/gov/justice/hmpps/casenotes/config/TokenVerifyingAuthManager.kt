@@ -42,7 +42,7 @@ class TokenVerifyingAuthManager(
       if (!tokenActive) throw InvalidBearerTokenException("Token verification failed")
     }
 
-    return jwtAuthenticationProvider.authenticate(authentication)
+    return jwtAuthenticationProvider.authenticate(authentication)!!
   }
 }
 
