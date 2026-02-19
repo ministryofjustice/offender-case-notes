@@ -22,7 +22,7 @@ generic-service:
     delius-pre-prod-3: 35.178.44.184/32
 
 generic-prometheus-alerts:
-  alertSeverity: hmpps-prisoner-profile-non-prod
+  alertSeverity: hmpps-connect-dps-non-prod # sent to #connect-dps-non-prod-alerts
   rdsAlertsDatabases:
     cloud-platform-5c6377808488916a: 'offender case notes'
     rdsAlertsConnectionThreshold: 360
