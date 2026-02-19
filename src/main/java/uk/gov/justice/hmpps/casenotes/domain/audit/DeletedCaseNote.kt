@@ -1,7 +1,5 @@
 package uk.gov.justice.hmpps.casenotes.domain.audit
 
-import com.fasterxml.jackson.databind.PropertyNamingStrategies.SnakeCaseStrategy
-import com.fasterxml.jackson.databind.annotation.JsonNaming
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
 import jakarta.persistence.EnumType
@@ -13,6 +11,8 @@ import org.hibernate.annotations.JdbcTypeCode
 import org.hibernate.type.SqlTypes
 import org.springframework.data.domain.Persistable
 import org.springframework.data.jpa.repository.JpaRepository
+import tools.jackson.databind.PropertyNamingStrategies.SnakeCaseStrategy
+import tools.jackson.databind.annotation.JsonNaming
 import uk.gov.justice.hmpps.casenotes.domain.AmendmentState
 import uk.gov.justice.hmpps.casenotes.domain.DeletionCause
 import uk.gov.justice.hmpps.casenotes.domain.IdGenerator.newUuid

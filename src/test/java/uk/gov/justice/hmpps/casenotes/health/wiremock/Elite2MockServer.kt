@@ -11,7 +11,7 @@ import org.junit.jupiter.api.extension.BeforeEachCallback
 import org.junit.jupiter.api.extension.ExtensionContext
 import uk.gov.justice.hmpps.casenotes.integrations.PrisonDetail
 import uk.gov.justice.hmpps.casenotes.legacy.dto.NomisCaseNote
-import uk.gov.justice.hmpps.casenotes.utils.JsonHelper.objectMapper
+import uk.gov.justice.hmpps.casenotes.utils.JsonHelper.jsonMapper
 import java.time.LocalDateTime
 
 class Elite2Extension :
@@ -122,7 +122,7 @@ class Elite2MockServer : WireMockServer(WIREMOCK_PORT) {
 
   fun subGetCaseNoteForOffender(offenderIdentifier: String?, caseNoteIdentifier: Long?) {
     val getCaseNote = String.format("%s/offenders/%s/case-notes/%s", API_PREFIX, offenderIdentifier, caseNoteIdentifier)
-    val body = objectMapper.writeValueAsString(createNomisCaseNote())
+    val body = jsonMapper.writeValueAsString(createNomisCaseNote())
     stubFor(
       get(urlPathMatching(getCaseNote))
         .willReturn(
@@ -152,7 +152,7 @@ class Elite2MockServer : WireMockServer(WIREMOCK_PORT) {
     .build()
 
   fun subCreateCaseNote(offenderIdentifier: String?) {
-    val body = objectMapper.writeValueAsString(createNomisCaseNote())
+    val body = jsonMapper.writeValueAsString(createNomisCaseNote())
     stubFor(
       WireMock.post(urlPathMatching(String.format("%s/offenders/%s/case-notes", API_PREFIX, offenderIdentifier)))
         .willReturn(
@@ -165,7 +165,7 @@ class Elite2MockServer : WireMockServer(WIREMOCK_PORT) {
   }
 
   fun subAmendCaseNote(offenderIdentifier: String?, caseNoteIdentifier: String?) {
-    val body = objectMapper.writeValueAsString(createNomisCaseNote())
+    val body = jsonMapper.writeValueAsString(createNomisCaseNote())
     stubFor(
       WireMock.put(
         urlPathMatching(
@@ -192,7 +192,7 @@ class Elite2MockServer : WireMockServer(WIREMOCK_PORT) {
         .willReturn(
           aResponse()
             .withHeader("Content-Type", "application/json")
-            .withBody(objectMapper.writeValueAsString(response))
+            .withBody(jsonMapper.writeValueAsString(response))
             .withStatus(200),
         ),
     )

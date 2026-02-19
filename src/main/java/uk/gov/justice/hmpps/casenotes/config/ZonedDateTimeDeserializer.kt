@@ -1,10 +1,10 @@
 package uk.gov.justice.hmpps.casenotes.config
 
-import com.fasterxml.jackson.core.JsonParser
-import com.fasterxml.jackson.core.JsonProcessingException
-import com.fasterxml.jackson.databind.DeserializationContext
-import com.fasterxml.jackson.databind.JsonDeserializer
-import org.springframework.boot.jackson.JsonComponent
+import org.springframework.boot.jackson.JacksonComponent
+import tools.jackson.core.JacksonException
+import tools.jackson.core.JsonParser
+import tools.jackson.databind.DeserializationContext
+import tools.jackson.databind.ValueDeserializer
 import java.io.IOException
 import java.time.LocalDateTime
 import java.time.ZoneId
@@ -14,8 +14,8 @@ import java.time.format.DateTimeFormatterBuilder
 
 val EuropeLondon: ZoneId = ZoneId.of("Europe/London")
 
-@JsonComponent
-class ZonedDateTimeDeserializer : JsonDeserializer<ZonedDateTime>() {
+@JacksonComponent
+class ZonedDateTimeDeserializer : ValueDeserializer<ZonedDateTime>() {
   companion object {
     private val formatter: DateTimeFormatter = DateTimeFormatterBuilder().parseCaseInsensitive()
       .append(DateTimeFormatter.ISO_LOCAL_DATE_TIME)
@@ -42,6 +42,6 @@ class ZonedDateTimeDeserializer : JsonDeserializer<ZonedDateTime>() {
     }
   }
 
-  @Throws(IOException::class, JsonProcessingException::class)
-  override fun deserialize(parser: JsonParser, context: DeserializationContext?) = deserialize(parser.text)
+  @Throws(IOException::class, JacksonException::class)
+  override fun deserialize(parser: JsonParser, context: DeserializationContext?) = deserialize(parser.string)
 }

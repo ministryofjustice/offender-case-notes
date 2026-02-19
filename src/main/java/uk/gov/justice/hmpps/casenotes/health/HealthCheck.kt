@@ -2,19 +2,20 @@ package uk.gov.justice.hmpps.casenotes.health
 
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value
-import org.springframework.boot.actuate.health.Health
-import org.springframework.boot.actuate.health.HealthIndicator
+import org.springframework.boot.health.contributor.Health
+import org.springframework.boot.health.contributor.HealthIndicator
 import org.springframework.stereotype.Component
 import org.springframework.web.reactive.function.client.WebClient
 import org.springframework.web.reactive.function.client.WebClientResponseException
+import org.springframework.web.reactive.function.client.toEntity
 import reactor.core.publisher.Mono
 
 abstract class HealthCheck(private val webClient: WebClient) : HealthIndicator {
   override fun health(): Health? = webClient.get()
     .uri("/health/ping")
     .retrieve()
-    .toEntity(String::class.java)
-    .flatMap { Mono.just(Health.up().withDetail("HttpStatus", it?.statusCode).build()) }
+    .toEntity<String>()
+    .flatMap { Mono.just(Health.up().withDetail("HttpStatus", it.statusCode).build()) }
     .onErrorResume(WebClientResponseException::class.java) {
       Mono.just(
         Health.down(it).withDetail("body", it.responseBodyAsString).withDetail("HttpStatus", it.statusCode).build(),
