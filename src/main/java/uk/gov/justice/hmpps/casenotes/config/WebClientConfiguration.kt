@@ -97,8 +97,8 @@ class WebClientConfiguration(
 
   @Bean
   fun authorizedClientManagerAppScope(
-    clientRegistrationRepository: ClientRegistrationRepository,
-    @Qualifier("globalOAuth2AuthorizedClientService") clientService: GlobalPrincipalOAuth2AuthorizedClientService,
+    clientRegistrationRepository: ClientRegistrationRepository?,
+    @Qualifier("globalOAuth2AuthorizedClientService") clientService: GlobalPrincipalOAuth2AuthorizedClientService?,
   ): OAuth2AuthorizedClientManager {
     val authorizedClientProvider = OAuth2AuthorizedClientProviderBuilder.builder().clientCredentials().build()
     val authorizedClientManager = AuthorizedClientServiceOAuth2AuthorizedClientManager(
