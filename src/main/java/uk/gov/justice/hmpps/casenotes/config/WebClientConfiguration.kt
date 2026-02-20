@@ -16,7 +16,6 @@ import org.springframework.http.client.reactive.ReactorClientHttpConnector
 import org.springframework.security.oauth2.client.AuthorizedClientServiceOAuth2AuthorizedClientManager
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClientManager
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClientProviderBuilder
-import org.springframework.security.oauth2.client.OAuth2AuthorizedClientService
 import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository
 import org.springframework.security.oauth2.client.web.reactive.function.client.ServletOAuth2AuthorizedClientExchangeFilterFunction
 import org.springframework.web.reactive.function.client.ClientRequest
@@ -27,6 +26,7 @@ import org.springframework.web.reactive.function.client.WebClient.Builder
 import reactor.netty.http.client.HttpClient
 import reactor.netty.http.client.HttpClient.create
 import uk.gov.justice.hmpps.casenotes.legacy.utils.UserContext
+import uk.gov.justice.hmpps.kotlin.auth.service.GlobalPrincipalOAuth2AuthorizedClientService
 import java.time.Duration
 import java.time.Duration.ofSeconds
 
@@ -90,14 +90,20 @@ class WebClientConfiguration(
   }
 
   @Bean
+  @Qualifier("globalOAuth2AuthorizedClientService")
+  fun globalOAuth2AuthorizedClientService(
+    clientRegistrationRepository: ClientRegistrationRepository,
+  ) = GlobalPrincipalOAuth2AuthorizedClientService(clientRegistrationRepository)
+
+  @Bean
   fun authorizedClientManagerAppScope(
     clientRegistrationRepository: ClientRegistrationRepository?,
-    oAuth2AuthorizedClientService: OAuth2AuthorizedClientService?,
+    @Qualifier("globalOAuth2AuthorizedClientService") clientService: GlobalPrincipalOAuth2AuthorizedClientService?,
   ): OAuth2AuthorizedClientManager {
     val authorizedClientProvider = OAuth2AuthorizedClientProviderBuilder.builder().clientCredentials().build()
     val authorizedClientManager = AuthorizedClientServiceOAuth2AuthorizedClientManager(
       clientRegistrationRepository,
-      oAuth2AuthorizedClientService,
+      clientService,
     )
     authorizedClientManager.setAuthorizedClientProvider(authorizedClientProvider)
     return authorizedClientManager
