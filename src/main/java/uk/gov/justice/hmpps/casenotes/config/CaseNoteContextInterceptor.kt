@@ -1,6 +1,5 @@
 package uk.gov.justice.hmpps.casenotes.config
 
-import io.opentelemetry.api.trace.Span
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
 import jakarta.validation.ValidationException
@@ -78,10 +77,7 @@ class CaseNoteContextInterceptor(
   private fun HttpServletRequest.extractHeaders(): Headers? {
     return getHeader(CaseloadIdHeader.NAME)?.let {
       if (it.isBlank()) return null
-      // add request header to request in app insights to avoid having custom events
-      Span.current().setAttribute("caseloadId", it)
-      // using usernameHeader as the username property is already set as part of client tracking config (user_name)
-      val username = getHeader(UsernameHeader.NAME)?.also { Span.current().setAttribute("usernameHeader", it) }
+      val username = getHeader(UsernameHeader.NAME)
       // only allow username header for switched path
       if (serviceConfig.switchesPathFor(it)) {
         Headers(it, username)
