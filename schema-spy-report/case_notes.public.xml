@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<database name="case_notes" schema="public" type="PostgreSQL - 17.8 (Debian 17.8-1.pgdg13+1)">
+<database name="case_notes" schema="public" type="PostgreSQL - 17.9 (Debian 17.9-1.pgdg13+1)">
    <sequences>
       <sequence increment="-1" name="case_note_legacy_id_seq" startValue="-1"/>
       <sequence increment="1" name="case_note_sub_type_id_seq" startValue="1"/>
