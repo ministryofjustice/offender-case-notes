@@ -44,6 +44,8 @@ class ClientTrackingInterceptor : HandlerInterceptor {
           Span.current().setAttribute("enduser.id", it) // user_Id at the top level of the request
         }
         Span.current().setAttribute("clientId", jwtBody.getClaim("client_id").toString())
+        request.getHeader(CaseloadIdHeader.NAME)?.also { Span.current().setAttribute(CaseloadIdHeader.NAME, it) }
+        request.getHeader(UsernameHeader.NAME)?.also { Span.current().setAttribute(UsernameHeader.NAME, it) }
       } catch (e: ParseException) {
         log.warn("problem decoding jwt public key for application insights", e)
       }
