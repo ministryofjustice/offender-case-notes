@@ -73,7 +73,7 @@ dependencies {
 
   testImplementation("org.springframework.security.oauth:spring-security-oauth2:2.5.2.RELEASE")
   testImplementation("org.springframework.security:spring-security-jwt:1.1.1.RELEASE")
-  testImplementation("org.mockito.kotlin:mockito-kotlin:6.1.0")
+  testImplementation("org.mockito.kotlin:mockito-kotlin:6.2.3")
   testImplementation("io.swagger.parser.v3:swagger-parser-v3:2.1.35")
 }
 
