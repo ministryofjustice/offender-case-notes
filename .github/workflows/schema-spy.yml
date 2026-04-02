@@ -54,11 +54,11 @@ jobs:
     timeout-minutes: 240
     environment: test
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
 
       - name: refresh cache
         id: initial-cache
-        uses: actions/cache@v4
+        uses: actions/cache@668228422ae6a00e4ad889ee87cd7109ec5666a7 # v5.0.4
         env:
           cache-name: kotlin-cache
         with:
@@ -67,7 +67,7 @@ jobs:
             - gradle-
           key: ${{ runner.os }}-gradle-${{ env.cache-name }}-${{ hashFiles('build.gradle.kts') }}
 
-      - uses: actions/setup-java@v5
+      - uses: actions/setup-java@be666c2fcd27ec809703dec50e508c2fdc7f6654 # v5.2.0
         with:
           distribution: 'temurin'
           java-version: '${{ inputs.java_version }}'
@@ -79,7 +79,7 @@ jobs:
       - name: Initialise database and generate Schema Spy report
         shell: bash
         run: |
-          docker compose -f docker-compose.yml -f ${{ inputs.docker_compose_file }} up -d 
+          docker compose -f docker-compose.yml -f ${{ inputs.docker_compose_file }} up -d
           curl -L https://github.com/schemaspy/schemaspy/releases/download/v${{ inputs.schemaspy_version }}/schemaspy-app.jar --output /tmp/schemaspy.jar
           curl -L https://jdbc.postgresql.org/download/postgresql-${{ inputs.postgres_driver_version }}.jar --output /tmp/postgres-driver.jar
           export JAVA_OPTS="${{ inputs.java_options }}"
@@ -87,7 +87,7 @@ jobs:
           java -jar /tmp/schemaspy.jar -t pgsql -dp /tmp/postgres-driver.jar -db ${{ inputs.database_name }} -host localhost -port 5432 -s ${{ inputs.database_schema }} -vizjs -u ${{ inputs.database_user }} -p ${{ inputs.database_password }} -I ${{ inputs.exclude }} -o /tmp/schema-spy-report
 
       - name: Publish HTML report
-        uses: JamesIves/github-pages-deploy-action@6c2d9db40f9296374acc17b90404b6e8864128c8 # v4.7.3
+        uses: JamesIves/github-pages-deploy-action@d92aa235d04922e8f08b40ce78cc5442fcfbfa2f # v4.8.0
         with:
           folder: /tmp/schema-spy-report/
           target-folder: schema-spy-report
