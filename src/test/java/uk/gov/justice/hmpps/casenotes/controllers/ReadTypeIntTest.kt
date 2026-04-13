@@ -116,7 +116,7 @@ class ReadTypeIntTest : IntegrationTest() {
   ) = webTestClient.get().uri { builder ->
     builder.path(BASE_URL)
     requestParams.forEach {
-      builder.queryParam(it.key, it.value)
+      builder.queryParam(it.key, it.value as Collection<String>?)
     }
     builder.build()
   }.headers(addBearerAuthorisation(username, roles))

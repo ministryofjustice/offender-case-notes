@@ -24,11 +24,11 @@ class HealthCheckIntegrationTokenVerificationTest : BasicIntegrationTest() {
     webTestClient.get().uri("/health").exchange()
       .expectStatus().isOk
       .expectBody()
-      .jsonPath("components.OAuthApiHealth.details.HttpStatus").isEqualTo("OK")
-      .jsonPath("components.elite2ApiHealth.details.HttpStatus").isEqualTo("OK")
-      .jsonPath("components.prisonerSearchApiHealth.details.HttpStatus").isEqualTo("OK")
-      .jsonPath("components.manageUsersApiHealth.details.HttpStatus").isEqualTo("OK")
-      .jsonPath("components.tokenVerificationApiHealth.details.HttpStatus").isEqualTo("OK")
+      .jsonPath("components.OAuthApiHealth.details.HttpStatus").isEqualTo("200 OK")
+      .jsonPath("components.elite2ApiHealth.details.HttpStatus").isEqualTo("200 OK")
+      .jsonPath("components.prisonerSearchApiHealth.details.HttpStatus").isEqualTo("200 OK")
+      .jsonPath("components.manageUsersApiHealth.details.HttpStatus").isEqualTo("200 OK")
+      .jsonPath("components.tokenVerificationApiHealth.details.HttpStatus").isEqualTo("200 OK")
       .jsonPath("status").isEqualTo("UP")
   }
 

@@ -1,7 +1,5 @@
 package uk.gov.justice.hmpps.casenotes.controllers
 
-import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.module.kotlin.readValue
 import com.fasterxml.uuid.Generators
 import com.microsoft.applicationinsights.TelemetryClient
 import org.assertj.core.api.Assertions.assertThat
@@ -13,6 +11,7 @@ import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT
+import org.springframework.boot.webtestclient.autoconfigure.AutoConfigureWebTestClient
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
@@ -22,6 +21,8 @@ import org.springframework.test.web.reactive.server.WebTestClient
 import org.springframework.test.web.reactive.server.WebTestClient.RequestBodySpec
 import software.amazon.awssdk.services.sqs.model.PurgeQueueRequest
 import software.amazon.awssdk.services.sqs.model.ReceiveMessageRequest
+import tools.jackson.databind.json.JsonMapper
+import tools.jackson.module.kotlin.readValue
 import uk.gov.justice.hmpps.casenotes.alertnotes.AlertsApiExtension
 import uk.gov.justice.hmpps.casenotes.domain.Amendment
 import uk.gov.justice.hmpps.casenotes.domain.Note
@@ -60,6 +61,7 @@ internal const val USERNAME = "TestUser"
 
 @ActiveProfiles("test", "test-token-verification")
 @SpringBootTest(webEnvironment = RANDOM_PORT)
+@AutoConfigureWebTestClient
 @ExtendWith(
   Elite2Extension::class,
   OAuthExtension::class,
@@ -80,7 +82,7 @@ abstract class IntegrationTest : BasicIntegrationTest() {
   internal lateinit var noteRepository: NoteRepository
 
   @Autowired
-  internal lateinit var objectMapper: ObjectMapper
+  internal lateinit var jsonMapper: JsonMapper
 
   @Autowired
   internal lateinit var hmppsQueueService: HmppsQueueService
@@ -102,7 +104,7 @@ abstract class IntegrationTest : BasicIntegrationTest() {
   }
 
   internal fun publishEventToTopic(event: DomainEvent<*>) {
-    domainEventsTopic.publish(event.eventType, objectMapper.writeValueAsString(event))
+    domainEventsTopic.publish(event.eventType, jsonMapper.writeValueAsString(event))
   }
 
   internal fun HmppsQueue.countAllMessagesOnQueue() = sqsClient.countAllMessagesOnQueue(queueUrl).get()
@@ -112,10 +114,10 @@ abstract class IntegrationTest : BasicIntegrationTest() {
     return sqsClient.receiveMessage(
       ReceiveMessageRequest.builder().queueUrl(queueUrl).maxNumberOfMessages(maxMessages).build(),
     ).get().messages()
-      .map { objectMapper.readValue<Notification>(it.body()) }
+      .map { jsonMapper.readValue<Notification>(it.body()) }
       .filter { e -> e.eventType in PersonCaseNoteEvent.Type.entries.map { "person.case-note.${it.name.lowercase()}" } }
       .map {
-        val event = objectMapper.readValue<DomainEvent<CaseNoteInformation>>(it.message)
+        val event = jsonMapper.readValue<DomainEvent<CaseNoteInformation>>(it.message)
         assertThat(it.attributes["type"]?.value).isEqualTo(event.additionalInformation.type)
         assertThat(it.attributes["subType"]?.value).isEqualTo(event.additionalInformation.subType)
         event
@@ -155,11 +157,11 @@ abstract class IntegrationTest : BasicIntegrationTest() {
     .expectBody(ErrorResponse::class.java)
     .returnResult().responseBody!!
 
-  internal final inline fun <reified T> WebTestClient.ResponseSpec.success(status: HttpStatus = HttpStatus.OK): T = expectStatus().isEqualTo(status)
+  internal final inline fun <reified T : Any> WebTestClient.ResponseSpec.success(status: HttpStatus = HttpStatus.OK): T = expectStatus().isEqualTo(status)
     .expectBody(T::class.java)
     .returnResult().responseBody!!
 
-  internal final inline fun <reified T> WebTestClient.ResponseSpec.successList(status: HttpStatus = HttpStatus.OK): List<T> = expectStatus().isEqualTo(status)
+  internal final inline fun <reified T : Any> WebTestClient.ResponseSpec.successList(status: HttpStatus = HttpStatus.OK): List<T> = expectStatus().isEqualTo(status)
     .expectBodyList(T::class.java)
     .returnResult().responseBody!!
 

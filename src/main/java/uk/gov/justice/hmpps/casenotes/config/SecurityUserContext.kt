@@ -11,7 +11,7 @@ import org.springframework.stereotype.Component
 @Component
 class SecurityUserContext {
 
-  fun getAuthentication(): Authentication = SecurityContextHolder.getContext().authentication
+  fun getAuthentication(): Authentication? = SecurityContextHolder.getContext().authentication
 
   fun getCurrentUsername(): String? = getAuthorisedUser()?.username
 
@@ -27,8 +27,8 @@ class SecurityUserContext {
     else -> null
   }
 
-  private fun hasMatchingRole(roles: List<String>): Boolean = getAuthentication().authorities?.any { a: GrantedAuthority? ->
-    roles.map { it.removeRolePrefix() }.contains(a!!.authority.removeRolePrefix())
+  private fun hasMatchingRole(roles: List<String>): Boolean = getAuthentication()?.authorities?.any { a: GrantedAuthority? ->
+    roles.map { it.removeRolePrefix() }.contains(a!!.authority?.removeRolePrefix())
   } == true
 
   private fun String.removeRolePrefix(): String = RegExUtils.replaceFirst(this, "ROLE_", "")

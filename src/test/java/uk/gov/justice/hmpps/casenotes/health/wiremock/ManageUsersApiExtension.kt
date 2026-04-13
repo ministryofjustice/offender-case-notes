@@ -35,7 +35,7 @@ class ManageUsersApiExtension :
 }
 
 class ManageUsersApiServer : WireMockServer(WIREMOCK_PORT) {
-  private val mapper = JsonHelper.objectMapper
+  private val mapper = JsonHelper.jsonMapper
 
   fun stubGetUserDetails(username: String, nomisUser: Boolean = true): StubMapping = stubFor(
     get("/users/$username")

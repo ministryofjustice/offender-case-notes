@@ -1,7 +1,5 @@
 package uk.gov.justice.hmpps.casenotes.config
 
-import com.fasterxml.jackson.databind.ObjectMapper
-import io.opentelemetry.api.trace.Span
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
 import jakarta.validation.ValidationException
@@ -16,6 +14,7 @@ import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.web.servlet.HandlerInterceptor
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer
+import tools.jackson.databind.json.JsonMapper
 import uk.gov.justice.hmpps.casenotes.integrations.ManageUsersService
 import uk.gov.justice.hmpps.casenotes.legacy.dto.ErrorResponse
 import uk.gov.justice.hmpps.casenotes.legacy.dto.UserDetails.Companion.NOMIS
@@ -32,7 +31,7 @@ class CaseNoteContextConfiguration(private val caseNoteContextInterceptor: CaseN
 @Configuration
 class CaseNoteContextInterceptor(
   private val manageUserService: ManageUsersService,
-  private val objectMapper: ObjectMapper,
+  private val jsonMapper: JsonMapper,
   private val serviceConfig: ServiceConfig,
 ) : HandlerInterceptor {
   override fun preHandle(request: HttpServletRequest, response: HttpServletResponse, handler: Any): Boolean {
@@ -50,16 +49,16 @@ class CaseNoteContextInterceptor(
         )
         request.setAttribute(CaseNoteRequestContext::class.simpleName, context)
         true
-      } ?: response.handleNoUserDetails(objectMapper)
+      } ?: response.handleNoUserDetails(jsonMapper)
     }
     return true
   }
 
-  private fun HttpServletResponse.handleNoUserDetails(objectMapper: ObjectMapper): Boolean {
+  private fun HttpServletResponse.handleNoUserDetails(jsonMapper: JsonMapper): Boolean {
     status = HttpStatus.BAD_REQUEST.value()
     contentType = org.springframework.http.MediaType.APPLICATION_JSON_VALUE
     writer.write(
-      objectMapper.writeValueAsString(
+      jsonMapper.writeValueAsString(
         ErrorResponse(
           HttpStatus.BAD_REQUEST.value(),
           developerMessage = "Invalid username provided in token",
@@ -78,10 +77,7 @@ class CaseNoteContextInterceptor(
   private fun HttpServletRequest.extractHeaders(): Headers? {
     return getHeader(CaseloadIdHeader.NAME)?.let {
       if (it.isBlank()) return null
-      // add request header to request in app insights to avoid having custom events
-      Span.current().setAttribute("caseloadId", it)
-      // using usernameHeader as the username property is already set as part of client tracking config (user_name)
-      val username = getHeader(UsernameHeader.NAME)?.also { Span.current().setAttribute("usernameHeader", it) }
+      val username = getHeader(UsernameHeader.NAME)
       // only allow username header for switched path
       if (serviceConfig.switchesPathFor(it)) {
         Headers(it, username)
