@@ -51,6 +51,7 @@ import uk.gov.justice.hmpps.sqs.MissingQueueException
 import uk.gov.justice.hmpps.sqs.MissingTopicException
 import uk.gov.justice.hmpps.sqs.countAllMessagesOnQueue
 import uk.gov.justice.hmpps.sqs.publish
+import uk.gov.justice.hmpps.test.kotlin.auth.JwtAuthorisationHelper
 import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit
 import java.util.UUID
@@ -77,6 +78,9 @@ abstract class IntegrationTest : BasicIntegrationTest() {
 
   @Autowired
   internal lateinit var jwtHelper: JwtAuthHelper
+
+  @Autowired
+  protected lateinit var jwtAuthHelper: JwtAuthorisationHelper
 
   @MockitoSpyBean
   internal lateinit var noteRepository: NoteRepository
@@ -136,9 +140,18 @@ abstract class IntegrationTest : BasicIntegrationTest() {
     hmppsEventsQueue.sqsClient.purgeQueue(PurgeQueueRequest.builder().queueUrl(hmppsEventsQueue.queueUrl).build()).get()
   }
 
+  internal fun setAuthorisation(
+    username: String? = "AUTH_ADM",
+    roles: List<String> = listOf(),
+    scopes: List<String> = listOf("read"),
+  ):  (HttpHeaders) -> Unit = jwtAuthHelper.setAuthorisationHeader(username = username, scope = scopes, roles = roles)
+
   fun addBearerAuthorisation(user: String, roles: List<String> = listOf()): Consumer<HttpHeaders> {
-    val jwt = jwtHelper.createJwt(user, roles = roles)
-    return addBearerToken(jwt)
+    return Consumer { headers: HttpHeaders ->
+      setAuthorisation(user, roles)(headers)
+      headers.add(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON_VALUE)
+      headers.add(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+    }
   }
 
   fun addBearerToken(token: String): Consumer<HttpHeaders> = Consumer { headers: HttpHeaders ->

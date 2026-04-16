@@ -36,6 +36,9 @@ spring:
 
   security:
     oauth2:
+      resourceserver:
+        jwt:
+          jwk-set-uri: ${oauth.api.base.url}/.well-known/jwks.json
       client:
         registration:
           default:
@@ -95,3 +98,9 @@ service:
 
 springdoc:
   paths-to-exclude: "/queue-admin/**"
+
+hmpps:
+  sar:
+    template:
+      path: /sar/templates/sar_template.mustache
+      enabled: true

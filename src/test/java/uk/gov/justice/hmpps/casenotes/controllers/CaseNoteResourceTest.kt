@@ -41,16 +41,15 @@ class CaseNoteResourceTest : IntegrationTest() {
       manageUsersApi.stubGetUserDetails("SECURE_CASENOTE_USER")
       prisonerSearchApi.stubPrisonerDetails("A1234AA", "LEI")
       elite2Api.subGetCaseNotesForOffender("A1234AA")
-      val token = jwtHelper.createJwt("SECURE_CASENOTE_USER", roles = CASENOTES_ROLES)
       webTestClient.post().uri("/case-notes/{offenderIdentifier}", "A1234AA")
-        .headers(addBearerToken(token))
+        .headers(addBearerAuthorisation("SECURE_CASENOTE_USER", roles = CASENOTES_ROLES))
         .bodyValue(CREATE_CASE_NOTE_WITHOUT_LOC.format("This is a case note"))
         .exchange()
         .expectStatus().isCreated
         .expectBody()
         .json(readFile("A1234AA-create-casenote.json"))
       webTestClient.get().uri("/case-notes/{offenderIdentifier}", "A1234AA")
-        .headers(addBearerToken(token))
+        .headers(addBearerAuthorisation("SECURE_CASENOTE_USER", roles = CASENOTES_ROLES))
         .exchange()
         .expectStatus().isOk
         .expectBody()
@@ -236,16 +235,15 @@ class CaseNoteResourceTest : IntegrationTest() {
     fun testRetrieveCaseNoteForOffenderSensitive() {
       manageUsersApi.stubGetUserDetails("SECURE_CASENOTE_USER")
       prisonerSearchApi.stubPrisonerDetails("A1234AF", "LEI")
-      val token = jwtHelper.createJwt("SECURE_CASENOTE_USER", roles = CASENOTES_ROLES)
       val postResponse = webTestClient.post().uri("/case-notes/{offenderIdentifier}", "A1234AF")
-        .headers(addBearerToken(token))
+        .headers(addBearerAuthorisation("SECURE_CASENOTE_USER", roles = CASENOTES_ROLES))
         .bodyValue(CREATE_CASE_NOTE_WITHOUT_LOC.format("This is a case note"))
         .exchange()
         .expectStatus().isCreated
         .returnResult(CaseNote::class.java)
       val id = postResponse.responseBody.blockFirst()!!.id
       webTestClient.get().uri("/case-notes/{offenderIdentifier}/{caseNoteIdentifier}", "A1234AF", id)
-        .headers(addBearerToken(token))
+        .headers(addBearerAuthorisation("SECURE_CASENOTE_USER", roles = CASENOTES_ROLES))
         .exchange()
         .expectStatus().isOk
         .expectBody()
@@ -257,10 +255,8 @@ class CaseNoteResourceTest : IntegrationTest() {
       manageUsersApi.stubGetUserDetails("SECURE_CASENOTE_USER")
       val personIdentifier = "S1234TN"
       elite2Api.subGetCaseNotesForOffender(personIdentifier)
-      val token = jwtHelper.createJwt("SECURE_CASENOTE_USER", roles = CASENOTES_ROLES)
-
       webTestClient.get().uri("/case-notes/{personIdentifier}", personIdentifier)
-        .headers(addBearerToken(token))
+        .headers(addBearerAuthorisation("SECURE_CASENOTE_USER", roles = CASENOTES_ROLES))
         .exchange()
         .expectStatus().isOk
         .expectBody().json(
@@ -444,11 +440,10 @@ class CaseNoteResourceTest : IntegrationTest() {
     manageUsersApi.stubGetUserDetails("SECURE_CASENOTE_USER")
     prisonerSearchApi.stubPrisonerDetails("A1234AB", "LEI")
     elite2Api.subGetCaseNotesForOffender("A1234AB")
-    val token = jwtHelper.createJwt("SECURE_CASENOTE_USER", roles = CASENOTES_ROLES)
 
     // create the case note
     val postResponse = webTestClient.post().uri("/case-notes/{offenderIdentifier}", "A1234AB")
-      .headers(addBearerToken(token))
+      .headers(addBearerAuthorisation("SECURE_CASENOTE_USER", roles = CASENOTES_ROLES))
       .bodyValue(CREATE_CASE_NOTE_WITHOUT_LOC.format("This is another case note"))
       .exchange()
       .expectStatus().isCreated
@@ -460,7 +455,7 @@ class CaseNoteResourceTest : IntegrationTest() {
       "A1234AB",
       postResponse.responseBody.blockFirst()!!.id,
     )
-      .headers(addBearerToken(token))
+      .headers(addBearerAuthorisation("SECURE_CASENOTE_USER", roles = CASENOTES_ROLES))
       .bodyValue("""{ "text": "Amended case note" }""")
       .exchange()
       .expectStatus().isOk
@@ -468,7 +463,7 @@ class CaseNoteResourceTest : IntegrationTest() {
 
     // check the case note now correct
     webTestClient.get().uri("/case-notes/{offenderIdentifier}", "A1234AB")
-      .headers(addBearerToken(token))
+      .headers(addBearerAuthorisation("SECURE_CASENOTE_USER", roles = CASENOTES_ROLES))
       .exchange()
       .expectStatus().isOk
       .expectBody()
@@ -495,24 +490,24 @@ class CaseNoteResourceTest : IntegrationTest() {
     manageUsersApi.stubGetUserDetails("SECURE_CASENOTE_USER")
     prisonerSearchApi.stubPrisonerDetails("A1234AC", "LEI")
     elite2Api.subGetCaseNotesForOffender("A1234AC")
-    val token = jwtHelper.createJwt("SECURE_CASENOTE_USER", roles = CASENOTES_ROLES)
+
     webTestClient.post().uri("/case-notes/{offenderIdentifier}", "A1234AC")
-      .headers(addBearerToken(token))
+      .headers(addBearerAuthorisation("SECURE_CASENOTE_USER", roles = CASENOTES_ROLES))
       .bodyValue(CREATE_CASE_NOTE.format("MDI", "This is a case note 1"))
       .exchange()
       .expectStatus().isCreated
     webTestClient.post().uri("/case-notes/{offenderIdentifier}", "A1234AC")
-      .headers(addBearerToken(token))
+      .headers(addBearerAuthorisation("SECURE_CASENOTE_USER", roles = CASENOTES_ROLES))
       .bodyValue(CREATE_CASE_NOTE_WITHOUT_LOC.format("This is a case note 2"))
       .exchange()
       .expectStatus().isCreated
     webTestClient.post().uri("/case-notes/{offenderIdentifier}", "A1234AC")
-      .headers(addBearerToken(token))
+      .headers(addBearerAuthorisation("SECURE_CASENOTE_USER", roles = CASENOTES_ROLES))
       .bodyValue(CREATE_CASE_NOTE.format("LEI", "This is a case note 3"))
       .exchange()
       .expectStatus().isCreated
     webTestClient.get().uri("/case-notes/{offenderIdentifier}?size={size}&page={page}", "A1234AC", "2", "1")
-      .headers(addBearerToken(token))
+      .headers(addBearerAuthorisation("SECURE_CASENOTE_USER", roles = CASENOTES_ROLES))
       .exchange()
       .expectStatus().isOk
       .expectBody()
@@ -522,11 +517,10 @@ class CaseNoteResourceTest : IntegrationTest() {
   @Test
   fun testSoftDeleteCaseNoteUserDoesntHaveRole() {
     manageUsersApi.stubGetUserDetails("SECURE_CASENOTE_USER")
-    val token = jwtHelper.createJwt("SECURE_CASENOTE_USER", roles = CASENOTES_ROLES)
 
     webTestClient.delete()
       .uri("/case-notes/{offenderIdentifier}/{caseNoteId}", "Z1234ZZ", "231eb4ee-c06c-49a3-846c-1b542cc0ed6b")
-      .headers(addBearerToken(token))
+      .headers(addBearerAuthorisation("SECURE_CASENOTE_USER", roles = CASENOTES_ROLES))
       .exchange()
       .expectStatus().isForbidden
   }
@@ -534,10 +528,9 @@ class CaseNoteResourceTest : IntegrationTest() {
   @Test
   fun testDeleteCaseNoteNotFound() {
     manageUsersApi.stubGetUserDetails("DELETE_CASE_NOTE_USER")
-    val token = jwtHelper.createJwt("DELETE_CASE_NOTE_USER", roles = listOf(ROLE_CASE_NOTES_ADMIN))
     webTestClient.delete()
       .uri("/case-notes/{offenderIdentifier}/{caseNoteId}", "Z1234ZZ", "231eb4ee-c06c-49a3-846c-1b542cc0ed6b")
-      .headers(addBearerToken(token))
+      .headers(addBearerAuthorisation("DELETE_CASE_NOTE_USER", roles = listOf(ROLE_CASE_NOTES_ADMIN)))
       .exchange()
       .expectStatus().isNotFound
       .expectBody()
