@@ -36,6 +36,9 @@ spring:
 
   security:
     oauth2:
+      resourceserver:
+        jwt:
+          jwk-set-uri: ${oauth.api.base.url}/.well-known/jwks.json
       client:
         registration:
           default:

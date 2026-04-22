@@ -38,7 +38,6 @@ alerts.api.base.url: https://alerts-api-dev.hmpps.service.justice.gov.uk
 tokenverification:
   api.base.url: https://token-verification-api-dev.prison.service.justice.gov.uk
   enabled: true
-spring.security.oauth2.resourceserver.jwt.jwk-set-uri: https://sign-in-dev.hmpps.service.justice.gov.uk/auth/.well-known/jwks.json
 
 hmpps.sqs:
   provider: localstack
