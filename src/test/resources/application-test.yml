@@ -1,7 +1,7 @@
 spring:
   flyway:
     enabled: true
-    locations: classpath:db/migration/general,classpath:db/migration/{vendor},classpath:db/test/migration
+    locations: classpath:db/migration,classpath:db/test/migration
 
   jpa:
     show-sql: true
@@ -75,6 +75,8 @@ hmpps:
 
   sar:
     tests:
+      expected-flyway-schema-version: 901 # SAR testing library includes test-only migrations
+      expected-flyway-schema-non-future-version: 40 # actual latest version
       expected-jpa-entity-schema:
         path: /sar/expected-jpa-entity-schema.json
 
