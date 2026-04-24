@@ -69,6 +69,15 @@ hmpps.sqs:
     domainevents:
       arn: arn:aws:sns:eu-west-2:000000000000:${random.uuid}
 
+hmpps:
+  test:
+    jwt-helper-enabled: false
+
+  sar:
+    tests:
+      expected-jpa-entity-schema:
+        path: /sar/expected-jpa-entity-schema.json
+
 service:
   active-prisons: MDI
   action-missing-case-notes: true
