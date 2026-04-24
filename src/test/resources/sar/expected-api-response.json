@@ -1,0 +1,44 @@
+[
+  {
+    "creationDateTime": "2025-04-22T13:17:53",
+    "type": "POM Activity",
+    "subType": "General POM Note",
+    "text": "Text about the case note saved in the case note database",
+    "authorUsername": "AuthorUsername",
+    "amendments": [
+      {
+        "creationDateTime": "2025-04-22T13:17:53",
+        "additionalNoteText": "An amendment to a case note saved in the case note database",
+        "authorUsername": "AuthorUsername"
+      }
+    ]
+  },
+  {
+    "creationDateTime": "2025-04-20T08:32:06",
+    "type": "OMIC Type",
+    "subType": "General OMIC Note",
+    "text": "Text about the case note saved in the case note database",
+    "authorUsername": "AuthorUsername",
+    "amendments": [
+      {
+        "creationDateTime": "2025-04-20T08:32:06",
+        "additionalNoteText": "An amendment to a case note saved in the case note database",
+        "authorUsername": "AuthorUsername"
+      }
+    ]
+  },
+  {
+    "creationDateTime": "2025-01-13T18:24:32",
+    "type": "OMIC Type",
+    "subType": "Open Case Note",
+    "text": "Text about the case note saved in the case note database",
+    "authorUsername": "AuthorUsername",
+    "amendments": [
+      {
+        "creationDateTime": "2025-01-13T18:24:32",
+        "additionalNoteText": "An amendment to a case note saved in the case note database",
+        "authorUsername": "AuthorUsername"
+      }
+    ]
+  }
+]

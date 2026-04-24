@@ -13,6 +13,8 @@ import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Import
 import org.springframework.context.annotation.Primary
 import org.springframework.security.oauth2.jwt.JwtDecoder
+import org.springframework.test.web.reactive.server.WebTestClient
+import uk.gov.justice.digital.hmpps.subjectaccessrequest.SarApiDataTest
 import uk.gov.justice.digital.hmpps.subjectaccessrequest.SarFlywaySchemaTest
 import uk.gov.justice.digital.hmpps.subjectaccessrequest.SarIntegrationTestHelper
 import uk.gov.justice.digital.hmpps.subjectaccessrequest.SarIntegrationTestHelperConfig
@@ -21,11 +23,15 @@ import uk.gov.justice.hmpps.casenotes.controllers.IntegrationTest
 import uk.gov.justice.hmpps.casenotes.utils.JwtAuthHelper
 import uk.gov.justice.hmpps.test.kotlin.auth.JwtAuthorisationHelper
 import java.time.Duration
+import java.time.LocalDateTime
 import javax.sql.DataSource
+
+const val SAMPLE_PRISONER_NUMBER = "A1234BB"
 
 @Import(SarIntegrationTestHelperConfig::class)
 class SubjectAccessRequestIntegrationTest :
   IntegrationTest(),
+  SarApiDataTest,
   SarFlywaySchemaTest,
   SarJpaEntitiesTest {
 
@@ -69,6 +75,52 @@ class SubjectAccessRequestIntegrationTest :
   override fun getDataSourceInstance(): DataSource = dataSource
   override fun getEntityManagerInstance(): EntityManager = entityManager
   override fun getSarHelper(): SarIntegrationTestHelper = sarIntegrationTestHelper
+  override fun getWebTestClientInstance(): WebTestClient = webTestClient
+
+  override fun setupTestData() {
+    val types = getAllTypes()
+    var date = LocalDateTime.parse("2025-04-22T13:17:53")
+    noteRepository.findByLegacyId(104) ?: givenCaseNote(
+      generateCaseNote(
+        personIdentifier = SAMPLE_PRISONER_NUMBER,
+        type = types.find { it.type.code == "POM" && it.code == "GEN" }!!,
+        authorUserId = "3124",
+        legacyId = 104,
+        occurredAt = date.minusHours(1),
+        createdAt = date,
+      ).withAmendment(
+        createdAt = date,
+      ),
+    )
+    date = LocalDateTime.parse("2025-04-20T08:32:06")
+    noteRepository.findByLegacyId(103) ?: givenCaseNote(
+      generateCaseNote(
+        personIdentifier = SAMPLE_PRISONER_NUMBER,
+        type = types.find { it.type.code == "OMIC" && it.code == "GEN" }!!,
+        authorUserId = "3124",
+        legacyId = 103,
+        occurredAt = date.minusHours(1),
+        createdAt = date,
+      ).withAmendment(
+        createdAt = date,
+      ),
+    )
+    date = LocalDateTime.parse("2025-01-13T18:24:32")
+    noteRepository.findByLegacyId(102) ?: givenCaseNote(
+      generateCaseNote(
+        personIdentifier = SAMPLE_PRISONER_NUMBER,
+        type = types.find { it.type.code == "OMIC" && it.code == "OMIC_OPEN" }!!,
+        authorUserId = "3129",
+        legacyId = 102,
+        occurredAt = date.minusHours(1),
+        createdAt = date,
+      ).withAmendment(
+        createdAt = date,
+      ),
+    )
+  }
+
+  override fun getPrn(): String? = SAMPLE_PRISONER_NUMBER
 
   @Test
   fun `Flyway schema version should match expected non-future version`(
