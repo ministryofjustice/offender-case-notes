@@ -97,3 +97,9 @@ service:
 
 springdoc:
   paths-to-exclude: "/queue-admin/**"
+
+hmpps:
+  sar:
+    template:
+      path: /sar/templates/sar_template.mustache
+      enabled: true

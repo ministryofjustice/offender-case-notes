@@ -82,6 +82,8 @@ hmpps:
         path: /sar/expected-api-response.json
       expected-jpa-entity-schema:
         path: /sar/expected-jpa-entity-schema.json
+      expected-render-result:
+        path: /sar/expected-render-result.html
 
 service:
   active-prisons: MDI

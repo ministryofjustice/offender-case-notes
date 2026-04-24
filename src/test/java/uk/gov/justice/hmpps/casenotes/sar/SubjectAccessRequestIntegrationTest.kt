@@ -19,6 +19,7 @@ import uk.gov.justice.digital.hmpps.subjectaccessrequest.SarFlywaySchemaTest
 import uk.gov.justice.digital.hmpps.subjectaccessrequest.SarIntegrationTestHelper
 import uk.gov.justice.digital.hmpps.subjectaccessrequest.SarIntegrationTestHelperConfig
 import uk.gov.justice.digital.hmpps.subjectaccessrequest.SarJpaEntitiesTest
+import uk.gov.justice.digital.hmpps.subjectaccessrequest.SarReportTest
 import uk.gov.justice.hmpps.casenotes.controllers.IntegrationTest
 import uk.gov.justice.hmpps.casenotes.utils.JwtAuthHelper
 import uk.gov.justice.hmpps.test.kotlin.auth.JwtAuthorisationHelper
@@ -33,7 +34,8 @@ class SubjectAccessRequestIntegrationTest :
   IntegrationTest(),
   SarApiDataTest,
   SarFlywaySchemaTest,
-  SarJpaEntitiesTest {
+  SarJpaEntitiesTest,
+  SarReportTest {
 
   @TestConfiguration
   class Config {
