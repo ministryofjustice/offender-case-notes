@@ -3,13 +3,13 @@
     "creationDateTime": "2025-04-22T13:17:53",
     "type": "POM Activity",
     "subType": "General POM Note",
-    "text": "Text about the case note saved in the case note database",
-    "authorUsername": "AuthorUsername",
+    "text": "Notes about something that happened after lunch",
+    "authorUsername": "POM1",
     "amendments": [
       {
         "creationDateTime": "2025-04-22T13:17:53",
-        "additionalNoteText": "An amendment to a case note saved in the case note database",
-        "authorUsername": "AuthorUsername"
+        "additionalNoteText": "Specifically, at about 1.17 pm",
+        "authorUsername": "POM2"
       }
     ]
   },
@@ -17,27 +17,21 @@
     "creationDateTime": "2025-04-20T08:32:06",
     "type": "OMIC Type",
     "subType": "General OMIC Note",
-    "text": "Text about the case note saved in the case note database",
-    "authorUsername": "AuthorUsername",
-    "amendments": [
-      {
-        "creationDateTime": "2025-04-20T08:32:06",
-        "additionalNoteText": "An amendment to a case note saved in the case note database",
-        "authorUsername": "AuthorUsername"
-      }
-    ]
+    "text": "OMIC notes\nWith my comments",
+    "authorUsername": "OMIC1",
+    "amendments": []
   },
   {
     "creationDateTime": "2025-01-13T18:24:32",
     "type": "OMIC Type",
     "subType": "Open Case Note",
-    "text": "Text about the case note saved in the case note database",
-    "authorUsername": "AuthorUsername",
+    "text": "Notes from a meeting",
+    "authorUsername": "OMIC2",
     "amendments": [
       {
         "creationDateTime": "2025-01-13T18:24:32",
-        "additionalNoteText": "An amendment to a case note saved in the case note database",
-        "authorUsername": "AuthorUsername"
+        "additionalNoteText": "That’s not quite right",
+        "authorUsername": "OMIC3"
       }
     ]
   }

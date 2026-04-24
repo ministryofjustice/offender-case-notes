@@ -27,8 +27,6 @@ import java.time.Duration
 import java.time.LocalDateTime
 import javax.sql.DataSource
 
-const val SAMPLE_PRISONER_NUMBER = "A1234BB"
-
 @Import(SarIntegrationTestHelperConfig::class)
 class SubjectAccessRequestIntegrationTest :
   IntegrationTest(),
@@ -79,50 +77,61 @@ class SubjectAccessRequestIntegrationTest :
   override fun getSarHelper(): SarIntegrationTestHelper = sarIntegrationTestHelper
   override fun getWebTestClientInstance(): WebTestClient = webTestClient
 
+  private val samplePrisonerNumber = "A1234BB"
+
   override fun setupTestData() {
     val types = getAllTypes()
     var date = LocalDateTime.parse("2025-04-22T13:17:53")
     noteRepository.findByLegacyId(104) ?: givenCaseNote(
       generateCaseNote(
-        personIdentifier = SAMPLE_PRISONER_NUMBER,
+        personIdentifier = samplePrisonerNumber,
         type = types.find { it.type.code == "POM" && it.code == "GEN" }!!,
+        text = "Notes about something that happened after lunch",
+        authorUsername = "POM1",
         authorUserId = "3124",
         legacyId = 104,
         occurredAt = date.minusHours(1),
         createdAt = date,
       ).withAmendment(
+        text = "Specifically, at about 1.17 pm",
+        authorUsername = "POM2",
         createdAt = date,
       ),
     )
     date = LocalDateTime.parse("2025-04-20T08:32:06")
     noteRepository.findByLegacyId(103) ?: givenCaseNote(
       generateCaseNote(
-        personIdentifier = SAMPLE_PRISONER_NUMBER,
+        personIdentifier = samplePrisonerNumber,
         type = types.find { it.type.code == "OMIC" && it.code == "GEN" }!!,
+        text = "OMIC notes\nWith my comments",
+        authorUsername = "OMIC1",
         authorUserId = "3124",
         legacyId = 103,
         occurredAt = date.minusHours(1),
-        createdAt = date,
-      ).withAmendment(
         createdAt = date,
       ),
     )
     date = LocalDateTime.parse("2025-01-13T18:24:32")
     noteRepository.findByLegacyId(102) ?: givenCaseNote(
       generateCaseNote(
-        personIdentifier = SAMPLE_PRISONER_NUMBER,
+        personIdentifier = samplePrisonerNumber,
         type = types.find { it.type.code == "OMIC" && it.code == "OMIC_OPEN" }!!,
+        text = "Notes from a meeting",
+        authorUsername = "OMIC2",
         authorUserId = "3129",
         legacyId = 102,
         occurredAt = date.minusHours(1),
         createdAt = date,
       ).withAmendment(
+        text = "That’s not quite right",
+        authorUsername = "OMIC3",
         createdAt = date,
       ),
     )
+    givenCaseNote(generateCaseNote())
   }
 
-  override fun getPrn(): String? = SAMPLE_PRISONER_NUMBER
+  override fun getPrn(): String? = samplePrisonerNumber
 
   @Test
   fun `Flyway schema version should match expected non-future version`(
