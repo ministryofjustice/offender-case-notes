@@ -19,6 +19,12 @@ spring:
         jwt:
           public-key-location: classpath:local-public-key.pub
 
+springdoc:
+  api-docs:
+    enabled: true
+  swagger-ui:
+    enabled: true
+
 server:
   shutdown: immediate
 
