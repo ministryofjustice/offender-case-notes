@@ -7,8 +7,8 @@ import uk.gov.justice.hmpps.casenotes.domain.Amendment
 import uk.gov.justice.hmpps.casenotes.domain.Note
 import uk.gov.justice.hmpps.casenotes.sar.SarAmendment
 import uk.gov.justice.hmpps.casenotes.sar.SarNote
-import uk.gov.justice.hmpps.casenotes.sar.SubjectAccessResponse
 import uk.gov.justice.hmpps.casenotes.utils.NomisIdGenerator.personIdentifier
+import uk.gov.justice.hmpps.kotlin.sar.Attachment
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.time.temporal.ChronoUnit
@@ -154,6 +154,9 @@ class SubjectAccessRequestIntTest : IntegrationTest() {
     const val BASE_URL = "/subject-access-request"
   }
 }
+
+// Needed because HmppsSubjectAccessRequestContent has untyped `content` property
+private data class SubjectAccessResponse(val content: List<SarNote>, val attachments: List<Attachment>?)
 
 private fun SarNote.verifyAgainst(note: Note) {
   assertThat(type).isEqualTo(note.subType.type.description)
