@@ -80,9 +80,8 @@ dependencies {
   testImplementation("io.swagger.parser.v3:swagger-parser-v3:2.1.40")
 }
 
-java {
-  sourceCompatibility = JavaVersion.VERSION_24
-  targetCompatibility = JavaVersion.VERSION_24
+kotlin {
+  jvmToolchain(25)
 }
 
 dependencyCheck {
@@ -92,7 +91,7 @@ dependencyCheck {
 tasks {
   withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
     compilerOptions {
-      jvmTarget = JvmTarget.JVM_24
+      jvmTarget = JvmTarget.JVM_25
       freeCompilerArgs.add("-Xannotation-default-target=param-property")
     }
   }
