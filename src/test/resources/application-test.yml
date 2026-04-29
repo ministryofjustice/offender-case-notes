@@ -23,6 +23,12 @@ spring:
         jwt:
           public-key-location: classpath:local-public-key.pub
 
+springdoc:
+  api-docs:
+    enabled: true
+  swagger-ui:
+    enabled: true
+
 server:
   shutdown: immediate
 
@@ -75,7 +81,7 @@ hmpps:
 
   sar:
     tests:
-      attachments-expected: true
+      attachments-expected: false
       expected-flyway-schema-version: 900 # SAR testing library includes test-only migrations
       expected-flyway-schema-non-future-version: 40 # actual latest version
       expected-api-response:

@@ -97,6 +97,11 @@ service:
 
 springdoc:
   paths-to-exclude: "/queue-admin/**"
+  api-docs:
+    enabled: false
+  swagger-ui:
+    enabled: false
+    version: 5.32.2
 
 hmpps:
   sar:
