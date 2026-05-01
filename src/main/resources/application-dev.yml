@@ -1,0 +1,5 @@
+hmpps:
+  sar:
+    template:
+      path: /sar/templates/V2__sar_template.mustache
+      enabled: true

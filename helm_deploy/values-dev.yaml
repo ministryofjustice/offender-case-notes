@@ -17,6 +17,7 @@ generic-service:
     SERVICE_ACTIVE_PRISONS: "***"
     SPRINGDOC_API_DOCS_ENABLED: "true"
     SPRINGDOC_SWAGGER_UI_ENABLED: "true"
+    SERVICE_SAR_ENABLE_ALL_CASE_NOTES: "true"
 
   allowlist:
     delius-dev-1: 35.178.19.203/32
