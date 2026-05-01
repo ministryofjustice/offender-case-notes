@@ -92,6 +92,7 @@ class SubjectAccessRequestIntegrationTest :
         legacyId = 104,
         occurredAt = date.minusHours(1),
         createdAt = date,
+        locationId = "LEI",
       ).withAmendment(
         text = "Specifically, at about 1.17 pm",
         authorUsername = "POM2",
@@ -109,6 +110,7 @@ class SubjectAccessRequestIntegrationTest :
         legacyId = 103,
         occurredAt = date.minusHours(1),
         createdAt = date,
+        locationId = "LEI",
       ),
     )
     date = LocalDateTime.parse("2025-01-13T18:24:32")
@@ -122,6 +124,7 @@ class SubjectAccessRequestIntegrationTest :
         legacyId = 102,
         occurredAt = date.minusHours(1),
         createdAt = date,
+        locationId = "LEI",
       ).withAmendment(
         text = "That’s not quite right",
         authorUsername = "OMIC3",

@@ -94,6 +94,7 @@ service:
   active-prisons:
   base-url:
   action-missing-case-notes: false
+  sar-enable-all-case-notes: false
 
 springdoc:
   paths-to-exclude: "/queue-admin/**"
@@ -106,5 +107,5 @@ springdoc:
 hmpps:
   sar:
     template:
-      path: /sar/templates/sar_template.mustache
+      path: /sar/templates/V1__sar_template.mustache
       enabled: true
