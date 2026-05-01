@@ -16,6 +16,7 @@ generic-service:
     APPLICATIONINSIGHTS_CONFIGURATION_FILE: applicationinsights.json
     SERVICE_ACTIVE_PRISONS: "***"
     SERVICE_SAR_ENABLE_ALL_CASE_NOTES: "true"
+    HMPPS_SAR_TEMPLATE_PATH: "/sar/templates/V2__sar_template.mustache"
 
   allowlist:
     delius-pre-prod-1: 52.56.240.62/32
