@@ -47,7 +47,6 @@ generic-service:
     SNS_PROVIDER: "aws"
     HMPPS_SQS_USE_WEB_TOKEN: true
     SENTRY_TRACES_SAMPLE_RATE: '0.05'
-    SENTRY_IGNORED_EXCEPTIONS_FOR_TYPE: "org.apache.catalina.connector.ClientAbortException"
 
   # Pre-existing kubernetes secrets to load as environment variables in the deployment.
   # namespace_secrets:
@@ -87,4 +86,3 @@ generic-prometheus-alerts:
 
 reconcile_alerts:
   schedule: "0 6 * * *"
-
