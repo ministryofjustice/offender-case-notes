@@ -60,6 +60,8 @@ spring:
 
 sentry:
   exception-resolver-order: -2147483647
+  ignored-exceptions-for-type: org.apache.catalina.connector.ClientAbortException,org.springframework.web.servlet.resource.NoResourceFoundException,org.springframework.web.context.request.async.AsyncRequestNotUsableException
+  send-default-pii: false
 
 server:
   port: 8080
