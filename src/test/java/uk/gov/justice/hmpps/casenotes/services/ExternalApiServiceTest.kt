@@ -76,7 +76,7 @@ class ExternalApiServiceTest {
     fun `test calls Prison API for first page with correct page size`() {
       val content = listOf(NomisCaseNote())
       val pageable = Pageable.ofSize(10)
-      whenever(responseSpecMock.toEntity(any<ParameterizedTypeReference<*>>())).thenReturn(
+      whenever(responseSpecMock.toEntity(any<ParameterizedTypeReference<RestResponsePage<NomisCaseNote>>>())).thenReturn(
         Mono.just(ResponseEntity(RestResponsePage(content, pageable, 12), HttpStatus.OK)),
       )
       val response = externalApiService.getOffenderCaseNotes("AA123B", CaseNoteFilter(), pageable)
@@ -100,7 +100,7 @@ class ExternalApiServiceTest {
     fun `test calls Prison API for correct page with correct page size`() {
       val content = listOf(NomisCaseNote())
       val pageable = PageRequest.of(5, 20)
-      whenever(responseSpecMock.toEntity(any<ParameterizedTypeReference<*>>())).thenReturn(
+      whenever(responseSpecMock.toEntity(any<ParameterizedTypeReference<RestResponsePage<NomisCaseNote>>>())).thenReturn(
         Mono.just(ResponseEntity(RestResponsePage(content, pageable, 12), HttpStatus.OK)),
       )
       val response = externalApiService.getOffenderCaseNotes("AA123B", CaseNoteFilter(), pageable)
@@ -124,7 +124,7 @@ class ExternalApiServiceTest {
     fun `test calls Prison API for correct page with sorting of field`() {
       val content = listOf(NomisCaseNote())
       val pageable = PageRequest.of(5, 20, Direction.ASC, "creationDateTime")
-      whenever(responseSpecMock.toEntity(any<ParameterizedTypeReference<*>>())).thenReturn(
+      whenever(responseSpecMock.toEntity(any<ParameterizedTypeReference<RestResponsePage<NomisCaseNote>>>())).thenReturn(
         Mono.just(ResponseEntity(RestResponsePage(content, pageable, 12), HttpStatus.OK)),
       )
       val response = externalApiService.getOffenderCaseNotes("AA123B", CaseNoteFilter(), pageable)
@@ -148,7 +148,7 @@ class ExternalApiServiceTest {
     fun `test calls Prison API for correct page with sorting of multiple fields`() {
       val content = listOf(NomisCaseNote())
       val pageable = PageRequest.of(5, 20, Direction.ASC, "creationDateTime", "occurrenceDateTime")
-      whenever(responseSpecMock.toEntity(any<ParameterizedTypeReference<*>>())).thenReturn(
+      whenever(responseSpecMock.toEntity(any<ParameterizedTypeReference<RestResponsePage<NomisCaseNote>>>())).thenReturn(
         Mono.just(ResponseEntity(RestResponsePage(content, pageable, 12), HttpStatus.OK)),
       )
       val response = externalApiService.getOffenderCaseNotes("AA123B", CaseNoteFilter(), pageable)
@@ -180,7 +180,7 @@ class ExternalApiServiceTest {
         20,
         Sort.by(Order(Direction.ASC, "creationDateTime"), Order(Direction.DESC, "occurrenceDateTime")),
       )
-      whenever(responseSpecMock.toEntity(any<ParameterizedTypeReference<*>>())).thenReturn(
+      whenever(responseSpecMock.toEntity(any<ParameterizedTypeReference<RestResponsePage<NomisCaseNote>>>())).thenReturn(
         Mono.just(ResponseEntity(RestResponsePage(content, pageable, 12), HttpStatus.OK)),
       )
       val response = externalApiService.getOffenderCaseNotes("AA123B", CaseNoteFilter(), pageable)
@@ -208,7 +208,7 @@ class ExternalApiServiceTest {
     fun `test calls Prison API with type filter`() {
       val content = listOf(NomisCaseNote())
       val pageable = Pageable.ofSize(10)
-      whenever(responseSpecMock.toEntity(any<ParameterizedTypeReference<*>>())).thenReturn(
+      whenever(responseSpecMock.toEntity(any<ParameterizedTypeReference<RestResponsePage<NomisCaseNote>>>())).thenReturn(
         Mono.just(ResponseEntity(RestResponsePage(content, pageable, 12), HttpStatus.OK)),
       )
       val response = externalApiService.getOffenderCaseNotes(
@@ -237,7 +237,7 @@ class ExternalApiServiceTest {
     fun `test calls Prison API with typeSubTypes filter`() {
       val content = listOf(NomisCaseNote())
       val pageable = Pageable.ofSize(10)
-      whenever(responseSpecMock.toEntity(any<ParameterizedTypeReference<*>>())).thenReturn(
+      whenever(responseSpecMock.toEntity(any<ParameterizedTypeReference<RestResponsePage<NomisCaseNote>>>())).thenReturn(
         Mono.just(ResponseEntity(RestResponsePage(content, pageable, 12), HttpStatus.OK)),
       )
       val response = externalApiService.getOffenderCaseNotes(
@@ -270,7 +270,7 @@ class ExternalApiServiceTest {
     fun `test calls Prison API with prisonId filter`() {
       val content = listOf(NomisCaseNote())
       val pageable = Pageable.ofSize(10)
-      whenever(responseSpecMock.toEntity(any<ParameterizedTypeReference<*>>())).thenReturn(
+      whenever(responseSpecMock.toEntity(any<ParameterizedTypeReference<RestResponsePage<NomisCaseNote>>>())).thenReturn(
         Mono.just(ResponseEntity(RestResponsePage(content, pageable, 12), HttpStatus.OK)),
       )
       val response = externalApiService.getOffenderCaseNotes(
@@ -298,7 +298,7 @@ class ExternalApiServiceTest {
     fun `test calls Prison API with from filter`() {
       val content = listOf(NomisCaseNote())
       val pageable = Pageable.ofSize(10)
-      whenever(responseSpecMock.toEntity(any<ParameterizedTypeReference<*>>())).thenReturn(
+      whenever(responseSpecMock.toEntity(any<ParameterizedTypeReference<RestResponsePage<NomisCaseNote>>>())).thenReturn(
         Mono.just(ResponseEntity(RestResponsePage(content, pageable, 12), HttpStatus.OK)),
       )
       val response = externalApiService.getOffenderCaseNotes(
@@ -326,7 +326,7 @@ class ExternalApiServiceTest {
     fun `test calls Prison API with to filter`() {
       val content = listOf(NomisCaseNote())
       val pageable = Pageable.ofSize(10)
-      whenever(responseSpecMock.toEntity(any<ParameterizedTypeReference<*>>())).thenReturn(
+      whenever(responseSpecMock.toEntity(any<ParameterizedTypeReference<RestResponsePage<NomisCaseNote>>>())).thenReturn(
         Mono.just(ResponseEntity(RestResponsePage(content, pageable, 12), HttpStatus.OK)),
       )
       val response = externalApiService.getOffenderCaseNotes(
