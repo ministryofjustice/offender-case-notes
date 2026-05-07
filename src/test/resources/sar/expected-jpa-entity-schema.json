@@ -1,0 +1,104 @@
+{
+  "Type": {
+    "code": "String",
+    "description": "String",
+    "subTypes": "Set"
+  },
+  "SubType": {
+    "active": "boolean",
+    "code": "String",
+    "description": "String",
+    "dpsUserSelectable": "boolean",
+    "id": "Long",
+    "key": "TypeKey",
+    "restrictedUse": "boolean",
+    "sensitive": "boolean",
+    "syncToNomis": "boolean",
+    "type": "Type"
+  },
+  "Note": {
+    "amendments": "SortedSet",
+    "authorName": "String",
+    "authorUserId": "String",
+    "authorUsername": "String",
+    "createdAt": "LocalDateTime",
+    "createdBy": "String",
+    "id": "UUID",
+    "legacyId": "long",
+    "locationId": "String",
+    "occurredAt": "LocalDateTime",
+    "personIdentifier": "String",
+    "subType": "SubType",
+    "subTypeId": "long",
+    "system": "System",
+    "systemGenerated": "boolean",
+    "text": "String"
+  },
+  "Amendment": {
+    "authorName": "String",
+    "authorUserId": "String",
+    "authorUsername": "String",
+    "createdAt": "LocalDateTime",
+    "createdBy": "String",
+    "id": "UUID",
+    "note": "Note",
+    "system": "System",
+    "text": "String"
+  },
+  "DeletedCaseNote": {
+    "caseNote": "DeletedDetail",
+    "caseNoteId": "UUID",
+    "cause": "DeletionCause",
+    "deletedAt": "LocalDateTime",
+    "deletedBy": "String",
+    "id": "UUID",
+    "legacyId": "Long",
+    "personIdentifier": "String",
+    "reason": "String",
+    "system": "System"
+  },
+  "CaseNoteType": {
+    "code": "String",
+    "description": "String",
+    "subTypes": "List"
+  },
+  "CaseNoteSubType": {
+    "active": "boolean",
+    "code": "String",
+    "description": "String",
+    "dpsUserSelectable": "boolean",
+    "id": "Long",
+    "restrictedUse": "boolean",
+    "sensitive": "boolean",
+    "syncToNomis": "boolean",
+    "type": "CaseNoteType"
+  },
+  "OffenderCaseNote": {
+    "amendments": "SortedSet",
+    "authorName": "String",
+    "authorUserId": "String",
+    "authorUsername": "String",
+    "createdAt": "LocalDateTime",
+    "createdBy": "String",
+    "id": "UUID",
+    "legacyId": "Long",
+    "locationId": "String",
+    "occurredAt": "LocalDateTime",
+    "personIdentifier": "String",
+    "subType": "CaseNoteSubType",
+    "system": "System",
+    "systemGenerated": "boolean",
+    "text": "String"
+  },
+  "OffenderCaseNoteAmendment": {
+    "authorName": "String",
+    "authorUserId": "String",
+    "authorUsername": "String",
+    "caseNote": "OffenderCaseNote",
+    "createdAt": "LocalDateTime",
+    "createdBy": "String",
+    "id": "UUID",
+    "system": "System",
+    "text": "String"
+  }
+}

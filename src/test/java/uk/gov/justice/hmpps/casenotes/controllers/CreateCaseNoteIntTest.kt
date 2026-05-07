@@ -1,6 +1,5 @@
 package uk.gov.justice.hmpps.casenotes.controllers
 
-import com.fasterxml.jackson.module.kotlin.readValue
 import org.assertj.core.api.Assertions.assertThat
 import org.awaitility.kotlin.await
 import org.awaitility.kotlin.matches

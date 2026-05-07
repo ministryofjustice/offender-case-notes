@@ -96,8 +96,7 @@ class Note(
   override val subTypeId: Long = subType.id!!
 
   @Column(nullable = false)
-  override var occurredAt: LocalDateTime = occurredAt
-    private set
+  override val occurredAt: LocalDateTime = occurredAt
 
   override var legacyId: Long = 0
 
@@ -107,8 +106,7 @@ class Note(
   override fun amendments() = amendments.toSortedSet()
 
   @Transient
-  var mergedAmendments: SortedSet<Amendment> = TreeSet()
-    private set
+  val mergedAmendments: SortedSet<Amendment> = TreeSet()
 
   fun addAmendment(request: TextRequest) = apply {
     if (request is SyncAmendmentRequest) {
@@ -160,20 +158,23 @@ class Note(
     legacyId = this@Note.legacyId
     createdAt = this@Note.createdAt
     createdBy = this@Note.createdBy
-    mergedAmendments = this@Note.amendments.map {
-      Amendment(
-        this,
-        it.authorUsername,
-        it.authorName,
-        it.authorUserId,
-        it.text,
-        it.system,
-        it.id,
-      ).apply {
-        createdAt = it.createdAt
-        createdBy = it.createdBy
-      }
-    }.toSortedSet()
+    mergedAmendments.clear()
+    mergedAmendments.addAll(
+      this@Note.amendments.map {
+        Amendment(
+          this,
+          it.authorUsername,
+          it.authorName,
+          it.authorUserId,
+          it.text,
+          it.system,
+          it.id,
+        ).apply {
+          createdAt = it.createdAt
+          createdBy = it.createdBy
+        }
+      },
+    )
   }
 
   companion object {

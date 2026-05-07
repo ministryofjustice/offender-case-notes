@@ -2,8 +2,6 @@ package uk.gov.justice.hmpps.casenotes.sar
 
 import java.time.LocalDateTime
 
-data class SubjectAccessResponse(val prn: String, val content: List<SarNote>)
-
 data class SarNote(
   val creationDateTime: LocalDateTime,
   val type: String,

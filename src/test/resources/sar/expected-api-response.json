@@ -1,0 +1,38 @@
+[
+  {
+    "creationDateTime": "2025-04-22T13:17:53",
+    "type": "POM Activity",
+    "subType": "General POM Note",
+    "text": "Notes about something that happened after lunch",
+    "authorUsername": "POM1",
+    "amendments": [
+      {
+        "creationDateTime": "2025-04-22T13:17:53",
+        "additionalNoteText": "Specifically, at about 1.17 pm",
+        "authorUsername": "POM2"
+      }
+    ]
+  },
+  {
+    "creationDateTime": "2025-04-20T08:32:06",
+    "type": "OMIC Type",
+    "subType": "General OMIC Note",
+    "text": "OMIC notes\nWith my comments",
+    "authorUsername": "OMIC1",
+    "amendments": []
+  },
+  {
+    "creationDateTime": "2025-01-13T18:24:32",
+    "type": "OMIC Type",
+    "subType": "Open Case Note",
+    "text": "Notes from a meeting",
+    "authorUsername": "OMIC2",
+    "amendments": [
+      {
+        "creationDateTime": "2025-01-13T18:24:32",
+        "additionalNoteText": "That’s not quite right",
+        "authorUsername": "OMIC3"
+      }
+    ]
+  }
+]

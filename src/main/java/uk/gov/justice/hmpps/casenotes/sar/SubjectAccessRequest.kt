@@ -4,17 +4,23 @@ import org.springframework.stereotype.Service
 import uk.gov.justice.hmpps.casenotes.domain.Amendment
 import uk.gov.justice.hmpps.casenotes.domain.Note
 import uk.gov.justice.hmpps.casenotes.domain.NoteRepository
+import uk.gov.justice.hmpps.kotlin.sar.HmppsPrisonSubjectAccessRequestService
+import uk.gov.justice.hmpps.kotlin.sar.HmppsSubjectAccessRequestContent
 import java.time.LocalDate
 
 @Service
-class SubjectAccessRequest(private val noteRepository: NoteRepository) {
-  fun getSarContent(personIdentifier: String, fromDate: LocalDate?, toDate: LocalDate?): SubjectAccessResponse? {
+class SubjectAccessRequest(private val noteRepository: NoteRepository) : HmppsPrisonSubjectAccessRequestService {
+  override fun getPrisonContentFor(
+    prn: String,
+    fromDate: LocalDate?,
+    toDate: LocalDate?,
+  ): HmppsSubjectAccessRequestContent? {
     val notes = noteRepository.findSarContent(
-      personIdentifier,
+      prn,
       fromDate?.atStartOfDay(),
       toDate?.plusDays(1)?.atStartOfDay(),
-    ).asSequence().map { it.toSarNote() }.sortedByDescending { it.creationDateTime }.toList()
-    return if (notes.isEmpty()) null else SubjectAccessResponse(personIdentifier, notes)
+    ).map { it.toSarNote() }.sortedByDescending { it.creationDateTime }
+    return if (notes.isEmpty()) null else HmppsSubjectAccessRequestContent(content = notes)
   }
 }
 

@@ -1,0 +1,148 @@
+package uk.gov.justice.hmpps.casenotes.sar
+
+import jakarta.persistence.EntityManager
+import org.assertj.core.api.Assertions.assertThat
+import org.assertj.core.api.Assertions.fail
+import org.flywaydb.core.Flyway
+import org.flywaydb.core.api.MigrationState
+import org.junit.jupiter.api.Test
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.beans.factory.annotation.Value
+import org.springframework.boot.test.context.TestConfiguration
+import org.springframework.context.annotation.Bean
+import org.springframework.context.annotation.Import
+import org.springframework.context.annotation.Primary
+import org.springframework.security.oauth2.jwt.JwtDecoder
+import org.springframework.test.web.reactive.server.WebTestClient
+import uk.gov.justice.digital.hmpps.subjectaccessrequest.SarApiDataTest
+import uk.gov.justice.digital.hmpps.subjectaccessrequest.SarFlywaySchemaTest
+import uk.gov.justice.digital.hmpps.subjectaccessrequest.SarIntegrationTestHelper
+import uk.gov.justice.digital.hmpps.subjectaccessrequest.SarIntegrationTestHelperConfig
+import uk.gov.justice.digital.hmpps.subjectaccessrequest.SarJpaEntitiesTest
+import uk.gov.justice.digital.hmpps.subjectaccessrequest.SarReportTest
+import uk.gov.justice.hmpps.casenotes.controllers.IntegrationTest
+import uk.gov.justice.hmpps.casenotes.utils.JwtAuthHelper
+import uk.gov.justice.hmpps.test.kotlin.auth.JwtAuthorisationHelper
+import java.time.Duration
+import java.time.LocalDateTime
+import javax.sql.DataSource
+
+@Import(SarIntegrationTestHelperConfig::class)
+class SubjectAccessRequestIntegrationTest :
+  IntegrationTest(),
+  SarApiDataTest,
+  SarFlywaySchemaTest,
+  SarJpaEntitiesTest,
+  SarReportTest {
+
+  @TestConfiguration
+  class Config {
+    @Autowired
+    lateinit var jwtHelper: JwtAuthHelper
+
+    @Primary
+    @Bean
+    fun jwtAuthorisationHelper() = object : JwtAuthorisationHelper() {
+      override fun jwtDecoder(): JwtDecoder = jwtHelper.jwtDecoder()
+
+      override fun createJwtAccessToken(
+        clientId: String,
+        username: String?,
+        scope: List<String>?,
+        roles: List<String>?,
+        expiryTime: Duration,
+        jwtId: String,
+        authSource: String,
+        grantType: String,
+      ): String = jwtHelper.createJwt(
+        subject = username ?: clientId,
+        userId = username,
+        scope = scope,
+        roles = roles,
+      )
+    }
+  }
+
+  @Autowired
+  private lateinit var dataSource: DataSource
+
+  @Autowired
+  private lateinit var entityManager: EntityManager
+
+  @Autowired
+  private lateinit var sarIntegrationTestHelper: SarIntegrationTestHelper
+
+  override fun getDataSourceInstance(): DataSource = dataSource
+  override fun getEntityManagerInstance(): EntityManager = entityManager
+  override fun getSarHelper(): SarIntegrationTestHelper = sarIntegrationTestHelper
+  override fun getWebTestClientInstance(): WebTestClient = webTestClient
+
+  private val samplePrisonerNumber = "A1234BB"
+
+  override fun setupTestData() {
+    val types = getAllTypes()
+    var date = LocalDateTime.parse("2025-04-22T13:17:53")
+    noteRepository.findByLegacyId(104) ?: givenCaseNote(
+      generateCaseNote(
+        personIdentifier = samplePrisonerNumber,
+        type = types.find { it.type.code == "POM" && it.code == "GEN" }!!,
+        text = "Notes about something that happened after lunch",
+        authorUsername = "POM1",
+        authorUserId = "3124",
+        legacyId = 104,
+        occurredAt = date.minusHours(1),
+        createdAt = date,
+      ).withAmendment(
+        text = "Specifically, at about 1.17 pm",
+        authorUsername = "POM2",
+        createdAt = date,
+      ),
+    )
+    date = LocalDateTime.parse("2025-04-20T08:32:06")
+    noteRepository.findByLegacyId(103) ?: givenCaseNote(
+      generateCaseNote(
+        personIdentifier = samplePrisonerNumber,
+        type = types.find { it.type.code == "OMIC" && it.code == "GEN" }!!,
+        text = "OMIC notes\nWith my comments",
+        authorUsername = "OMIC1",
+        authorUserId = "3124",
+        legacyId = 103,
+        occurredAt = date.minusHours(1),
+        createdAt = date,
+      ),
+    )
+    date = LocalDateTime.parse("2025-01-13T18:24:32")
+    noteRepository.findByLegacyId(102) ?: givenCaseNote(
+      generateCaseNote(
+        personIdentifier = samplePrisonerNumber,
+        type = types.find { it.type.code == "OMIC" && it.code == "OMIC_OPEN" }!!,
+        text = "Notes from a meeting",
+        authorUsername = "OMIC2",
+        authorUserId = "3129",
+        legacyId = 102,
+        occurredAt = date.minusHours(1),
+        createdAt = date,
+      ).withAmendment(
+        text = "That’s not quite right",
+        authorUsername = "OMIC3",
+        createdAt = date,
+      ),
+    )
+    givenCaseNote(generateCaseNote())
+  }
+
+  override fun getPrn(): String? = samplePrisonerNumber
+
+  @Test
+  fun `Flyway schema version should match expected non-future version`(
+    @Value($$"${hmpps.sar.tests.expected-flyway-schema-non-future-version:0}")
+    expectedFlywaySchemaNonFutureVersion: String,
+  ) {
+    // NB: SAR testing library includes test-only migrations so this test case exists to compare main schema only
+    val migrations = Flyway.configure().dataSource(dataSource).load().info().all()
+    val lastMigration = migrations.findLast {
+      it.state == MigrationState.SUCCESS
+    } ?: fail("Last successful non-future migration not found")
+    assertThat(lastMigration.version?.version).`as`("Flyway schema version").isEqualTo(expectedFlywaySchemaNonFutureVersion)
+  }
+}

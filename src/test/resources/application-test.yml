@@ -1,7 +1,7 @@
 spring:
   flyway:
     enabled: true
-    locations: classpath:db/migration/general,classpath:db/migration/{vendor},classpath:db/test/migration
+    locations: classpath:db/migration,classpath:db/test/migration
 
   jpa:
     show-sql: true
@@ -22,6 +22,12 @@ spring:
       resourceserver:
         jwt:
           public-key-location: classpath:local-public-key.pub
+
+springdoc:
+  api-docs:
+    enabled: true
+  swagger-ui:
+    enabled: true
 
 server:
   shutdown: immediate
@@ -68,6 +74,22 @@ hmpps.sqs:
   topics:
     domainevents:
       arn: arn:aws:sns:eu-west-2:000000000000:${random.uuid}
+
+hmpps:
+  test:
+    jwt-helper-enabled: false
+
+  sar:
+    tests:
+      attachments-expected: false
+      expected-flyway-schema-version: 900 # SAR testing library includes test-only migrations
+      expected-flyway-schema-non-future-version: 40 # actual latest version
+      expected-api-response:
+        path: /sar/expected-api-response.json
+      expected-jpa-entity-schema:
+        path: /sar/expected-jpa-entity-schema.json
+      expected-render-result:
+        path: /sar/expected-render-result.html
 
 service:
   active-prisons: MDI
