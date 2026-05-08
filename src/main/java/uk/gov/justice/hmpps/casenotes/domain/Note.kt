@@ -235,6 +235,23 @@ interface NoteRepository :
   )
   fun findSarContent(personIdentifier: String, from: LocalDateTime?, to: LocalDateTime?): List<Note>
 
+  @Query(
+    """
+    select n from Note n
+    join fetch n.subType st
+    join fetch st.type
+    left join fetch n.amendments a
+    where n.personIdentifier = :personIdentifier
+    and (
+         ((cast(:from as LocalDateTime) is null or (:from <= n.createdAt))
+            and (cast(:to as LocalDateTime) is null or :to >= n.createdAt)) 
+         or ((cast(:from as LocalDateTime) is null or :from <= a.createdAt) 
+            and (cast(:to as LocalDateTime) is null or :to >= a.createdAt))
+        )
+    """,
+  )
+  fun findSarContentForAllNotes(personIdentifier: String, from: LocalDateTime?, to: LocalDateTime?): List<Note>
+
   fun existsByPersonIdentifierAndSubTypeSensitiveIn(personIdentifier: String, sensitive: Set<Boolean>): Boolean
 
   @Query(
