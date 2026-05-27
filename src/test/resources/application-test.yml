@@ -80,6 +80,8 @@ hmpps:
     jwt-helper-enabled: false
 
   sar:
+    template:
+       path: "/sar/templates/V1__sar_template.mustache"
     tests:
       attachments-expected: false
       expected-flyway-schema-version: 900 # SAR testing library includes test-only migrations
@@ -93,3 +95,4 @@ hmpps:
 
 service:
   action-missing-case-notes: true
+  sar-enable-all-case-notes: false
