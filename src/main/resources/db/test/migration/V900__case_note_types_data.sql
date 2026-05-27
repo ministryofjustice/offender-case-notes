@@ -49,3 +49,9 @@ values ('NOT_DPS', 'Non DPS Parent', now(), 'SYSTEM');
 insert into case_note_sub_type (type_code, code, description, active, sensitive, restricted_use, dps_user_selectable,
                                 created_at, created_by)
 values ('NOT_DPS', 'NOT_SEL', 'Not Dps User Selectable', true, false, false, false, now(), 'SYSTEM');
+
+insert into case_note_type (code, description, created_at, created_by)
+values ('NOMIS_SYNC', 'NOMIS synced case notes', now(), 'SYSTEM');
+
+insert into case_note_sub_type (type_code, code, description, active, sensitive, sync_to_nomis, created_at, created_by)
+values ('NOMIS_SYNC', 'SYNC', 'Case note that is synced to NOMIS', true, true, true, now(), 'SYSTEM');
