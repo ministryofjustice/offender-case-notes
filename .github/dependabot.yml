@@ -1,10 +1,26 @@
 version: 2
+
+multi-ecosystem-groups:
+  infrastructure:
+    schedule:
+      interval: "weekly"
+      day: "wednesday"
+      time: "10:04"
+      timezone: "Europe/London"
+
 updates:
+  # main dependencies
   - package-ecosystem: "gradle"
     directory: "/"
     schedule:
-      interval: "weekly"
-      day: wednesday
+      interval: "daily"
+      time: "10:30"
+      timezone: "Europe/London"
+    cooldown:
+      default-days: 7
+      exclude:
+        - "uk.gov.justice.service.hmpps:*"
+        - "uk.gov.justice.hmpps.*"
     groups:
       minor:
         update-types:
@@ -13,15 +29,37 @@ updates:
         patterns:
           - "*"
 
-  - package-ecosystem: "github-actions"
+  # infrastructure dependencies
+  - package-ecosystem: "docker"
+    multi-ecosystem-group: "infrastructure"
     directory: "/"
-    schedule:
-      interval: "weekly"
-      day: wednesday
-    groups:
-      minor:
-        update-types:
-          - "minor"
-          - "patch"
-        patterns:
-          - "*"
+    patterns:
+      - "*"
+    cooldown:
+      default-days: 7
+  - package-ecosystem: "docker-compose"
+    multi-ecosystem-group: "infrastructure"
+    directory: "/"
+    patterns:
+      - "*"
+    cooldown:
+      default-days: 7
+  - package-ecosystem: "github-actions"
+    multi-ecosystem-group: "infrastructure"
+    directory: "/"
+    patterns:
+      - "*"
+    cooldown:
+      default-days: 7
+      exclude:
+        - "ministryofjustice/*"
+  - package-ecosystem: "helm"
+    multi-ecosystem-group: "infrastructure"
+    directories:
+      - "/helm_deploy/*"
+    patterns:
+      - "*"
+    cooldown:
+      default-days: 7
+      exclude:
+        - "https://ministryofjustice.github.io/hmpps-helm-charts/*"
