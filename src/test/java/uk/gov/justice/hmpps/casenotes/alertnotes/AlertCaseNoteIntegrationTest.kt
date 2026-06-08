@@ -244,7 +244,7 @@ class AlertCaseNoteIntegrationTest : IntegrationTest() {
   }
 }
 
-fun Alert.domainEvent(eventName: String): DomainEvent<AlertAdditionalInformation> = DomainEvent(
+private fun Alert.domainEvent(eventName: String): DomainEvent<AlertAdditionalInformation> = DomainEvent(
   occurredAt = activeToLastSetAt?.atZone(EuropeLondon) ?: ZonedDateTime.now(EuropeLondon),
   eventName,
   null,
@@ -253,7 +253,7 @@ fun Alert.domainEvent(eventName: String): DomainEvent<AlertAdditionalInformation
   PersonReference.withIdentifier(prisonNumber),
 )
 
-fun alert(
+private fun alert(
   prisonNumber: String = personIdentifier(),
   alertCode: AlertCodeSummary = AlertCodeSummary("TC1", "Type Description", "C1", "Description"),
   activeFrom: LocalDate = LocalDate.now().minusDays(30),
