@@ -30,7 +30,6 @@ server:
 
 service:
   base-url: http://localhost:8080
-  active-prisons: ${SERVICE_ACTIVE_PRISONS:***}
 
 elite2.api.base.url: https://prison-api-dev.prison.service.justice.gov.uk
 oauth.api.base.url: https://sign-in-dev.hmpps.service.justice.gov.uk/auth

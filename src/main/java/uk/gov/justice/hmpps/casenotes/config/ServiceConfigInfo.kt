@@ -6,22 +6,17 @@ import org.springframework.boot.context.properties.ConfigurationProperties
 import org.springframework.stereotype.Component
 
 @Component
-class ServiceConfigInfo(
-  private val serviceConfig: ServiceConfig,
-) : InfoContributor {
+final class ServiceConfigInfo : InfoContributor {
   override fun contribute(builder: Info.Builder) {
-    builder.withDetail("activeAgencies", serviceConfig.activePrisons)
+    builder.withDetail("activeAgencies", listOf("***"))
   }
 }
 
 @ConfigurationProperties(prefix = "service")
 data class ServiceConfig(
-  val activePrisons: Set<String>,
   val baseUrl: String,
   val actionMissingCaseNotes: Boolean,
   val sarEnableAllCaseNotes: Boolean,
 ) {
-  val allPrisonsActive = activePrisons.contains("***")
-
-  fun switchesPathFor(caseloadId: String?): Boolean = !caseloadId.isNullOrBlank() && (allPrisonsActive || caseloadId in activePrisons)
+  fun switchesPathFor(caseloadId: String?): Boolean = !caseloadId.isNullOrBlank()
 }

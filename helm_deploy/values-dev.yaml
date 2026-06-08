@@ -14,7 +14,6 @@ generic-service:
     TOKENVERIFICATION_ENABLED: "false"
     SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_JWK_SET_URI: "https://sign-in-dev.hmpps.service.justice.gov.uk/auth/.well-known/jwks.json"
     APPLICATIONINSIGHTS_CONFIGURATION_FILE: applicationinsights.dev.json
-    SERVICE_ACTIVE_PRISONS: "***"
     SPRINGDOC_API_DOCS_ENABLED: "true"
     SPRINGDOC_SWAGGER_UI_ENABLED: "true"
     SERVICE_SAR_ENABLE_ALL_CASE_NOTES: "true"

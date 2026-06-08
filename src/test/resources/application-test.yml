@@ -92,5 +92,4 @@ hmpps:
         path: /sar/expected-render-result.html
 
 service:
-  active-prisons: MDI
   action-missing-case-notes: true
