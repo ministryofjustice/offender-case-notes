@@ -17,6 +17,4 @@ data class ServiceConfig(
   val baseUrl: String,
   val actionMissingCaseNotes: Boolean,
   val sarEnableAllCaseNotes: Boolean,
-) {
-  fun switchesPathFor(caseloadId: String?): Boolean = !caseloadId.isNullOrBlank()
-}
+)

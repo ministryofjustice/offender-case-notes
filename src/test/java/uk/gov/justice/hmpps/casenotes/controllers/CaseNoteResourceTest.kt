@@ -542,22 +542,29 @@ class CaseNoteResourceTest : IntegrationTest() {
       .expectStatus().isNotFound
       .expectBody()
       .json(
-        "{" +
-          "'status':404," +
-          "'developerMessage':'Resource with id [231eb4ee-c06c-49a3-846c-1b542cc0ed6b] not found.'" +
-          "}",
+        """
+        {
+          "status": 404,
+          "developerMessage": "Resource with id [231eb4ee-c06c-49a3-846c-1b542cc0ed6b] not found."
+        }
+        """,
       )
   }
 
   companion object {
     private const val CREATE_CASE_NOTE =
+      // language=json
       """{"locationId": "%s", "type": "POM", "subType": "GEN", "text": "%s"}"""
     private const val CREATE_CASE_NOTE_WITHOUT_LOC =
+      // language=json
       """{"type": "POM", "subType": "GEN", "text": "%s"}"""
     private const val CREATE_NORMAL_CASE_NOTE_WITHOUT_LOC =
+      // language=json
       """{"type": "ACP", "subType": "POS1", "text": "%s"}"""
     private const val CREATE_CASE_NOTE_BY_TYPE =
+      // language=json
       """{"type": "%s", "subType": "%s", "text": "%s"}"""
+
     private val POM_ROLE = listOf("ROLE_POM")
     private val CASENOTES_ROLES = listOf("ROLE_VIEW_SENSITIVE_CASE_NOTES", "ROLE_ADD_SENSITIVE_CASE_NOTES")
   }

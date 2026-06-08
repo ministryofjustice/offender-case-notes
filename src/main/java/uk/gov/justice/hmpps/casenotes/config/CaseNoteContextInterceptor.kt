@@ -32,12 +32,13 @@ class CaseNoteContextConfiguration(private val caseNoteContextInterceptor: CaseN
 class CaseNoteContextInterceptor(
   private val manageUserService: ManageUsersService,
   private val jsonMapper: JsonMapper,
-  private val serviceConfig: ServiceConfig,
 ) : HandlerInterceptor {
+  private val mutatingMethods = setOf(POST.name(), PUT.name(), PATCH.name(), DELETE.name())
+
   override fun preHandle(request: HttpServletRequest, response: HttpServletResponse, handler: Any): Boolean {
-    if (request.method in listOf(POST.name(), PUT.name(), PATCH.name(), DELETE.name())) {
-      val headers = request.extractHeaders()
-      val username = headers?.username ?: username()
+    if (request.method in mutatingMethods) {
+      val usernameInHeader: String? = request.getHeader(UsernameHeader.NAME)
+      val username = usernameInHeader ?: username()
       return manageUserService.getUserDetails(username)?.let {
         val context = CaseNoteRequestContext(
           username,
@@ -73,19 +74,4 @@ class CaseNoteContextInterceptor(
 
   private fun username(): String = authentication().name.takeIf { it.length <= 64 }
     ?: throw ValidationException("username for audit exceeds 64 characters")
-
-  private fun HttpServletRequest.extractHeaders(): Headers? {
-    return getHeader(CaseloadIdHeader.NAME)?.let {
-      if (it.isBlank()) return null
-      val username = getHeader(UsernameHeader.NAME)
-      // only allow username header for switched path
-      if (serviceConfig.switchesPathFor(it)) {
-        Headers(it, username)
-      } else {
-        null
-      }
-    }
-  }
 }
-
-private data class Headers(val caseloadId: String, val username: String?)

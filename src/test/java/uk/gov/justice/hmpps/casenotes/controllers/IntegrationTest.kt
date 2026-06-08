@@ -18,7 +18,6 @@ import org.springframework.http.MediaType
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.bean.override.mockito.MockitoSpyBean
 import org.springframework.test.web.reactive.server.WebTestClient
-import org.springframework.test.web.reactive.server.WebTestClient.RequestBodySpec
 import software.amazon.awssdk.services.sqs.model.PurgeQueueRequest
 import software.amazon.awssdk.services.sqs.model.ReceiveMessageRequest
 import tools.jackson.databind.json.JsonMapper
@@ -56,7 +55,6 @@ import java.time.temporal.ChronoUnit
 import java.util.UUID
 import java.util.function.Consumer
 
-internal const val ACTIVE_PRISON = "MDI"
 internal const val USERNAME = "TestUser"
 
 @ActiveProfiles("test", "test-token-verification")
@@ -145,10 +143,6 @@ abstract class IntegrationTest : BasicIntegrationTest() {
     headers.add(HttpHeaders.AUTHORIZATION, "Bearer $token")
     headers.add(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON_VALUE)
     headers.add(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-  }
-
-  fun RequestBodySpec.addHeader(key: String, value: String? = null) = apply {
-    value?.also { header(key, it) }
   }
 
   fun readFile(file: String): String = this.javaClass.getResource(file)!!.readText()

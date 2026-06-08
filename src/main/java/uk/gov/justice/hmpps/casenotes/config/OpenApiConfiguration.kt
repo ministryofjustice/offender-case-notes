@@ -42,9 +42,9 @@ class OpenApiConfiguration(buildProperties: BuildProperties, private val context
   fun customOpenAPI(): OpenAPI = OpenAPI()
     .servers(
       listOf(
-        Server().url("https://offender-case-notes.service.justice.gov.uk").description("Prod"),
-        Server().url("https://preprod.offender-case-notes.service.justice.gov.uk").description("PreProd"),
-        Server().url("https://dev.offender-case-notes.service.justice.gov.uk").description("Development"),
+        Server().url("https://offender-case-notes.service.justice.gov.uk").description("prod"),
+        Server().url("https://preprod.offender-case-notes.service.justice.gov.uk").description("preprod"),
+        Server().url("https://dev.offender-case-notes.service.justice.gov.uk").description("dev"),
       ),
     )
     .info(
@@ -60,8 +60,8 @@ class OpenApiConfiguration(buildProperties: BuildProperties, private val context
             |
             |## Responsibilities of the client
             |
-            |Clients should only allow users to read and write case notes where that user is allowed to view the associated person's information.
-            |For example a prisoner should be available to the user's caseload. Contact the Connect DPS team for the latest permissions logic.
+            |Clients should only allow users to read and write case notes where that user is allowed to view the associated person’s information.
+            |For example, a prisoner should be available to the user’s caseload. Contact the Connect DPS team for the latest permissions logic.
             |It is no longer the responsibility of this API to verify the permissions of the user in context as per the move away from passing user tokens.
             |
             |### Sensitive and restricted use case note sub-types
@@ -75,14 +75,15 @@ class OpenApiConfiguration(buildProperties: BuildProperties, private val context
             |
             |The usage of the combined case notes dataset in DPS was released nationally in February 2025.
             |The combined dataset uses UUIDs for case note identifiers replacing the legacy numeric ids.
-            |This is a potentially breaking change for typed clients and therefore they cannot be automatically switched.
-            |Instead API clients can 'opt in' to using the combined dataset by including a non empty `${CaseloadIdHeader.NAME}` header value.
-            |The presence of this header value declares that the client is:
+            |Clients must now
             |
-            |- Following the responsibilities of the client for prisoner visibility, note sensitivity and restricted use sub-types listed above
-            |- Compatible with UUID identifiers
-            |- Authenticating with a client token containing one or more of the required role claims
-            |- Supplying a username for any write endpoints either in the JWT subject or the `${UsernameHeader.NAME}` header
+            |- handle permissions logic themselves regarding
+            |  - prisoner visibility,
+            |  - note sensitivity and
+            |  - restricted use sub-types listed above
+            |- use UUID case note identifiers
+            |- authenticate with a client token containing one or more of the required role claims
+            |- supply a username for any write endpoints either in the JWT subject or the `${UsernameHeader.NAME}` header (see below)
             |
             |## Authentication
             |
@@ -153,14 +154,17 @@ class OpenApiConfiguration(buildProperties: BuildProperties, private val context
       evalContext.beanResolver = BeanFactoryResolver(context)
       evalContext.setRootObject(
         object {
+          @Suppress("unused")
           fun hasRole(role: String) = listOf(role)
+
+          @Suppress("unused")
           fun hasAnyRole(vararg roles: String) = roles.toList()
         },
       )
 
       val roles = try {
         (preAuthExp.getValue(evalContext) as List<*>).filterIsInstance<String>()
-      } catch (e: SpelEvaluationException) {
+      } catch (_: SpelEvaluationException) {
         emptyList()
       }
       if (roles.isNotEmpty()) {
@@ -181,24 +185,6 @@ class OpenApiConfiguration(buildProperties: BuildProperties, private val context
 
   private fun HandlerMethod.preAuthorizeForMethodOrClass() = getMethodAnnotation(PreAuthorize::class.java)?.value
     ?: beanType.getAnnotation(PreAuthorize::class.java)?.value
-}
-
-@Parameter(
-  name = CaseloadIdHeader.NAME,
-  `in` = ParameterIn.HEADER,
-  description = """
-    Relevant caseload id for the client identity in context e.g. the active caseload id of the logged in user.
-    Used to declare that the client is compatible with the usage of the combined case notes dataset.
-    """,
-  required = false,
-  content = [Content(schema = Schema(implementation = String::class))],
-)
-@Target(AnnotationTarget.CLASS, AnnotationTarget.FUNCTION)
-@Retention(AnnotationRetention.RUNTIME)
-internal annotation class CaseloadIdHeader {
-  companion object {
-    const val NAME = "CaseloadId"
-  }
 }
 
 @Parameter(
