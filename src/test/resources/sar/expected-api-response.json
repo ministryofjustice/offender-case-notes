@@ -15,7 +15,7 @@
   },
   {
     "creationDateTime": "2025-04-20T08:32:06",
-    "type": "OMIC Type",
+    "type": "OMiC",
     "subType": "General OMIC Note",
     "text": "OMIC notes\nWith my comments",
     "authorUsername": "OMIC1",
@@ -23,7 +23,7 @@
   },
   {
     "creationDateTime": "2025-01-13T18:24:32",
-    "type": "OMIC Type",
+    "type": "OMiC",
     "subType": "Open Case Note",
     "text": "Notes from a meeting",
     "authorUsername": "OMIC2",

@@ -83,7 +83,7 @@ hmpps:
     tests:
       attachments-expected: false
       expected-flyway-schema-version: 900 # SAR testing library includes test-only migrations
-      expected-flyway-schema-non-future-version: 40 # actual latest version
+      expected-flyway-schema-non-future-version: 41 # actual latest version
       expected-api-response:
         path: /sar/expected-api-response.json
       expected-jpa-entity-schema:
