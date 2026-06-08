@@ -24,7 +24,7 @@ interface CaseNoteEventPusher {
 class CaseNoteAwsEventPusher(
   private val hmppsQueueService: HmppsQueueService,
   private val jsonMapper: JsonMapper,
-  @param:Value("\${service.base-url}") private val serviceBaseUrl: String,
+  @param:Value($$"${service.base-url}") private val serviceBaseUrl: String,
 ) : CaseNoteEventPusher {
   companion object {
     val log: Logger = LoggerFactory.getLogger(this::class.java)

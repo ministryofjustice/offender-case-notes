@@ -50,19 +50,19 @@ class HealthCheckIntegrationTokenVerificationTest : BasicIntegrationTest() {
       .expectStatus().is5xxServerError
       .expectBody()
       .jsonPath("components.OAuthApiHealth.details.error").value<String> {
-        assertThat(it).contains("WebClientResponseException\$NotFound: 404 Not Found")
+        assertThat(it).contains($$"WebClientResponseException$NotFound: 404 Not Found")
       }
       .jsonPath("components.elite2ApiHealth.details.error").value<String> {
-        assertThat(it).contains("WebClientResponseException\$NotFound: 404 Not Found")
+        assertThat(it).contains($$"WebClientResponseException$NotFound: 404 Not Found")
       }
       .jsonPath("components.manageUsersApiHealth.details.error").value<String> {
-        assertThat(it).contains("WebClientResponseException\$NotFound: 404 Not Found")
+        assertThat(it).contains($$"WebClientResponseException$NotFound: 404 Not Found")
       }
       .jsonPath("components.prisonerSearchApiHealth.details.error").value<String> {
-        assertThat(it).contains("WebClientResponseException\$NotFound: 404 Not Found")
+        assertThat(it).contains($$"WebClientResponseException$NotFound: 404 Not Found")
       }
       .jsonPath("components.tokenVerificationApiHealth.details.error").value<String> {
-        assertThat(it).contains("WebClientResponseException\$NotFound: 404 Not Found")
+        assertThat(it).contains($$"WebClientResponseException$NotFound: 404 Not Found")
       }
       .jsonPath("status").isEqualTo("DOWN")
   }

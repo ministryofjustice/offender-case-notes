@@ -18,7 +18,7 @@ import java.text.ParseException
 import java.util.Optional
 
 @Configuration
-@ConditionalOnExpression("T(org.apache.commons.lang3.StringUtils).isNotBlank('\${applicationinsights.connection.string:}')")
+@ConditionalOnExpression($$"T(org.apache.commons.lang3.StringUtils).isNotBlank('${applicationinsights.connection.string:}')")
 class ClientTrackingConfiguration(private val clientTrackingInterceptor: ClientTrackingInterceptor) : WebMvcConfigurer {
   override fun addInterceptors(registry: InterceptorRegistry) {
     log.info("Adding application insights client tracking interceptor")

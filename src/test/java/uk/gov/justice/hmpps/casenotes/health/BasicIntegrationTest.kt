@@ -34,7 +34,7 @@ abstract class BasicIntegrationTest {
   @Autowired
   lateinit var webTestClient: WebTestClient
 
-  @Value("\${token}")
+  @Value($$"${token}")
   private val token: String? = null
 
   init {

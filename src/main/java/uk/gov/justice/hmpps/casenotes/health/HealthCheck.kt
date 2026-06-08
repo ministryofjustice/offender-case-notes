@@ -40,7 +40,7 @@ class ManageUsersApiHealth(@Qualifier("manageUsersApiHealthWebClient") webClient
 @Component
 class TokenVerificationApiHealth(
   @Qualifier("tokenVerificationApiHealthWebClient") webClient: WebClient,
-  @param:Value("\${tokenverification.enabled:false}") private val tokenVerificationEnabled: Boolean,
+  @param:Value($$"${tokenverification.enabled:false}") private val tokenVerificationEnabled: Boolean,
 ) : HealthCheck(webClient) {
   override fun health(): Health? = if (tokenVerificationEnabled) {
     super.health()
