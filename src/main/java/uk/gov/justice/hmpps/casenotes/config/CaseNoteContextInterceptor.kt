@@ -16,7 +16,7 @@ import org.springframework.web.servlet.config.annotation.InterceptorRegistry
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer
 import tools.jackson.databind.json.JsonMapper
 import uk.gov.justice.hmpps.casenotes.integrations.ManageUsersService
-import uk.gov.justice.hmpps.casenotes.legacy.dto.ErrorResponse
+import uk.gov.justice.hmpps.casenotes.utils.ErrorResponse
 
 @Configuration
 class CaseNoteContextConfiguration(private val caseNoteContextInterceptor: CaseNoteContextInterceptor) : WebMvcConfigurer {

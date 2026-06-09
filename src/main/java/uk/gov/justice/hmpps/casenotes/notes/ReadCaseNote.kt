@@ -22,9 +22,9 @@ import uk.gov.justice.hmpps.casenotes.domain.matchesOnType
 import uk.gov.justice.hmpps.casenotes.domain.matchesPersonIdentifier
 import uk.gov.justice.hmpps.casenotes.domain.occurredAfter
 import uk.gov.justice.hmpps.casenotes.domain.occurredBefore
-import uk.gov.justice.hmpps.casenotes.legacy.service.EntityNotFoundException
 import uk.gov.justice.hmpps.casenotes.notes.NoteUsageRequest.DateType.CREATED_AT
 import uk.gov.justice.hmpps.casenotes.notes.NoteUsageRequest.DateType.OCCURRED_AT
+import uk.gov.justice.hmpps.casenotes.utils.EntityNotFoundException
 import java.time.temporal.ChronoUnit
 import java.util.UUID.fromString
 

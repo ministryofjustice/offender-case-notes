@@ -1,4 +1,4 @@
-package uk.gov.justice.hmpps.casenotes.legacy.service
+package uk.gov.justice.hmpps.casenotes.events.pusher
 
 import org.apache.commons.lang3.math.NumberUtils
 import org.slf4j.Logger

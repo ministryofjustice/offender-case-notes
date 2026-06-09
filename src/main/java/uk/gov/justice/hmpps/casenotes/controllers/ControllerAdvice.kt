@@ -15,8 +15,8 @@ import org.springframework.web.bind.annotation.RestControllerAdvice
 import org.springframework.web.method.annotation.HandlerMethodValidationException
 import org.springframework.web.reactive.function.client.WebClientException
 import org.springframework.web.reactive.function.client.WebClientResponseException
-import uk.gov.justice.hmpps.casenotes.legacy.dto.ErrorResponse
-import uk.gov.justice.hmpps.casenotes.legacy.service.EntityNotFoundException
+import uk.gov.justice.hmpps.casenotes.utils.EntityNotFoundException
+import uk.gov.justice.hmpps.casenotes.utils.ErrorResponse
 import java.sql.BatchUpdateException
 
 @RestControllerAdvice

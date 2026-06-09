@@ -12,13 +12,13 @@ import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 import uk.gov.justice.hmpps.casenotes.config.RO_OPERATIONS
-import uk.gov.justice.hmpps.casenotes.legacy.dto.ErrorResponse
 import uk.gov.justice.hmpps.casenotes.notes.NoteUsageResponse
 import uk.gov.justice.hmpps.casenotes.notes.ReadCaseNote
 import uk.gov.justice.hmpps.casenotes.notes.UsageByAuthorIdRequest
 import uk.gov.justice.hmpps.casenotes.notes.UsageByAuthorIdResponse
 import uk.gov.justice.hmpps.casenotes.notes.UsageByPersonIdentifierRequest
 import uk.gov.justice.hmpps.casenotes.notes.UsageByPersonIdentifierResponse
+import uk.gov.justice.hmpps.casenotes.utils.ErrorResponse
 
 @Tag(name = RO_OPERATIONS)
 @RestController

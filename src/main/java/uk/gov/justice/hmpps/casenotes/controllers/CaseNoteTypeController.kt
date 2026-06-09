@@ -14,10 +14,10 @@ import org.springframework.web.bind.annotation.RestController
 import uk.gov.justice.hmpps.casenotes.config.RO_OPERATIONS
 import uk.gov.justice.hmpps.casenotes.config.SecurityUserContext.Companion.ROLE_CASE_NOTES_READ
 import uk.gov.justice.hmpps.casenotes.config.SecurityUserContext.Companion.ROLE_CASE_NOTES_WRITE
-import uk.gov.justice.hmpps.casenotes.legacy.dto.ErrorResponse
 import uk.gov.justice.hmpps.casenotes.types.CaseNoteType
 import uk.gov.justice.hmpps.casenotes.types.ReadCaseNoteType
 import uk.gov.justice.hmpps.casenotes.types.SelectableBy
+import uk.gov.justice.hmpps.casenotes.utils.ErrorResponse
 
 @Tag(name = RO_OPERATIONS)
 @RestController

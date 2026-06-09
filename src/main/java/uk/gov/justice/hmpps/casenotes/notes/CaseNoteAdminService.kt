@@ -12,7 +12,7 @@ import uk.gov.justice.hmpps.casenotes.domain.TypeKey
 import uk.gov.justice.hmpps.casenotes.events.PersonCaseNoteEvent.Companion.createEvent
 import uk.gov.justice.hmpps.casenotes.events.PersonCaseNoteEvent.Type.DELETED
 import uk.gov.justice.hmpps.casenotes.events.PersonCaseNoteEvent.Type.UPDATED
-import uk.gov.justice.hmpps.casenotes.legacy.service.EntityNotFoundException
+import uk.gov.justice.hmpps.casenotes.utils.EntityNotFoundException
 import java.util.UUID
 
 @Transactional

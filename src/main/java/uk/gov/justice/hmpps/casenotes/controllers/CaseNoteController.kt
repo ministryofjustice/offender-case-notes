@@ -26,15 +26,15 @@ import uk.gov.justice.hmpps.casenotes.config.ADMIN_ONLY
 import uk.gov.justice.hmpps.casenotes.config.RO_OPERATIONS
 import uk.gov.justice.hmpps.casenotes.config.RW_OPERATIONS
 import uk.gov.justice.hmpps.casenotes.config.UsernameHeader
+import uk.gov.justice.hmpps.casenotes.events.pusher.CaseNoteEventPusher
 import uk.gov.justice.hmpps.casenotes.integrations.PrisonerSearchService
-import uk.gov.justice.hmpps.casenotes.legacy.dto.ErrorResponse
-import uk.gov.justice.hmpps.casenotes.legacy.service.CaseNoteEventPusher
 import uk.gov.justice.hmpps.casenotes.notes.AmendCaseNoteRequest
 import uk.gov.justice.hmpps.casenotes.notes.CaseNote
 import uk.gov.justice.hmpps.casenotes.notes.CaseNoteFilter
 import uk.gov.justice.hmpps.casenotes.notes.CreateCaseNoteRequest
 import uk.gov.justice.hmpps.casenotes.notes.ReadCaseNote
 import uk.gov.justice.hmpps.casenotes.notes.WriteCaseNote
+import uk.gov.justice.hmpps.casenotes.utils.ErrorResponse
 
 @RestController
 @RequestMapping("case-notes")

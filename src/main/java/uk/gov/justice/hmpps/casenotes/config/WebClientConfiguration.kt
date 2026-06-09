@@ -25,7 +25,7 @@ import org.springframework.web.reactive.function.client.WebClient
 import org.springframework.web.reactive.function.client.WebClient.Builder
 import reactor.netty.http.client.HttpClient
 import reactor.netty.http.client.HttpClient.create
-import uk.gov.justice.hmpps.casenotes.legacy.utils.UserContext
+import uk.gov.justice.hmpps.casenotes.utils.UserContext
 import uk.gov.justice.hmpps.kotlin.auth.service.GlobalPrincipalOAuth2AuthorizedClientService
 import java.time.Duration
 import java.time.Duration.ofSeconds
