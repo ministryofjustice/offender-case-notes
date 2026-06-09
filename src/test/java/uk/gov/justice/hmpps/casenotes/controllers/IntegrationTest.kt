@@ -36,9 +36,9 @@ import uk.gov.justice.hmpps.casenotes.events.DomainEvent
 import uk.gov.justice.hmpps.casenotes.events.Notification
 import uk.gov.justice.hmpps.casenotes.events.PersonCaseNoteEvent
 import uk.gov.justice.hmpps.casenotes.health.BasicIntegrationTest
-import uk.gov.justice.hmpps.casenotes.health.wiremock.Elite2Extension
 import uk.gov.justice.hmpps.casenotes.health.wiremock.ManageUsersApiExtension
 import uk.gov.justice.hmpps.casenotes.health.wiremock.OAuthExtension
+import uk.gov.justice.hmpps.casenotes.health.wiremock.PrisonApiExtension
 import uk.gov.justice.hmpps.casenotes.health.wiremock.PrisonerSearchApiExtension
 import uk.gov.justice.hmpps.casenotes.health.wiremock.TokenVerificationExtension
 import uk.gov.justice.hmpps.casenotes.utils.ErrorResponse
@@ -63,7 +63,7 @@ internal const val USERNAME = "TestUser"
 @SpringBootTest(webEnvironment = RANDOM_PORT)
 @AutoConfigureWebTestClient
 @ExtendWith(
-  Elite2Extension::class,
+  PrisonApiExtension::class,
   OAuthExtension::class,
   TokenVerificationExtension::class,
   PrisonerSearchApiExtension::class,

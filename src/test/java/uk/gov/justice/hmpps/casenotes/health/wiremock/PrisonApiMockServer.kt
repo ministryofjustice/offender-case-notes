@@ -11,29 +11,29 @@ import org.junit.jupiter.api.extension.ExtensionContext
 import uk.gov.justice.hmpps.casenotes.integrations.PrisonDetail
 import uk.gov.justice.hmpps.casenotes.utils.JsonHelper.jsonMapper
 
-class Elite2Extension :
+class PrisonApiExtension :
   BeforeAllCallback,
   AfterAllCallback,
   BeforeEachCallback {
   companion object {
     @JvmField
-    val elite2Api = Elite2MockServer()
+    val prisonApi = PrisonApiMockServer()
   }
 
   override fun beforeAll(context: ExtensionContext) {
-    elite2Api.start()
+    prisonApi.start()
   }
 
   override fun beforeEach(context: ExtensionContext) {
-    elite2Api.resetRequests()
+    prisonApi.resetRequests()
   }
 
   override fun afterAll(context: ExtensionContext) {
-    elite2Api.stop()
+    prisonApi.stop()
   }
 }
 
-class Elite2MockServer : WireMockServer(WIREMOCK_PORT) {
+class PrisonApiMockServer : WireMockServer(WIREMOCK_PORT) {
   fun stubPrisonSwitch(serviceCode: String = "ALERTS_CASE_NOTES", response: List<PrisonDetail>) {
     stubFor(
       get(urlPathMatching("/api/agency-switches/$serviceCode"))

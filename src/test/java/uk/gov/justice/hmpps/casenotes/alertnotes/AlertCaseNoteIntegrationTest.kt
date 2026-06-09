@@ -23,8 +23,8 @@ import uk.gov.justice.hmpps.casenotes.events.DomainEventListener.Companion.ALERT
 import uk.gov.justice.hmpps.casenotes.events.DomainEventListener.Companion.ALERT_INACTIVE
 import uk.gov.justice.hmpps.casenotes.events.PersonCaseNoteEvent
 import uk.gov.justice.hmpps.casenotes.events.PersonReference
-import uk.gov.justice.hmpps.casenotes.health.wiremock.Elite2Extension.Companion.elite2Api
 import uk.gov.justice.hmpps.casenotes.health.wiremock.ManageUsersApiExtension.Companion.manageUsersApi
+import uk.gov.justice.hmpps.casenotes.health.wiremock.PrisonApiExtension.Companion.prisonApi
 import uk.gov.justice.hmpps.casenotes.health.wiremock.PrisonerSearchApiExtension.Companion.prisonerSearchApi
 import uk.gov.justice.hmpps.casenotes.integrations.PrisonDetail
 import uk.gov.justice.hmpps.casenotes.integrations.UserDetails
@@ -45,7 +45,7 @@ class AlertCaseNoteIntegrationTest : IntegrationTest() {
     val alert = alert()
     alertsApi.withAlert(alert)
     prisonerSearchApi.stubPrisonerDetails(alert.prisonNumber, prisonCode)
-    elite2Api.stubPrisonSwitchNotFound()
+    prisonApi.stubPrisonSwitchNotFound()
 
     publishEventToTopic(alert.domainEvent(ALERT_CREATED))
     await untilCallTo { domainEventsQueue.countAllMessagesOnQueue() } matches { it == 0 }
@@ -59,7 +59,7 @@ class AlertCaseNoteIntegrationTest : IntegrationTest() {
     val alert = alert()
     alertsApi.withAlert(alert)
     prisonerSearchApi.stubPrisonerDetails(alert.prisonNumber, prisonCode)
-    elite2Api.stubPrisonSwitch(response = listOf(PrisonDetail("OTH", "Any other prison")))
+    prisonApi.stubPrisonSwitch(response = listOf(PrisonDetail("OTH", "Any other prison")))
 
     publishEventToTopic(alert.domainEvent(ALERT_CREATED))
     await untilCallTo { domainEventsQueue.countAllMessagesOnQueue() } matches { it == 0 }
@@ -73,7 +73,7 @@ class AlertCaseNoteIntegrationTest : IntegrationTest() {
     val alert = alert()
     alertsApi.withAlert(alert)
     prisonerSearchApi.stubPrisonerDetails(alert.prisonNumber, prisonCode)
-    elite2Api.stubPrisonSwitch(response = listOf(PrisonDetail(prisonCode, "Active Prison")))
+    prisonApi.stubPrisonSwitch(response = listOf(PrisonDetail(prisonCode, "Active Prison")))
 
     val userDetails = UserDetails(alert.createdBy, true, "Brian Created", "nomis", "null", "5761427", newUuid())
     manageUsersApi.stubGetUserDetails(userDetails)
@@ -96,7 +96,7 @@ class AlertCaseNoteIntegrationTest : IntegrationTest() {
     val alert = alert(createdBy = "AN07H3R")
     alertsApi.withAlert(alert)
     prisonerSearchApi.stubPrisonerDetails(alert.prisonNumber, prisonCode)
-    elite2Api.stubPrisonSwitch(
+    prisonApi.stubPrisonSwitch(
       response = listOf(
         PrisonDetail("OTH", "Any other prison"),
         PrisonDetail("*ALL*", "Active Prison"),
@@ -129,7 +129,7 @@ class AlertCaseNoteIntegrationTest : IntegrationTest() {
     )
     alertsApi.withAlert(alert)
     prisonerSearchApi.stubPrisonerDetails(alert.prisonNumber, prisonCode)
-    elite2Api.stubPrisonSwitch(response = listOf(PrisonDetail("*ALL*", "All Active")))
+    prisonApi.stubPrisonSwitch(response = listOf(PrisonDetail("*ALL*", "All Active")))
 
     val userDetails = UserDetails(alert.createdBy, true, "Another Person", "nomis", "null", "81946582", newUuid())
     manageUsersApi.stubGetUserDetails(userDetails)
@@ -152,7 +152,7 @@ class AlertCaseNoteIntegrationTest : IntegrationTest() {
     val alert = alert(activeTo = LocalDate.now(), activeToLastSetAt = LocalDateTime.now())
     alertsApi.withAlert(alert)
     prisonerSearchApi.stubPrisonerDetails(alert.prisonNumber, prisonCode)
-    elite2Api.stubPrisonSwitch(response = listOf(PrisonDetail("OTH", "Any other prison")))
+    prisonApi.stubPrisonSwitch(response = listOf(PrisonDetail("OTH", "Any other prison")))
 
     publishEventToTopic(alert.domainEvent(ALERT_CREATED))
     await untilCallTo { domainEventsQueue.countAllMessagesOnQueue() } matches { it == 0 }
@@ -167,7 +167,7 @@ class AlertCaseNoteIntegrationTest : IntegrationTest() {
       alert(activeTo = LocalDate.now(), madeInactiveAt = LocalDateTime.now(), madeInactiveBy = "BCreated")
     alertsApi.withAlert(alert)
     prisonerSearchApi.stubPrisonerDetails(alert.prisonNumber, prisonCode)
-    elite2Api.stubPrisonSwitch(response = listOf(PrisonDetail(prisonCode, "Active Prison")))
+    prisonApi.stubPrisonSwitch(response = listOf(PrisonDetail(prisonCode, "Active Prison")))
 
     val userDetails =
       UserDetails(alert.madeInactiveBy!!, true, "Brian Created", "nomis", "null", "5761427", newUuid())
@@ -193,7 +193,7 @@ class AlertCaseNoteIntegrationTest : IntegrationTest() {
       alert(activeTo = LocalDate.now(), madeInactiveAt = LocalDateTime.now(), madeInactiveBy = "AN07H3R")
     alertsApi.withAlert(alert)
     prisonerSearchApi.stubPrisonerDetails(alert.prisonNumber, prisonCode)
-    elite2Api.stubPrisonSwitch(
+    prisonApi.stubPrisonSwitch(
       response = listOf(
         PrisonDetail("OTH", "Any other prison"),
         PrisonDetail("*ALL*", "Active Prison"),
@@ -223,7 +223,7 @@ class AlertCaseNoteIntegrationTest : IntegrationTest() {
     val alert = alert(activeTo = LocalDate.now(), madeInactiveAt = LocalDateTime.now(), madeInactiveBy = "deactiv8")
     alertsApi.withAlert(alert)
     prisonerSearchApi.stubPrisonerDetails(alert.prisonNumber, prisonCode)
-    elite2Api.stubPrisonSwitch(
+    prisonApi.stubPrisonSwitch(
       response = listOf(PrisonDetail(prisonCode, "Active Prison"), PrisonDetail("*ALL*", "Active Prison")),
     )
 

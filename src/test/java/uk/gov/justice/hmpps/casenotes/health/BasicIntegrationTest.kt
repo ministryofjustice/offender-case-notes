@@ -14,9 +14,9 @@ import org.springframework.test.web.reactive.server.WebTestClient
 import uk.gov.justice.hmpps.casenotes.config.container.LocalStackContainer
 import uk.gov.justice.hmpps.casenotes.config.container.LocalStackContainer.setLocalStackProperties
 import uk.gov.justice.hmpps.casenotes.config.container.PostgresContainer
-import uk.gov.justice.hmpps.casenotes.health.wiremock.Elite2Extension
 import uk.gov.justice.hmpps.casenotes.health.wiremock.ManageUsersApiExtension
 import uk.gov.justice.hmpps.casenotes.health.wiremock.OAuthExtension
+import uk.gov.justice.hmpps.casenotes.health.wiremock.PrisonApiExtension
 import uk.gov.justice.hmpps.casenotes.health.wiremock.PrisonerSearchApiExtension
 import uk.gov.justice.hmpps.casenotes.health.wiremock.TokenVerificationExtension
 
@@ -24,7 +24,7 @@ import uk.gov.justice.hmpps.casenotes.health.wiremock.TokenVerificationExtension
 @ActiveProfiles("test")
 @AutoConfigureWebTestClient
 @ExtendWith(
-  Elite2Extension::class,
+  PrisonApiExtension::class,
   OAuthExtension::class,
   TokenVerificationExtension::class,
   PrisonerSearchApiExtension::class,

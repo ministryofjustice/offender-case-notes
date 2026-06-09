@@ -31,7 +31,7 @@ server:
 service:
   base-url: http://localhost:8080
 
-elite2.api.base.url: https://prison-api-dev.prison.service.justice.gov.uk
+prison.api.base.url: https://prison-api-dev.prison.service.justice.gov.uk
 oauth.api.base.url: https://sign-in-dev.hmpps.service.justice.gov.uk/auth
 prisoner-search.api.base.url: https://prisoner-search-dev.prison.service.justice.gov.uk
 manage-users.api.base.url: https://manage-users-api-dev.hmpps.service.justice.gov.uk

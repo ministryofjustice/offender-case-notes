@@ -26,7 +26,7 @@ abstract class HealthCheck(private val webClient: WebClient) : HealthIndicator {
 }
 
 @Component
-class Elite2ApiHealth(@Qualifier("elite2ApiHealthWebClient") webClient: WebClient) : HealthCheck(webClient)
+class PrisonApiHealth(@Qualifier("prisonApiHealthWebClient") webClient: WebClient) : HealthCheck(webClient)
 
 @Component
 class OAuthApiHealth(@Qualifier("oauthApiHealthWebClient") webClient: WebClient) : HealthCheck(webClient)
