@@ -49,7 +49,7 @@ class CreateAmendmentIntTest : IntegrationTest() {
   }
 
   @Test
-  fun `cannot amend a sync to nomis case note with non nomis user`() {
+  fun `cannot amend a sync to NOMIS case note with non NOMIS user`() {
     val username = "DeliusUser"
     manageUsersApi.stubGetUserDetails(username, nomisUser = false)
     val type = getAllTypes().first { it.syncToNomis }

@@ -7,6 +7,7 @@ import org.junit.jupiter.params.provider.Arguments.of
 import org.junit.jupiter.params.provider.MethodSource
 import org.junit.jupiter.params.provider.ValueSource
 import org.springframework.http.HttpStatus
+import org.springframework.test.web.reactive.server.expectBody
 import uk.gov.justice.hmpps.casenotes.config.SecurityUserContext.Companion.ROLE_CASE_NOTES_READ
 import uk.gov.justice.hmpps.casenotes.config.SecurityUserContext.Companion.ROLE_CASE_NOTES_WRITE
 import uk.gov.justice.hmpps.casenotes.domain.Note
@@ -232,7 +233,7 @@ class SearchCaseNotesIntTest : IntegrationTest() {
     username: String = USERNAME,
   ): SearchNotesResponse = findCaseNotesSpec(personIdentifier, request, roles, username)
     .expectStatus().isOk
-    .expectBody(SearchNotesResponse::class.java).returnResult().responseBody!!
+    .expectBody<SearchNotesResponse>().returnResult().responseBody!!
 
   companion object {
     @JvmStatic

@@ -58,7 +58,7 @@ class CaseNoteAdminService(
     this.legacyId = existing.legacyId
     this.createdAt = existing.createdAt
     this.createdBy = existing.createdBy
-    amendments.map {
+    amendments.forEach {
       withAmendment(it) {
         existing.findAmendment(it) ?: throw EntityNotFoundException("No amendment for this case note with id $it")
       }

@@ -56,7 +56,7 @@ class CreateCaseNoteIntTest : IntegrationTest() {
   }
 
   @Test
-  fun `cannot create a sync to nomis case note with non nomis user`() {
+  fun `cannot create a sync to nomis case note with non NOMIS user`() {
     val username = "DeliusUser"
     manageUsersApi.stubGetUserDetails(username, nomisUser = false)
     val type = getAllTypes().first { it.syncToNomis }
@@ -160,7 +160,7 @@ class CreateCaseNoteIntTest : IntegrationTest() {
   }
 
   @Test
-  fun `can create a case note without caseload id when not sync to nomis`() {
+  fun `can create a case note without caseload id when not sync to NOMIS`() {
     val type = getAllTypes().first { !it.syncToNomis }
     val request = createCaseNoteRequest(type = type.typeCode, subType = type.code)
     val response = createCaseNote(personIdentifier(), request).success<CaseNote>(HttpStatus.CREATED)

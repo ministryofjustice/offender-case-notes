@@ -18,6 +18,8 @@ import org.springframework.http.MediaType
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.bean.override.mockito.MockitoSpyBean
 import org.springframework.test.web.reactive.server.WebTestClient
+import org.springframework.test.web.reactive.server.expectBody
+import org.springframework.test.web.reactive.server.expectBodyList
 import software.amazon.awssdk.services.sqs.model.PurgeQueueRequest
 import software.amazon.awssdk.services.sqs.model.ReceiveMessageRequest
 import tools.jackson.databind.json.JsonMapper
@@ -145,18 +147,16 @@ abstract class IntegrationTest : BasicIntegrationTest() {
     headers.add(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
   }
 
-  fun readFile(file: String): String = this.javaClass.getResource(file)!!.readText()
-
   internal final fun WebTestClient.ResponseSpec.errorResponse(status: HttpStatus): ErrorResponse = expectStatus().isEqualTo(status)
-    .expectBody(ErrorResponse::class.java)
+    .expectBody<ErrorResponse>()
     .returnResult().responseBody!!
 
   internal final inline fun <reified T : Any> WebTestClient.ResponseSpec.success(status: HttpStatus = HttpStatus.OK): T = expectStatus().isEqualTo(status)
-    .expectBody(T::class.java)
+    .expectBody<T>()
     .returnResult().responseBody!!
 
   internal final inline fun <reified T : Any> WebTestClient.ResponseSpec.successList(status: HttpStatus = HttpStatus.OK): List<T> = expectStatus().isEqualTo(status)
-    .expectBodyList(T::class.java)
+    .expectBodyList<T>()
     .returnResult().responseBody!!
 
   fun getAllTypes(
