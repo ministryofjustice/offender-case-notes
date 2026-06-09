@@ -12,11 +12,11 @@ import software.amazon.awssdk.services.sns.model.MessageAttributeValue
 import software.amazon.awssdk.services.sns.model.PublishRequest
 import software.amazon.awssdk.services.sns.model.PublishResponse
 import tools.jackson.databind.json.JsonMapper
+import uk.gov.justice.hmpps.casenotes.config.EuropeLondon
+import uk.gov.justice.hmpps.casenotes.events.DomainEvent
+import uk.gov.justice.hmpps.casenotes.events.PersonReference
 import uk.gov.justice.hmpps.casenotes.events.pusher.CaseNoteAdditionalInformation
 import uk.gov.justice.hmpps.casenotes.events.pusher.CaseNoteAwsEventPusher
-import uk.gov.justice.hmpps.casenotes.events.pusher.HmppsDomainEvent
-import uk.gov.justice.hmpps.casenotes.events.pusher.PersonIdentifier
-import uk.gov.justice.hmpps.casenotes.events.pusher.PersonReference
 import uk.gov.justice.hmpps.casenotes.notes.CaseNote
 import uk.gov.justice.hmpps.sqs.HmppsQueueService
 import uk.gov.justice.hmpps.sqs.HmppsTopic
@@ -39,13 +39,14 @@ class CaseNoteAwsEventPusherTest {
 
     service.sendEvent(caseCaseNote())
     verify(jsonMapper).writeValueAsString(
-      check<HmppsDomainEvent> {
+      check<DomainEvent<CaseNoteAdditionalInformation>> {
         assertThat(it).isEqualTo(
-          HmppsDomainEvent(
+          DomainEvent(
             eventType = "prison.case-note.published",
+            description = "A prison case note has been created or amended",
             detailUrl = "http://localhost:8080/case-notes/A1234AC/abcde",
-            occurredAt = LocalDateTime.parse("2019-03-04T10:11:12"),
-            personReference = PersonReference(identifiers = listOf(PersonIdentifier("NOMS", "A1234AC"))),
+            occurredAt = LocalDateTime.parse("2019-03-04T10:11:12").atZone(EuropeLondon),
+            personReference = PersonReference(identifiers = setOf(PersonReference.Identifier("NOMS", "A1234AC"))),
             additionalInformation = CaseNoteAdditionalInformation(
               caseNoteId = "abcde",
               caseNoteType = "GEN-OSE",
