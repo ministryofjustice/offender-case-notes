@@ -31,6 +31,8 @@ generic-service:
         DB_USER_PREPROD: "database_username"
         DB_PASS_PREPROD: "database_password"
         DB_HOST_PREPROD: "rds_instance_address"
+      s3-db-restore-bucket:
+        BUCKET_NAME: "bucket_name"
 
   allowlist:
     delius-prod-1: 52.56.115.146/32
