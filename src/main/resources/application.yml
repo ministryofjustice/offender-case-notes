@@ -93,7 +93,6 @@ management:
         time-to-live: 2000ms
 
 service:
-  active-prisons:
   base-url:
   action-missing-case-notes: false
   sar-enable-all-case-notes: false

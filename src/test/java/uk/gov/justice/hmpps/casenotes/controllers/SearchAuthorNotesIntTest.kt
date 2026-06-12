@@ -7,14 +7,15 @@ import org.junit.jupiter.params.provider.Arguments.of
 import org.junit.jupiter.params.provider.MethodSource
 import org.junit.jupiter.params.provider.ValueSource
 import org.springframework.http.HttpStatus
+import org.springframework.test.web.reactive.server.expectBody
 import uk.gov.justice.hmpps.casenotes.config.SecurityUserContext.Companion.ROLE_CASE_NOTES_READ
 import uk.gov.justice.hmpps.casenotes.config.SecurityUserContext.Companion.ROLE_CASE_NOTES_WRITE
 import uk.gov.justice.hmpps.casenotes.domain.Note
-import uk.gov.justice.hmpps.casenotes.legacy.dto.ErrorResponse
 import uk.gov.justice.hmpps.casenotes.notes.AuthorIdentifierType
 import uk.gov.justice.hmpps.casenotes.notes.AuthorNotesResponse
 import uk.gov.justice.hmpps.casenotes.notes.SearchNotesRequest
 import uk.gov.justice.hmpps.casenotes.notes.TypeSubTypeRequest
+import uk.gov.justice.hmpps.casenotes.utils.ErrorResponse
 import uk.gov.justice.hmpps.casenotes.utils.NomisIdGenerator.newId
 import uk.gov.justice.hmpps.casenotes.utils.verifyAgainst
 import java.time.LocalDateTime
@@ -257,7 +258,7 @@ class SearchAuthorNotesIntTest : IntegrationTest() {
     username: String = USERNAME,
   ): AuthorNotesResponse = findAuthorNotesSpec(prisonCode, authorId, request, authorIdType, roles, username)
     .expectStatus().isOk
-    .expectBody(AuthorNotesResponse::class.java).returnResult().responseBody!!
+    .expectBody<AuthorNotesResponse>().returnResult().responseBody!!
 
   companion object {
     const val AUTHOR_SEARCH_URL = "/search/case-notes/prisons/{prisonCode}/authors/{authorIdentifier}"

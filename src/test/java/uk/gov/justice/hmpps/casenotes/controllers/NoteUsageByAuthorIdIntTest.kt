@@ -8,13 +8,13 @@ import org.junit.jupiter.params.provider.MethodSource
 import org.springframework.core.ParameterizedTypeReference
 import org.springframework.http.HttpStatus
 import uk.gov.justice.hmpps.casenotes.config.SecurityUserContext.Companion.ROLE_CASE_NOTES_READ
-import uk.gov.justice.hmpps.casenotes.legacy.dto.ErrorResponse
 import uk.gov.justice.hmpps.casenotes.notes.LatestNote
 import uk.gov.justice.hmpps.casenotes.notes.NoteUsageRequest.DateType
 import uk.gov.justice.hmpps.casenotes.notes.NoteUsageResponse
 import uk.gov.justice.hmpps.casenotes.notes.TypeSubTypeRequest
 import uk.gov.justice.hmpps.casenotes.notes.UsageByAuthorIdRequest
 import uk.gov.justice.hmpps.casenotes.notes.UsageByAuthorIdResponse
+import uk.gov.justice.hmpps.casenotes.utils.ErrorResponse
 import uk.gov.justice.hmpps.casenotes.utils.NomisIdGenerator.newId
 import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit.SECONDS

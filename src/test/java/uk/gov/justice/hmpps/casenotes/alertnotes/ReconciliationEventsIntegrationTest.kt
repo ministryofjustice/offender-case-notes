@@ -22,7 +22,7 @@ class ReconciliationEventsIntegrationTest : IntegrationTest() {
     val to = LocalDate.now()
     val prisonNumbers = arrayOf(personIdentifier(), personIdentifier())
     alertsApi.withPersonIdentifiers(from, to, *prisonNumbers)
-    prisonNumbers.map { alertsApi.withAlerts(it, from, to, response(from, created)) }
+    prisonNumbers.forEach { alertsApi.withAlerts(it, from, to, response(from, created)) }
 
     webTestClient.post().uri("/case-notes/alerts/reconciliation")
       .exchange()

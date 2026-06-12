@@ -18,7 +18,8 @@ import org.springframework.http.MediaType
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.bean.override.mockito.MockitoSpyBean
 import org.springframework.test.web.reactive.server.WebTestClient
-import org.springframework.test.web.reactive.server.WebTestClient.RequestBodySpec
+import org.springframework.test.web.reactive.server.expectBody
+import org.springframework.test.web.reactive.server.expectBodyList
 import software.amazon.awssdk.services.sqs.model.PurgeQueueRequest
 import software.amazon.awssdk.services.sqs.model.ReceiveMessageRequest
 import tools.jackson.databind.json.JsonMapper
@@ -35,12 +36,12 @@ import uk.gov.justice.hmpps.casenotes.events.DomainEvent
 import uk.gov.justice.hmpps.casenotes.events.Notification
 import uk.gov.justice.hmpps.casenotes.events.PersonCaseNoteEvent
 import uk.gov.justice.hmpps.casenotes.health.BasicIntegrationTest
-import uk.gov.justice.hmpps.casenotes.health.wiremock.Elite2Extension
 import uk.gov.justice.hmpps.casenotes.health.wiremock.ManageUsersApiExtension
 import uk.gov.justice.hmpps.casenotes.health.wiremock.OAuthExtension
+import uk.gov.justice.hmpps.casenotes.health.wiremock.PrisonApiExtension
 import uk.gov.justice.hmpps.casenotes.health.wiremock.PrisonerSearchApiExtension
 import uk.gov.justice.hmpps.casenotes.health.wiremock.TokenVerificationExtension
-import uk.gov.justice.hmpps.casenotes.legacy.dto.ErrorResponse
+import uk.gov.justice.hmpps.casenotes.utils.ErrorResponse
 import uk.gov.justice.hmpps.casenotes.utils.JwtAuthHelper
 import uk.gov.justice.hmpps.casenotes.utils.NomisIdGenerator
 import uk.gov.justice.hmpps.casenotes.utils.NomisIdGenerator.newId
@@ -56,14 +57,13 @@ import java.time.temporal.ChronoUnit
 import java.util.UUID
 import java.util.function.Consumer
 
-internal const val ACTIVE_PRISON = "MDI"
 internal const val USERNAME = "TestUser"
 
 @ActiveProfiles("test", "test-token-verification")
 @SpringBootTest(webEnvironment = RANDOM_PORT)
 @AutoConfigureWebTestClient
 @ExtendWith(
-  Elite2Extension::class,
+  PrisonApiExtension::class,
   OAuthExtension::class,
   TokenVerificationExtension::class,
   PrisonerSearchApiExtension::class,
@@ -147,22 +147,16 @@ abstract class IntegrationTest : BasicIntegrationTest() {
     headers.add(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
   }
 
-  fun RequestBodySpec.addHeader(key: String, value: String? = null) = apply {
-    value?.also { header(key, it) }
-  }
-
-  fun readFile(file: String): String = this.javaClass.getResource(file)!!.readText()
-
   internal final fun WebTestClient.ResponseSpec.errorResponse(status: HttpStatus): ErrorResponse = expectStatus().isEqualTo(status)
-    .expectBody(ErrorResponse::class.java)
+    .expectBody<ErrorResponse>()
     .returnResult().responseBody!!
 
   internal final inline fun <reified T : Any> WebTestClient.ResponseSpec.success(status: HttpStatus = HttpStatus.OK): T = expectStatus().isEqualTo(status)
-    .expectBody(T::class.java)
+    .expectBody<T>()
     .returnResult().responseBody!!
 
   internal final inline fun <reified T : Any> WebTestClient.ResponseSpec.successList(status: HttpStatus = HttpStatus.OK): List<T> = expectStatus().isEqualTo(status)
-    .expectBodyList(T::class.java)
+    .expectBodyList<T>()
     .returnResult().responseBody!!
 
   fun getAllTypes(

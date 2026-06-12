@@ -126,7 +126,7 @@ class SyncCaseNoteIntTest : IntegrationTest() {
   }
 
   @Test
-  fun `200 ok - sync updates an existing case note using id retaining dps legacy id`() {
+  fun `200 ok - sync updates an existing case note using id retaining DPS legacy id`() {
     val personIdentifier = personIdentifier()
     val dpsLegacyId = noteRepository.getNextLegacyId()
     val existing = givenCaseNote(generateCaseNote(personIdentifier, legacyId = dpsLegacyId))

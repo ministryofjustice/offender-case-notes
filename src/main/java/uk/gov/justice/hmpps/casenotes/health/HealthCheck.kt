@@ -26,7 +26,7 @@ abstract class HealthCheck(private val webClient: WebClient) : HealthIndicator {
 }
 
 @Component
-class Elite2ApiHealth(@Qualifier("elite2ApiHealthWebClient") webClient: WebClient) : HealthCheck(webClient)
+class PrisonApiHealth(@Qualifier("prisonApiHealthWebClient") webClient: WebClient) : HealthCheck(webClient)
 
 @Component
 class OAuthApiHealth(@Qualifier("oauthApiHealthWebClient") webClient: WebClient) : HealthCheck(webClient)
@@ -40,7 +40,7 @@ class ManageUsersApiHealth(@Qualifier("manageUsersApiHealthWebClient") webClient
 @Component
 class TokenVerificationApiHealth(
   @Qualifier("tokenVerificationApiHealthWebClient") webClient: WebClient,
-  @param:Value("\${tokenverification.enabled:false}") private val tokenVerificationEnabled: Boolean,
+  @param:Value($$"${tokenverification.enabled:false}") private val tokenVerificationEnabled: Boolean,
 ) : HealthCheck(webClient) {
   override fun health(): Health? = if (tokenVerificationEnabled) {
     super.health()

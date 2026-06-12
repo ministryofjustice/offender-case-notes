@@ -6,7 +6,7 @@ generic-service:
     SENTRY_ENVIRONMENT: prod
     SPRING_DATASOURCE_HIKARI_MAXIMUMPOOLSIZE: 30
     SERVICE_BASE_URL: "https://offender-case-notes.service.justice.gov.uk"
-    ELITE2_API_BASE_URL: "https://prison-api.prison.service.justice.gov.uk"
+    PRISON_API_BASE_URL: "https://prison-api.prison.service.justice.gov.uk"
     OAUTH_API_BASE_URL: "https://sign-in.hmpps.service.justice.gov.uk/auth"
     PRISONER_SEARCH_API_BASE_URL: "https://prisoner-search.prison.service.justice.gov.uk"
     MANAGE_USERS_API_BASE_URL: "https://manage-users-api.hmpps.service.justice.gov.uk"
@@ -15,7 +15,6 @@ generic-service:
     TOKENVERIFICATION_ENABLED: "false"
     SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_JWK_SET_URI: "https://sign-in.hmpps.service.justice.gov.uk/auth/.well-known/jwks.json"
     APPLICATIONINSIGHTS_CONFIGURATION_FILE: applicationinsights.json
-    SERVICE_ACTIVE_PRISONS: "***"
 
   postgresDatabaseRestore:
     enabled: true
@@ -40,7 +39,6 @@ generic-service:
     delius-prod-2: 35.178.104.253/32
     delius-prod-3: 35.177.47.45/32
 
-# CloudPlatform AlertManager receiver to route prometheus alerts to slack
 generic-prometheus-alerts:
   alertSeverity: hmpps-connect-dps-prod # sent to #connect-dps-prod-alerts
   sqsOldestAlertQueueNames:

@@ -17,7 +17,7 @@ class CaseNoteAlertTest {
   private val afterChanges = LocalDateTime.parse("2024-11-25T10:02:17.547652")
 
   @Test
-  fun `text for oncr before and after change`() {
+  fun `text for ONCR before and after change`() {
     val after = caseNoteAlert(oncrType, oncrSubType, afterChanges)
     val before = caseNoteAlert(oncrType, oncrSubType, beforeChanges)
 
@@ -30,7 +30,7 @@ class CaseNoteAlertTest {
   }
 
   @Test
-  fun `text for cpc before and after change`() {
+  fun `text for CPC before and after change`() {
     val after = caseNoteAlert(cpcType, cpcSubType, afterChanges)
     val before = caseNoteAlert(cpcType, cpcSubType, beforeChanges)
 
