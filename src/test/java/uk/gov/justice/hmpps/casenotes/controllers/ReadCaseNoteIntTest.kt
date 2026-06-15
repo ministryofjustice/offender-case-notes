@@ -6,7 +6,6 @@ import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments
 import org.junit.jupiter.params.provider.MethodSource
 import org.junit.jupiter.params.provider.ValueSource
-import uk.gov.justice.hmpps.casenotes.config.CaseloadIdHeader
 import uk.gov.justice.hmpps.casenotes.config.SecurityUserContext
 import uk.gov.justice.hmpps.casenotes.domain.SubType
 import uk.gov.justice.hmpps.casenotes.notes.CaseNote
@@ -56,16 +55,6 @@ class ReadCaseNoteIntTest : IntegrationTest() {
     response.amendments.first().verifyAgainst(caseNote.amendments().first())
   }
 
-  @Test
-  fun `calls from sync retrieve NOMIS case notes from local database`() {
-    val caseNote = givenCaseNote(generateCaseNote().withAmendment())
-    val response = getCaseNote(caseNote.personIdentifier, caseNote.id.toString(), listOf(SecurityUserContext.ROLE_CASE_NOTES_SYNC), caseloadId = null)
-      .success<CaseNote>()
-
-    response.verifyAgainst(caseNote)
-    response.amendments.first().verifyAgainst(caseNote.amendments().first())
-  }
-
   @ParameterizedTest
   @MethodSource("caseNotesWithSource")
   fun `correctly calculates the source`(filter: Predicate<SubType>, source: String) {
@@ -82,10 +71,8 @@ class ReadCaseNoteIntTest : IntegrationTest() {
     caseNoteId: String,
     roles: List<String> = listOf(SecurityUserContext.ROLE_CASE_NOTES_READ),
     username: String = USERNAME,
-    caseloadId: String? = ACTIVE_PRISON,
   ) = webTestClient.get().uri(urlToTest(personIdentifier, caseNoteId))
     .headers(addBearerAuthorisation(username, roles))
-    .apply { if (caseloadId != null) this.header(CaseloadIdHeader.NAME, caseloadId) }
     .exchange()
 
   private fun urlToTest(personIdentifier: String, caseNoteId: String) = "/case-notes/$personIdentifier/$caseNoteId"

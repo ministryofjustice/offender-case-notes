@@ -19,11 +19,11 @@ import org.springframework.web.bind.annotation.RestController
 import uk.gov.justice.hmpps.casenotes.config.ADMIN_ONLY
 import uk.gov.justice.hmpps.casenotes.config.CaseNoteRequestContext
 import uk.gov.justice.hmpps.casenotes.config.SecurityUserContext.Companion.ROLE_CASE_NOTES_ADMIN
-import uk.gov.justice.hmpps.casenotes.legacy.dto.ErrorResponse
 import uk.gov.justice.hmpps.casenotes.notes.CaseNote
 import uk.gov.justice.hmpps.casenotes.notes.CaseNoteAdminService
 import uk.gov.justice.hmpps.casenotes.notes.DeleteCaseNoteRequest
 import uk.gov.justice.hmpps.casenotes.notes.ReplaceNoteRequest
+import uk.gov.justice.hmpps.casenotes.utils.ErrorResponse
 import java.util.UUID
 
 @Tag(name = ADMIN_ONLY)

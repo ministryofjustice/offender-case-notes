@@ -1,4 +1,4 @@
-package uk.gov.justice.hmpps.casenotes.legacy.utils;
+package uk.gov.justice.hmpps.casenotes.utils;
 
 import org.springframework.stereotype.Component;
 

@@ -16,8 +16,7 @@ import org.springframework.web.servlet.config.annotation.InterceptorRegistry
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer
 import tools.jackson.databind.json.JsonMapper
 import uk.gov.justice.hmpps.casenotes.integrations.ManageUsersService
-import uk.gov.justice.hmpps.casenotes.legacy.dto.ErrorResponse
-import uk.gov.justice.hmpps.casenotes.legacy.dto.UserDetails.Companion.NOMIS
+import uk.gov.justice.hmpps.casenotes.utils.ErrorResponse
 
 @Configuration
 class CaseNoteContextConfiguration(private val caseNoteContextInterceptor: CaseNoteContextInterceptor) : WebMvcConfigurer {
@@ -32,12 +31,13 @@ class CaseNoteContextConfiguration(private val caseNoteContextInterceptor: CaseN
 class CaseNoteContextInterceptor(
   private val manageUserService: ManageUsersService,
   private val jsonMapper: JsonMapper,
-  private val serviceConfig: ServiceConfig,
 ) : HandlerInterceptor {
+  private val mutatingMethods = setOf(POST.name(), PUT.name(), PATCH.name(), DELETE.name())
+
   override fun preHandle(request: HttpServletRequest, response: HttpServletResponse, handler: Any): Boolean {
-    if (request.method in listOf(POST.name(), PUT.name(), PATCH.name(), DELETE.name())) {
-      val headers = request.extractHeaders()
-      val username = headers?.username ?: username()
+    if (request.method in mutatingMethods) {
+      val usernameInHeader: String? = request.getHeader(UsernameHeader.NAME)
+      val username = usernameInHeader ?: username()
       return manageUserService.getUserDetails(username)?.let {
         val context = CaseNoteRequestContext(
           username,
@@ -45,7 +45,7 @@ class CaseNoteContextInterceptor(
           it.userId,
           it.activeCaseLoadId,
           Source.DPS,
-          nomisUser = it.authSource == NOMIS,
+          nomisUser = it.authSource == "nomis",
         )
         request.setAttribute(CaseNoteRequestContext::class.simpleName, context)
         true
@@ -73,19 +73,4 @@ class CaseNoteContextInterceptor(
 
   private fun username(): String = authentication().name.takeIf { it.length <= 64 }
     ?: throw ValidationException("username for audit exceeds 64 characters")
-
-  private fun HttpServletRequest.extractHeaders(): Headers? {
-    return getHeader(CaseloadIdHeader.NAME)?.let {
-      if (it.isBlank()) return null
-      val username = getHeader(UsernameHeader.NAME)
-      // only allow username header for switched path
-      if (serviceConfig.switchesPathFor(it)) {
-        Headers(it, username)
-      } else {
-        null
-      }
-    }
-  }
 }
-
-private data class Headers(val caseloadId: String, val username: String?)

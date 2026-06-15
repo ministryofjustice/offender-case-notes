@@ -25,28 +25,24 @@ import org.springframework.web.reactive.function.client.WebClient
 import org.springframework.web.reactive.function.client.WebClient.Builder
 import reactor.netty.http.client.HttpClient
 import reactor.netty.http.client.HttpClient.create
-import uk.gov.justice.hmpps.casenotes.legacy.utils.UserContext
+import uk.gov.justice.hmpps.casenotes.utils.UserContext
 import uk.gov.justice.hmpps.kotlin.auth.service.GlobalPrincipalOAuth2AuthorizedClientService
 import java.time.Duration
 import java.time.Duration.ofSeconds
 
 @Configuration
 class WebClientConfiguration(
-  @param:Value("\${elite2.api.base.url}") private val elite2ApiBaseUrl: @URL String,
-  @param:Value("\${oauth.api.base.url}") private val oauthApiBaseUrl: @URL String,
-  @param:Value("\${prisoner-search.api.base.url}") private val prisonerSearchApiBaseUrl: @URL String,
-  @param:Value("\${manage-users.api.base.url}") private val manageUsersApiBaseUrl: @URL String,
-  @param:Value("\${alerts.api.base.url}") private val alertsApiBaseUrl: @URL String,
-  @param:Value("\${tokenverification.api.base.url}") private val tokenVerificationApiBaseUrl: @URL String,
-  @param:Value("\${api.health-timeout:1s}") private val healthTimeout: Duration,
-  @param:Value("\${api.response-timeout:2s}") private val responseTimeout: Duration,
+  @param:Value($$"${prison.api.base.url}") private val prisonApiBaseUrl: @URL String,
+  @param:Value($$"${oauth.api.base.url}") private val oauthApiBaseUrl: @URL String,
+  @param:Value($$"${prisoner-search.api.base.url}") private val prisonerSearchApiBaseUrl: @URL String,
+  @param:Value($$"${manage-users.api.base.url}") private val manageUsersApiBaseUrl: @URL String,
+  @param:Value($$"${alerts.api.base.url}") private val alertsApiBaseUrl: @URL String,
+  @param:Value($$"${tokenverification.api.base.url}") private val tokenVerificationApiBaseUrl: @URL String,
+  @param:Value($$"${api.health-timeout:1s}") private val healthTimeout: Duration,
+  @param:Value($$"${api.response-timeout:2s}") private val responseTimeout: Duration,
 ) {
-
   @Bean
-  fun elite2ApiWebClient(builder: Builder): WebClient = createForwardAuthWebClient(builder, elite2ApiBaseUrl)
-
-  @Bean
-  fun elite2ApiHealthWebClient(builder: Builder): WebClient = createHealthClient(builder, elite2ApiBaseUrl)
+  fun prisonApiHealthWebClient(builder: Builder): WebClient = createHealthClient(builder, prisonApiBaseUrl)
 
   @Bean
   fun oauthApiWebClient(builder: Builder): WebClient = createForwardAuthWebClient(builder, oauthApiBaseUrl)
@@ -113,7 +109,7 @@ class WebClientConfiguration(
   fun prisonApiWebClient(
     @Qualifier(value = "authorizedClientManagerAppScope") authorizedClientManager: OAuth2AuthorizedClientManager,
     builder: Builder,
-  ): WebClient = getOAuthWebClient(authorizedClientManager, builder, elite2ApiBaseUrl)
+  ): WebClient = getOAuthWebClient(authorizedClientManager, builder, prisonApiBaseUrl)
 
   @Bean
   fun prisonerSearchWebClient(

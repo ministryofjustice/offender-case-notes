@@ -1,4 +1,4 @@
-package uk.gov.justice.hmpps.casenotes.legacy.dto
+package uk.gov.justice.hmpps.casenotes.utils
 
 import com.fasterxml.jackson.annotation.JsonInclude
 

@@ -38,7 +38,7 @@ management.endpoint:
 
 service.base-url: http://localhost:8080
 
-elite2:
+prison:
   api.base.url: http://localhost:8999
 oauth:
   api.base.url: http://localhost:8998/auth
@@ -92,5 +92,4 @@ hmpps:
         path: /sar/expected-render-result.html
 
 service:
-  active-prisons: MDI
   action-missing-case-notes: true

@@ -10,6 +10,7 @@ import org.mockito.kotlin.eq
 import org.mockito.kotlin.verify
 import uk.gov.justice.hmpps.casenotes.alertnotes.AlertCaseNoteReconciliation.Companion.TYPE
 import uk.gov.justice.hmpps.casenotes.alertnotes.AlertsApiExtension.Companion.alertsApi
+import uk.gov.justice.hmpps.casenotes.config.EuropeLondon
 import uk.gov.justice.hmpps.casenotes.controllers.IntegrationTest
 import uk.gov.justice.hmpps.casenotes.domain.Note
 import uk.gov.justice.hmpps.casenotes.domain.matchesPersonIdentifier
@@ -22,7 +23,6 @@ import uk.gov.justice.hmpps.casenotes.utils.NomisIdGenerator.personIdentifier
 import java.time.Instant.ofEpochSecond
 import java.time.LocalDate
 import java.time.LocalTime
-import java.time.ZoneId.systemDefault
 import java.time.ZoneOffset
 import java.time.ZonedDateTime
 import java.time.temporal.ChronoUnit
@@ -161,11 +161,10 @@ class AlertCaseNoteReconciliationIntTest : IntegrationTest() {
 
   private fun generateCaseNoteAlerts(from: LocalDate, to: LocalDate, count: Int = 5): List<CaseNoteAlert> {
     val dateRange = (from.forRange()..to.minusDays(1).forRange())
-    val createdAt = { ofEpochSecond(dateRange.random()).atZone(systemDefault()).toLocalDateTime() }
-    val activeFrom = { ofEpochSecond(dateRange.random()).atZone(systemDefault()).toLocalDate() }
+    val createdAt = { ofEpochSecond(dateRange.random()).atZone(EuropeLondon).toLocalDateTime() }
+    val activeFrom = { ofEpochSecond(dateRange.random()).atZone(EuropeLondon).toLocalDate() }
     val activeTo = {
-      ofEpochSecond((activeFrom().forRange()..to.forRange()).random())
-        .atZone(systemDefault()).toLocalDateTime()
+      ofEpochSecond((activeFrom().forRange()..to.forRange()).random()).atZone(EuropeLondon).toLocalDateTime()
     }
     return (0..count).map {
       val activeTo = activeTo()

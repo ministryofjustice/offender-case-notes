@@ -1,4 +1,4 @@
-package uk.gov.justice.hmpps.casenotes.legacy.service
+package uk.gov.justice.hmpps.casenotes.utils
 
 import java.util.function.Supplier
 

@@ -12,7 +12,7 @@ data class CaseNote(
   @JsonProperty("caseNoteId")
   @Schema(
     requiredMode = REQUIRED,
-    description = "Case Note Identifier. Will be a UUID for all consumers of the combined dataset but can be numeric for those that have not opted in. See documentation above",
+    description = "Case note identifier. Will be a UUID for all consumers of the combined dataset. See documentation above",
     example = "518b2200-6489-4c77-8514-10cf80ccd488",
   )
   val id: String,
@@ -100,7 +100,7 @@ data class CaseNote(
   val systemGenerated: Boolean,
 
   @Schema(
-    description = "The assigned numeric id for the case note. Can be positive or negative. Should only be used temporarily by clients that want to opt into the combined data set but are not fully compatible with UUID case note identifiers",
+    description = "The assigned legacy numeric id for the case note. Can be positive or negative. Should be avoided by clients except for cross-referencing historic data.",
     deprecated = true,
   )
   val legacyId: Long,

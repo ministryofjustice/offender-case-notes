@@ -3,9 +3,9 @@ package uk.gov.justice.hmpps.casenotes.events
 import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL
 import uk.gov.justice.hmpps.casenotes.config.CaseNoteRequestContext
+import uk.gov.justice.hmpps.casenotes.config.EuropeLondon
 import uk.gov.justice.hmpps.casenotes.config.Source
 import uk.gov.justice.hmpps.casenotes.domain.Note
-import java.time.ZoneId
 import java.util.UUID
 
 @JsonInclude(NON_NULL)
@@ -54,7 +54,7 @@ data class PersonCaseNoteEvent(
 }
 
 fun PersonCaseNoteEvent.asDomainEvent(baseUrl: String): DomainEvent<CaseNoteInformation> = DomainEvent(
-  CaseNoteRequestContext.get().requestAt.atZone(ZoneId.systemDefault()),
+  CaseNoteRequestContext.get().requestAt.atZone(EuropeLondon),
   eventName,
   baseUrl + detailUrl,
   description = "A case note has been ${eventType.name.lowercase()}",

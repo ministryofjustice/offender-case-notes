@@ -22,12 +22,12 @@ import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestController
 import uk.gov.justice.hmpps.casenotes.config.NOMIS_SYNC_ONLY
 import uk.gov.justice.hmpps.casenotes.config.SecurityUserContext.Companion.ROLE_CASE_NOTES_SYNC
-import uk.gov.justice.hmpps.casenotes.legacy.dto.ErrorResponse
 import uk.gov.justice.hmpps.casenotes.sync.MoveCaseNotesRequest
 import uk.gov.justice.hmpps.casenotes.sync.ResendPersonCaseNoteEvents
 import uk.gov.justice.hmpps.casenotes.sync.SyncCaseNoteRequest
 import uk.gov.justice.hmpps.casenotes.sync.SyncCaseNotes
 import uk.gov.justice.hmpps.casenotes.sync.SyncResult
+import uk.gov.justice.hmpps.casenotes.utils.ErrorResponse
 import java.util.UUID
 
 @Tag(name = NOMIS_SYNC_ONLY)

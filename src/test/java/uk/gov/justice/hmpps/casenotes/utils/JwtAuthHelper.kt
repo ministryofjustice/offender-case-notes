@@ -35,7 +35,7 @@ class JwtAuthHelper {
     jwtId: String = UUID.randomUUID().toString(),
   ): String {
     val claims =
-      mutableMapOf<String, Any?>("user_name" to subject, "client_id" to "elite2apiclient", "user_id" to userId)
+      mutableMapOf<String, Any?>("user_name" to subject, "client_id" to "prisonapiclient", "user_id" to userId)
     roles?.let { claims["authorities"] = roles }
     scope?.let { claims["scope"] = scope }
     return Jwts.builder()

@@ -10,7 +10,6 @@ import org.junit.jupiter.api.Test
 import org.springframework.http.HttpStatus
 import org.springframework.test.web.reactive.server.WebTestClient
 import tools.jackson.module.kotlin.readValue
-import uk.gov.justice.hmpps.casenotes.config.CaseloadIdHeader
 import uk.gov.justice.hmpps.casenotes.config.SecurityUserContext.Companion.ROLE_CASE_NOTES_READ
 import uk.gov.justice.hmpps.casenotes.config.SecurityUserContext.Companion.ROLE_CASE_NOTES_WRITE
 import uk.gov.justice.hmpps.casenotes.config.Source
@@ -57,7 +56,7 @@ class CreateCaseNoteIntTest : IntegrationTest() {
   }
 
   @Test
-  fun `cannot create a sync to nomis case note with non nomis user`() {
+  fun `cannot create a sync to nomis case note with non NOMIS user`() {
     val username = "DeliusUser"
     manageUsersApi.stubGetUserDetails(username, nomisUser = false)
     val type = getAllTypes().first { it.syncToNomis }
@@ -161,7 +160,7 @@ class CreateCaseNoteIntTest : IntegrationTest() {
   }
 
   @Test
-  fun `can create a case note without caseload id when not sync to nomis`() {
+  fun `can create a case note without caseload id when not sync to NOMIS`() {
     val type = getAllTypes().first { !it.syncToNomis }
     val request = createCaseNoteRequest(type = type.typeCode, subType = type.code)
     val response = createCaseNote(personIdentifier(), request).success<CaseNote>(HttpStatus.CREATED)
@@ -225,7 +224,6 @@ class CreateCaseNoteIntTest : IntegrationTest() {
     }
     ub.build()
   }.headers(addBearerAuthorisation(tokenUsername, roles))
-    .header(CaseloadIdHeader.NAME, ACTIVE_PRISON)
     .optionalHeader(UsernameHeader.NAME, usernameHeader)
     .bodyValue(request)
     .exchange()
@@ -243,7 +241,6 @@ class CreateCaseNoteIntTest : IntegrationTest() {
     }
     ub.build()
   }.headers(addBearerAuthorisation(tokenUsername, roles))
-    .header(CaseloadIdHeader.NAME, ACTIVE_PRISON)
     .bodyValue(request)
     .exchange()
 

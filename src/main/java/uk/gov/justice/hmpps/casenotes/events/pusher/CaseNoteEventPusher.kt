@@ -1,4 +1,4 @@
-package uk.gov.justice.hmpps.casenotes.legacy.service
+package uk.gov.justice.hmpps.casenotes.events.pusher
 
 import org.apache.commons.lang3.math.NumberUtils
 import org.slf4j.Logger
@@ -7,12 +7,15 @@ import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Component
 import software.amazon.awssdk.services.sns.model.MessageAttributeValue
 import tools.jackson.databind.json.JsonMapper
+import uk.gov.justice.hmpps.casenotes.config.EuropeLondon
+import uk.gov.justice.hmpps.casenotes.events.AdditionalInformation
+import uk.gov.justice.hmpps.casenotes.events.DomainEvent
+import uk.gov.justice.hmpps.casenotes.events.PersonReference
 import uk.gov.justice.hmpps.casenotes.notes.CaseNote
 import uk.gov.justice.hmpps.sqs.HmppsQueueService
 import uk.gov.justice.hmpps.sqs.HmppsTopic
 import uk.gov.justice.hmpps.sqs.publish
 import java.net.URI
-import java.time.LocalDateTime
 
 interface CaseNoteEventPusher {
   fun sendEvent(caseNote: CaseNote)
@@ -24,7 +27,7 @@ interface CaseNoteEventPusher {
 class CaseNoteAwsEventPusher(
   private val hmppsQueueService: HmppsQueueService,
   private val jsonMapper: JsonMapper,
-  @param:Value("\${service.base-url}") private val serviceBaseUrl: String,
+  @param:Value($$"${service.base-url}") private val serviceBaseUrl: String,
 ) : CaseNoteEventPusher {
   companion object {
     val log: Logger = LoggerFactory.getLogger(this::class.java)
@@ -34,7 +37,7 @@ class CaseNoteAwsEventPusher(
 
   override fun sendEvent(caseNote: CaseNote) {
     if (isSensitiveCaseNote(caseNote.id)) {
-      val cne = HmppsDomainEvent(caseNote, serviceBaseUrl)
+      val cne = buildDomainEvent(caseNote, serviceBaseUrl)
       log.info("Pushing case note {} to event topic with event type of {}", caseNote.id, cne.eventType)
       try {
         val publishResponse = eventTopic.publish(
@@ -56,29 +59,20 @@ class CaseNoteAwsEventPusher(
   }
 }
 
-data class PersonIdentifier(val type: String, val value: String)
-data class PersonReference(val identifiers: List<PersonIdentifier>)
 data class CaseNoteAdditionalInformation(
   val caseNoteId: String,
   val caseNoteType: String,
-)
+) : AdditionalInformation
 
-data class HmppsDomainEvent(
-  val version: Int = 1,
-  val eventType: String = "prison.case-note.published",
-  val description: String = "A prison case note has been created or amended",
-  val detailUrl: String,
-  val occurredAt: LocalDateTime,
-  val personReference: PersonReference,
-  val additionalInformation: CaseNoteAdditionalInformation,
-) {
-  constructor(caseNote: CaseNote, baseUrl: String) : this(
-    detailUrl = URI.create("$baseUrl/case-notes/${caseNote.personIdentifier}/${caseNote.id}").toString(),
-    occurredAt = caseNote.createdAt,
-    personReference = PersonReference(identifiers = listOf(PersonIdentifier("NOMS", caseNote.personIdentifier))),
-    additionalInformation = CaseNoteAdditionalInformation(
-      caseNoteId = caseNote.id,
-      caseNoteType = "${caseNote.type}-${caseNote.subType}",
-    ),
-  )
-}
+private fun buildDomainEvent(caseNote: CaseNote, baseUrl: String): DomainEvent<CaseNoteAdditionalInformation> = DomainEvent(
+  version = 1,
+  eventType = "prison.case-note.published",
+  description = "A prison case note has been created or amended",
+  detailUrl = URI.create("$baseUrl/case-notes/${caseNote.personIdentifier}/${caseNote.id}").toString(),
+  occurredAt = caseNote.createdAt.atZone(EuropeLondon),
+  personReference = PersonReference.withIdentifier(caseNote.personIdentifier),
+  additionalInformation = CaseNoteAdditionalInformation(
+    caseNoteId = caseNote.id,
+    caseNoteType = "${caseNote.type}-${caseNote.subType}",
+  ),
+)

@@ -1,14 +1,11 @@
 package uk.gov.justice.hmpps.casenotes.controllers
 
 import org.assertj.core.api.Assertions.assertThat
-import org.awaitility.kotlin.await
-import org.awaitility.kotlin.matches
-import org.awaitility.kotlin.untilCallTo
-import org.awaitility.kotlin.withPollDelay
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.ValueSource
 import org.springframework.http.HttpStatus
-import uk.gov.justice.hmpps.casenotes.config.CaseloadIdHeader
 import uk.gov.justice.hmpps.casenotes.config.SecurityUserContext
 import uk.gov.justice.hmpps.casenotes.config.Source
 import uk.gov.justice.hmpps.casenotes.domain.System
@@ -19,7 +16,6 @@ import uk.gov.justice.hmpps.casenotes.notes.CaseNote
 import uk.gov.justice.hmpps.casenotes.utils.NomisIdGenerator.newId
 import uk.gov.justice.hmpps.casenotes.utils.NomisIdGenerator.personIdentifier
 import uk.gov.justice.hmpps.casenotes.utils.verifyAgainst
-import java.time.Duration.ofSeconds
 import java.util.UUID.randomUUID
 
 class CreateAmendmentIntTest : IntegrationTest() {
@@ -53,7 +49,7 @@ class CreateAmendmentIntTest : IntegrationTest() {
   }
 
   @Test
-  fun `cannot amend a sync to nomis case note with non nomis user`() {
+  fun `cannot amend a sync to NOMIS case note with non NOMIS user`() {
     val username = "DeliusUser"
     manageUsersApi.stubGetUserDetails(username, nomisUser = false)
     val type = getAllTypes().first { it.syncToNomis }
@@ -88,9 +84,11 @@ class CreateAmendmentIntTest : IntegrationTest() {
     }
   }
 
-  @Test
-  fun `can amend a case note with write role`() {
-    val caseNote = givenCaseNote(generateCaseNote(personIdentifier()))
+  @ParameterizedTest(name = "can amend a case note with write role for type that syncs to NOMIS: {0}")
+  @ValueSource(booleans = [true, false])
+  fun `can amend a case note with write role`(syncToNomis: Boolean) {
+    val type = getAllTypes().first { it.syncToNomis == syncToNomis }
+    val caseNote = givenCaseNote(generateCaseNote(personIdentifier(), type = type))
     val request = amendCaseNoteRequest()
     val response = amendCaseNote(caseNote.personIdentifier, caseNote.id.toString(), request).success<CaseNote>()
 
@@ -128,32 +126,6 @@ class CreateAmendmentIntTest : IntegrationTest() {
     hmppsEventsQueue.receivePersonCaseNoteEvent().verifyAgainst(PersonCaseNoteEvent.Type.UPDATED, Source.DPS, saved)
   }
 
-  @Test
-  fun `can amend a case note without caseload id when not sync to nomis`() {
-    val type = getAllTypes().first { !it.syncToNomis }
-    val caseNote = givenCaseNote(generateCaseNote(personIdentifier(), type = type))
-    val request = amendCaseNoteRequest()
-    val response = amendCaseNote(caseNote.personIdentifier, caseNote.id.toString(), request, caseloadId = null)
-      .success<CaseNote>()
-
-    assertThat(response.amendments.size).isEqualTo(1)
-    assertThat(response.amendments.first().additionalNoteText).isEqualTo(request.text)
-
-    val saved = requireNotNull(noteRepository.findByIdAndPersonIdentifier(caseNote.id, response.personIdentifier))
-    assertThat(saved.system).isEqualTo(System.DPS)
-    with(saved.amendments().first()) {
-      assertThat(text).isEqualTo(request.text)
-      assertThat(authorUsername).isEqualTo(USERNAME)
-      assertThat(system).isEqualTo(System.DPS)
-    }
-
-    await withPollDelay ofSeconds(1) untilCallTo { hmppsEventsQueue.countAllMessagesOnQueue() } matches { it == 1 }
-    val event = hmppsEventsQueue.receivePersonCaseNoteEvent()
-    assertThat(event.eventType).isEqualTo("person.case-note.updated")
-    assertThat(event.additionalInformation.source).isEqualTo(Source.DPS)
-    assertThat(event.additionalInformation.syncToNomis).isEqualTo(false)
-  }
-
   private fun amendCaseNoteRequest(
     text: String = "Some amended text about a case note",
   ) = AmendCaseNoteRequest(text)
@@ -165,7 +137,6 @@ class CreateAmendmentIntTest : IntegrationTest() {
     params: Map<String, String> = mapOf("useRestrictedType" to "true"),
     roles: List<String> = listOf(SecurityUserContext.ROLE_CASE_NOTES_WRITE),
     tokenUsername: String = USERNAME,
-    caseloadId: String? = ACTIVE_PRISON,
   ) = webTestClient.put().uri { ub ->
     ub.path(urlToTest())
     params.forEach {
@@ -173,7 +144,6 @@ class CreateAmendmentIntTest : IntegrationTest() {
     }
     ub.build(personIdentifier, caseNoteId)
   }.headers(addBearerAuthorisation(tokenUsername, roles))
-    .addHeader(CaseloadIdHeader.NAME, caseloadId)
     .bodyValue(request)
     .exchange()
 

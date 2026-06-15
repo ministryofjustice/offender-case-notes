@@ -19,37 +19,28 @@ import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.PutMapping
 import org.springframework.web.bind.annotation.RequestBody
-import org.springframework.web.bind.annotation.RequestHeader
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestController
 import uk.gov.justice.hmpps.casenotes.config.ADMIN_ONLY
-import uk.gov.justice.hmpps.casenotes.config.CaseloadIdHeader
 import uk.gov.justice.hmpps.casenotes.config.RO_OPERATIONS
 import uk.gov.justice.hmpps.casenotes.config.RW_OPERATIONS
-import uk.gov.justice.hmpps.casenotes.config.SecurityUserContext
-import uk.gov.justice.hmpps.casenotes.config.SecurityUserContext.Companion.ROLE_CASE_NOTES_SYNC
-import uk.gov.justice.hmpps.casenotes.config.ServiceConfig
 import uk.gov.justice.hmpps.casenotes.config.UsernameHeader
+import uk.gov.justice.hmpps.casenotes.events.pusher.CaseNoteEventPusher
 import uk.gov.justice.hmpps.casenotes.integrations.PrisonerSearchService
-import uk.gov.justice.hmpps.casenotes.legacy.dto.ErrorResponse
-import uk.gov.justice.hmpps.casenotes.legacy.service.CaseNoteEventPusher
-import uk.gov.justice.hmpps.casenotes.legacy.service.CaseNoteService
 import uk.gov.justice.hmpps.casenotes.notes.AmendCaseNoteRequest
 import uk.gov.justice.hmpps.casenotes.notes.CaseNote
 import uk.gov.justice.hmpps.casenotes.notes.CaseNoteFilter
 import uk.gov.justice.hmpps.casenotes.notes.CreateCaseNoteRequest
 import uk.gov.justice.hmpps.casenotes.notes.ReadCaseNote
 import uk.gov.justice.hmpps.casenotes.notes.WriteCaseNote
+import uk.gov.justice.hmpps.casenotes.utils.ErrorResponse
 
 @RestController
 @RequestMapping("case-notes")
 class CaseNoteController(
-  private val serviceConfig: ServiceConfig,
-  private val caseNoteService: CaseNoteService,
   private val find: ReadCaseNote,
   private val save: WriteCaseNote,
-  private val securityUserContext: SecurityUserContext,
   private val caseNoteEventPusher: CaseNoteEventPusher,
   private val search: PrisonerSearchService,
 ) {
@@ -63,19 +54,13 @@ class CaseNoteController(
       content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))],
     ),
   )
-  @CaseloadIdHeader
   @GetMapping("/{personIdentifier}/{caseNoteIdentifier}")
   fun getCaseNote(
     @Parameter(description = "Person Identifier", required = true, example = "A1234AA")
     @PathVariable personIdentifier: String,
     @Parameter(description = "Case Note Id", required = true, example = "518b2200-6489-4c77-8514-10cf80ccd488")
     @PathVariable caseNoteIdentifier: String,
-    @RequestHeader(CaseloadIdHeader.NAME) caseloadId: String? = null,
-  ): CaseNote = if ((serviceConfig.switchesPathFor(caseloadId)) || securityUserContext.hasAnyRole(ROLE_CASE_NOTES_SYNC)) {
-    find.caseNote(personIdentifier.uppercase(), caseNoteIdentifier)
-  } else {
-    caseNoteService.getCaseNote(personIdentifier.uppercase(), caseNoteIdentifier)
-  }
+  ): CaseNote = find.caseNote(personIdentifier.uppercase(), caseNoteIdentifier)
 
   @Tag(name = RO_OPERATIONS)
   @Operation(
@@ -83,19 +68,13 @@ class CaseNoteController(
     summary = "Please do not use - this has been superseded by search/case-notes/{personIdentifier}",
   )
   @ApiResponses(ApiResponse(responseCode = "200", description = "OK"))
-  @CaseloadIdHeader
   @GetMapping("/{personIdentifier}")
   fun getCaseNotes(
     @Parameter(description = "Person Identifier", required = true, example = "A1234AA")
     @PathVariable personIdentifier: String,
     @Parameter(description = "Optionally specify a case note filter") filter: CaseNoteFilter,
     @PageableDefault(sort = ["occurrenceDateTime"], direction = Sort.Direction.DESC) pageable: Pageable,
-    @RequestHeader(CaseloadIdHeader.NAME) caseloadId: String? = null,
-  ): Page<CaseNote> = if (serviceConfig.switchesPathFor(caseloadId)) {
-    find.caseNotes(personIdentifier.uppercase(), filter, pageable)
-  } else {
-    caseNoteService.getCaseNotes(personIdentifier.uppercase(), filter, pageable)
-  }
+  ): Page<CaseNote> = find.caseNotes(personIdentifier.uppercase(), filter, pageable)
 
   @Tag(name = RW_OPERATIONS)
   @Operation(
@@ -123,7 +102,6 @@ class CaseNoteController(
       ),
     ],
   )
-  @CaseloadIdHeader
   @UsernameHeader
   @ResponseStatus(HttpStatus.CREATED)
   @PostMapping("/{personIdentifier}")
@@ -131,18 +109,13 @@ class CaseNoteController(
     @Parameter(description = "Person Identifier", required = true, example = "A1234AA")
     @PathVariable personIdentifier: String,
     @Valid @RequestBody createCaseNote: CreateCaseNoteRequest,
-    @RequestHeader(required = false, value = CaseloadIdHeader.NAME) caseloadId: String? = null,
   ): CaseNote {
     val request = if (createCaseNote.locationId == null) {
       createCaseNote.copy(locationId = search.getPrisonerDetails(personIdentifier.uppercase()).prisonId)
     } else {
       createCaseNote
     }
-    val caseNote = if (serviceConfig.switchesPathFor(caseloadId)) {
-      save.createNote(personIdentifier.uppercase(), request)
-    } else {
-      caseNoteService.createCaseNote(personIdentifier.uppercase(), request)
-    }
+    val caseNote = save.createNote(personIdentifier.uppercase(), request)
     caseNoteEventPusher.sendEvent(caseNote)
     return caseNote
   }
@@ -165,7 +138,6 @@ class CaseNoteController(
       ),
     ],
   )
-  @CaseloadIdHeader
   @UsernameHeader
   @PutMapping("/{personIdentifier}/{caseNoteIdentifier}")
   fun amendCaseNote(
@@ -174,13 +146,8 @@ class CaseNoteController(
     @Parameter(description = "Case Note Id", required = true, example = "518b2200-6489-4c77-8514-10cf80ccd488")
     @PathVariable caseNoteIdentifier: String,
     @Valid @RequestBody amendedText: AmendCaseNoteRequest,
-    @RequestHeader(required = false, value = CaseloadIdHeader.NAME) caseloadId: String? = null,
   ): CaseNote {
-    val caseNote = if (serviceConfig.switchesPathFor(caseloadId)) {
-      save.createAmendment(personIdentifier.uppercase(), caseNoteIdentifier, amendedText)
-    } else {
-      caseNoteService.amendCaseNote(personIdentifier.uppercase(), caseNoteIdentifier, amendedText)
-    }
+    val caseNote = save.createAmendment(personIdentifier.uppercase(), caseNoteIdentifier, amendedText)
     caseNoteEventPusher.sendEvent(caseNote)
     return caseNote
   }
