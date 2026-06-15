@@ -103,4 +103,4 @@ jobs:
       - name: Link workflow summary to report
         shell: bash
         run: |
-          echo '[SchemaSpy report](https://ministryofjustice.github.io/offender-case-notes/schema-spy-report/)' >> $GITHUB_STEP_SUMMARY
+          echo '[SchemaSpy report](https://ministryofjustice.github.io/offender-case-notes/)' >> $GITHUB_STEP_SUMMARY
