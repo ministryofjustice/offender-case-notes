@@ -71,7 +71,7 @@ jobs:
       sign_image: true
   schema_spy:
     name: Schema Spy Report
-    if: github.ref == 'refs/heads/main'
+    if: github.ref == 'refs/heads/main' || github.ref == 'reds/heads/CDPS-1961'
     needs:
       - gradle-verify
     uses: ./.github/workflows/schema-spy.yml
