@@ -13,7 +13,7 @@ services:
       - POSTGRES_PASSWORD=notes
 
   localstack:
-    image: localstack/localstack:2026.5.3
+    image: localstack/localstack:2026.5.4
     networks:
       - hmpps
     container_name: localstack
