@@ -108,5 +108,5 @@ springdoc:
 hmpps:
   sar:
     template:
-      path: /sar/templates/V1__sar_template.mustache
+      path: /sar/templates/V2__sar_template.mustache
       enabled: true
