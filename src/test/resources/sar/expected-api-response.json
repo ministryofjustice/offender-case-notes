@@ -3,15 +3,17 @@
     "creationDateTime": "2025-04-22T13:17:53",
     "type": "POM Activity",
     "subType": "General POM Note",
-    "text": "Notes about something that happened after lunch",
+    "text": "Notes about something that happened the day before",
     "authorUsername": "POM1",
     "amendments": [
       {
-        "creationDateTime": "2025-04-22T13:17:53",
-        "additionalNoteText": "Specifically, at about 1.17 pm",
+        "creationDateTime": "2025-04-23T14:17:53",
+        "additionalNoteText": "An amendment about what happened.",
         "authorUsername": "POM2"
       }
-    ]
+    ],
+    "location": "LEI",
+    "occurredAt": "2025-04-21T12:07:53"
   },
   {
     "creationDateTime": "2025-04-20T08:32:06",
@@ -19,20 +21,24 @@
     "subType": "General OMIC Note",
     "text": "OMIC notes\nWith my comments",
     "authorUsername": "OMIC1",
-    "amendments": []
+    "amendments": [],
+    "location": "LEI",
+    "occurredAt": "2025-04-20T03:32:06"
   },
   {
     "creationDateTime": "2025-01-13T18:24:32",
-    "type": "OMiC",
-    "subType": "Open Case Note",
-    "text": "Notes from a meeting",
-    "authorUsername": "OMIC2",
+    "type": "NOMIS synced case notes",
+    "subType": "Case note that is synced to NOMIS",
+    "text": "A note that is sync'd to NOMIS",
+    "authorUsername": "NOMIS_SYNC",
     "amendments": [
       {
         "creationDateTime": "2025-01-13T18:24:32",
         "additionalNoteText": "That’s not quite right",
-        "authorUsername": "OMIC3"
+        "authorUsername": "NOMIS_SYNC_2"
       }
-    ]
+    ],
+    "location": "LEI",
+    "occurredAt": "2025-01-13T17:24:32"
   }
 ]
