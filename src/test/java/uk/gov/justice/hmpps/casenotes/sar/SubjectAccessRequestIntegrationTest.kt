@@ -86,17 +86,17 @@ class SubjectAccessRequestIntegrationTest :
       generateCaseNote(
         personIdentifier = samplePrisonerNumber,
         type = types.find { it.type.code == "POM" && it.code == "GEN" }!!,
-        text = "Notes about something that happened after lunch",
+        text = "Notes about something that happened the day before",
         authorUsername = "POM1",
         authorUserId = "3124",
         legacyId = 104,
-        occurredAt = date.minusHours(1),
+        occurredAt = date.minusDays(1).minusHours(1).minusMinutes(10),
         createdAt = date,
         locationId = "LEI",
       ).withAmendment(
-        text = "Specifically, at about 1.17 pm",
+        text = "An amendment about what happened.",
         authorUsername = "POM2",
-        createdAt = date,
+        createdAt = date.plusDays(1).plusHours(1),
       ),
     )
     date = LocalDateTime.parse("2025-04-20T08:32:06")
@@ -108,7 +108,7 @@ class SubjectAccessRequestIntegrationTest :
         authorUsername = "OMIC1",
         authorUserId = "3124",
         legacyId = 103,
-        occurredAt = date.minusHours(1),
+        occurredAt = date.minusHours(5),
         createdAt = date,
         locationId = "LEI",
       ),
@@ -117,17 +117,17 @@ class SubjectAccessRequestIntegrationTest :
     noteRepository.findByLegacyId(102) ?: givenCaseNote(
       generateCaseNote(
         personIdentifier = samplePrisonerNumber,
-        type = types.find { it.type.code == "OMIC" && it.code == "OMIC_OPEN" }!!,
-        text = "Notes from a meeting",
-        authorUsername = "OMIC2",
-        authorUserId = "3129",
+        type = types.find { it.type.code == "NOMIS_SYNC" && it.code == "SYNC" }!!,
+        text = "A note that is sync'd to NOMIS",
+        authorUsername = "NOMIS_SYNC",
+        authorUserId = "3130",
         legacyId = 102,
         occurredAt = date.minusHours(1),
         createdAt = date,
         locationId = "LEI",
       ).withAmendment(
         text = "That’s not quite right",
-        authorUsername = "OMIC3",
+        authorUsername = "NOMIS_SYNC_2",
         createdAt = date,
       ),
     )
