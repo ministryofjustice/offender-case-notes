@@ -18,11 +18,11 @@ on:
         type: boolean
 
 permissions:
-  contents: write
+  contents: read
   packages: write
+  pages: write
   id-token: write
   attestations: write
-  pages: write
 
 concurrency:
   # Only cancel in progress when on a branch - use SHA on main to ensure uniqueness.
@@ -53,6 +53,19 @@ jobs:
       postgres-db: 'case_notes'
       postgres-username: 'case'
       postgres-password: 'notes'
+  schema-spy:
+    name: SchemaSpy report
+    if: github.ref == 'refs/heads/main'
+    needs:
+      - gradle-verify
+    uses: ./.github/workflows/schema-spy.yml
+    with:
+      docker_compose_file: 'docker-compose-schema-spy.yml'
+      init_db_cli: './gradlew initialiseDatabase'
+      database_name: 'case_notes'
+      database_user: 'case'
+      database_password: 'notes'
+    secrets: inherit
   build:
     name: Build docker image from hmpps-github-actions
     if: github.ref == 'refs/heads/main'
@@ -69,20 +82,6 @@ jobs:
       generate_sbom: true
       attach_sbom_to_registry: true
       sign_image: true
-  schema_spy:
-    name: Schema Spy Report
-    if: github.ref == 'refs/heads/main'
-    needs:
-      - gradle-verify
-    uses: ./.github/workflows/schema-spy.yml
-    with:
-      docker_compose_file: 'docker-compose-schema-spy.yml'
-      init_db_cli: './gradlew initialiseDatabase'
-      database_name: 'case_notes'
-      database_schema: 'public'
-      database_user: 'case'
-      database_password: 'notes'
-    secrets: inherit
   deploy_dev:
     name: Deploy to the dev environment
     if: github.ref == 'refs/heads/main'

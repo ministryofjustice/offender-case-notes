@@ -6,8 +6,7 @@
 [![codecov](https://codecov.io/github/ministryofjustice/offender-case-notes/graph/badge.svg?token=EQ8ADME9KY)](https://codecov.io/github/ministryofjustice/offender-case-notes)
 [![API docs](https://img.shields.io/badge/API_docs_(needs_VPN)-view-85EA2D.svg?logo=swagger)](https://dev.offender-case-notes.service.justice.gov.uk/swagger-ui/index.html?configUrl=/v3/api-docs)
 [![Event docs](https://img.shields.io/badge/Event_docs-view-85EA2D.svg)](https://studio.asyncapi.com/?url=https://raw.githubusercontent.com/ministryofjustice/offender-case-notes/main/async-api.yml&readOnly)
-
-Datebase Schema diagram: https://ministryofjustice.github.io/offender-case-notes/
+[![Database schema](https://img.shields.io/badge/Database_schema-view-85EA2D.svg)](https://ministryofjustice.github.io/offender-case-notes/)
 
 Service to provide secure access to retrieving and storing case notes about offenders
 

@@ -12,13 +12,13 @@ on:
         type: string
         default: '-Xmx512m -XX:ParallelGCThreads=2 -XX:ConcGCThreads=2 -Djava.util.concurrent.ForkJoinPool.common.parallelism=2 -Dorg.gradle.daemon=false -Dkotlin.compiler.execution.strategy=in-process'
       schemaspy_version:
-        description: Schema Spy version
+        description: SchemaSpy version
         type: string
         default: '7.0.2'
       postgres_driver_version:
         description: Postgres version
         type: string
-        default: '42.7.8'
+        default: '42.7.13'
       exclude:
         description: Regex of tables to be excluded
         type: string
@@ -46,10 +46,11 @@ on:
       database_schema:
         description: Database schema name
         type: string
-        required: true
+        default: public
+
 jobs:
   schema-spy:
-    name: Schema Spy report generation
+    name: Generate SchemaSpy report
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -59,7 +60,7 @@ jobs:
     steps:
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
 
-      - name: refresh cache
+      - name: Refresh cache
         id: initial-cache
         uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         env:
@@ -79,7 +80,7 @@ jobs:
             *.gradle*
             **/gradle-wrapper.properties
 
-      - name: Initialise database and generate Schema Spy report
+      - name: Initialise database and generate SchemaSpy report
         shell: bash
         run: |
           docker compose -f docker-compose.yml -f ${{ inputs.docker_compose_file }} up -d
@@ -87,7 +88,7 @@ jobs:
           curl -L https://jdbc.postgresql.org/download/postgresql-${{ inputs.postgres_driver_version }}.jar --output /tmp/postgres-driver.jar
           export JAVA_OPTS="${{ inputs.java_options }}"
           ${{ inputs.init_db_cli }}
-          java -jar /tmp/schemaspy.jar -t pgsql -dp /tmp/postgres-driver.jar -db ${{ inputs.database_name }} -host localhost -port 5432 -s ${{ inputs.database_schema }} -vizjs -u ${{ inputs.database_user }} -p ${{ inputs.database_password }} -I ${{ inputs.exclude }} -o /tmp/schema-spy-report
+          java -jar /tmp/schemaspy.jar -t pgsql -dp /tmp/postgres-driver.jar -db ${{ inputs.database_name }} -host localhost -port 5432 -s ${{ inputs.database_schema }} -vizjs -u ${{ inputs.database_user }} -p ${{ inputs.database_password }} -I ${{ inputs.exclude }} -norows -o /tmp/schema-spy-report
 
       - name: Setup GitHub Pages
         uses: actions/configure-pages@45bfe0192ca1faeb007ade9deae92b16b8254a0d # v6.0.0
@@ -103,4 +104,4 @@ jobs:
       - name: Link workflow summary to report
         shell: bash
         run: |
-          echo '[SchemaSpy report](https://ministryofjustice.github.io/offender-case-notes/)' >> $GITHUB_STEP_SUMMARY
+          echo '[SchemaSpy report]('https://$GITHUB_REPOSITORY_OWNER.github.io/$(basename $GITHUB_REPOSITORY)'/)' >> $GITHUB_STEP_SUMMARY
