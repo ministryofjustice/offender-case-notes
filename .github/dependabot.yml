@@ -44,6 +44,10 @@ updates:
       - "*"
     cooldown:
       default-days: 7
+    ignore:
+      - dependency-name: "localstack/localstack"
+        versions:
+          - ">4"
   - package-ecosystem: "github-actions"
     multi-ecosystem-group: "infrastructure"
     directory: "/"
