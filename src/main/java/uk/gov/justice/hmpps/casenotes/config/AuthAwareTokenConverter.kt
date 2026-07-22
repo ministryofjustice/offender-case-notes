@@ -22,5 +22,5 @@ class AuthAwareTokenConverter : Converter<Jwt, AbstractAuthenticationToken> {
 
 class AuthAwareAuthenticationToken(jwt: Jwt, userId: String, authorities: Collection<GrantedAuthority>) : JwtAuthenticationToken(jwt, authorities) {
 
-  val userIdUser: UserIdUser = UserIdUser(jwt.subject!!, userId)
+  val userIdUser: UserIdUser = UserIdUser(jwt.subject, userId)
 }
