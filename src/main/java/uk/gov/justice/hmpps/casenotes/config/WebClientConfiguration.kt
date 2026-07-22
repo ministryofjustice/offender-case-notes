@@ -38,20 +38,16 @@ class WebClientConfiguration(
   fun tokenVerificationApiHealthWebClient(builder: Builder): WebClient = builder.healthWebClient(tokenVerificationApiBaseUrl, healthTimeout)
 
   @Bean
-  fun prisonApiWebClient(authorizedClientManager: OAuth2AuthorizedClientManager, builder: Builder): WebClient =
-    builder.authorisedWebClient(authorizedClientManager, "default", prisonApiBaseUrl, responseTimeout)
+  fun prisonApiWebClient(authorizedClientManager: OAuth2AuthorizedClientManager, builder: Builder): WebClient = builder.authorisedWebClient(authorizedClientManager, "default", prisonApiBaseUrl, responseTimeout)
 
   @Bean
-  fun prisonerSearchWebClient(authorizedClientManager: OAuth2AuthorizedClientManager, builder: Builder): WebClient =
-    builder.authorisedWebClient(authorizedClientManager, "default", prisonerSearchApiBaseUrl, responseTimeout)
+  fun prisonerSearchWebClient(authorizedClientManager: OAuth2AuthorizedClientManager, builder: Builder): WebClient = builder.authorisedWebClient(authorizedClientManager, "default", prisonerSearchApiBaseUrl, responseTimeout)
 
   @Bean
-  fun manageUsersWebClient(authorizedClientManager: OAuth2AuthorizedClientManager, builder: Builder): WebClient =
-    builder.authorisedWebClient(authorizedClientManager, "default", manageUsersApiBaseUrl, responseTimeout)
+  fun manageUsersWebClient(authorizedClientManager: OAuth2AuthorizedClientManager, builder: Builder): WebClient = builder.authorisedWebClient(authorizedClientManager, "default", manageUsersApiBaseUrl, responseTimeout)
 
   @Bean
-  fun alertsWebClient(authorizedClientManager: OAuth2AuthorizedClientManager, builder: Builder): WebClient =
-    builder.authorisedWebClient(authorizedClientManager, "default", alertsApiBaseUrl, responseTimeout)
+  fun alertsWebClient(authorizedClientManager: OAuth2AuthorizedClientManager, builder: Builder): WebClient = builder.authorisedWebClient(authorizedClientManager, "default", alertsApiBaseUrl, responseTimeout)
 
   @Bean
   fun tokenVerificationApiWebClient(builder: Builder): WebClient = builder.baseUrl(tokenVerificationApiBaseUrl).build()
