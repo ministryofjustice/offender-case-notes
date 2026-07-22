@@ -26,6 +26,7 @@ import org.springframework.web.reactive.function.client.WebClient.Builder
 import reactor.netty.http.client.HttpClient
 import reactor.netty.http.client.HttpClient.create
 import uk.gov.justice.hmpps.casenotes.utils.UserContext
+import uk.gov.justice.hmpps.kotlin.auth.ServletRequestResponseNonNullFilterFunction
 import uk.gov.justice.hmpps.kotlin.auth.service.GlobalPrincipalOAuth2AuthorizedClientService
 import java.time.Duration
 import java.time.Duration.ofSeconds
@@ -93,8 +94,8 @@ class WebClientConfiguration(
 
   @Bean
   fun authorizedClientManagerAppScope(
-    clientRegistrationRepository: ClientRegistrationRepository?,
-    @Qualifier("globalOAuth2AuthorizedClientService") clientService: GlobalPrincipalOAuth2AuthorizedClientService?,
+    clientRegistrationRepository: ClientRegistrationRepository,
+    @Qualifier("globalOAuth2AuthorizedClientService") clientService: GlobalPrincipalOAuth2AuthorizedClientService,
   ): OAuth2AuthorizedClientManager {
     val authorizedClientProvider = OAuth2AuthorizedClientProviderBuilder.builder().clientCredentials().build()
     val authorizedClientManager = AuthorizedClientServiceOAuth2AuthorizedClientManager(
@@ -138,6 +139,7 @@ class WebClientConfiguration(
     oauth2Client.setDefaultClientRegistrationId("default")
     return builder.baseUrl(rootUri)
       .clientConnector(clientConnector())
+      .filter(ServletRequestResponseNonNullFilterFunction())
       .apply(oauth2Client.oauth2Configuration())
       .build()
   }
