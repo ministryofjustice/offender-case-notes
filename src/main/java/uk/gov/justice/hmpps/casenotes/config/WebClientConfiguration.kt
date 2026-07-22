@@ -1,35 +1,15 @@
 package uk.gov.justice.hmpps.casenotes.config
 
-import io.netty.channel.ChannelOption.CONNECT_TIMEOUT_MILLIS
-import io.netty.channel.ChannelOption.SO_KEEPALIVE
-import io.netty.channel.epoll.EpollChannelOption
-import io.netty.handler.timeout.ReadTimeoutHandler
-import io.netty.handler.timeout.WriteTimeoutHandler
 import org.hibernate.validator.constraints.URL
-import org.slf4j.LoggerFactory
-import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
-import org.springframework.http.HttpHeaders
-import org.springframework.http.client.reactive.ReactorClientHttpConnector
-import org.springframework.security.oauth2.client.AuthorizedClientServiceOAuth2AuthorizedClientManager
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClientManager
-import org.springframework.security.oauth2.client.OAuth2AuthorizedClientProviderBuilder
-import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository
-import org.springframework.security.oauth2.client.web.reactive.function.client.ServletOAuth2AuthorizedClientExchangeFilterFunction
-import org.springframework.web.reactive.function.client.ClientRequest
-import org.springframework.web.reactive.function.client.ExchangeFilterFunction
-import org.springframework.web.reactive.function.client.ExchangeFunction
 import org.springframework.web.reactive.function.client.WebClient
 import org.springframework.web.reactive.function.client.WebClient.Builder
-import reactor.netty.http.client.HttpClient
-import reactor.netty.http.client.HttpClient.create
-import uk.gov.justice.hmpps.casenotes.utils.UserContext
-import uk.gov.justice.hmpps.kotlin.auth.ServletRequestResponseNonNullFilterFunction
-import uk.gov.justice.hmpps.kotlin.auth.service.GlobalPrincipalOAuth2AuthorizedClientService
+import uk.gov.justice.hmpps.kotlin.auth.authorisedWebClient
+import uk.gov.justice.hmpps.kotlin.auth.healthWebClient
 import java.time.Duration
-import java.time.Duration.ofSeconds
 
 @Configuration
 class WebClientConfiguration(
@@ -43,131 +23,36 @@ class WebClientConfiguration(
   @param:Value($$"${api.response-timeout:2s}") private val responseTimeout: Duration,
 ) {
   @Bean
-  fun prisonApiHealthWebClient(builder: Builder): WebClient = createHealthClient(builder, prisonApiBaseUrl)
+  fun prisonApiHealthWebClient(builder: Builder): WebClient = builder.healthWebClient(prisonApiBaseUrl, healthTimeout)
 
   @Bean
-  fun oauthApiWebClient(builder: Builder): WebClient = createForwardAuthWebClient(builder, oauthApiBaseUrl)
+  fun oauthApiHealthWebClient(builder: Builder): WebClient = builder.healthWebClient(oauthApiBaseUrl, healthTimeout)
 
   @Bean
-  fun oauthApiHealthWebClient(builder: Builder): WebClient = createHealthClient(builder, oauthApiBaseUrl)
+  fun prisonerSearchApiHealthWebClient(builder: Builder): WebClient = builder.healthWebClient(prisonerSearchApiBaseUrl, healthTimeout)
 
   @Bean
-  fun prisonerSearchApiHealthWebClient(builder: Builder): WebClient = createHealthClient(builder, prisonerSearchApiBaseUrl)
+  fun manageUsersApiHealthWebClient(builder: Builder): WebClient = builder.healthWebClient(manageUsersApiBaseUrl, healthTimeout)
 
   @Bean
-  fun manageUsersApiHealthWebClient(builder: Builder): WebClient = createHealthClient(builder, manageUsersApiBaseUrl)
+  fun tokenVerificationApiHealthWebClient(builder: Builder): WebClient = builder.healthWebClient(tokenVerificationApiBaseUrl, healthTimeout)
 
   @Bean
-  fun tokenVerificationApiWebClient(builder: Builder): WebClient = builder.baseUrl(tokenVerificationApiBaseUrl)
-    .clientConnector(ReactorClientHttpConnector(create().warmupWithHealthPing(tokenVerificationApiBaseUrl))).build()
+  fun prisonApiWebClient(authorizedClientManager: OAuth2AuthorizedClientManager, builder: Builder): WebClient =
+    builder.authorisedWebClient(authorizedClientManager, "default", prisonApiBaseUrl, responseTimeout)
 
   @Bean
-  fun tokenVerificationApiHealthWebClient(builder: Builder): WebClient = createHealthClient(builder, tokenVerificationApiBaseUrl)
-
-  private fun createForwardAuthWebClient(builder: Builder, url: @URL String): WebClient = builder.baseUrl(url)
-    .filter(addAuthHeaderFilterFunction())
-    .clientConnector(clientConnector { it.warmupWithHealthPing(tokenVerificationApiBaseUrl) }).build()
-
-  private fun createHealthClient(builder: Builder, url: @URL String): WebClient {
-    val httpClient = create()
-      .warmupWithHealthPing(url)
-      .option(CONNECT_TIMEOUT_MILLIS, healthTimeout.toMillis().toInt())
-      .doOnConnected { connection ->
-        connection.addHandlerLast(ReadTimeoutHandler(healthTimeout.toSeconds().toInt()))
-          .addHandlerLast(WriteTimeoutHandler(healthTimeout.toSeconds().toInt()))
-      }
-    return builder.clientConnector(ReactorClientHttpConnector(httpClient)).baseUrl(url).build()
-  }
-
-  private fun addAuthHeaderFilterFunction(): ExchangeFilterFunction = ExchangeFilterFunction { request: ClientRequest, next: ExchangeFunction ->
-    val filtered = ClientRequest.from(request)
-      .header(HttpHeaders.AUTHORIZATION, UserContext.getAuthToken())
-      .build()
-    next.exchange(filtered)
-  }
+  fun prisonerSearchWebClient(authorizedClientManager: OAuth2AuthorizedClientManager, builder: Builder): WebClient =
+    builder.authorisedWebClient(authorizedClientManager, "default", prisonerSearchApiBaseUrl, responseTimeout)
 
   @Bean
-  @Qualifier("globalOAuth2AuthorizedClientService")
-  fun globalOAuth2AuthorizedClientService(
-    clientRegistrationRepository: ClientRegistrationRepository,
-  ) = GlobalPrincipalOAuth2AuthorizedClientService(clientRegistrationRepository)
+  fun manageUsersWebClient(authorizedClientManager: OAuth2AuthorizedClientManager, builder: Builder): WebClient =
+    builder.authorisedWebClient(authorizedClientManager, "default", manageUsersApiBaseUrl, responseTimeout)
 
   @Bean
-  fun authorizedClientManagerAppScope(
-    clientRegistrationRepository: ClientRegistrationRepository,
-    @Qualifier("globalOAuth2AuthorizedClientService") clientService: GlobalPrincipalOAuth2AuthorizedClientService,
-  ): OAuth2AuthorizedClientManager {
-    val authorizedClientProvider = OAuth2AuthorizedClientProviderBuilder.builder().clientCredentials().build()
-    val authorizedClientManager = AuthorizedClientServiceOAuth2AuthorizedClientManager(
-      clientRegistrationRepository,
-      clientService,
-    )
-    authorizedClientManager.setAuthorizedClientProvider(authorizedClientProvider)
-    return authorizedClientManager
-  }
+  fun alertsWebClient(authorizedClientManager: OAuth2AuthorizedClientManager, builder: Builder): WebClient =
+    builder.authorisedWebClient(authorizedClientManager, "default", alertsApiBaseUrl, responseTimeout)
 
   @Bean
-  fun prisonApiWebClient(
-    @Qualifier(value = "authorizedClientManagerAppScope") authorizedClientManager: OAuth2AuthorizedClientManager,
-    builder: Builder,
-  ): WebClient = getOAuthWebClient(authorizedClientManager, builder, prisonApiBaseUrl)
-
-  @Bean
-  fun prisonerSearchWebClient(
-    @Qualifier(value = "authorizedClientManagerAppScope") authorizedClientManager: OAuth2AuthorizedClientManager,
-    builder: Builder,
-  ): WebClient = getOAuthWebClient(authorizedClientManager, builder, prisonerSearchApiBaseUrl)
-
-  @Bean
-  fun manageUsersWebClient(
-    @Qualifier(value = "authorizedClientManagerAppScope") authorizedClientManager: OAuth2AuthorizedClientManager,
-    builder: Builder,
-  ): WebClient = getOAuthWebClient(authorizedClientManager, builder, manageUsersApiBaseUrl)
-
-  @Bean
-  fun alertsWebClient(
-    @Qualifier(value = "authorizedClientManagerAppScope") authorizedClientManager: OAuth2AuthorizedClientManager,
-    builder: Builder,
-  ): WebClient = getOAuthWebClient(authorizedClientManager, builder, alertsApiBaseUrl)
-
-  private fun getOAuthWebClient(
-    authorizedClientManager: OAuth2AuthorizedClientManager,
-    builder: Builder,
-    rootUri: String,
-  ): WebClient {
-    val oauth2Client = ServletOAuth2AuthorizedClientExchangeFilterFunction(authorizedClientManager)
-    oauth2Client.setDefaultClientRegistrationId("default")
-    return builder.baseUrl(rootUri)
-      .clientConnector(clientConnector())
-      .filter(ServletRequestResponseNonNullFilterFunction())
-      .apply(oauth2Client.oauth2Configuration())
-      .build()
-  }
-
-  private fun clientConnector(consumer: ((HttpClient) -> Unit)? = null): ReactorClientHttpConnector {
-    val client = create().responseTimeout(ofSeconds(responseTimeout.toSeconds()))
-      .option(CONNECT_TIMEOUT_MILLIS, 1000)
-      .option(SO_KEEPALIVE, true)
-      // this will show a warning on apple (arm) architecture but will work on linux x86 container
-      .option(EpollChannelOption.TCP_KEEPINTVL, 60)
-    consumer?.also { it.invoke(client) }
-    return ReactorClientHttpConnector(client)
-  }
-
-  companion object {
-    private val log = LoggerFactory.getLogger(this::class.java)
-  }
-
-  private fun HttpClient.warmupWithHealthPing(baseUrl: String): HttpClient {
-    log.info("Warming up web client for {}", baseUrl)
-    warmup().block()
-    log.info("Warming up web client for {} halfway through, now calling health ping", baseUrl)
-    try {
-      baseUrl("$baseUrl/health/ping").get().response().block(ofSeconds(30))
-    } catch (e: RuntimeException) {
-      log.error("Caught exception during warm up, carrying on regardless", e)
-    }
-    log.info("Warming up web client completed for {}", baseUrl)
-    return this
-  }
+  fun tokenVerificationApiWebClient(builder: Builder): WebClient = builder.baseUrl(tokenVerificationApiBaseUrl).build()
 }
