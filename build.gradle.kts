@@ -23,7 +23,7 @@ dependencies {
 
   runtimeOnly("org.flywaydb:flyway-core")
   runtimeOnly("org.flywaydb:flyway-database-postgresql")
-  runtimeOnly("org.postgresql:postgresql:42.7.13")
+  runtimeOnly("org.postgresql:postgresql")
 
   implementation("uk.gov.justice.service.hmpps:hmpps-kotlin-spring-boot-autoconfigure:3.0.0")
   implementation("uk.gov.justice.service.hmpps:hmpps-kotlin-spring-boot-starter:3.0.0")
@@ -56,7 +56,7 @@ dependencies {
   implementation("com.google.guava:guava:33.6.0-jre")
 
   implementation(platform("com.amazonaws:aws-java-sdk-bom:1.12.797"))
-  implementation("software.amazon.awssdk:sns:2.48.3")
+  implementation("software.amazon.awssdk:sns:2.49.0")
 
   testAnnotationProcessor("org.projectlombok:lombok:1.18.46")
   testCompileOnly("org.projectlombok:lombok:1.18.46")
