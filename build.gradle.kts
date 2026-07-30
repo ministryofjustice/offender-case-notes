@@ -3,7 +3,7 @@
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
-  id("uk.gov.justice.hmpps.gradle-spring-boot") version "11.0.1"
+  id("uk.gov.justice.hmpps.gradle-spring-boot") version "11.0.2"
   kotlin("plugin.spring") version "2.4.10"
   kotlin("plugin.jpa") version "2.4.10"
   id("io.gatling.gradle") version "3.15.1.1"
@@ -40,7 +40,7 @@ dependencies {
   implementation("org.springframework.boot:spring-boot-starter-webclient")
   implementation("org.springframework.boot:spring-boot-starter-webflux")
 
-  implementation("io.sentry:sentry-spring-boot-4:8.49.0")
+  implementation("io.sentry:sentry-spring-boot-4:8.50.0")
 
   implementation("javax.activation:activation:1.1.1")
   implementation("javax.transaction:javax.transaction-api:1.3")
@@ -56,7 +56,7 @@ dependencies {
   implementation("com.google.guava:guava:33.6.0-jre")
 
   implementation(platform("com.amazonaws:aws-java-sdk-bom:1.12.797"))
-  implementation("software.amazon.awssdk:sns:2.49.0")
+  implementation("software.amazon.awssdk:sns:2.49.1")
 
   testAnnotationProcessor("org.projectlombok:lombok:1.18.46")
   testCompileOnly("org.projectlombok:lombok:1.18.46")
