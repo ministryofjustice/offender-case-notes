@@ -3,10 +3,10 @@
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
-  id("uk.gov.justice.hmpps.gradle-spring-boot") version "11.0.1"
+  id("uk.gov.justice.hmpps.gradle-spring-boot") version "11.0.2"
   kotlin("plugin.spring") version "2.4.10"
   kotlin("plugin.jpa") version "2.4.10"
-  id("io.gatling.gradle") version "3.15.1.1"
+  id("io.gatling.gradle") version "3.15.1.2"
   jacoco
 }
 
@@ -40,7 +40,7 @@ dependencies {
   implementation("org.springframework.boot:spring-boot-starter-webclient")
   implementation("org.springframework.boot:spring-boot-starter-webflux")
 
-  implementation("io.sentry:sentry-spring-boot-4:8.49.0")
+  implementation("io.sentry:sentry-spring-boot-4:8.51.0")
 
   implementation("javax.activation:activation:1.1.1")
   implementation("javax.transaction:javax.transaction-api:1.3")
@@ -56,12 +56,12 @@ dependencies {
   implementation("com.google.guava:guava:33.6.0-jre")
 
   implementation(platform("com.amazonaws:aws-java-sdk-bom:1.12.797"))
-  implementation("software.amazon.awssdk:sns:2.49.0")
+  implementation("software.amazon.awssdk:sns:2.50.1")
 
   testAnnotationProcessor("org.projectlombok:lombok:1.18.46")
   testCompileOnly("org.projectlombok:lombok:1.18.46")
   testImplementation("uk.gov.justice.service.hmpps:hmpps-kotlin-spring-boot-starter-test:3.0.0")
-  testImplementation("uk.gov.justice.service.hmpps:hmpps-subject-access-request-test-support:2.6.2")
+  testImplementation("uk.gov.justice.service.hmpps:hmpps-subject-access-request-test-support:2.7.0")
   testImplementation("org.springframework.boot:spring-boot-starter-jackson-test")
   testImplementation("org.springframework.boot:spring-boot-starter-webclient-test")
   testImplementation("org.springframework.boot:spring-boot-webtestclient")
