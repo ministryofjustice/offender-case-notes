@@ -22,4 +22,43 @@
       <packageUrl regex="true">^pkg:maven/xerces/xercesImpl@.*$</packageUrl>
       <vulnerabilityName>CVE-2017-10355</vulnerabilityName>
   </suppress>
+
+  <!-- Gatling, not used on prod or CI -->
+  <suppress>
+      <notes><![CDATA[
+      CVE-2025-51308 affects Gatling not prod or CI code.
+      ]]></notes>
+      <packageUrl regex="true">^pkg:maven/io\.gatling/.*@.*$</packageUrl>
+      <cve>CVE-2025-51308</cve>
+  </suppress>
+  <suppress>
+      <notes><![CDATA[
+      CVE-2025-51306 affects Gatling not prod or CI code.
+      ]]></notes>
+      <packageUrl regex="true">^pkg:maven/io\.gatling/.*@.*$</packageUrl>
+      <cve>CVE-2025-51306</cve>
+  </suppress>
+
+  <!-- Suppress false positives -->
+  <suppress>
+      <notes><![CDATA[
+      CVE-2026-54133 is a jmespath.php PHP vuln, not relevant.
+      ]]></notes>
+      <packageUrl regex="true">^pkg:maven/io\.burt/jmespath-jackson@.*$</packageUrl>
+      <cve>CVE-2026-54133</cve>
+  </suppress>
+  <suppress>
+      <notes><![CDATA[
+      CVE-2022-32511 is a jmespath.rb Ruby vuln, not relevant.
+      ]]></notes>
+      <packageUrl regex="true">^pkg:maven/io\.burt/jmespath-core@.*$</packageUrl>
+      <cve>CVE-2022-32511</cve>
+  </suppress>
+  <suppress>
+      <notes><![CDATA[
+      CVE-2026-54133 is a jmespath.php PHP vuln, not relevant.
+      ]]></notes>
+      <packageUrl regex="true">^pkg:maven/io\.burt/jmespath-core@.*$</packageUrl>
+      <cve>CVE-2026-54133</cve>
+  </suppress>
 </suppressions>
