@@ -3,7 +3,7 @@
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
-  id("uk.gov.justice.hmpps.gradle-spring-boot") version "11.0.2"
+  id("uk.gov.justice.hmpps.gradle-spring-boot") version "11.0.4"
   kotlin("plugin.spring") version "2.4.10"
   kotlin("plugin.jpa") version "2.4.10"
   id("io.gatling.gradle") version "3.15.1.2"
@@ -79,7 +79,7 @@ dependencies {
   testImplementation("org.springframework.security.oauth:spring-security-oauth2:2.5.2.RELEASE")
   testImplementation("org.springframework.security:spring-security-jwt:1.1.1.RELEASE")
   testImplementation("org.mockito.kotlin:mockito-kotlin:6.3.0")
-  testImplementation("io.swagger.parser.v3:swagger-parser-v3:2.1.45")
+  testImplementation("io.swagger.parser.v3:swagger-parser-v3:2.1.46")
 }
 
 kotlin {
