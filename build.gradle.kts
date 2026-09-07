@@ -54,7 +54,7 @@ dependencies {
   implementation("com.google.guava:guava:33.7.1-jre")
 
   implementation(platform("com.amazonaws:aws-java-sdk-bom:1.12.797"))
-  implementation("software.amazon.awssdk:sns:2.54.6")
+  implementation("software.amazon.awssdk:sns:2.54.7")
 
   testAnnotationProcessor("org.projectlombok:lombok:1.18.46")
   testCompileOnly("org.projectlombok:lombok:1.18.46")
@@ -77,7 +77,7 @@ dependencies {
   testImplementation("org.springframework.security.oauth:spring-security-oauth2:2.5.2.RELEASE")
   testImplementation("org.springframework.security:spring-security-jwt:1.1.1.RELEASE")
   testImplementation("org.mockito.kotlin:mockito-kotlin:6.3.0")
-  testImplementation("io.swagger.parser.v3:swagger-parser-v3:2.1.47")
+  testImplementation("io.swagger.parser.v3:swagger-parser-v3:2.1.48")
 }
 
 kotlin {
