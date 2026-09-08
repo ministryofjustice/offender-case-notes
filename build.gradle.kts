@@ -2,8 +2,8 @@
 
 plugins {
   id("uk.gov.justice.hmpps.gradle-spring-boot") version "11.0.8"
-  kotlin("plugin.spring") version "2.4.10"
-  kotlin("plugin.jpa") version "2.4.10"
+  kotlin("plugin.spring") version "2.4.20"
+  kotlin("plugin.jpa") version "2.4.20"
   id("io.gatling.gradle") version "3.15.1.3"
   jacoco
 }
@@ -15,9 +15,9 @@ configurations {
 }
 
 dependencies {
-  annotationProcessor("org.projectlombok:lombok:1.18.46")
+  annotationProcessor("org.projectlombok:lombok:1.18.48")
 
-  compileOnly("org.projectlombok:lombok:1.18.46")
+  compileOnly("org.projectlombok:lombok:1.18.48")
 
   runtimeOnly("org.flywaydb:flyway-core")
   runtimeOnly("org.flywaydb:flyway-database-postgresql")
@@ -38,23 +38,23 @@ dependencies {
   implementation("org.springframework.boot:spring-boot-starter-webclient")
   implementation("org.springframework.boot:spring-boot-starter-webflux")
 
-  implementation("io.sentry:sentry-spring-boot-4:8.54.0")
+  implementation("io.sentry:sentry-spring-boot-4:8.55.0")
 
   implementation("javax.activation:activation:1.1.1")
   implementation("javax.transaction:javax.transaction-api:1.3")
 
   implementation("javax.xml.bind:jaxb-api:2.3.1")
-  implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:3.1.0")
+  implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:3.1.1")
   implementation("org.apache.commons:commons-text:1.15.0")
   implementation("com.fasterxml.uuid:java-uuid-generator:5.2.0")
   implementation("com.pauldijou:jwt-core_2.11:5.0.0")
   implementation("com.google.guava:guava:33.7.1-jre")
 
   implementation(platform("com.amazonaws:aws-java-sdk-bom:1.12.797"))
-  implementation("software.amazon.awssdk:sns:2.54.9")
+  implementation("software.amazon.awssdk:sns:2.54.13")
 
-  testAnnotationProcessor("org.projectlombok:lombok:1.18.46")
-  testCompileOnly("org.projectlombok:lombok:1.18.46")
+  testAnnotationProcessor("org.projectlombok:lombok:1.18.48")
+  testCompileOnly("org.projectlombok:lombok:1.18.48")
   testImplementation("uk.gov.justice.service.hmpps:hmpps-kotlin-spring-boot-starter-test:3.0.1")
   testImplementation("uk.gov.justice.service.hmpps:hmpps-subject-access-request-test-support:2.8.1")
   testImplementation("org.springframework.boot:spring-boot-starter-jackson-test")
