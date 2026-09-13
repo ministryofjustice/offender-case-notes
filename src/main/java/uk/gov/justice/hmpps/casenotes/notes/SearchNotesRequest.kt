@@ -2,8 +2,15 @@ package uk.gov.justice.hmpps.casenotes.notes
 
 import io.swagger.v3.oas.annotations.Parameter
 import io.swagger.v3.oas.annotations.media.Schema
+import jakarta.validation.constraints.NotEmpty
 import uk.gov.justice.hmpps.casenotes.domain.Note
 import java.time.LocalDateTime
+import java.util.UUID
+
+data class SearchNotesByIdsRequest(
+  @NotEmpty
+  val ids: List<UUID>,
+)
 
 data class SearchNotesRequest(
   @Schema(required = false)

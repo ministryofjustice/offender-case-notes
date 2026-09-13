@@ -26,7 +26,7 @@ import uk.gov.justice.hmpps.casenotes.notes.NoteUsageRequest.DateType.CREATED_AT
 import uk.gov.justice.hmpps.casenotes.notes.NoteUsageRequest.DateType.OCCURRED_AT
 import uk.gov.justice.hmpps.casenotes.utils.EntityNotFoundException
 import java.time.temporal.ChronoUnit
-import java.util.UUID.fromString
+import java.util.UUID
 
 @Service
 @Transactional(readOnly = true)
@@ -34,6 +34,10 @@ import java.util.UUID.fromString
 class ReadCaseNote(
   private val noteRepository: NoteRepository,
 ) {
+  fun caseNotesByIds(ids: Collection<UUID>): List<CaseNote> = noteRepository.findAllByIdIn(ids).map {
+    it.toModel()
+  }
+
   fun caseNotes(personIdentifier: String, filter: CaseNoteFilter, pageable: Pageable): Page<CaseNote> {
     val page = noteRepository.findAll(filter.asSpecification(personIdentifier), pageable.forSpecification())
     val records = noteRepository.findAllByIdIn(page.content.map { it.id }).associateBy { it.id }
@@ -42,7 +46,7 @@ class ReadCaseNote(
 
   fun caseNote(personIdentifier: String, caseNoteId: String): CaseNote {
     val caseNote = when (val legacyId = caseNoteId.asLegacyId()) {
-      null -> noteRepository.findByIdAndPersonIdentifier(fromString(caseNoteId), personIdentifier)
+      null -> noteRepository.findByIdAndPersonIdentifier(UUID.fromString(caseNoteId), personIdentifier)
       else -> noteRepository.findByLegacyIdAndPersonIdentifier(legacyId, personIdentifier)
     } ?: throw EntityNotFoundException.withId(caseNoteId)
     return caseNote.toModel()
