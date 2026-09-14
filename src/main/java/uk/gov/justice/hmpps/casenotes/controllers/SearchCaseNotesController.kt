@@ -15,7 +15,9 @@ import org.springframework.web.bind.annotation.RestController
 import uk.gov.justice.hmpps.casenotes.config.RO_OPERATIONS
 import uk.gov.justice.hmpps.casenotes.notes.AuthorIdentifierType
 import uk.gov.justice.hmpps.casenotes.notes.AuthorNotesResponse
+import uk.gov.justice.hmpps.casenotes.notes.CaseNote
 import uk.gov.justice.hmpps.casenotes.notes.ReadCaseNote
+import uk.gov.justice.hmpps.casenotes.notes.SearchNotesByIdsRequest
 import uk.gov.justice.hmpps.casenotes.notes.SearchNotesRequest
 import uk.gov.justice.hmpps.casenotes.notes.SearchNotesResponse
 
@@ -23,6 +25,19 @@ import uk.gov.justice.hmpps.casenotes.notes.SearchNotesResponse
 @RestController
 @RequestMapping("search/case-notes")
 class SearchCaseNotesController(private val search: ReadCaseNote) {
+  @Operation(
+    summary = "Finds case notes by ids",
+    description = "Does not take into account whether case notes are sensitive",
+  )
+  @ApiResponses(
+    ApiResponse(responseCode = "200", description = "OK - successfully conducted search, providing matching results or empty content when no matching case notes are found"),
+    ApiResponse(responseCode = "400", description = "Bad request - the search request did not meet validation requirements"),
+  )
+  @PostMapping("/by-ids")
+  fun findCaseNotesByIds(
+    @Valid @RequestBody request: SearchNotesByIdsRequest,
+  ): List<CaseNote> = search.caseNotesByIds(request.ids)
+
   @Operation(
     summary = "Finds matching case notes",
     description = "Sorting can be applied on occurrenceDateTime (default) or creationDateTime. Any other sort parameter will have the default result (occurrenceDateTime,desc)",
