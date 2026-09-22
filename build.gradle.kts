@@ -23,8 +23,8 @@ dependencies {
   runtimeOnly("org.flywaydb:flyway-database-postgresql")
   runtimeOnly("org.postgresql:postgresql:42.7.13")
 
-  implementation("uk.gov.justice.service.hmpps:hmpps-kotlin-spring-boot-autoconfigure:3.0.1")
-  implementation("uk.gov.justice.service.hmpps:hmpps-kotlin-spring-boot-starter:3.0.1")
+  implementation("uk.gov.justice.service.hmpps:hmpps-kotlin-spring-boot-autoconfigure:3.0.2")
+  implementation("uk.gov.justice.service.hmpps:hmpps-kotlin-spring-boot-starter:3.0.2")
   implementation("uk.gov.justice.service.hmpps:hmpps-sqs-spring-boot-starter:7.4.1")
 
   implementation("org.springframework.boot:spring-boot-starter-data-jpa")
@@ -55,7 +55,7 @@ dependencies {
 
   testAnnotationProcessor("org.projectlombok:lombok:1.18.48")
   testCompileOnly("org.projectlombok:lombok:1.18.48")
-  testImplementation("uk.gov.justice.service.hmpps:hmpps-kotlin-spring-boot-starter-test:3.0.1")
+  testImplementation("uk.gov.justice.service.hmpps:hmpps-kotlin-spring-boot-starter-test:3.0.2")
   testImplementation("uk.gov.justice.service.hmpps:hmpps-subject-access-request-test-support:2.8.1")
   testImplementation("org.springframework.boot:spring-boot-starter-jackson-test")
   testImplementation("org.springframework.boot:spring-boot-starter-webclient-test")
