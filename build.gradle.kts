@@ -23,8 +23,8 @@ dependencies {
   runtimeOnly("org.flywaydb:flyway-database-postgresql")
   runtimeOnly("org.postgresql:postgresql:42.7.13")
 
-  implementation("uk.gov.justice.service.hmpps:hmpps-kotlin-spring-boot-autoconfigure:3.0.1")
-  implementation("uk.gov.justice.service.hmpps:hmpps-kotlin-spring-boot-starter:3.0.1")
+  implementation("uk.gov.justice.service.hmpps:hmpps-kotlin-spring-boot-autoconfigure:3.0.2")
+  implementation("uk.gov.justice.service.hmpps:hmpps-kotlin-spring-boot-starter:3.0.2")
   implementation("uk.gov.justice.service.hmpps:hmpps-sqs-spring-boot-starter:7.4.1")
 
   implementation("org.springframework.boot:spring-boot-starter-data-jpa")
@@ -51,11 +51,11 @@ dependencies {
   implementation("com.google.guava:guava:33.7.1-jre")
 
   implementation(platform("com.amazonaws:aws-java-sdk-bom:1.12.797"))
-  implementation("software.amazon.awssdk:sns:2.54.20")
+  implementation("software.amazon.awssdk:sns:2.55.3")
 
   testAnnotationProcessor("org.projectlombok:lombok:1.18.48")
   testCompileOnly("org.projectlombok:lombok:1.18.48")
-  testImplementation("uk.gov.justice.service.hmpps:hmpps-kotlin-spring-boot-starter-test:3.0.1")
+  testImplementation("uk.gov.justice.service.hmpps:hmpps-kotlin-spring-boot-starter-test:3.0.2")
   testImplementation("uk.gov.justice.service.hmpps:hmpps-subject-access-request-test-support:2.8.1")
   testImplementation("org.springframework.boot:spring-boot-starter-jackson-test")
   testImplementation("org.springframework.boot:spring-boot-starter-webclient-test")
@@ -73,7 +73,7 @@ dependencies {
 
   testImplementation("org.springframework.security.oauth:spring-security-oauth2:2.5.2.RELEASE")
   testImplementation("org.springframework.security:spring-security-jwt:1.1.1.RELEASE")
-  testImplementation("org.mockito.kotlin:mockito-kotlin:6.3.0")
+  testImplementation("org.mockito.kotlin:mockito-kotlin:6.4.0")
   testImplementation("io.swagger.parser.v3:swagger-parser-v3:2.1.48")
 }
 
