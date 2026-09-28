@@ -109,3 +109,6 @@ hmpps:
     template:
       path: /sar/templates/V2__sar_template.mustache
       enabled: true
+
+hmpps.sqs:
+  queueAdminRole: ROLE_CONNECT_DPS__QUEUE_ADMIN
