@@ -43,11 +43,8 @@ class NoteUsageByAuthorIdIntTest : IntegrationTest() {
     request: UsageByAuthorIdRequest,
     error: ErrorResponse,
   ) {
-    val res = getUsageByAuthorIdSpec(request).expectStatus().isBadRequest.errorResponse(HttpStatus.BAD_REQUEST)
-    with(res) {
-      assertThat(status).isEqualTo(HttpStatus.BAD_REQUEST.value())
-      assertThat(developerMessage).isEqualTo(error.developerMessage)
-    }
+    val response = getUsageByAuthorIdSpec(request).expectStatus().isBadRequest.errorResponse(HttpStatus.BAD_REQUEST)
+    assertThat(response.developerMessage).isEqualTo(error.developerMessage)
   }
 
   @Test

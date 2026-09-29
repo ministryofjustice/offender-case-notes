@@ -49,10 +49,7 @@ class CreateCaseNoteIntTest : IntegrationTest() {
     val response = createCaseNote(personIdentifier(), request, tokenUsername = "NoneExistentUser")
       .errorResponse(HttpStatus.BAD_REQUEST)
 
-    with(response) {
-      assertThat(status).isEqualTo(HttpStatus.BAD_REQUEST.value())
-      assertThat(developerMessage).isEqualTo("Invalid username provided in token")
-    }
+    assertThat(response.developerMessage).isEqualTo("Invalid username provided in token")
   }
 
   @Test
@@ -64,9 +61,7 @@ class CreateCaseNoteIntTest : IntegrationTest() {
     val response = createCaseNote(personIdentifier(), request, params = mapOf(), tokenUsername = username)
       .errorResponse(HttpStatus.FORBIDDEN)
 
-    with(response) {
-      assertThat(developerMessage).isEqualTo("Unable to author 'sync to nomis' type without a nomis user")
-    }
+    assertThat(response.developerMessage).isEqualTo("Unable to author 'sync to nomis' type without a nomis user")
   }
 
   @Test
@@ -78,19 +73,16 @@ class CreateCaseNoteIntTest : IntegrationTest() {
       text = "",
     )
     val response = createCaseNote(personIdentifier(), request).errorResponse(HttpStatus.BAD_REQUEST)
-    with(response) {
-      assertThat(status).isEqualTo(HttpStatus.BAD_REQUEST.value())
-      assertThat(developerMessage).isEqualTo(
-        """
-        |400 BAD_REQUEST Validation failures: 
-        |location must be no more than 12 characters
-        |sub type must be no more than 12 characters
-        |text cannot be blank
-        |type must be no more than 12 characters
-        |
-        """.trimMargin(),
-      )
-    }
+    assertThat(response.developerMessage).isEqualTo(
+      """
+      |400 BAD_REQUEST Validation failures:
+      |location must be no more than 12 characters
+      |sub type must be no more than 12 characters
+      |text cannot be blank
+      |type must be no more than 12 characters
+      |
+      """.trimMargin(),
+    )
   }
 
   @Test

@@ -32,10 +32,7 @@ class SystemGeneratedNotesIntTest : IntegrationTest() {
   fun `400 bad request - case note type must exist`() {
     val request = sysGenRequest(type = "NON_EXISTENT", subType = "NOT_THERE")
     val response = sysGenNote(personIdentifier(), request).errorResponse(HttpStatus.BAD_REQUEST)
-    with(response) {
-      assertThat(status).isEqualTo(HttpStatus.BAD_REQUEST.value())
-      assertThat(developerMessage).isEqualTo("Unknown case note type NON_EXISTENT:NOT_THERE")
-    }
+    assertThat(response.developerMessage).isEqualTo("Unknown case note type NON_EXISTENT:NOT_THERE")
   }
 
   @Test
@@ -43,10 +40,7 @@ class SystemGeneratedNotesIntTest : IntegrationTest() {
     val type = getAllTypes().filter { it.syncToNomis }.random()
     val request = sysGenRequest(type = type.type.code, subType = type.code)
     val response = sysGenNote(personIdentifier(), request).errorResponse(HttpStatus.BAD_REQUEST)
-    with(response) {
-      assertThat(status).isEqualTo(HttpStatus.BAD_REQUEST.value())
-      assertThat(developerMessage).isEqualTo("System generated case notes cannot use a sync to nomis type")
-    }
+    assertThat(response.developerMessage).isEqualTo("System generated case notes cannot use a sync to nomis type")
   }
 
   @Test
@@ -60,21 +54,18 @@ class SystemGeneratedNotesIntTest : IntegrationTest() {
       text = "",
     )
     val response = sysGenNote(personIdentifier(), request).errorResponse(HttpStatus.BAD_REQUEST)
-    with(response) {
-      assertThat(status).isEqualTo(HttpStatus.BAD_REQUEST.value())
-      assertThat(developerMessage).isEqualTo(
-        """
-        |400 BAD_REQUEST Validation failures: 
-        |author name cannot be more than 80 characters
-        |author username cannot be more than 64 characters
-        |location must be no more than 12 characters
-        |sub type must be no more than 12 characters
-        |text cannot be blank
-        |type must be no more than 12 characters
-        |
-        """.trimMargin(),
-      )
-    }
+    assertThat(response.developerMessage).isEqualTo(
+      """
+      |400 BAD_REQUEST Validation failures:
+      |author name cannot be more than 80 characters
+      |author username cannot be more than 64 characters
+      |location must be no more than 12 characters
+      |sub type must be no more than 12 characters
+      |text cannot be blank
+      |type must be no more than 12 characters
+      |
+      """.trimMargin(),
+    )
   }
 
   @Test

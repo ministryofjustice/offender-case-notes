@@ -50,24 +50,22 @@ class AdminReplaceCaseNoteIntTest : IntegrationTest() {
       amendments = listOf(ReplaceAmendmentRequest(UUID.randomUUID(), "")),
     )
     val response = replaceCaseNote(id, request).errorResponse(HttpStatus.BAD_REQUEST)
-    with(response) {
-      assertThat(status).isEqualTo(HttpStatus.BAD_REQUEST.value())
-      assertThat(developerMessage).isEqualTo(
-        """
-        |400 BAD_REQUEST Validation failures: 
-        |amendment text cannot be blank
-        |note text cannot be blank
-        |sub type must be no more than 12 characters
-        |type must be no more than 12 characters
-        |
-        """.trimMargin(),
-      )
-    }
+    assertThat(response.developerMessage).isEqualTo(
+      """
+      |400 BAD_REQUEST Validation failures:
+      |amendment text cannot be blank
+      |note text cannot be blank
+      |sub type must be no more than 12 characters
+      |type must be no more than 12 characters
+      |
+      """.trimMargin(),
+    )
+  }
 
   @Test
   fun `400 bad request - missing field validation failures`() {
-    val id = UUID.randomUUID()
-    val errorResponse = webTestClient.put().uri(BASE_URL, id)
+    val errorResponse = webTestClient.put()
+      .uri(BASE_URL, UUID.randomUUID())
       .bodyValue(
         // language=json
         """

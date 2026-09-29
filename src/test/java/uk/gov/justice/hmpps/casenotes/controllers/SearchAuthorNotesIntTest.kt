@@ -36,14 +36,11 @@ class SearchAuthorNotesIntTest : IntegrationTest() {
   fun `400 bad request - invalid request fields`(request: SearchNotesRequest, expected: ErrorResponse) {
     val prisonCode = "VAL"
     val authorUsername = "US37R"
-    val res = findAuthorNotesSpec(prisonCode, authorUsername, request = request)
+    val response = findAuthorNotesSpec(prisonCode, authorUsername, request = request)
       .expectStatus().isBadRequest
       .errorResponse(HttpStatus.BAD_REQUEST)
 
-    with(res) {
-      assertThat(status).isEqualTo(HttpStatus.BAD_REQUEST.value())
-      assertThat(developerMessage).isEqualTo(expected.developerMessage)
-    }
+    assertThat(response.developerMessage).isEqualTo(expected.developerMessage)
   }
 
   @Test

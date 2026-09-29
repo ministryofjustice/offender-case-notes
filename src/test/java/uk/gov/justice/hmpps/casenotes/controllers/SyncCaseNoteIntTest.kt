@@ -64,25 +64,22 @@ class SyncCaseNoteIntTest : IntegrationTest() {
       ),
     )
     val response = syncCaseNote(request).errorResponse(HttpStatus.BAD_REQUEST)
-    with(response) {
-      assertThat(status).isEqualTo(HttpStatus.BAD_REQUEST.value())
-      assertThat(developerMessage).isEqualTo(
-        """
-        |400 BAD_REQUEST Validation failures: 
-        |author first name cannot be blank
-        |author last name cannot be blank
-        |author user id cannot be blank
-        |author user id cannot be more than 64 characters
-        |author username cannot be blank
-        |author username cannot be more than 64 characters
-        |location must be no more than 12 characters
-        |person identifier cannot be more than 12 characters
-        |sub type must be no more than 12 characters
-        |type must be no more than 12 characters
-        |
-        """.trimMargin(),
-      )
-    }
+    assertThat(response.developerMessage).isEqualTo(
+      """
+      |400 BAD_REQUEST Validation failures:
+      |author first name cannot be blank
+      |author last name cannot be blank
+      |author user id cannot be blank
+      |author user id cannot be more than 64 characters
+      |author username cannot be blank
+      |author username cannot be more than 64 characters
+      |location must be no more than 12 characters
+      |person identifier cannot be more than 12 characters
+      |sub type must be no more than 12 characters
+      |type must be no more than 12 characters
+      |
+      """.trimMargin(),
+    )
   }
 
   @Test
