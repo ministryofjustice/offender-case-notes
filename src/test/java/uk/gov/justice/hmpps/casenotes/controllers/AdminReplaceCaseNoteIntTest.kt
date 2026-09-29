@@ -63,6 +63,24 @@ class AdminReplaceCaseNoteIntTest : IntegrationTest() {
         """.trimMargin(),
       )
     }
+
+  @Test
+  fun `400 bad request - missing field validation failures`() {
+    val id = UUID.randomUUID()
+    val errorResponse = webTestClient.put().uri(BASE_URL, id)
+      .bodyValue(
+        // language=json
+        """
+        {
+          "type": "OMIC",
+          "subType": "GEN"
+        }
+        """,
+      )
+      .headers(addBearerAuthorisation("AdminUser", listOf(ROLE_CASE_NOTES_ADMIN)))
+      .exchange()
+      .errorResponse(HttpStatus.BAD_REQUEST)
+    assertThat(errorResponse.developerMessage).contains("value failed for JSON property text due to missing (therefore NULL) value for creator parameter text which is a non-nullable type")
   }
 
   @Test

@@ -46,6 +46,21 @@ class SearchAuthorNotesIntTest : IntegrationTest() {
     }
   }
 
+  @Test
+  fun `400 bad request - invalid field type`() {
+    val errorResponse = webTestClient.post()
+      .uri { ub ->
+        ub.path(AUTHOR_SEARCH_URL)
+        ub.queryParam("authorIdentifierType", "error")
+        ub.build("MDI", USERNAME)
+      }
+      .headers(addBearerAuthorisation(USERNAME, listOf(ROLE_CASE_NOTES_READ)))
+      .bodyValue(searchRequest())
+      .exchange()
+      .errorResponse(HttpStatus.BAD_REQUEST)
+    assertThat(errorResponse.developerMessage).contains("Failed to convert value of type 'java.lang.String' to required type 'uk.gov.justice.hmpps.casenotes.notes.AuthorIdentifierType'")
+  }
+
   @ParameterizedTest
   @ValueSource(strings = [ROLE_CASE_NOTES_READ, ROLE_CASE_NOTES_WRITE])
   fun `can find a case note by author with appropriate role`(role: String) {
