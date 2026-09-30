@@ -71,7 +71,6 @@ class SearchCaseNotesByIdIntTest : IntegrationTest() {
     val response = findCaseNotesByIds(emptyList())
       .expectStatus().isBadRequest
       .errorResponse(HttpStatus.BAD_REQUEST)
-    assertThat(response.status).isEqualTo(HttpStatus.BAD_REQUEST.value())
     assertThat(response.developerMessage).isEqualTo("400 BAD_REQUEST Validation failure: must not be empty")
   }
 

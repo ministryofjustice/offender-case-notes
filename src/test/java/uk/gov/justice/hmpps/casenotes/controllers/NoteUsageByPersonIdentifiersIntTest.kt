@@ -43,11 +43,8 @@ class NoteUsageByPersonIdentifiersIntTest : IntegrationTest() {
     request: UsageByPersonIdentifierRequest,
     error: ErrorResponse,
   ) {
-    val res = getUsageByPersonIdentifiersSpec(request).expectStatus().isBadRequest.errorResponse(HttpStatus.BAD_REQUEST)
-    with(res) {
-      assertThat(status).isEqualTo(HttpStatus.BAD_REQUEST.value())
-      assertThat(developerMessage).isEqualTo(error.developerMessage)
-    }
+    val response = getUsageByPersonIdentifiersSpec(request).expectStatus().isBadRequest.errorResponse(HttpStatus.BAD_REQUEST)
+    assertThat(response.developerMessage).isEqualTo(error.developerMessage)
   }
 
   @Test

@@ -42,10 +42,7 @@ class CreateAmendmentIntTest : IntegrationTest() {
     val response = amendCaseNote(personIdentifier(), randomUUID().toString(), request, tokenUsername = notFoundUser)
       .errorResponse(HttpStatus.BAD_REQUEST)
 
-    with(response) {
-      assertThat(status).isEqualTo(HttpStatus.BAD_REQUEST.value())
-      assertThat(developerMessage).isEqualTo("Invalid username provided in token")
-    }
+    assertThat(response.developerMessage).isEqualTo("Invalid username provided in token")
   }
 
   @Test
@@ -63,9 +60,7 @@ class CreateAmendmentIntTest : IntegrationTest() {
         tokenUsername = username,
       ).errorResponse(HttpStatus.FORBIDDEN)
 
-    with(response) {
-      assertThat(developerMessage).isEqualTo("Unable to author 'sync to nomis' type without a nomis user")
-    }
+    assertThat(response.developerMessage).isEqualTo("Unable to author 'sync to nomis' type without a nomis user")
   }
 
   @Test
@@ -79,9 +74,7 @@ class CreateAmendmentIntTest : IntegrationTest() {
         mapOf(),
       ).errorResponse(HttpStatus.BAD_REQUEST)
 
-    with(response) {
-      assertThat(userMessage).isEqualTo("Validation failure: text cannot be blank")
-    }
+    assertThat(response.userMessage).isEqualTo("Validation failure: text cannot be blank")
   }
 
   @ParameterizedTest(name = "can amend a case note with write role for type that syncs to NOMIS: {0}")

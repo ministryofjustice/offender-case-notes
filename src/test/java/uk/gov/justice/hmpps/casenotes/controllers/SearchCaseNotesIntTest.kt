@@ -35,11 +35,8 @@ class SearchCaseNotesIntTest : IntegrationTest() {
   fun `400 bad request - invalid request fields`(request: SearchNotesRequest, expected: ErrorResponse) {
     val personIdentifier = personIdentifier()
 
-    val res = findCaseNotesSpec(personIdentifier, request).expectStatus().isBadRequest.errorResponse(HttpStatus.BAD_REQUEST)
-    with(res) {
-      assertThat(status).isEqualTo(HttpStatus.BAD_REQUEST.value())
-      assertThat(developerMessage).isEqualTo(expected.developerMessage)
-    }
+    val response = findCaseNotesSpec(personIdentifier, request).expectStatus().isBadRequest.errorResponse(HttpStatus.BAD_REQUEST)
+    assertThat(response.developerMessage).isEqualTo(expected.developerMessage)
   }
 
   @ParameterizedTest

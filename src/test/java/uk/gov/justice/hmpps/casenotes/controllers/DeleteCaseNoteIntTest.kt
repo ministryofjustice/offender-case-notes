@@ -42,10 +42,7 @@ class DeleteCaseNoteIntTest : IntegrationTest() {
     val response = deleteCaseNote(personIdentifier(), UUID.randomUUID(), username = "NoneExistentUser")
       .errorResponse(HttpStatus.BAD_REQUEST)
 
-    with(response) {
-      assertThat(status).isEqualTo(HttpStatus.BAD_REQUEST.value())
-      assertThat(developerMessage).isEqualTo("Invalid username provided in token")
-    }
+    assertThat(response.developerMessage).isEqualTo("Invalid username provided in token")
   }
 
   @Test

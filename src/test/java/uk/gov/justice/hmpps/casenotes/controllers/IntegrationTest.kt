@@ -147,9 +147,13 @@ abstract class IntegrationTest : BasicIntegrationTest() {
     headers.add(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
   }
 
-  internal final fun WebTestClient.ResponseSpec.errorResponse(status: HttpStatus): ErrorResponse = expectStatus().isEqualTo(status)
-    .expectBody<ErrorResponse>()
-    .returnResult().responseBody!!
+  internal final fun WebTestClient.ResponseSpec.errorResponse(status: HttpStatus): ErrorResponse {
+    val errorResponse = expectStatus().isEqualTo(status)
+      .expectBody<ErrorResponse>()
+      .returnResult().responseBody!!
+    assertThat(errorResponse.status).isEqualTo(status.value())
+    return errorResponse
+  }
 
   internal final inline fun <reified T : Any> WebTestClient.ResponseSpec.success(status: HttpStatus = HttpStatus.OK): T = expectStatus().isEqualTo(status)
     .expectBody<T>()
