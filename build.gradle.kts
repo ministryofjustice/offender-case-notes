@@ -4,7 +4,7 @@ plugins {
   id("uk.gov.justice.hmpps.gradle-spring-boot") version "11.0.11"
   kotlin("plugin.spring") version "2.4.20"
   kotlin("plugin.jpa") version "2.4.20"
-  id("io.gatling.gradle") version "3.15.1.3"
+  id("io.gatling.gradle") version "3.16.0"
   jacoco
 }
 
@@ -38,7 +38,7 @@ dependencies {
   implementation("org.springframework.boot:spring-boot-starter-webclient")
   implementation("org.springframework.boot:spring-boot-starter-webflux")
 
-  implementation("io.sentry:sentry-spring-boot-4:8.58.0")
+  implementation("io.sentry:sentry-spring-boot-4:8.59.0")
 
   implementation("javax.activation:activation:1.1.1")
   implementation("javax.transaction:javax.transaction-api:1.3")
@@ -48,10 +48,10 @@ dependencies {
   implementation("org.apache.commons:commons-text:1.15.0")
   implementation("com.fasterxml.uuid:java-uuid-generator:5.2.0")
   implementation("com.pauldijou:jwt-core_2.11:5.0.0")
-  implementation("com.google.guava:guava:33.7.1-jre")
+  implementation("com.google.guava:guava:33.7.2-jre")
 
   implementation(platform("com.amazonaws:aws-java-sdk-bom:1.12.797"))
-  implementation("software.amazon.awssdk:sns:2.55.5")
+  implementation("software.amazon.awssdk:sns:2.55.10")
 
   testAnnotationProcessor("org.projectlombok:lombok:1.18.48")
   testCompileOnly("org.projectlombok:lombok:1.18.48")
