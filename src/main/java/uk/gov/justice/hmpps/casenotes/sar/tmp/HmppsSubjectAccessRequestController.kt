@@ -13,7 +13,6 @@ import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.RequestHeader
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
@@ -83,7 +82,7 @@ class HmppsSubjectAccessRequestController(private val service: SubjectAccessRequ
     @RequestParam(value = "toDate")
     @Parameter(description = "Optional parameter denoting maximum date of event occurrence which should be returned in the response")
     toDate: LocalDate?,
-    @RequestHeader("DPS-Only") dpsOnly: Boolean?,
+    @RequestParam(value = "filter") filter: String?,
   ): ResponseEntity<Any> {
     if (prn.isNullOrBlank() && crn.isNullOrBlank()) {
       return ResponseEntity.badRequest().body(
@@ -96,10 +95,10 @@ class HmppsSubjectAccessRequestController(private val service: SubjectAccessRequ
     }
 
     val content = if (!prn.isNullOrBlank()) {
-      if (dpsOnly == null || !dpsOnly) {
-        service.getPrisonContentFor(prn, fromDate, toDate)
-      } else {
+      if (filter != null && filter == "omic") {
         service.getDpsOnlyPrisonContentFor(prn, fromDate, toDate)
+      } else {
+        service.getPrisonContentFor(prn, fromDate, toDate)
       }
     } else {
       return ResponseEntity.status(209).build()
