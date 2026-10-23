@@ -95,4 +95,3 @@ hmpps:
 
 service:
   action-missing-case-notes: true
-  sar-enable-all-case-notes: true

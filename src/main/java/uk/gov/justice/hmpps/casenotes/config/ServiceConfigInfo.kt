@@ -16,5 +16,4 @@ final class ServiceConfigInfo : InfoContributor {
 data class ServiceConfig(
   val baseUrl: String,
   val actionMissingCaseNotes: Boolean,
-  val sarEnableAllCaseNotes: Boolean,
 )
