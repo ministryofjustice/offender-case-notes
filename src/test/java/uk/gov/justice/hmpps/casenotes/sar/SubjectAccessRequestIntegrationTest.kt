@@ -162,7 +162,7 @@ class SubjectAccessRequestIntegrationTest :
       .isEqualTo(expectedFlywaySchemaNonFutureVersion)
   }
 
-  // TODO - Delete this
+  // TODO - CDPS-2198 - Delete this
   @Test
   fun `SAR API should return expected data - With filter`() {
     setupTestData()
@@ -188,7 +188,7 @@ class SubjectAccessRequestIntegrationTest :
     }
   }
 
-  // TODO - Delete this
+  // TODO - CDPS-2198 - Delete this
   @Test
   fun `SAR report should render as expected - With filter`() {
     setupTestData()
