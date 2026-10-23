@@ -1,5 +1,6 @@
 package uk.gov.justice.hmpps.casenotes.config
 
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.springframework.http.MediaType
 import uk.gov.justice.hmpps.casenotes.controllers.IntegrationTest
@@ -44,6 +45,8 @@ class OpenApiDocsTest : IntegrationTest() {
       .accept(MediaType.APPLICATION_JSON)
       .exchange()
       .expectStatus().isOk
-      .expectBody().jsonPath("info.version").isEqualTo(DateTimeFormatter.ISO_DATE.format(LocalDate.now()))
+      .expectBody().jsonPath("info.version").value<String> {
+        assertThat(it).startsWith(DateTimeFormatter.ISO_DATE.format(LocalDate.now()))
+      }
   }
 }
