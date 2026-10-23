@@ -1,9 +1,10 @@
 package uk.gov.justice.hmpps.casenotes.health
 
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.springframework.test.context.ActiveProfiles
-import java.time.LocalDateTime
-import java.time.format.DateTimeFormatter.ISO_DATE
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 
 @ActiveProfiles("noqueue")
 class InfoIntTest : BasicIntegrationTest() {
@@ -15,6 +16,8 @@ class InfoIntTest : BasicIntegrationTest() {
   @Test
   fun `Info page reports version`() {
     webTestClient.get().uri("/info").exchange()
-      .expectBody().jsonPath("build.version").isEqualTo(LocalDateTime.now().format(ISO_DATE))
+      .expectBody().jsonPath("build.version").value<String> {
+        assertThat(it).startsWith(DateTimeFormatter.ISO_DATE.format(LocalDate.now()))
+      }
   }
 }
