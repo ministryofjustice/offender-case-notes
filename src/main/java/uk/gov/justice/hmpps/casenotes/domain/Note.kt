@@ -233,7 +233,7 @@ interface NoteRepository :
         )
     """,
   )
-  fun findSarContent(personIdentifier: String, from: LocalDateTime?, to: LocalDateTime?): List<Note>
+  fun findDpsOnlySarContent(personIdentifier: String, from: LocalDateTime?, to: LocalDateTime?): List<Note>
 
   @Query(
     """
