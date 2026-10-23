@@ -8,11 +8,11 @@ import uk.gov.justice.hmpps.kotlin.sar.HmppsSubjectAccessRequestContent
 import java.time.LocalDate
 import kotlin.collections.sortedByDescending
 
-// TODO - Uncomment out this line and replace the one after with it
+// TODO - CDPS-2198 - Uncomment out this line and replace the one after with it
 // class SubjectAccessRequest(private val noteRepository: NoteRepository) : HmppsPrisonSubjectAccessRequestService {
 @Service
 class SubjectAccessRequest(private val noteRepository: NoteRepository) {
-  // TODO - Re-override this
+  // TODO - CDPS-2198 - Re-override this
   fun getPrisonContentFor(
     prn: String,
     fromDate: LocalDate?,
@@ -26,7 +26,7 @@ class SubjectAccessRequest(private val noteRepository: NoteRepository) {
     return if (notes.isEmpty()) null else HmppsSubjectAccessRequestContent(content = notes)
   }
 
-  // TODO - Delete this function
+  // TODO - CDPS-2198 - Delete this function
   fun getDpsOnlyPrisonContentFor(
     prn: String,
     fromDate: LocalDate?,
