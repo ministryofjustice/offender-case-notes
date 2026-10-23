@@ -75,6 +75,8 @@ dependencies {
   testImplementation("org.springframework.security:spring-security-jwt:1.1.1.RELEASE")
   testImplementation("org.mockito.kotlin:mockito-kotlin:6.4.0")
   testImplementation("io.swagger.parser.v3:swagger-parser-v3:2.1.48")
+  // TODO - CDPS-2198 - Delete this
+  testImplementation("net.javacrumbs.json-unit:json-unit-assertj:6.3.0")
 }
 
 kotlin {

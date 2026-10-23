@@ -95,7 +95,6 @@ management:
 service:
   base-url:
   action-missing-case-notes: false
-  sar-enable-all-case-notes: false
 
 springdoc:
   paths-to-exclude: "/queue-admin/**"
