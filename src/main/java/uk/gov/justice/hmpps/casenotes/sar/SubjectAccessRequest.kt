@@ -27,12 +27,12 @@ class SubjectAccessRequest(private val noteRepository: NoteRepository) {
   }
 
   // TODO - CDPS-2198 - Delete this function
-  fun getDpsOnlyPrisonContentFor(
+  fun getOmicOnlyContentFor(
     prn: String,
     fromDate: LocalDate?,
     toDate: LocalDate?,
   ): HmppsSubjectAccessRequestContent? {
-    val notes = noteRepository.findDpsOnlySarContent(
+    val notes = noteRepository.findOmicOnlyContent(
       prn,
       fromDate?.atStartOfDay(),
       toDate?.plusDays(1)?.atStartOfDay(),

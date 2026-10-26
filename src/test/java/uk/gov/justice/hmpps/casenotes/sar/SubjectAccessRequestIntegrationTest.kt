@@ -97,7 +97,7 @@ class SubjectAccessRequestIntegrationTest :
     noteRepository.findByLegacyId(104) ?: givenCaseNote(
       generateCaseNote(
         personIdentifier = samplePrisonerNumber,
-        type = types.find { it.type.code == "POM" && it.code == "GEN" }!!,
+        type = types.find { it.type.code == "OMIC_OPD" && it.code == "CASE_FORM" }!!,
         text = "Notes about something that happened the day before",
         authorUsername = "POM1",
         authorUserId = "3124",

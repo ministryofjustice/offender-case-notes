@@ -225,6 +225,7 @@ interface NoteRepository :
     left join fetch n.amendments a
     where n.personIdentifier = :personIdentifier
     and st.syncToNomis = false
+    and (st.type.code = 'OMIC' or st.type.code = 'OMIC_OPD')
     and (
          ((cast(:from as LocalDateTime) is null or (:from <= n.createdAt))
             and (cast(:to as LocalDateTime) is null or :to >= n.createdAt)) 
@@ -233,7 +234,7 @@ interface NoteRepository :
         )
     """,
   )
-  fun findDpsOnlySarContent(personIdentifier: String, from: LocalDateTime?, to: LocalDateTime?): List<Note>
+  fun findOmicOnlyContent(personIdentifier: String, from: LocalDateTime?, to: LocalDateTime?): List<Note>
 
   @Query(
     """

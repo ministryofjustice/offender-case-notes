@@ -96,7 +96,7 @@ class HmppsSubjectAccessRequestController(private val service: SubjectAccessRequ
 
     val content = if (!prn.isNullOrBlank()) {
       if (filter != null && filter == "omic") {
-        service.getDpsOnlyPrisonContentFor(prn, fromDate, toDate)
+        service.getOmicOnlyContentFor(prn, fromDate, toDate)
       } else {
         service.getPrisonContentFor(prn, fromDate, toDate)
       }
