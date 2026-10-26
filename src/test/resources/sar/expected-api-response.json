@@ -1,8 +1,8 @@
 [
   {
     "creationDateTime": "2025-04-22T13:17:53",
-    "type": "POM Activity",
-    "subType": "General POM Note",
+    "type": "OMiC OPD",
+    "subType": "Case Formulation",
     "text": "Notes about something that happened the day before",
     "authorUsername": "POM1",
     "amendments": [

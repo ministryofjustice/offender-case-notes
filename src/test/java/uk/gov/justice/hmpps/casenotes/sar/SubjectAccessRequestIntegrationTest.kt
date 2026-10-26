@@ -1,6 +1,8 @@
 package uk.gov.justice.hmpps.casenotes.sar
 
+import com.fasterxml.jackson.databind.ObjectMapper
 import jakarta.persistence.EntityManager
+import net.javacrumbs.jsonunit.assertj.JsonAssertions.assertThatJson
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.fail
 import org.flywaydb.core.Flyway
@@ -12,6 +14,7 @@ import org.springframework.boot.test.context.TestConfiguration
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Import
 import org.springframework.context.annotation.Primary
+import org.springframework.http.HttpHeaders
 import org.springframework.security.oauth2.jwt.JwtDecoder
 import org.springframework.test.web.reactive.server.WebTestClient
 import uk.gov.justice.digital.hmpps.subjectaccessrequest.SarApiDataTest
@@ -20,11 +23,15 @@ import uk.gov.justice.digital.hmpps.subjectaccessrequest.SarIntegrationTestHelpe
 import uk.gov.justice.digital.hmpps.subjectaccessrequest.SarIntegrationTestHelperConfig
 import uk.gov.justice.digital.hmpps.subjectaccessrequest.SarJpaEntitiesTest
 import uk.gov.justice.digital.hmpps.subjectaccessrequest.SarReportTest
+import uk.gov.justice.digital.hmpps.subjectaccessrequest.SubjectAccessRequestResponse
 import uk.gov.justice.hmpps.casenotes.controllers.IntegrationTest
 import uk.gov.justice.hmpps.casenotes.utils.JwtAuthHelper
+import uk.gov.justice.hmpps.kotlin.auth.AuthSource
 import uk.gov.justice.hmpps.test.kotlin.auth.JwtAuthorisationHelper
 import java.time.Duration
+import java.time.LocalDate
 import java.time.LocalDateTime
+import java.util.Optional
 import javax.sql.DataSource
 
 @Import(SarIntegrationTestHelperConfig::class)
@@ -34,6 +41,11 @@ class SubjectAccessRequestIntegrationTest :
   SarFlywaySchemaTest,
   SarJpaEntitiesTest,
   SarReportTest {
+  @Autowired
+  private lateinit var jwtAuthHelper: JwtAuthorisationHelper
+
+  @Autowired
+  private lateinit var objectMapper: ObjectMapper
 
   @TestConfiguration
   class Config {
@@ -85,7 +97,7 @@ class SubjectAccessRequestIntegrationTest :
     noteRepository.findByLegacyId(104) ?: givenCaseNote(
       generateCaseNote(
         personIdentifier = samplePrisonerNumber,
-        type = types.find { it.type.code == "POM" && it.code == "GEN" }!!,
+        type = types.find { it.type.code == "OMIC_OPD" && it.code == "CASE_FORM" }!!,
         text = "Notes about something that happened the day before",
         authorUsername = "POM1",
         authorUserId = "3124",
@@ -146,6 +158,110 @@ class SubjectAccessRequestIntegrationTest :
     val lastMigration = migrations.findLast {
       it.state == MigrationState.SUCCESS
     } ?: fail("Last successful non-future migration not found")
-    assertThat(lastMigration.version?.version).`as`("Flyway schema version").isEqualTo(expectedFlywaySchemaNonFutureVersion)
+    assertThat(lastMigration.version?.version).`as`("Flyway schema version")
+      .isEqualTo(expectedFlywaySchemaNonFutureVersion)
   }
+
+  // TODO - CDPS-2198 - Delete this
+  @Test
+  fun `SAR API should return expected data - With filter`() {
+    setupTestData()
+
+    val response = getSarDataWithFilter(
+      getPrn(),
+      getCrn(),
+      getFromDate(),
+      getToDate(),
+      getWebTestClientInstance(),
+      getContentType(),
+      getAuthorisationSource(),
+    )
+    if (System.getenv("SAR_GENERATE_ACTUAL").toBoolean()) {
+      getSarHelper().saveSarApiResponse(response)
+    } else {
+      assertThatJson(getSarHelper().toJson(response)).`as`("Response content json")
+        .isEqualTo(
+          this::class.java.getResource("/sar/tmp/expected-api-response.json")?.readText()!!,
+        )
+      assertThat(response.attachments?.isNotEmpty() == true).`as`("Response has attachments")
+        .isEqualTo(getSarHelper().attachmentsExpected)
+    }
+  }
+
+  // TODO - CDPS-2198 - Delete this
+  @Test
+  fun `SAR report should render as expected - With filter`() {
+    setupTestData()
+    getSarHelper().stubFindPrisonNameWith("Moorland (HMP & YOI)")
+    getSarHelper().stubFindUserLastNameWith("Johnson")
+    getSarHelper().stubFindLocationNameByNomisIdWith("PROPERTY BOX 1")
+    getSarHelper().stubFindLocationNameByDpsIdWith("PROPERTY BOX 2")
+    getInlineAttachments().forEach { attachment ->
+      getSarHelper().stubGetAttachment(attachment.key, getSarHelper().getResourceAsBytes(attachment.value))
+    }
+    val dataResponse = getSarDataWithFilter(
+      getPrn(),
+      getCrn(),
+      getFromDate(),
+      getToDate(),
+      getWebTestClientInstance(),
+      getContentType(),
+      getAuthorisationSource(),
+    )
+    val templateResponse = getSarHelper().requestSarTemplate(getWebTestClientInstance(), getAuthorisationSource())
+
+    val renderResult = getSarHelper().renderServiceReport(
+      data = dataResponse.content,
+      templateVersion = "1.0",
+      template = templateResponse,
+    )
+
+    getSarHelper().renderAndSaveReportAsPdf(renderResult, getPrn(), getCrn())
+
+    if (System.getenv("SAR_GENERATE_ACTUAL").toBoolean()) {
+      getSarHelper().saveGeneratedReport(renderResult)
+    } else {
+      getSarHelper().assertHtmlEquals(
+        renderResult,
+        this::class.java.getResource("/sar/tmp/expected-render-result.html")?.readText()!!,
+      )
+    }
+  }
+
+  private fun <T> getSarDataWithFilter(
+    prn: String?,
+    crn: String?,
+    fromDate: LocalDate?,
+    toDate: LocalDate?,
+    webTestClient: WebTestClient,
+    contentType: Class<T>,
+    authSource: AuthSource = AuthSource.NONE,
+  ): SubjectAccessRequestResponse<T> {
+    val response = webTestClient.get().uri {
+      it.path("/subject-access-request")
+        .queryParamIfPresent("prn", Optional.ofNullable(prn))
+        .queryParamIfPresent("crn", Optional.ofNullable(crn))
+        .queryParamIfPresent("fromDate", Optional.ofNullable(fromDate))
+        .queryParamIfPresent("toDate", Optional.ofNullable(toDate))
+        .queryParamIfPresent("filter", Optional.ofNullable("omic"))
+        .build()
+    }
+      .headers(setAuthorisation(roles = listOf("ROLE_SAR_DATA_ACCESS"), authSource = authSource))
+      .exchange()
+      .expectStatus().isOk
+      .expectBody(String::class.java)
+      .returnResult().responseBody!!
+
+    return objectMapper.readValue(
+      response,
+      objectMapper.typeFactory.constructParametricType(SubjectAccessRequestResponse::class.java, contentType),
+    )
+  }
+
+  fun setAuthorisation(
+    username: String? = "TEST_USR",
+    roles: List<String> = listOf(),
+    scopes: List<String> = listOf("read"),
+    authSource: AuthSource,
+  ): (HttpHeaders) -> Unit = jwtAuthHelper.setAuthorisationHeader(username = username, scope = scopes, roles = roles, authSource = authSource)
 }

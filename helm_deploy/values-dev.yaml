@@ -16,7 +16,6 @@ generic-service:
     APPLICATIONINSIGHTS_CONFIGURATION_FILE: applicationinsights.dev.json
     SPRINGDOC_API_DOCS_ENABLED: "true"
     SPRINGDOC_SWAGGER_UI_ENABLED: "true"
-    SERVICE_SAR_ENABLE_ALL_CASE_NOTES: "true"
     HMPPS_SAR_TEMPLATE_PATH: "/sar/templates/V2__sar_template.mustache"
 
   allowlist:

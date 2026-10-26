@@ -1,6 +1,9 @@
 insert into case_note_type (code, description, created_at, created_by)
 values ('OLDPOM', 'OLDPOM Notes', now(), 'SYSTEM');
 
+insert into case_note_type (code, description, created_at, created_by)
+values ('OMIC_OPD', 'OMiC OPD', now(), 'SYSTEM');
+
 insert into case_note_sub_type (type_code, code, description, active, created_at, created_by)
 values ('POM', 'GEN', 'General POM Note', true, now(), 'SYSTEM');
 
@@ -18,6 +21,9 @@ values ('OLDPOM', 'OLDONE', 'Active Old POM Note', false, now(), 'SYSTEM');
 
 insert into case_note_sub_type (type_code, code, description, active, created_at, created_by)
 values ('OMIC', 'GEN', 'General OMIC Note', true, now(), 'SYSTEM');
+
+insert into case_note_sub_type (type_code, code, description, active, created_at, created_by)
+values ('OMIC_OPD', 'CASE_FORM', 'Case Formulation', true, now(), 'SYSTEM');
 
 insert into case_note_sub_type (type_code, code, description, active, created_at, created_by)
 values ('OMIC', 'SPECIAL', 'Special OMIC Note', true, now(), 'SYSTEM');

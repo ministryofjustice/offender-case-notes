@@ -1,0 +1,28 @@
+[
+  {
+    "creationDateTime": "2025-04-22T13:17:53",
+    "type": "OMiC OPD",
+    "subType": "Case Formulation",
+    "text": "Notes about something that happened the day before",
+    "authorUsername": "POM1",
+    "amendments": [
+      {
+        "creationDateTime": "2025-04-23T14:17:53",
+        "additionalNoteText": "An amendment about what happened.",
+        "authorUsername": "POM2"
+      }
+    ],
+    "location": "LEI",
+    "occurredAt": "2025-04-21T12:07:53"
+  },
+  {
+    "creationDateTime": "2025-04-20T08:32:06",
+    "type": "OMiC",
+    "subType": "General OMIC Note",
+    "text": "OMIC notes\nWith my comments",
+    "authorUsername": "OMIC1",
+    "amendments": [],
+    "location": "LEI",
+    "occurredAt": "2025-04-20T03:32:06"
+  }
+]
