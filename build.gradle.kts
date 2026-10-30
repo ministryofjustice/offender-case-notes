@@ -56,7 +56,7 @@ dependencies {
   testAnnotationProcessor("org.projectlombok:lombok:1.18.48")
   testCompileOnly("org.projectlombok:lombok:1.18.48")
   testImplementation("uk.gov.justice.service.hmpps:hmpps-kotlin-spring-boot-starter-test:3.0.3")
-  testImplementation("uk.gov.justice.service.hmpps:hmpps-subject-access-request-test-support:2.8.5")
+  testImplementation("uk.gov.justice.service.hmpps:hmpps-subject-access-request-test-support:2.8.6")
   testImplementation("org.springframework.boot:spring-boot-starter-jackson-test")
   testImplementation("org.springframework.boot:spring-boot-starter-webclient-test")
   testImplementation("org.springframework.boot:spring-boot-webtestclient")
@@ -76,7 +76,7 @@ dependencies {
   testImplementation("org.mockito.kotlin:mockito-kotlin:6.4.0")
   testImplementation("io.swagger.parser.v3:swagger-parser-v3:2.1.48")
   // TODO - CDPS-2198 - Delete this
-  testImplementation("net.javacrumbs.json-unit:json-unit-assertj:6.3.0")
+  testImplementation("net.javacrumbs.json-unit:json-unit-assertj:6.4.0")
 }
 
 kotlin {
