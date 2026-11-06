@@ -38,7 +38,7 @@ dependencies {
   implementation("org.springframework.boot:spring-boot-starter-webclient")
   implementation("org.springframework.boot:spring-boot-starter-webflux")
 
-  implementation("io.sentry:sentry-spring-boot-4:8.62.0")
+  implementation("io.sentry:sentry-spring-boot-4:8.63.0")
 
   implementation("javax.activation:activation:1.1.1")
   implementation("javax.transaction:javax.transaction-api:1.3")
@@ -51,7 +51,7 @@ dependencies {
   implementation("com.google.guava:guava:33.8.0-jre")
 
   implementation(platform("com.amazonaws:aws-java-sdk-bom:1.12.797"))
-  implementation("software.amazon.awssdk:sns:2.57.8")
+  implementation("software.amazon.awssdk:sns:2.57.10")
 
   testAnnotationProcessor("org.projectlombok:lombok:1.18.48")
   testCompileOnly("org.projectlombok:lombok:1.18.48")
