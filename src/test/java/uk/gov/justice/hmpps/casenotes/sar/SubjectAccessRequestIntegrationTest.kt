@@ -66,6 +66,7 @@ class SubjectAccessRequestIntegrationTest :
         jwtId: String,
         authSource: String,
         grantType: String,
+        userUuid: String?,
       ): String = jwtHelper.createJwt(
         subject = username ?: clientId,
         userId = username,
